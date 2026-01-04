@@ -1,11 +1,37 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { auth } from '@clerk/nextjs/server';
+import { rateLimit, LIMITS } from '@/lib/rateLimit';
 
 export async function POST(req) {
   try {
+    // Require authentication
+    const { userId } = await auth();
+    if (!userId) {
+      return new Response(JSON.stringify({ error: 'Please sign in to analyze reports' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Check rate limit
+    const { allowed, remaining, resetIn } = await rateLimit(userId, 'analyze', LIMITS.analyze);
+    if (!allowed) {
+      const hours = Math.ceil(resetIn / 3600);
+      return new Response(JSON.stringify({
+        error: `Daily limit reached (${LIMITS.analyze} analyses/day). Resets in ${hours} hour${hours > 1 ? 's' : ''}.`
+      }), {
+        status: 429,
+        headers: {
+          'Content-Type': 'application/json',
+          'X-RateLimit-Remaining': '0',
+          'X-RateLimit-Reset': String(resetIn)
+        }
+      });
+    }
+
     const formData = await req.formData();
     const files = formData.getAll('files');
-    const bureau = formData.get('bureau'); // Optional: which bureau this is from
-    
+
     if (!files || files.length === 0) {
       return new Response(JSON.stringify({ error: 'No files uploaded' }), {
         status: 400,
@@ -22,15 +48,15 @@ export async function POST(req) {
 
     // Extract text from PDFs
     const pdfTexts = [];
-    
+
     for (const file of files) {
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
-      
+
       // Dynamic import pdf-parse to avoid build issues
       const pdfParse = (await import('pdf-parse/lib/pdf-parse.js')).default;
       const pdfData = await pdfParse(buffer);
-      
+
       pdfTexts.push({
         filename: file.name,
         text: pdfData.text,
@@ -105,18 +131,18 @@ Analyze thoroughly and return ONLY valid JSON, no other text.`;
     });
 
     let analysisText = response.content[0]?.text || "{}";
-    
+
     // Clean up the response - remove markdown code blocks if present
     analysisText = analysisText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-    
+
     let analysis;
     try {
       analysis = JSON.parse(analysisText);
     } catch (e) {
       // If JSON parsing fails, return the raw text for debugging
-      return new Response(JSON.stringify({ 
+      return new Response(JSON.stringify({
         error: 'Failed to parse analysis',
-        rawResponse: analysisText 
+        rawResponse: analysisText
       }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' }
@@ -126,9 +152,13 @@ Analyze thoroughly and return ONLY valid JSON, no other text.`;
     return new Response(JSON.stringify({
       success: true,
       filesProcessed: pdfTexts.map(p => ({ name: p.filename, pages: p.pages })),
-      analysis
+      analysis,
+      remaining // Let frontend know remaining analyses
     }), {
-      headers: { 'Content-Type': 'application/json' }
+      headers: {
+        'Content-Type': 'application/json',
+        'X-RateLimit-Remaining': String(remaining)
+      }
     });
 
   } catch (error) {

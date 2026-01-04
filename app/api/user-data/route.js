@@ -1,6 +1,8 @@
-import { kv } from '@vercel/kv';
+import { Redis } from '@upstash/redis';
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
+
+const redis = Redis.fromEnv();
 
 // Get user data
 export async function GET() {
@@ -11,7 +13,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const data = await kv.get(`user:${userId}:data`);
+    const data = await redis.get(`user:${userId}:data`);
 
     return NextResponse.json({
       disputes: data?.disputes || [],
@@ -36,7 +38,7 @@ export async function POST(request) {
     const body = await request.json();
     const { disputes, auditLog, flaggedItems } = body;
 
-    await kv.set(`user:${userId}:data`, {
+    await redis.set(`user:${userId}:data`, {
       disputes: disputes || [],
       auditLog: auditLog || [],
       flaggedItems: flaggedItems || [],

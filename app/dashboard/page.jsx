@@ -20,7 +20,6 @@ import {
   Building2,
   Shield,
   FileWarning,
-  ArrowUpRight,
   X,
   Copy,
   Loader2,
@@ -30,46 +29,22 @@ import {
   Check,
   Flag,
   Search,
-  Trash2
+  Trash2,
+  Menu,
+  Settings
 } from 'lucide-react';
 
-// ============================================================================
-// SYSTEM PROMPT
-// ============================================================================
+// System prompt for chat
+const SYSTEM_PROMPT = `You are 605b.ai, an expert credit repair assistant specializing in identity theft recovery and consumer protection law. Be direct, cite statutes, give concrete next steps.`;
 
-const SYSTEM_PROMPT = `You are 605b.ai, an expert credit repair assistant specializing in identity theft recovery and consumer protection law.
-
-CORE EXPERTISE:
-- FCRA §605B: Identity theft block demands (4 business day response required)
-- FCRA §611: Standard dispute process (30 day investigation window)  
-- FCRA §609: Disclosure requests (method of verification)
-- FDCPA §809: Debt validation requests (30 days to request)
-- FCRA §623: Furnisher responsibilities and direct disputes
-- State consumer protection laws
-
-CREDIT BUREAUS:
-- Experian: PO Box 4500, Allen, TX 75013 | 888-397-3742
-- Equifax: PO Box 740256, Atlanta, GA 30374 | 800-846-5279
-- TransUnion: PO Box 2000, Chester, PA 19016 | 800-916-8800
-
-SPECIALTY AGENCIES:
-- ChexSystems: 7805 Hudson Rd, Woodbury, MN 55125 | 800-428-9623
-- Early Warning Services: 16552 N 90th St, Scottsdale, AZ 85260 | 800-325-7775
-- LexisNexis: PO Box 105108, Atlanta, GA 30348 | 888-497-0011
-
-STYLE: Be direct and professional. Cite specific statutes. Give concrete next steps.`;
-
-// ============================================================================
-// TEMPLATE DATA
-// ============================================================================
-
+// Template data
 const TEMPLATES = {
   identity_theft: {
     category: "Identity Theft",
     icon: Shield,
     templates: [
-      { id: "605b_bureau", name: "§605B Identity Theft Block", description: "Demand bureaus block fraudulent accounts within 4 business days", deadline: "4 business days" },
-      { id: "605b_furnisher", name: "§605B Direct to Furnisher", description: "Send block demand directly to the creditor/furnisher", deadline: "4 business days" },
+      { id: "605b_bureau", name: "§605B Identity Theft Block", description: "Demand bureaus block fraudulent accounts", deadline: "4 business days" },
+      { id: "605b_furnisher", name: "§605B Direct to Furnisher", description: "Send block demand to creditor", deadline: "4 business days" },
       { id: "ftc_affidavit", name: "FTC Identity Theft Report", description: "Official identity theft affidavit", deadline: "N/A", external: "https://www.identitytheft.gov/" },
     ]
   },
@@ -77,46 +52,43 @@ const TEMPLATES = {
     category: "Credit Disputes",
     icon: FileWarning,
     templates: [
-      { id: "611_dispute", name: "§611 Standard Dispute", description: "Challenge inaccurate information on your credit report", deadline: "30 days" },
-      { id: "609_disclosure", name: "§609 Method of Verification", description: "Request proof of how disputed info was verified", deadline: "15 days" },
-      { id: "623_direct", name: "§623 Direct Furnisher Dispute", description: "Dispute directly with the company reporting the info", deadline: "30 days" },
+      { id: "611_dispute", name: "§611 Standard Dispute", description: "Challenge inaccurate information", deadline: "30 days" },
+      { id: "609_disclosure", name: "§609 Method of Verification", description: "Request verification proof", deadline: "15 days" },
+      { id: "623_direct", name: "§623 Direct Furnisher Dispute", description: "Dispute directly with furnisher", deadline: "30 days" },
     ]
   },
   debt_collection: {
     category: "Debt Collection",
     icon: AlertTriangle,
     templates: [
-      { id: "809_validation", name: "§809 Debt Validation", description: "Demand collector prove the debt is valid", deadline: "30 days" },
-      { id: "cease_desist", name: "Cease & Desist Letter", description: "Demand collector stop contacting you", deadline: "Immediate" },
-      { id: "pay_delete", name: "Pay for Delete Request", description: "Offer payment in exchange for removal", deadline: "Negotiable" },
+      { id: "809_validation", name: "§809 Debt Validation", description: "Demand collector prove debt", deadline: "30 days" },
+      { id: "cease_desist", name: "Cease & Desist Letter", description: "Stop collector contact", deadline: "Immediate" },
+      { id: "pay_delete", name: "Pay for Delete Request", description: "Payment for removal", deadline: "Negotiable" },
     ]
   },
   specialty: {
     category: "Specialty Agencies",
     icon: Building2,
     templates: [
-      { id: "chex_dispute", name: "ChexSystems Dispute", description: "Dispute banking history errors", deadline: "30 days" },
+      { id: "chex_dispute", name: "ChexSystems Dispute", description: "Dispute banking history", deadline: "30 days" },
       { id: "ews_dispute", name: "Early Warning Dispute", description: "Dispute EWS records", deadline: "30 days" },
-      { id: "lexis_dispute", name: "LexisNexis Dispute", description: "Dispute public records, address history", deadline: "30 days" },
+      { id: "lexis_dispute", name: "LexisNexis Dispute", description: "Dispute public records", deadline: "30 days" },
     ]
   },
   escalation: {
     category: "Escalation",
     icon: Scale,
     templates: [
-      { id: "cfpb_complaint", name: "CFPB Complaint", description: "File with Consumer Financial Protection Bureau", deadline: "15-60 days", external: "https://www.consumerfinance.gov/complaint/" },
-      { id: "state_ag", name: "State Attorney General", description: "File with your state's AG consumer protection", deadline: "Varies" },
+      { id: "cfpb_complaint", name: "CFPB Complaint", description: "File federal complaint", deadline: "15-60 days", external: "https://www.consumerfinance.gov/complaint/" },
+      { id: "state_ag", name: "State Attorney General", description: "File state complaint", deadline: "Varies" },
       { id: "intent_to_sue", name: "Intent to Sue Letter", description: "Final demand before litigation", deadline: "15-30 days" },
     ]
   },
 };
 
-// ============================================================================
-// LETTER CONTENT
-// ============================================================================
-
+// Letter content
 const LETTER_CONTENT = {
-  "605b_bureau": (info) => `${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+  "605b_bureau": () => `${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
 
 [YOUR NAME]
 [YOUR ADDRESS]
@@ -133,7 +105,7 @@ To Whom It May Concern:
 I am a victim of identity theft. Pursuant to the Fair Credit Reporting Act, 15 U.S.C. § 1681c-2 (Section 605B), I am requesting that you block the following fraudulent information from my credit report within four (4) business days of receipt of this letter.
 
 FRAUDULENT ACCOUNTS TO BE BLOCKED:
-${info?.accounts || '[ACCOUNT NAME] - Account #[XXXX] - Opened [DATE]'}
+[ACCOUNT NAME] - Account #[XXXX] - Opened [DATE]
 
 I have enclosed:
 □ Copy of FTC Identity Theft Report
@@ -147,7 +119,7 @@ Sincerely,
 ______________________________
 [YOUR NAME]`,
 
-  "611_dispute": (info) => `${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+  "611_dispute": () => `${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
 
 [YOUR NAME]
 [YOUR ADDRESS]
@@ -164,7 +136,9 @@ To Whom It May Concern:
 Pursuant to FCRA §611, I am disputing the following inaccurate information:
 
 ITEMS DISPUTED:
-${info?.accounts || 'Creditor: [CREDITOR NAME]\nAccount Number: [XXXX]\nReason: [REASON]'}
+Creditor: [CREDITOR NAME]
+Account Number: [XXXX]
+Reason: [REASON]
 
 Under §611(a)(1)(A), you must conduct a reasonable investigation within 30 days. Under §611(a)(5)(A), if the information is inaccurate or unverifiable, you must delete or modify it.
 
@@ -175,7 +149,7 @@ Sincerely,
 ______________________________
 [YOUR NAME]`,
 
-  "809_validation": (info) => `${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+  "809_validation": () => `${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
 
 [YOUR NAME]
 [YOUR ADDRESS]
@@ -205,66 +179,16 @@ ______________________________
 [YOUR NAME]
 
 SENT VIA CERTIFIED MAIL`,
-
-  "cease_desist": () => `${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-
-[YOUR NAME]
-[YOUR ADDRESS]
-
-[COLLECTION AGENCY]
-[ADDRESS]
-
-Re: Cease and Desist - FDCPA §805(c)
-
-Pursuant to FDCPA §805(c), I demand you cease all communication regarding this matter.
-
-You may only contact me to:
-(1) Advise collection efforts are terminated
-(2) Notify me of specific remedies you may invoke
-
-Further communication will be considered a violation.
-
-______________________________
-[YOUR NAME]`,
-
-  "chex_dispute": () => `${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-
-[YOUR NAME]
-[YOUR ADDRESS]
-
-ChexSystems, Inc.
-7805 Hudson Road, Suite 100
-Woodbury, MN 55125
-
-Re: Dispute of ChexSystems Information
-SSN: XXX-XX-[LAST 4]
-
-To Whom It May Concern:
-
-I am disputing inaccurate information in my ChexSystems report pursuant to FCRA §611.
-
-DISPUTED ITEM:
-Bank: [BANK NAME]
-Reason: [REASON FOR DISPUTE]
-
-Please investigate within 30 days and provide written results.
-
-______________________________
-[YOUR NAME]`,
 };
 
-// Default letter for templates without specific content
-const getLetterContent = (templateId, info) => {
+const getLetterContent = (templateId) => {
   if (LETTER_CONTENT[templateId]) {
-    return LETTER_CONTENT[templateId](info);
+    return LETTER_CONTENT[templateId]();
   }
   return `[Letter template for ${templateId}]\n\nCustomize this template with your specific information.`;
 };
 
-// ============================================================================
-// HOOKS
-// ============================================================================
-
+// Local storage hook
 function useLocalStorage(key, initial) {
   const [value, setValue] = useState(() => {
     if (typeof window === 'undefined') return initial;
@@ -283,10 +207,6 @@ function useLocalStorage(key, initial) {
   return [value, setValue];
 }
 
-// ============================================================================
-// MAIN COMPONENT
-// ============================================================================
-
 export default function Dashboard() {
   const { user } = useUser();
   const [activeTab, setActiveTab] = useState('analyze');
@@ -296,6 +216,7 @@ export default function Dashboard() {
   const [disputes, setDisputes] = useLocalStorage('605b_disputes', []);
   const [auditLog, setAuditLog] = useLocalStorage('605b_audit', []);
   const [flaggedItems, setFlaggedItems] = useLocalStorage('605b_flagged', []);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   // Analysis state
   const [uploadedFiles, setUploadedFiles] = useState([]);
@@ -320,7 +241,7 @@ export default function Dashboard() {
     }, ...prev]);
   }, [setAuditLog]);
 
-  // File upload handler
+  // File upload
   const handleFileUpload = (e) => {
     const files = Array.from(e.target.files);
     const pdfFiles = files.filter(f => f.type === 'application/pdf');
@@ -358,30 +279,26 @@ export default function Dashboard() {
       }
 
       setAnalysisResult(data.analysis);
-      logAction('REPORTS_ANALYZED', { 
-        filesCount: uploadedFiles.length,
-        issuesFound: data.analysis?.findings?.length || 0 
-      });
+      logAction('REPORTS_ANALYZED', { filesCount: uploadedFiles.length, issuesFound: data.analysis?.findings?.length || 0 });
     } catch (err) {
-      console.error('Analysis error:', err);
       setAnalysisError(err.message);
     } finally {
       setIsAnalyzing(false);
     }
   };
 
-  // Toggle flag on finding
+  // Toggle flag
   const toggleFlag = (finding) => {
     const exists = flaggedItems.find(f => f.id === finding.id);
     if (exists) {
       setFlaggedItems(prev => prev.filter(f => f.id !== finding.id));
     } else {
       setFlaggedItems(prev => [...prev, { ...finding, flaggedAt: new Date().toISOString() }]);
-      logAction('ITEM_FLAGGED', { account: finding.account, issue: finding.issue });
+      logAction('ITEM_FLAGGED', { account: finding.account });
     }
   };
 
-  // Create dispute from flagged item
+  // Create dispute from flagged
   const createDisputeFromFlagged = (item) => {
     const newDispute = {
       id: Date.now(),
@@ -394,10 +311,10 @@ export default function Dashboard() {
       status: 'pending'
     };
     setDisputes(prev => [newDispute, ...prev]);
-    logAction('DISPUTE_CREATED_FROM_FLAG', { account: item.account });
+    logAction('DISPUTE_CREATED', { account: item.account });
   };
 
-  // Send chat message
+  // Send chat
   const sendMessage = async () => {
     const text = inputValue.trim();
     if (!text || isLoading) return;
@@ -418,37 +335,23 @@ export default function Dashboard() {
       });
 
       if (!response.ok) throw new Error(await response.text());
-
-      const text = await response.text();
-      setMessages(prev => [...prev, { id: Date.now() + 1, role: 'assistant', content: text }]);
+      const responseText = await response.text();
+      setMessages(prev => [...prev, { id: Date.now() + 1, role: 'assistant', content: responseText }]);
       logAction('AI_CHAT', { query: text.substring(0, 50) });
     } catch (err) {
-      setMessages(prev => [...prev, {
-        id: Date.now() + 1,
-        role: 'assistant',
-        content: `Error: ${err.message}`,
-        isError: true
-      }]);
+      setMessages(prev => [...prev, { id: Date.now() + 1, role: 'assistant', content: `Error: ${err.message}`, isError: true }]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Initialize chat
+  // Init chat
   useEffect(() => {
     if (messages.length === 0) {
       setMessages([{
         id: 1,
         role: 'assistant',
-        content: `Welcome to 605b.ai. I help with credit disputes and identity theft recovery.
-
-I can help with:
-• Identity theft recovery — §605B blocks, FTC reports
-• Credit disputes — §611 disputes, verification requests
-• Debt collection — §809 validation, cease & desist
-• Escalation — CFPB complaints, attorney referrals
-
-What's your situation?`
+        content: `Welcome to 605b.ai. I help with credit disputes and identity theft recovery.\n\nI can help with:\n• Identity theft recovery — §605B blocks\n• Credit disputes — §611 disputes\n• Debt collection — §809 validation\n• Escalation — CFPB complaints\n\nWhat's your situation?`
       }]);
     }
   }, []);
@@ -477,604 +380,908 @@ What's your situation?`
     setTimeout(() => setCopySuccess(false), 2000);
   };
 
-  const severityColor = {
-    high: '#ef4444',
-    medium: '#f59e0b', 
-    low: '#22c55e'
-  };
+  const severityColor = { high: '#ef4444', medium: '#f59e0b', low: '#22c55e' };
+
+  const tabs = [
+    { id: 'analyze', icon: Search, label: 'Analyze' },
+    { id: 'chat', icon: MessageSquare, label: 'Chat' },
+    { id: 'templates', icon: FileText, label: 'Templates' },
+    { id: 'tracker', icon: Calendar, label: 'Tracker' },
+    { id: 'flagged', icon: Flag, label: 'Flagged' },
+    { id: 'audit', icon: FileWarning, label: 'Audit' },
+  ];
 
   return (
-    <div style={styles.container}>
-      {/* Sidebar */}
-      <aside style={styles.sidebar}>
-        <div style={styles.sidebarHeader}>
-          <Link href="/" style={styles.logo}>605b<span style={{ color: '#d4a574' }}>.ai</span></Link>
-        </div>
+    <>
+      <style jsx global>{`
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         
-        <nav style={styles.nav}>
-          {[
-            { id: 'analyze', icon: Search, label: 'Analyze Reports' },
-            { id: 'chat', icon: MessageSquare, label: 'Chat' },
-            { id: 'templates', icon: FileText, label: 'Templates' },
-            { id: 'tracker', icon: Calendar, label: 'Tracker', badge: disputes.length },
-            { id: 'flagged', icon: Flag, label: 'Flagged Items', badge: flaggedItems.length },
-            { id: 'audit', icon: FileWarning, label: 'Audit Log' },
-          ].map(item => (
-            <button 
-              key={item.id}
-              style={{...styles.navItem, ...(activeTab === item.id ? styles.navItemActive : {})}}
-              onClick={() => setActiveTab(item.id)}
-            >
-              <item.icon size={18} />
-              <span>{item.label}</span>
-              {item.badge > 0 && <span style={styles.badge}>{item.badge}</span>}
-            </button>
-          ))}
-        </nav>
-
-        <div style={styles.sidebarSection}>
-          <div style={styles.sectionLabel}>Quick Links</div>
-          <a href="https://www.identitytheft.gov/" target="_blank" rel="noopener noreferrer" style={styles.quickLink}>
-            <Shield size={14} /><span>FTC Report</span><ExternalLink size={12} style={{ marginLeft: 'auto', opacity: 0.5 }} />
-          </a>
-          <a href="https://www.annualcreditreport.com/" target="_blank" rel="noopener noreferrer" style={styles.quickLink}>
-            <FileText size={14} /><span>Free Credit Reports</span><ExternalLink size={12} style={{ marginLeft: 'auto', opacity: 0.5 }} />
-          </a>
-        </div>
-
-        <div style={styles.sidebarFooter}>
-          <UserButton afterSignOutUrl="/" />
-          <div style={styles.userName}>{user?.firstName || user?.emailAddresses?.[0]?.emailAddress?.split('@')[0] || 'User'}</div>
-        </div>
-      </aside>
-
-      {/* Main Content */}
-      <main style={styles.main}>
+        .dashboard { display: flex; min-height: 100vh; background: #09090b; color: #fafafa; }
         
-        {/* ANALYZE TAB */}
-        {activeTab === 'analyze' && (
-          <div style={styles.analyzeContainer}>
-            <div style={styles.pageHeader}>
-              <div>
-                <h1 style={styles.pageTitle}>Analyze Credit Reports</h1>
-                <p style={styles.pageSubtitle}>Upload your credit reports and let AI identify errors, inconsistencies, and dispute opportunities</p>
-              </div>
-            </div>
+        /* Sidebar - Desktop */
+        .sidebar {
+          width: 240px;
+          background: #0c0c0e;
+          border-right: 1px solid #1c1c1f;
+          display: flex;
+          flex-direction: column;
+          position: fixed;
+          height: 100vh;
+          z-index: 100;
+        }
+        
+        .sidebar-header {
+          padding: 20px;
+          border-bottom: 1px solid #1c1c1f;
+        }
+        
+        .logo {
+          font-size: 20px;
+          font-weight: 700;
+          color: #fafafa;
+          text-decoration: none;
+        }
+        
+        .logo-accent { color: #d4a574; }
+        
+        .nav { padding: 12px; display: flex; flex-direction: column; gap: 4px; flex: 1; }
+        
+        .nav-item {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 12px;
+          background: transparent;
+          border: none;
+          border-radius: 8px;
+          color: #71717a;
+          font-size: 14px;
+          font-weight: 500;
+          cursor: pointer;
+          text-align: left;
+          width: 100%;
+          transition: all 0.15s;
+        }
+        
+        .nav-item:hover { background: rgba(255,255,255,0.05); color: #a1a1aa; }
+        .nav-item.active { background: rgba(212, 165, 116, 0.1); color: #d4a574; }
+        
+        .nav-badge {
+          margin-left: auto;
+          padding: 2px 8px;
+          background: #d4a574;
+          color: #09090b;
+          border-radius: 10px;
+          font-size: 11px;
+          font-weight: 600;
+        }
+        
+        .sidebar-footer {
+          padding: 16px 20px;
+          border-top: 1px solid #1c1c1f;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+        
+        .user-name { font-size: 13px; color: #a1a1aa; }
+        
+        /* Main content */
+        .main { flex: 1; margin-left: 240px; min-height: 100vh; }
+        
+        /* Mobile header */
+        .mobile-header {
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 60px;
+          background: #0c0c0e;
+          border-bottom: 1px solid #1c1c1f;
+          padding: 0 16px;
+          align-items: center;
+          justify-content: space-between;
+          z-index: 90;
+        }
+        
+        .mobile-menu-btn {
+          background: none;
+          border: none;
+          color: #fafafa;
+          cursor: pointer;
+          padding: 8px;
+        }
+        
+        /* Mobile bottom nav */
+        .mobile-nav {
+          display: none;
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          background: #0c0c0e;
+          border-top: 1px solid #1c1c1f;
+          padding: 8px 0;
+          padding-bottom: env(safe-area-inset-bottom, 8px);
+          z-index: 90;
+        }
+        
+        .mobile-nav-items {
+          display: flex;
+          justify-content: space-around;
+        }
+        
+        .mobile-nav-item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 4px;
+          padding: 8px 12px;
+          background: none;
+          border: none;
+          color: #71717a;
+          font-size: 10px;
+          cursor: pointer;
+        }
+        
+        .mobile-nav-item.active { color: #d4a574; }
+        
+        /* Content areas */
+        .content-area {
+          padding: 24px;
+          min-height: 100vh;
+        }
+        
+        .page-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 24px;
+          flex-wrap: wrap;
+          gap: 16px;
+        }
+        
+        .page-title { font-size: 24px; font-weight: 600; margin-bottom: 4px; }
+        .page-subtitle { font-size: 14px; color: #71717a; }
+        
+        /* Buttons */
+        .btn-primary {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 10px 16px;
+          background: #d4a574;
+          border: none;
+          border-radius: 8px;
+          color: #09090b;
+          font-size: 14px;
+          font-weight: 500;
+          cursor: pointer;
+        }
+        
+        .btn-secondary {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 10px 16px;
+          background: transparent;
+          border: 1px solid #27272a;
+          border-radius: 8px;
+          color: #a1a1aa;
+          font-size: 14px;
+          font-weight: 500;
+          cursor: pointer;
+        }
+        
+        /* Cards */
+        .card {
+          background: #0f0f11;
+          border: 1px solid #1c1c1f;
+          border-radius: 12px;
+          padding: 20px;
+          margin-bottom: 16px;
+        }
+        
+        /* Upload zone */
+        .upload-zone {
+          border: 2px dashed #27272a;
+          border-radius: 12px;
+          padding: 40px 20px;
+          text-align: center;
+          cursor: pointer;
+          transition: border-color 0.2s;
+        }
+        
+        .upload-zone:hover { border-color: #d4a574; }
+        
+        .upload-icon {
+          width: 64px;
+          height: 64px;
+          margin: 0 auto 16px;
+          background: rgba(212,165,116,0.1);
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #d4a574;
+        }
+        
+        /* File list */
+        .file-item {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 12px 16px;
+          background: #0f0f11;
+          border: 1px solid #1c1c1f;
+          border-radius: 8px;
+          margin-bottom: 8px;
+        }
+        
+        .file-name { flex: 1; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .file-size { font-size: 12px; color: #52525b; }
+        .file-remove { background: none; border: none; color: #71717a; cursor: pointer; padding: 4px; }
+        
+        /* Summary cards */
+        .summary-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+          gap: 12px;
+          margin-bottom: 24px;
+        }
+        
+        .summary-card {
+          padding: 20px;
+          background: #0f0f11;
+          border: 1px solid #1c1c1f;
+          border-radius: 12px;
+          text-align: center;
+        }
+        
+        .summary-value { font-size: 32px; font-weight: 700; }
+        .summary-label { font-size: 12px; color: #71717a; margin-top: 4px; }
+        
+        /* Findings */
+        .finding-card {
+          padding: 16px;
+          background: #0f0f11;
+          border: 1px solid #1c1c1f;
+          border-left: 4px solid;
+          border-radius: 8px;
+          margin-bottom: 12px;
+        }
+        
+        .finding-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+        .severity-badge { padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+        .statute-tag { font-size: 12px; color: #d4a574; }
+        .finding-account { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+        .finding-issue { font-size: 14px; color: #a1a1aa; line-height: 1.5; margin-bottom: 12px; }
+        .flag-btn { background: none; border: none; color: #71717a; cursor: pointer; padding: 8px; }
+        .flag-btn.flagged { color: #d4a574; }
+        
+        /* Chat */
+        .chat-container { display: flex; flex-direction: column; height: calc(100vh - 48px); }
+        .chat-messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+        .message { max-width: 85%; }
+        .message.user { align-self: flex-end; }
+        .message.assistant { align-self: flex-start; }
+        .message-content {
+          padding: 12px 16px;
+          border-radius: 16px;
+          font-size: 14px;
+          line-height: 1.6;
+          white-space: pre-wrap;
+        }
+        .message.user .message-content { background: #d4a574; color: #09090b; border-bottom-right-radius: 4px; }
+        .message.assistant .message-content { background: #1c1c1f; color: #e4e4e7; border: 1px solid #27272a; border-bottom-left-radius: 4px; }
+        .message.error .message-content { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.3); color: #fca5a5; }
+        
+        .chat-input-area { padding: 16px; border-top: 1px solid #1c1c1f; }
+        .chat-input-wrapper {
+          display: flex;
+          align-items: flex-end;
+          gap: 12px;
+          background: #1c1c1f;
+          border: 1px solid #27272a;
+          border-radius: 12px;
+          padding: 12px 16px;
+        }
+        .chat-input {
+          flex: 1;
+          background: transparent;
+          border: none;
+          color: #fafafa;
+          font-size: 14px;
+          resize: none;
+          outline: none;
+          line-height: 1.5;
+          font-family: inherit;
+          max-height: 120px;
+        }
+        .send-btn {
+          width: 36px;
+          height: 36px;
+          border-radius: 8px;
+          background: #d4a574;
+          border: none;
+          color: #09090b;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+        .send-btn:disabled { opacity: 0.4; }
+        
+        /* Templates */
+        .category-card { background: #0f0f11; border: 1px solid #1c1c1f; border-radius: 12px; margin-bottom: 12px; overflow: hidden; }
+        .category-header {
+          width: 100%;
+          padding: 16px;
+          background: transparent;
+          border: none;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          cursor: pointer;
+          color: #fafafa;
+        }
+        .category-title { display: flex; align-items: center; gap: 12px; font-size: 16px; font-weight: 600; }
+        .category-icon { width: 36px; height: 36px; background: rgba(212,165,116,0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #d4a574; }
+        
+        .template-item {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 16px;
+          border-top: 1px solid #1c1c1f;
+          gap: 12px;
+          flex-wrap: wrap;
+        }
+        .template-info { flex: 1; min-width: 200px; }
+        .template-name { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+        .template-desc { font-size: 13px; color: #71717a; margin-bottom: 4px; }
+        .template-deadline { font-size: 12px; color: #d4a574; display: flex; align-items: center; gap: 4px; }
+        .template-btn {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          padding: 8px 14px;
+          background: #d4a574;
+          border: none;
+          border-radius: 6px;
+          color: #09090b;
+          font-size: 13px;
+          font-weight: 500;
+          cursor: pointer;
+          text-decoration: none;
+        }
+        
+        /* Tracker */
+        .dispute-card {
+          padding: 16px;
+          background: #0f0f11;
+          border: 1px solid;
+          border-radius: 12px;
+          margin-bottom: 12px;
+        }
+        .dispute-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+        .dispute-agency { font-size: 16px; font-weight: 600; }
+        .dispute-type { font-size: 13px; color: #71717a; }
+        .type-badge { padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 500; }
+        .countdown { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600; margin-bottom: 12px; }
+        .dispute-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .action-btn {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          padding: 8px 12px;
+          background: #1c1c1f;
+          border: 1px solid #27272a;
+          border-radius: 6px;
+          color: #a1a1aa;
+          font-size: 13px;
+          cursor: pointer;
+        }
+        
+        /* Audit */
+        .audit-notice {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 12px 16px;
+          background: rgba(212,165,116,0.1);
+          border: 1px solid rgba(212,165,116,0.2);
+          border-radius: 8px;
+          font-size: 13px;
+          color: #d4a574;
+          margin-bottom: 24px;
+        }
+        .audit-entry {
+          padding: 12px 16px;
+          background: #0f0f11;
+          border: 1px solid #1c1c1f;
+          border-radius: 8px;
+          font-family: monospace;
+          font-size: 12px;
+          margin-bottom: 8px;
+        }
+        .audit-timestamp { color: #52525b; margin-bottom: 4px; }
+        .audit-action { color: #d4a574; font-weight: 500; }
+        .audit-details { color: #71717a; margin-top: 4px; }
+        
+        /* Empty state */
+        .empty-state {
+          text-align: center;
+          padding: 48px 24px;
+          background: #0f0f11;
+          border-radius: 12px;
+          border: 1px solid #1c1c1f;
+        }
+        .empty-icon {
+          width: 64px;
+          height: 64px;
+          margin: 0 auto 16px;
+          background: #1c1c1f;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #52525b;
+        }
+        .empty-title { font-size: 16px; font-weight: 600; color: #a1a1aa; margin-bottom: 8px; }
+        .empty-text { font-size: 14px; color: #52525b; }
+        
+        /* Modal */
+        .modal-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.8);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+          padding: 20px;
+        }
+        .modal {
+          background: #0f0f11;
+          border: 1px solid #27272a;
+          border-radius: 16px;
+          width: 100%;
+          max-width: 600px;
+          max-height: 85vh;
+          display: flex;
+          flex-direction: column;
+        }
+        .modal-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 16px 20px;
+          border-bottom: 1px solid #27272a;
+        }
+        .modal-title { font-size: 18px; font-weight: 600; }
+        .close-btn {
+          width: 32px;
+          height: 32px;
+          border-radius: 8px;
+          background: #27272a;
+          border: none;
+          color: #a1a1aa;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .modal-body { padding: 20px; overflow-y: auto; flex: 1; }
+        .modal-footer { display: flex; justify-content: flex-end; gap: 12px; padding: 16px 20px; border-top: 1px solid #27272a; }
+        
+        .letter-instructions {
+          display: flex;
+          align-items: flex-start;
+          gap: 10px;
+          padding: 12px 16px;
+          background: rgba(212,165,116,0.1);
+          border: 1px solid rgba(212,165,116,0.2);
+          border-radius: 8px;
+          font-size: 13px;
+          color: #d4a574;
+          margin-bottom: 16px;
+        }
+        .letter-content {
+          background: #1c1c1f;
+          border: 1px solid #27272a;
+          border-radius: 8px;
+          padding: 16px;
+          font-size: 12px;
+          line-height: 1.6;
+          color: #e4e4e7;
+          white-space: pre-wrap;
+          font-family: monospace;
+          overflow-x: auto;
+        }
+        
+        /* Error box */
+        .error-box {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 12px 16px;
+          background: rgba(239,68,68,0.1);
+          border: 1px solid rgba(239,68,68,0.3);
+          border-radius: 8px;
+          color: #fca5a5;
+          margin-bottom: 16px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+          .sidebar { display: none; }
+          .main { margin-left: 0; padding-top: 60px; padding-bottom: 80px; }
+          .mobile-header { display: flex; }
+          .mobile-nav { display: block; }
+          .content-area { padding: 16px; }
+          .page-title { font-size: 20px; }
+          .chat-container { height: calc(100vh - 140px); }
+          .chat-messages { padding: 16px; }
+          .summary-value { font-size: 24px; }
+        }
+      `}</style>
 
-            {/* Upload Section */}
-            <div style={styles.uploadSection}>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".pdf"
-                multiple
-                onChange={handleFileUpload}
-                style={{ display: 'none' }}
-              />
-              
-              <div 
-                style={styles.uploadZone}
-                onClick={() => fileInputRef.current?.click()}
-                onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  const files = Array.from(e.dataTransfer.files).filter(f => f.type === 'application/pdf');
-                  if (files.length) setUploadedFiles(prev => [...prev, ...files]);
-                }}
+      <div className="dashboard">
+        {/* Desktop Sidebar */}
+        <aside className="sidebar">
+          <div className="sidebar-header">
+            <Link href="/" className="logo">605b<span className="logo-accent">.ai</span></Link>
+          </div>
+          <nav className="nav">
+            {tabs.map(tab => (
+              <button
+                key={tab.id}
+                className={`nav-item ${activeTab === tab.id ? 'active' : ''}`}
+                onClick={() => setActiveTab(tab.id)}
               >
-                <Upload size={32} style={{ color: '#d4a574', marginBottom: '12px' }} />
-                <div style={styles.uploadText}>Drop credit report PDFs here or click to browse</div>
-                <div style={styles.uploadHint}>Supports Experian, Equifax, TransUnion reports</div>
+                <tab.icon size={18} />
+                <span>{tab.label}</span>
+                {tab.id === 'tracker' && disputes.length > 0 && <span className="nav-badge">{disputes.length}</span>}
+                {tab.id === 'flagged' && flaggedItems.length > 0 && <span className="nav-badge">{flaggedItems.length}</span>}
+              </button>
+            ))}
+          </nav>
+          <div className="sidebar-footer">
+            <UserButton afterSignOutUrl="/" />
+            <span className="user-name">{user?.firstName || 'User'}</span>
+          </div>
+        </aside>
+
+        {/* Mobile Header */}
+        <div className="mobile-header">
+          <Link href="/" className="logo">605b<span className="logo-accent">.ai</span></Link>
+          <UserButton afterSignOutUrl="/" />
+        </div>
+
+        {/* Mobile Bottom Nav */}
+        <div className="mobile-nav">
+          <div className="mobile-nav-items">
+            {tabs.slice(0, 5).map(tab => (
+              <button
+                key={tab.id}
+                className={`mobile-nav-item ${activeTab === tab.id ? 'active' : ''}`}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                <tab.icon size={20} />
+                <span>{tab.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <main className="main">
+          
+          {/* ANALYZE TAB */}
+          {activeTab === 'analyze' && (
+            <div className="content-area">
+              <div className="page-header">
+                <div>
+                  <h1 className="page-title">Analyze Reports</h1>
+                  <p className="page-subtitle">Upload credit reports to identify dispute opportunities</p>
+                </div>
+              </div>
+
+              <input ref={fileInputRef} type="file" accept=".pdf" multiple onChange={handleFileUpload} style={{ display: 'none' }} />
+              
+              <div className="upload-zone" onClick={() => fileInputRef.current?.click()}>
+                <div className="upload-icon"><Upload size={28} /></div>
+                <div style={{ fontSize: '15px', marginBottom: '8px' }}>Tap to upload credit reports</div>
+                <div style={{ fontSize: '13px', color: '#71717a' }}>PDF files from Experian, Equifax, TransUnion</div>
               </div>
 
               {uploadedFiles.length > 0 && (
-                <div style={styles.fileList}>
+                <div style={{ marginTop: '16px' }}>
                   {uploadedFiles.map((file, i) => (
-                    <div key={i} style={styles.fileItem}>
-                      <File size={16} style={{ color: '#d4a574' }} />
-                      <span style={styles.fileName}>{file.name}</span>
-                      <span style={styles.fileSize}>{(file.size / 1024 / 1024).toFixed(2)} MB</span>
-                      <button style={styles.removeFile} onClick={() => removeFile(i)}>
-                        <X size={14} />
-                      </button>
+                    <div key={i} className="file-item">
+                      <File size={18} style={{ color: '#d4a574' }} />
+                      <span className="file-name">{file.name}</span>
+                      <span className="file-size">{(file.size / 1024 / 1024).toFixed(1)} MB</span>
+                      <button className="file-remove" onClick={() => removeFile(i)}><X size={16} /></button>
                     </div>
                   ))}
-                  
-                  <button 
-                    style={{...styles.primaryButton, marginTop: '16px', width: '100%', justifyContent: 'center'}}
-                    onClick={analyzeReports}
-                    disabled={isAnalyzing}
-                  >
-                    {isAnalyzing ? (
-                      <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> Analyzing...</>
-                    ) : (
-                      <><Search size={16} /> Analyze {uploadedFiles.length} Report{uploadedFiles.length > 1 ? 's' : ''}</>
-                    )}
+                  <button className="btn-primary" style={{ width: '100%', justifyContent: 'center', marginTop: '8px' }} onClick={analyzeReports} disabled={isAnalyzing}>
+                    {isAnalyzing ? <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> Analyzing...</> : <><Search size={16} /> Analyze {uploadedFiles.length} Report{uploadedFiles.length > 1 ? 's' : ''}</>}
                   </button>
                 </div>
               )}
-            </div>
 
-            {/* Error */}
-            {analysisError && (
-              <div style={styles.errorBox}>
-                <AlertCircle size={16} />
-                <span>{analysisError}</span>
-              </div>
-            )}
+              {analysisError && <div className="error-box"><AlertCircle size={18} />{analysisError}</div>}
 
-            {/* Results */}
-            {analysisResult && (
-              <div style={styles.resultsSection}>
-                {/* Summary */}
-                <div style={styles.summaryCards}>
-                  <div style={styles.summaryCard}>
-                    <div style={styles.summaryValue}>{analysisResult.summary?.totalAccounts || 0}</div>
-                    <div style={styles.summaryLabel}>Accounts Found</div>
+              {analysisResult && (
+                <div style={{ marginTop: '24px' }}>
+                  <div className="summary-grid">
+                    <div className="summary-card">
+                      <div className="summary-value">{analysisResult.summary?.totalAccounts || 0}</div>
+                      <div className="summary-label">Accounts</div>
+                    </div>
+                    <div className="summary-card">
+                      <div className="summary-value" style={{ color: '#f59e0b' }}>{analysisResult.summary?.potentialIssues || 0}</div>
+                      <div className="summary-label">Issues</div>
+                    </div>
+                    <div className="summary-card">
+                      <div className="summary-value" style={{ color: '#ef4444' }}>{analysisResult.summary?.highPriorityItems || 0}</div>
+                      <div className="summary-label">High Priority</div>
+                    </div>
                   </div>
-                  <div style={styles.summaryCard}>
-                    <div style={{...styles.summaryValue, color: '#f59e0b'}}>{analysisResult.summary?.potentialIssues || 0}</div>
-                    <div style={styles.summaryLabel}>Potential Issues</div>
-                  </div>
-                  <div style={styles.summaryCard}>
-                    <div style={{...styles.summaryValue, color: '#ef4444'}}>{analysisResult.summary?.highPriorityItems || 0}</div>
-                    <div style={styles.summaryLabel}>High Priority</div>
-                  </div>
-                </div>
 
-                {/* Findings */}
-                {analysisResult.findings?.length > 0 && (
-                  <div style={styles.findingsSection}>
-                    <h3 style={styles.sectionTitle}>Findings</h3>
-                    {analysisResult.findings.map((finding, i) => {
-                      const isFlagged = flaggedItems.some(f => f.id === finding.id);
-                      return (
-                        <div key={finding.id || i} style={{...styles.findingCard, borderLeftColor: severityColor[finding.severity] || '#71717a'}}>
-                          <div style={styles.findingHeader}>
-                            <div>
-                              <span style={{...styles.severityBadge, background: `${severityColor[finding.severity]}20`, color: severityColor[finding.severity]}}>
-                                {finding.severity?.toUpperCase()}
-                              </span>
-                              <span style={styles.typeBadge}>{finding.type?.replace(/_/g, ' ')}</span>
+                  {analysisResult.findings?.length > 0 && (
+                    <>
+                      <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '16px' }}>Findings</h3>
+                      {analysisResult.findings.map((finding, i) => {
+                        const isFlagged = flaggedItems.some(f => f.id === finding.id);
+                        return (
+                          <div key={finding.id || i} className="finding-card" style={{ borderLeftColor: severityColor[finding.severity] || '#71717a' }}>
+                            <div className="finding-header">
+                              <div>
+                                <span className="severity-badge" style={{ background: `${severityColor[finding.severity]}20`, color: severityColor[finding.severity] }}>{finding.severity?.toUpperCase()}</span>
+                                <span className="statute-tag">{finding.statute}</span>
+                              </div>
+                              <button className={`flag-btn ${isFlagged ? 'flagged' : ''}`} onClick={() => toggleFlag(finding)}>
+                                <Flag size={16} fill={isFlagged ? '#d4a574' : 'none'} />
+                              </button>
                             </div>
-                            <button 
-                              style={{...styles.flagButton, color: isFlagged ? '#d4a574' : '#71717a'}}
-                              onClick={() => toggleFlag(finding)}
-                            >
-                              <Flag size={16} fill={isFlagged ? '#d4a574' : 'none'} />
-                            </button>
+                            <div className="finding-account">{finding.account}</div>
+                            <div className="finding-issue">{finding.issue}</div>
+                            <div style={{ fontSize: '13px', color: '#71717a' }}>Success: {finding.successLikelihood}</div>
                           </div>
-                          <div style={styles.findingAccount}>{finding.account}</div>
-                          <div style={styles.findingIssue}>{finding.issue}</div>
-                          <div style={styles.findingMeta}>
-                            <span style={styles.statuteTag}>{finding.statute}</span>
-                            <span>Success: {finding.successLikelihood}</span>
-                          </div>
-                          <div style={styles.findingAction}>
-                            <strong>Action:</strong> {finding.recommendation}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-
-                {/* Cross-Bureau Inconsistencies */}
-                {analysisResult.crossBureauInconsistencies?.length > 0 && (
-                  <div style={styles.findingsSection}>
-                    <h3 style={styles.sectionTitle}>Cross-Bureau Inconsistencies</h3>
-                    {analysisResult.crossBureauInconsistencies.map((item, i) => (
-                      <div key={i} style={styles.inconsistencyCard}>
-                        <div style={styles.inconsistencyItem}>{item.item}</div>
-                        <div style={styles.inconsistencyDetails}>{item.details}</div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Personal Info Review */}
-                {analysisResult.personalInfo && (
-                  <div style={styles.findingsSection}>
-                    <h3 style={styles.sectionTitle}>Personal Information Found</h3>
-                    <div style={styles.personalInfoGrid}>
-                      {analysisResult.personalInfo.namesFound?.length > 0 && (
-                        <div style={styles.infoBlock}>
-                          <div style={styles.infoLabel}>Names</div>
-                          <div style={styles.infoList}>{analysisResult.personalInfo.namesFound.join(', ')}</div>
-                        </div>
-                      )}
-                      {analysisResult.personalInfo.addressesFound?.length > 0 && (
-                        <div style={styles.infoBlock}>
-                          <div style={styles.infoLabel}>Addresses</div>
-                          <div style={styles.infoList}>{analysisResult.personalInfo.addressesFound.join('; ')}</div>
-                        </div>
-                      )}
-                    </div>
-                    <p style={styles.infoNote}>Review this information. Flag anything unfamiliar — it may indicate fraud.</p>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* FLAGGED ITEMS TAB */}
-        {activeTab === 'flagged' && (
-          <div style={styles.flaggedContainer}>
-            <div style={styles.pageHeader}>
-              <div>
-                <h1 style={styles.pageTitle}>Flagged Items</h1>
-                <p style={styles.pageSubtitle}>Items you've flagged for dispute from your credit report analysis</p>
-              </div>
-            </div>
-
-            {flaggedItems.length === 0 ? (
-              <div style={styles.emptyState}>
-                <Flag size={48} style={{ color: '#3f3f46', marginBottom: '16px' }} />
-                <h3 style={styles.emptyTitle}>No flagged items</h3>
-                <p style={styles.emptyText}>Analyze your credit reports and flag items you want to dispute.</p>
-              </div>
-            ) : (
-              <div style={styles.flaggedGrid}>
-                {flaggedItems.map((item, i) => (
-                  <div key={item.id || i} style={styles.flaggedCard}>
-                    <div style={styles.flaggedHeader}>
-                      <span style={{...styles.severityBadge, background: `${severityColor[item.severity]}20`, color: severityColor[item.severity]}}>
-                        {item.severity?.toUpperCase()}
-                      </span>
-                      <span style={styles.statuteTag}>{item.statute}</span>
-                    </div>
-                    <div style={styles.flaggedAccount}>{item.account}</div>
-                    <div style={styles.flaggedIssue}>{item.issue}</div>
-                    <div style={styles.flaggedActions}>
-                      <button 
-                        style={styles.primaryButton}
-                        onClick={() => createDisputeFromFlagged(item)}
-                      >
-                        <Plus size={14} /> Create Dispute
-                      </button>
-                      <button 
-                        style={styles.secondaryButton}
-                        onClick={() => toggleFlag(item)}
-                      >
-                        <Trash2 size={14} /> Remove
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* CHAT TAB */}
-        {activeTab === 'chat' && (
-          <div style={styles.chatContainer}>
-            <div style={styles.chatMessages}>
-              {messages.map((msg) => (
-                <div key={msg.id} style={{...styles.message, ...(msg.role === 'user' ? styles.messageUser : styles.messageAssistant)}}>
-                  <div style={{...styles.messageContent, ...(msg.role === 'user' ? styles.messageContentUser : styles.messageContentAssistant), ...(msg.isError ? styles.messageError : {})}}>
-                    {msg.content}
-                  </div>
-                </div>
-              ))}
-              {isLoading && (
-                <div style={{...styles.message, ...styles.messageAssistant}}>
-                  <div style={{...styles.messageContent, ...styles.messageContentAssistant}}>
-                    <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />
-                  </div>
-                </div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-            <div style={styles.inputContainer}>
-              <div style={styles.inputWrapper}>
-                <textarea
-                  style={styles.input}
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }}}
-                  placeholder="Describe your situation..."
-                  rows={1}
-                />
-                <button style={{...styles.sendButton, opacity: inputValue.trim() && !isLoading ? 1 : 0.4}} onClick={sendMessage} disabled={!inputValue.trim() || isLoading}>
-                  <Send size={18} />
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* TEMPLATES TAB */}
-        {activeTab === 'templates' && (
-          <div style={styles.templatesContainer}>
-            <div style={styles.pageHeader}>
-              <h1 style={styles.pageTitle}>Letter Templates</h1>
-              <p style={styles.pageSubtitle}>Generate dispute letters customized for your situation</p>
-            </div>
-            <div style={styles.templateCategories}>
-              {Object.entries(TEMPLATES).map(([key, category]) => (
-                <div key={key} style={styles.categoryCard}>
-                  <button style={styles.categoryHeader} onClick={() => setExpandedCategory(expandedCategory === key ? null : key)}>
-                    <div style={styles.categoryTitle}><category.icon size={20} style={{ color: '#d4a574' }} /><span>{category.category}</span></div>
-                    <ChevronDown size={18} style={{ transform: expandedCategory === key ? 'rotate(180deg)' : 'rotate(0deg)', transition: '0.2s' }} />
-                  </button>
-                  {expandedCategory === key && (
-                    <div style={styles.templateList}>
-                      {category.templates.map(template => (
-                        <div key={template.id} style={styles.templateItem}>
-                          <div style={styles.templateInfo}>
-                            <div style={styles.templateName}>{template.name}</div>
-                            <div style={styles.templateDesc}>{template.description}</div>
-                            <div style={styles.templateDeadline}><Clock size={12} /> {template.deadline}</div>
-                          </div>
-                          {template.external ? (
-                            <a href={template.external} target="_blank" rel="noopener noreferrer" style={styles.generateButton}>
-                              Open <ExternalLink size={14} />
-                            </a>
-                          ) : (
-                            <button style={styles.generateButton} onClick={() => setGeneratedLetter({ template, content: getLetterContent(template.id) })}>
-                              Generate <ChevronRight size={14} />
-                            </button>
-                          )}
-                        </div>
-                      ))}
-                    </div>
+                        );
+                      })}
+                    </>
                   )}
                 </div>
+              )}
+            </div>
+          )}
+
+          {/* FLAGGED TAB */}
+          {activeTab === 'flagged' && (
+            <div className="content-area">
+              <div className="page-header">
+                <div>
+                  <h1 className="page-title">Flagged Items</h1>
+                  <p className="page-subtitle">Items marked for dispute</p>
+                </div>
+              </div>
+              {flaggedItems.length === 0 ? (
+                <div className="empty-state">
+                  <div className="empty-icon"><Flag size={28} /></div>
+                  <div className="empty-title">No flagged items</div>
+                  <div className="empty-text">Analyze reports and flag items to dispute</div>
+                </div>
+              ) : (
+                flaggedItems.map((item, i) => (
+                  <div key={item.id || i} className="card">
+                    <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+                      <span className="severity-badge" style={{ background: `${severityColor[item.severity]}20`, color: severityColor[item.severity] }}>{item.severity?.toUpperCase()}</span>
+                      <span className="statute-tag">{item.statute}</span>
+                    </div>
+                    <div style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px' }}>{item.account}</div>
+                    <div style={{ fontSize: '14px', color: '#a1a1aa', marginBottom: '16px' }}>{item.issue}</div>
+                    <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                      <button className="btn-primary" onClick={() => createDisputeFromFlagged(item)}><Plus size={14} /> Create Dispute</button>
+                      <button className="btn-secondary" onClick={() => toggleFlag(item)}><Trash2 size={14} /> Remove</button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+
+          {/* CHAT TAB */}
+          {activeTab === 'chat' && (
+            <div className="chat-container">
+              <div className="chat-messages">
+                {messages.map(msg => (
+                  <div key={msg.id} className={`message ${msg.role} ${msg.isError ? 'error' : ''}`}>
+                    <div className="message-content">{msg.content}</div>
+                  </div>
+                ))}
+                {isLoading && (
+                  <div className="message assistant">
+                    <div className="message-content"><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /></div>
+                  </div>
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+              <div className="chat-input-area">
+                <div className="chat-input-wrapper">
+                  <textarea
+                    className="chat-input"
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }}}
+                    placeholder="Describe your situation..."
+                    rows={1}
+                  />
+                  <button className="send-btn" onClick={sendMessage} disabled={!inputValue.trim() || isLoading}>
+                    <Send size={18} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TEMPLATES TAB */}
+          {activeTab === 'templates' && (
+            <div className="content-area">
+              <div className="page-header">
+                <div>
+                  <h1 className="page-title">Letter Templates</h1>
+                  <p className="page-subtitle">Generate dispute letters</p>
+                </div>
+              </div>
+              {Object.entries(TEMPLATES).map(([key, category]) => (
+                <div key={key} className="category-card">
+                  <button className="category-header" onClick={() => setExpandedCategory(expandedCategory === key ? null : key)}>
+                    <div className="category-title">
+                      <div className="category-icon"><category.icon size={18} /></div>
+                      {category.category}
+                    </div>
+                    <ChevronDown size={18} style={{ transform: expandedCategory === key ? 'rotate(180deg)' : 'none', transition: '0.2s' }} />
+                  </button>
+                  {expandedCategory === key && category.templates.map(template => (
+                    <div key={template.id} className="template-item">
+                      <div className="template-info">
+                        <div className="template-name">{template.name}</div>
+                        <div className="template-desc">{template.description}</div>
+                        <div className="template-deadline"><Clock size={12} /> {template.deadline}</div>
+                      </div>
+                      {template.external ? (
+                        <a href={template.external} target="_blank" rel="noopener noreferrer" className="template-btn">Open <ExternalLink size={14} /></a>
+                      ) : (
+                        <button className="template-btn" onClick={() => setGeneratedLetter({ template, content: getLetterContent(template.id) })}>Generate <ChevronRight size={14} /></button>
+                      )}
+                    </div>
+                  ))}
+                </div>
               ))}
             </div>
-          </div>
-        )}
+          )}
 
-        {/* TRACKER TAB */}
-        {activeTab === 'tracker' && (
-          <div style={styles.trackerContainer}>
-            <div style={styles.pageHeader}>
-              <div><h1 style={styles.pageTitle}>Dispute Tracker</h1><p style={styles.pageSubtitle}>Monitor deadlines and responses</p></div>
-              <button style={styles.primaryButton} onClick={() => {
-                const agency = prompt('Agency name:');
-                const type = prompt('Type (605B or 611):');
-                if (agency && type) {
-                  setDisputes(prev => [{ id: Date.now(), agency, type: type.toUpperCase(), createdAt: new Date().toISOString(), deadline: calculateDeadline(type.toUpperCase()), status: 'pending' }, ...prev]);
-                  logAction('DISPUTE_CREATED', { agency, type });
-                }
-              }}><Plus size={16} /> Add Dispute</button>
-            </div>
-            {disputes.length === 0 ? (
-              <div style={styles.emptyState}><Calendar size={48} style={{ color: '#3f3f46', marginBottom: '16px' }} /><h3 style={styles.emptyTitle}>No disputes tracked</h3></div>
-            ) : (
-              <div style={styles.disputeGrid}>
-                {disputes.map(d => {
+          {/* TRACKER TAB */}
+          {activeTab === 'tracker' && (
+            <div className="content-area">
+              <div className="page-header">
+                <div>
+                  <h1 className="page-title">Dispute Tracker</h1>
+                  <p className="page-subtitle">Monitor deadlines</p>
+                </div>
+                <button className="btn-primary" onClick={() => {
+                  const agency = prompt('Agency name:');
+                  const type = prompt('Type (605B or 611):');
+                  if (agency && type) {
+                    setDisputes(prev => [{ id: Date.now(), agency, type: type.toUpperCase(), createdAt: new Date().toISOString(), deadline: calculateDeadline(type.toUpperCase()), status: 'pending' }, ...prev]);
+                    logAction('DISPUTE_CREATED', { agency, type });
+                  }
+                }}><Plus size={16} /> Add</button>
+              </div>
+              {disputes.length === 0 ? (
+                <div className="empty-state">
+                  <div className="empty-icon"><Calendar size={28} /></div>
+                  <div className="empty-title">No disputes tracked</div>
+                  <div className="empty-text">Add disputes to track deadlines</div>
+                </div>
+              ) : (
+                disputes.map(d => {
                   const days = getDaysRemaining(d.deadline);
                   const isOverdue = days < 0;
+                  const statusColor = isOverdue ? '#ef4444' : days <= 2 ? '#f59e0b' : '#22c55e';
                   return (
-                    <div key={d.id} style={{...styles.disputeCard, borderColor: isOverdue ? '#ef4444' : days <= 2 ? '#f59e0b' : '#27272a'}}>
-                      <div style={styles.disputeHeader}>
-                        <div><div style={styles.disputeAgency}>{d.agency}</div><div style={styles.disputeType}>§{d.type} • {formatDate(d.createdAt)}</div></div>
-                        <span style={{...styles.statusBadge, background: d.type === '605B' ? 'rgba(212,165,116,0.15)' : 'rgba(59,130,246,0.15)', color: d.type === '605B' ? '#d4a574' : '#60a5fa'}}>{d.type === '605B' ? '4-day' : '30-day'}</span>
+                    <div key={d.id} className="dispute-card" style={{ borderColor: statusColor }}>
+                      <div className="dispute-header">
+                        <div>
+                          <div className="dispute-agency">{d.agency}</div>
+                          <div className="dispute-type">§{d.type} · {formatDate(d.createdAt)}</div>
+                        </div>
+                        <span className="type-badge" style={{ background: d.type === '605B' ? 'rgba(212,165,116,0.15)' : 'rgba(59,130,246,0.15)', color: d.type === '605B' ? '#d4a574' : '#60a5fa' }}>{d.type === '605B' ? '4-day' : '30-day'}</span>
                       </div>
-                      <div style={{...styles.countdown, color: isOverdue ? '#ef4444' : days <= 2 ? '#f59e0b' : '#22c55e'}}>
-                        {isOverdue ? <><AlertCircle size={18} /> Overdue by {Math.abs(days)} days</> : <><Clock size={18} /> {days} days left</>}
+                      <div className="countdown" style={{ color: statusColor }}>
+                        {isOverdue ? <><AlertCircle size={18} /> Overdue {Math.abs(days)}d — VIOLATION</> : <><Clock size={18} /> {days} days left</>}
                       </div>
-                      <div style={styles.disputeActions}>
-                        <button style={styles.actionButton} onClick={() => { setDisputes(prev => prev.map(x => x.id === d.id ? {...x, status: 'responded'} : x)); logAction('RESPONSE_RECEIVED', { agency: d.agency }); }}>
-                          <CheckCircle2 size={14} /> Responded
+                      <div className="dispute-actions">
+                        <button className="action-btn" onClick={() => { setDisputes(prev => prev.map(x => x.id === d.id ? {...x, status: 'responded'} : x)); logAction('RESPONSE_RECEIVED', { agency: d.agency }); }}>
+                          <CheckCircle2 size={14} style={{ color: '#22c55e' }} /> Responded
                         </button>
-                        <button style={{...styles.actionButton, color: '#ef4444'}} onClick={() => { setDisputes(prev => prev.filter(x => x.id !== d.id)); }}>
-                          <X size={14} /> Delete
+                        <button className="action-btn" onClick={() => setDisputes(prev => prev.filter(x => x.id !== d.id))}>
+                          <X size={14} style={{ color: '#ef4444' }} /> Delete
                         </button>
                       </div>
                     </div>
                   );
-                })}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* AUDIT TAB */}
-        {activeTab === 'audit' && (
-          <div style={styles.auditContainer}>
-            <div style={styles.pageHeader}>
-              <div><h1 style={styles.pageTitle}>Audit Log</h1><p style={styles.pageSubtitle}>Timestamped evidence trail</p></div>
-              <button style={styles.secondaryButton} onClick={() => {
-                const data = JSON.stringify({ auditLog, disputes, flaggedItems, exportedAt: new Date().toISOString() }, null, 2);
-                const blob = new Blob([data], { type: 'application/json' });
-                const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `605b_audit_${new Date().toISOString().split('T')[0]}.json`; a.click();
-              }}><Download size={16} /> Export</button>
+                })
+              )}
             </div>
-            <div style={styles.auditNotice}><Scale size={16} /><span>This log serves as evidence for CFPB complaints and litigation.</span></div>
-            {auditLog.length === 0 ? (
-              <div style={styles.emptyState}><FileText size={48} style={{ color: '#3f3f46', marginBottom: '16px' }} /><h3 style={styles.emptyTitle}>No actions logged</h3></div>
-            ) : (
-              <div style={styles.auditList}>
-                {auditLog.map(entry => (
-                  <div key={entry.id} style={styles.auditEntry}>
-                    <div style={styles.auditTimestamp}>{new Date(entry.timestamp).toLocaleString()}</div>
-                    <div style={styles.auditAction}>{entry.action}</div>
-                    {Object.keys(entry.details).length > 0 && <div style={styles.auditDetails}>{JSON.stringify(entry.details)}</div>}
+          )}
+
+          {/* AUDIT TAB */}
+          {activeTab === 'audit' && (
+            <div className="content-area">
+              <div className="page-header">
+                <div>
+                  <h1 className="page-title">Audit Log</h1>
+                  <p className="page-subtitle">Evidence trail</p>
+                </div>
+                <button className="btn-secondary" onClick={() => {
+                  const data = JSON.stringify({ auditLog, disputes, flaggedItems, exportedAt: new Date().toISOString() }, null, 2);
+                  const blob = new Blob([data], { type: 'application/json' });
+                  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `605b_audit_${new Date().toISOString().split('T')[0]}.json`; a.click();
+                }}><Download size={16} /> Export</button>
+              </div>
+              <div className="audit-notice"><Scale size={16} /> This log serves as evidence for CFPB complaints.</div>
+              {auditLog.length === 0 ? (
+                <div className="empty-state">
+                  <div className="empty-icon"><FileText size={28} /></div>
+                  <div className="empty-title">No actions logged</div>
+                </div>
+              ) : (
+                auditLog.map(entry => (
+                  <div key={entry.id} className="audit-entry">
+                    <div className="audit-timestamp">{new Date(entry.timestamp).toLocaleString()}</div>
+                    <div className="audit-action">{entry.action}</div>
+                    {Object.keys(entry.details).length > 0 && <div className="audit-details">{JSON.stringify(entry.details)}</div>}
                   </div>
-                ))}
+                ))
+              )}
+            </div>
+          )}
+        </main>
+
+        {/* Letter Modal */}
+        {generatedLetter && (
+          <div className="modal-overlay" onClick={() => setGeneratedLetter(null)}>
+            <div className="modal" onClick={e => e.stopPropagation()}>
+              <div className="modal-header">
+                <div className="modal-title">{generatedLetter.template.name}</div>
+                <button className="close-btn" onClick={() => setGeneratedLetter(null)}><X size={18} /></button>
               </div>
-            )}
+              <div className="modal-body">
+                <div className="letter-instructions"><AlertCircle size={16} style={{ flexShrink: 0 }} /> Replace [BRACKETED] text. Send via certified mail.</div>
+                <pre className="letter-content">{generatedLetter.content}</pre>
+              </div>
+              <div className="modal-footer">
+                <button className="btn-secondary" onClick={() => copyToClipboard(generatedLetter.content)}>
+                  {copySuccess ? <Check size={16} /> : <Copy size={16} />} {copySuccess ? 'Copied!' : 'Copy'}
+                </button>
+                <button className="btn-primary" onClick={() => {
+                  const blob = new Blob([generatedLetter.content], { type: 'text/plain' });
+                  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${generatedLetter.template.id}.txt`; a.click();
+                }}><Download size={16} /> Download</button>
+              </div>
+            </div>
           </div>
         )}
-      </main>
-
-      {/* Letter Modal */}
-      {generatedLetter && (
-        <div style={styles.modalOverlay} onClick={() => setGeneratedLetter(null)}>
-          <div style={styles.modal} onClick={e => e.stopPropagation()}>
-            <div style={styles.modalHeader}>
-              <h2 style={styles.modalTitle}>{generatedLetter.template.name}</h2>
-              <button style={styles.closeButton} onClick={() => setGeneratedLetter(null)}><X size={20} /></button>
-            </div>
-            <div style={styles.modalBody}>
-              <div style={styles.letterInstructions}><AlertCircle size={16} /><span>Replace [BRACKETED] text with your info. Send via certified mail.</span></div>
-              <pre style={styles.letterContent}>{generatedLetter.content}</pre>
-            </div>
-            <div style={styles.modalFooter}>
-              <button style={styles.secondaryButton} onClick={() => copyToClipboard(generatedLetter.content)}>
-                {copySuccess ? <Check size={16} /> : <Copy size={16} />} {copySuccess ? 'Copied!' : 'Copy'}
-              </button>
-              <button style={styles.primaryButton} onClick={() => {
-                const blob = new Blob([generatedLetter.content], { type: 'text/plain' });
-                const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${generatedLetter.template.id}.txt`; a.click();
-              }}><Download size={16} /> Download</button>
-            </div>
-          </div>
-        </div>
-      )}
-
+      </div>
+      
       <style jsx global>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
-    </div>
+    </>
   );
 }
-
-// ============================================================================
-// STYLES
-// ============================================================================
-
-const styles = {
-  container: { display: 'flex', minHeight: '100vh', background: '#09090b', color: '#fafafa' },
-  
-  // Sidebar
-  sidebar: { width: '250px', background: '#0c0c0e', borderRight: '1px solid #1c1c1f', display: 'flex', flexDirection: 'column', position: 'fixed', height: '100vh' },
-  sidebarHeader: { padding: '20px', borderBottom: '1px solid #1c1c1f' },
-  logo: { fontSize: '20px', fontWeight: '700', color: '#fafafa', textDecoration: 'none' },
-  nav: { padding: '12px', display: 'flex', flexDirection: 'column', gap: '2px' },
-  navItem: { display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px', background: 'transparent', border: 'none', borderRadius: '8px', color: '#71717a', fontSize: '14px', fontWeight: '500', cursor: 'pointer', textAlign: 'left', width: '100%' },
-  navItemActive: { background: 'rgba(212, 165, 116, 0.1)', color: '#d4a574' },
-  badge: { marginLeft: 'auto', padding: '2px 8px', background: '#d4a574', color: '#09090b', borderRadius: '10px', fontSize: '11px', fontWeight: '600' },
-  sidebarSection: { padding: '16px 12px', borderTop: '1px solid #1c1c1f', marginTop: 'auto' },
-  sectionLabel: { fontSize: '11px', fontWeight: '600', color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px', padding: '0 12px' },
-  quickLink: { display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 12px', color: '#71717a', fontSize: '13px', textDecoration: 'none', borderRadius: '6px' },
-  sidebarFooter: { padding: '16px 20px', borderTop: '1px solid #1c1c1f', display: 'flex', alignItems: 'center', gap: '12px' },
-  userName: { fontSize: '13px', color: '#a1a1aa' },
-
-  // Main
-  main: { flex: 1, marginLeft: '250px', minHeight: '100vh' },
-  pageHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' },
-  pageTitle: { fontSize: '24px', fontWeight: '600', color: '#fafafa', marginBottom: '4px' },
-  pageSubtitle: { fontSize: '14px', color: '#71717a' },
-
-  // Analyze
-  analyzeContainer: { padding: '32px', overflowY: 'auto' },
-  uploadSection: { marginBottom: '24px' },
-  uploadZone: { border: '2px dashed #27272a', borderRadius: '12px', padding: '48px', textAlign: 'center', cursor: 'pointer', transition: '0.2s' },
-  uploadText: { fontSize: '16px', color: '#a1a1aa', marginBottom: '8px' },
-  uploadHint: { fontSize: '13px', color: '#52525b' },
-  fileList: { marginTop: '16px' },
-  fileItem: { display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', background: '#0f0f11', border: '1px solid #1c1c1f', borderRadius: '8px', marginBottom: '8px' },
-  fileName: { flex: 1, fontSize: '14px', color: '#fafafa' },
-  fileSize: { fontSize: '12px', color: '#52525b' },
-  removeFile: { background: 'transparent', border: 'none', color: '#71717a', cursor: 'pointer', padding: '4px' },
-  errorBox: { display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '8px', color: '#fca5a5', marginBottom: '24px' },
-  
-  // Results
-  resultsSection: { marginTop: '32px' },
-  summaryCards: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '32px' },
-  summaryCard: { padding: '24px', background: '#0f0f11', border: '1px solid #1c1c1f', borderRadius: '12px', textAlign: 'center' },
-  summaryValue: { fontSize: '36px', fontWeight: '700', color: '#fafafa' },
-  summaryLabel: { fontSize: '13px', color: '#71717a', marginTop: '4px' },
-  findingsSection: { marginBottom: '32px' },
-  sectionTitle: { fontSize: '18px', fontWeight: '600', marginBottom: '16px' },
-  findingCard: { padding: '20px', background: '#0f0f11', border: '1px solid #1c1c1f', borderLeft: '4px solid', borderRadius: '8px', marginBottom: '12px' },
-  findingHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' },
-  severityBadge: { padding: '4px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: '600', marginRight: '8px' },
-  typeBadge: { padding: '4px 8px', background: '#1c1c1f', borderRadius: '4px', fontSize: '11px', color: '#a1a1aa', textTransform: 'capitalize' },
-  flagButton: { background: 'transparent', border: 'none', cursor: 'pointer', padding: '8px' },
-  findingAccount: { fontSize: '16px', fontWeight: '600', marginBottom: '8px' },
-  findingIssue: { fontSize: '14px', color: '#a1a1aa', marginBottom: '12px', lineHeight: '1.5' },
-  findingMeta: { display: 'flex', gap: '16px', fontSize: '13px', color: '#71717a', marginBottom: '12px' },
-  statuteTag: { color: '#d4a574' },
-  findingAction: { fontSize: '13px', color: '#a1a1aa', padding: '12px', background: '#1c1c1f', borderRadius: '6px' },
-  inconsistencyCard: { padding: '16px', background: '#0f0f11', border: '1px solid #1c1c1f', borderRadius: '8px', marginBottom: '12px' },
-  inconsistencyItem: { fontSize: '15px', fontWeight: '500', marginBottom: '8px' },
-  inconsistencyDetails: { fontSize: '14px', color: '#a1a1aa' },
-  personalInfoGrid: { display: 'grid', gap: '16px', marginBottom: '16px' },
-  infoBlock: { padding: '16px', background: '#0f0f11', border: '1px solid #1c1c1f', borderRadius: '8px' },
-  infoLabel: { fontSize: '12px', fontWeight: '600', color: '#71717a', marginBottom: '8px', textTransform: 'uppercase' },
-  infoList: { fontSize: '14px', color: '#a1a1aa' },
-  infoNote: { fontSize: '13px', color: '#71717a', fontStyle: 'italic' },
-
-  // Flagged
-  flaggedContainer: { padding: '32px', overflowY: 'auto' },
-  flaggedGrid: { display: 'grid', gap: '16px' },
-  flaggedCard: { padding: '20px', background: '#0f0f11', border: '1px solid #1c1c1f', borderRadius: '12px' },
-  flaggedHeader: { display: 'flex', gap: '8px', marginBottom: '12px' },
-  flaggedAccount: { fontSize: '16px', fontWeight: '600', marginBottom: '8px' },
-  flaggedIssue: { fontSize: '14px', color: '#a1a1aa', marginBottom: '16px' },
-  flaggedActions: { display: 'flex', gap: '12px' },
-
-  // Chat
-  chatContainer: { display: 'flex', flexDirection: 'column', height: '100vh' },
-  chatMessages: { flex: 1, overflowY: 'auto', padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: '16px' },
-  message: { maxWidth: '75%' },
-  messageUser: { alignSelf: 'flex-end' },
-  messageAssistant: { alignSelf: 'flex-start' },
-  messageContent: { padding: '14px 18px', borderRadius: '16px', fontSize: '14px', lineHeight: '1.6', whiteSpace: 'pre-wrap' },
-  messageContentUser: { background: '#d4a574', color: '#09090b', borderRadius: '16px 16px 4px 16px' },
-  messageContentAssistant: { background: '#1c1c1f', color: '#e4e4e7', border: '1px solid #27272a', borderRadius: '16px 16px 16px 4px' },
-  messageError: { background: 'rgba(239,68,68,0.1)', borderColor: 'rgba(239,68,68,0.3)', color: '#fca5a5' },
-  inputContainer: { padding: '16px 32px 24px', borderTop: '1px solid #1c1c1f' },
-  inputWrapper: { display: 'flex', alignItems: 'flex-end', gap: '12px', background: '#1c1c1f', border: '1px solid #27272a', borderRadius: '12px', padding: '12px 16px' },
-  input: { flex: 1, background: 'transparent', border: 'none', color: '#fafafa', fontSize: '14px', resize: 'none', outline: 'none', lineHeight: '1.5', fontFamily: 'inherit' },
-  sendButton: { width: '36px', height: '36px', borderRadius: '8px', background: '#d4a574', border: 'none', color: '#09090b', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' },
-
-  // Templates
-  templatesContainer: { padding: '32px', overflowY: 'auto' },
-  templateCategories: { display: 'flex', flexDirection: 'column', gap: '12px' },
-  categoryCard: { background: '#0f0f11', border: '1px solid #1c1c1f', borderRadius: '12px', overflow: 'hidden' },
-  categoryHeader: { width: '100%', padding: '16px 20px', background: 'transparent', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', color: '#fafafa' },
-  categoryTitle: { display: 'flex', alignItems: 'center', gap: '12px', fontSize: '16px', fontWeight: '600' },
-  templateList: { borderTop: '1px solid #1c1c1f' },
-  templateItem: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid #1c1c1f', gap: '16px' },
-  templateInfo: { flex: 1 },
-  templateName: { fontSize: '14px', fontWeight: '500', color: '#fafafa', marginBottom: '4px' },
-  templateDesc: { fontSize: '13px', color: '#71717a', marginBottom: '6px' },
-  templateDeadline: { display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#d4a574' },
-  generateButton: { display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', background: '#d4a574', border: 'none', borderRadius: '6px', color: '#09090b', fontSize: '13px', fontWeight: '500', cursor: 'pointer', textDecoration: 'none' },
-
-  // Tracker
-  trackerContainer: { padding: '32px', overflowY: 'auto' },
-  disputeGrid: { display: 'grid', gap: '16px' },
-  disputeCard: { padding: '20px', background: '#0f0f11', border: '1px solid', borderRadius: '12px' },
-  disputeHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' },
-  disputeAgency: { fontSize: '16px', fontWeight: '600' },
-  disputeType: { fontSize: '13px', color: '#71717a', marginTop: '2px' },
-  statusBadge: { padding: '4px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '500' },
-  countdown: { display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', fontWeight: '600', marginBottom: '16px' },
-  disputeActions: { display: 'flex', gap: '8px' },
-  actionButton: { display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px', background: '#1c1c1f', border: '1px solid #27272a', borderRadius: '6px', color: '#a1a1aa', fontSize: '13px', cursor: 'pointer' },
-
-  // Audit
-  auditContainer: { padding: '32px', overflowY: 'auto' },
-  auditNotice: { display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', background: 'rgba(212,165,116,0.1)', border: '1px solid rgba(212,165,116,0.2)', borderRadius: '8px', fontSize: '13px', color: '#d4a574', marginBottom: '24px' },
-  auditList: { display: 'flex', flexDirection: 'column', gap: '8px' },
-  auditEntry: { padding: '12px 16px', background: '#0f0f11', border: '1px solid #1c1c1f', borderRadius: '8px', fontFamily: 'monospace', fontSize: '12px' },
-  auditTimestamp: { color: '#52525b', marginBottom: '4px' },
-  auditAction: { color: '#d4a574', fontWeight: '500' },
-  auditDetails: { color: '#71717a', marginTop: '4px' },
-
-  // Buttons
-  primaryButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', background: '#d4a574', border: 'none', borderRadius: '8px', color: '#09090b', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
-  secondaryButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', background: 'transparent', border: '1px solid #27272a', borderRadius: '8px', color: '#a1a1aa', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
-
-  // Empty
-  emptyState: { textAlign: 'center', padding: '64px 32px', background: '#0f0f11', borderRadius: '12px', border: '1px solid #1c1c1f' },
-  emptyTitle: { fontSize: '16px', fontWeight: '600', color: '#a1a1aa', marginBottom: '8px' },
-  emptyText: { fontSize: '14px', color: '#52525b' },
-
-  // Modal
-  modalOverlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' },
-  modal: { background: '#0f0f11', border: '1px solid #27272a', borderRadius: '16px', width: '100%', maxWidth: '700px', maxHeight: '85vh', display: 'flex', flexDirection: 'column' },
-  modalHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 24px', borderBottom: '1px solid #27272a' },
-  modalTitle: { fontSize: '18px', fontWeight: '600' },
-  closeButton: { width: '32px', height: '32px', borderRadius: '8px', background: '#27272a', border: 'none', color: '#a1a1aa', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' },
-  modalBody: { padding: '24px', overflowY: 'auto', flex: 1 },
-  letterInstructions: { display: 'flex', alignItems: 'flex-start', gap: '10px', padding: '12px 16px', background: 'rgba(212,165,116,0.1)', border: '1px solid rgba(212,165,116,0.2)', borderRadius: '8px', fontSize: '13px', color: '#d4a574', marginBottom: '16px' },
-  letterContent: { background: '#1c1c1f', border: '1px solid #27272a', borderRadius: '8px', padding: '20px', fontSize: '13px', lineHeight: '1.6', color: '#e4e4e7', whiteSpace: 'pre-wrap', fontFamily: 'monospace', overflowX: 'auto' },
-  modalFooter: { display: 'flex', justifyContent: 'flex-end', gap: '12px', padding: '16px 24px', borderTop: '1px solid #27272a' },
-};

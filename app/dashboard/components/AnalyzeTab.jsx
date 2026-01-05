@@ -362,6 +362,74 @@ export default function AnalyzeTab({ flaggedItems, setFlaggedItems, logAction })
           background: rgba(212, 165, 116, 0.2);
           border-color: rgba(212, 165, 116, 0.4);
         }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+          .intro-banner {
+            padding: 16px;
+          }
+          .intro-banner h2 {
+            font-size: 16px;
+          }
+          .intro-banner p {
+            font-size: 13px;
+          }
+          .capabilities-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+          }
+          .capability-item {
+            padding: 10px;
+            flex-direction: column;
+            text-align: center;
+          }
+          .capability-icon {
+            width: 28px;
+            height: 28px;
+          }
+          .capability-text h4 {
+            font-size: 12px;
+          }
+          .capability-text p {
+            font-size: 11px;
+          }
+          .upload-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+          }
+          .tip-badge {
+            font-size: 11px;
+          }
+          .resource-category {
+            /* ensure touch targets are big enough */
+          }
+          .category-header {
+            padding: 12px 16px;
+          }
+          .category-links {
+            padding: 0 12px 12px;
+          }
+          .resource-link {
+            padding: 10px 12px;
+          }
+          .resource-name {
+            font-size: 13px;
+          }
+          .resource-desc {
+            font-size: 11px;
+          }
+          .no-reports-cta {
+            padding: 24px 16px;
+          }
+          .quick-links {
+            flex-direction: column;
+          }
+          .quick-link {
+            width: 100%;
+            justify-content: center;
+          }
+        }
       `}</style>
 
       <div className="page-header">

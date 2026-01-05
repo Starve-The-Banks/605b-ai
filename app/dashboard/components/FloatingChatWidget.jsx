@@ -171,7 +171,7 @@ export default function FloatingChatWidget({ currentTab }) {
         <style jsx>{`
           .chat-fab {
             position: fixed;
-            bottom: 100px;
+            bottom: 24px;
             right: 24px;
             width: 56px;
             height: 56px;
@@ -208,7 +208,7 @@ export default function FloatingChatWidget({ currentTab }) {
           }
           @media (max-width: 768px) {
             .chat-fab {
-              bottom: 90px;
+              bottom: 88px;
               right: 16px;
               width: 52px;
               height: 52px;
@@ -228,7 +228,7 @@ export default function FloatingChatWidget({ currentTab }) {
       <style jsx>{`
         .chat-widget {
           position: fixed;
-          bottom: 100px;
+          bottom: 24px;
           right: 24px;
           width: 380px;
           max-height: 520px;
@@ -418,11 +418,22 @@ export default function FloatingChatWidget({ currentTab }) {
         }
         @media (max-width: 768px) {
           .chat-widget {
-            bottom: 80px;
+            bottom: 88px;
             right: 12px;
             left: 12px;
             width: auto;
-            max-height: 70vh;
+            max-height: 60vh;
+          }
+          .widget-messages {
+            min-height: 150px;
+            max-height: 200px;
+          }
+          .quick-prompts {
+            padding: 10px 12px;
+          }
+          .quick-prompt {
+            font-size: 11px;
+            padding: 5px 8px;
           }
         }
       `}</style>

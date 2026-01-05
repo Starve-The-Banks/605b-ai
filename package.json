@@ -11,8 +11,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",
     "@clerk/nextjs": "^5.0.0",
-    "@upstash/redis": "^1.36.0",
-    "@vercel/kv": "^3.0.0",
+    "@vercel/analytics": "^1.6.1",
     "lucide-react": "^0.303.0",
     "next": "14.2.28",
     "pdf-parse": "^1.1.1",

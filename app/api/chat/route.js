@@ -1,7 +1,30 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { auth } from '@clerk/nextjs/server';
+import { rateLimit, LIMITS } from '@/lib/rateLimit';
 
 export async function POST(req) {
   try {
+    // Require authentication
+    const { userId } = await auth();
+    if (!userId) {
+      return new Response(JSON.stringify({ error: 'Please sign in to use chat' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Check rate limit
+    const { allowed, remaining, resetIn } = await rateLimit(userId, 'chat', LIMITS.chat);
+    if (!allowed) {
+      const hours = Math.ceil(resetIn / 3600);
+      return new Response(JSON.stringify({
+        error: `Daily limit reached (${LIMITS.chat} messages/day). Resets in ${hours} hour${hours > 1 ? 's' : ''}.`
+      }), {
+        status: 429,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
     const { messages, systemPrompt } = await req.json();
 
     if (!messages || !Array.isArray(messages)) {
@@ -35,7 +58,10 @@ export async function POST(req) {
     const text = response.content[0]?.text || "No response generated.";
 
     return new Response(text, {
-      headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'X-RateLimit-Remaining': String(remaining)
+      }
     });
 
   } catch (error) {

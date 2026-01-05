@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
-import { ArrowRight, Shield, Clock, FileText, Scale, Upload, Flag, BarChart3, Menu, X } from 'lucide-react';
+import { ArrowRight, Shield, Clock, FileText, Scale, Upload, Flag, BarChart3, Menu, X, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 
 export default function LandingPage() {
@@ -147,6 +147,7 @@ export default function LandingPage() {
           align-items: center;
           text-align: center;
           padding: 120px 24px 80px;
+          position: relative;
         }
         
         .hero-badge {
@@ -230,6 +231,44 @@ export default function LandingPage() {
           color: #a1a1aa;
           max-width: 600px;
           text-align: left;
+        }
+        
+        .scroll-indicator {
+          position: absolute;
+          bottom: 32px;
+          left: 50%;
+          transform: translateX(-50%);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 8px;
+          color: #52525b;
+          font-size: 12px;
+          font-weight: 500;
+          letter-spacing: 0.05em;
+          text-transform: uppercase;
+          cursor: pointer;
+          transition: color 0.2s;
+        }
+        
+        .scroll-indicator:hover {
+          color: #d4a574;
+        }
+        
+        .scroll-indicator svg {
+          animation: bounceDown 2s ease-in-out infinite;
+        }
+        
+        @keyframes bounceDown {
+          0%, 20%, 50%, 80%, 100% {
+            transform: translateY(0);
+          }
+          40% {
+            transform: translateY(8px);
+          }
+          60% {
+            transform: translateY(4px);
+          }
         }
         
         /* Sections */
@@ -651,6 +690,10 @@ export default function LandingPage() {
               credit repair services, or guarantees of outcomes.
             </span>
           </div>
+          <a href="#how-it-works" className="scroll-indicator">
+            <span>Learn more</span>
+            <ChevronDown size={20} />
+          </a>
         </section>
 
         {/* How It Works */}

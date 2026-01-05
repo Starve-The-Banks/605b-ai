@@ -40,14 +40,20 @@ export default function LandingPage() {
         }
         
         .logo {
-          font-size: 22px;
+          display: flex;
+          align-items: center;
+          font-size: 20px;
           font-weight: 700;
           color: #fafafa;
           text-decoration: none;
+          letter-spacing: -0.03em;
         }
         
         .logo-accent {
-          color: #d4a574;
+          background: linear-gradient(135deg, #d4a574 0%, #e8c4a0 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
         }
         
         .nav-links {
@@ -470,10 +476,18 @@ export default function LandingPage() {
         }
         
         .footer-logo {
-          font-size: 20px;
+          font-size: 18px;
           font-weight: 700;
           margin-bottom: 12px;
           color: #fafafa;
+          letter-spacing: -0.03em;
+        }
+        
+        .footer-logo .logo-accent {
+          background: linear-gradient(135deg, #d4a574 0%, #e8c4a0 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
         }
         
         .footer-tagline {

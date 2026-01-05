@@ -12,20 +12,40 @@ import {
   FileWarning,
   Loader2,
   Cloud,
-  CloudOff
+  CloudOff,
+  Sparkles
 } from 'lucide-react';
 
 import { useSyncedStorage } from '@/lib/hooks';
 import { AnalyzeTab, ChatTab, TemplatesTab, TrackerTab, FlaggedTab, AuditTab, CommandPalette } from './components';
 import { dashboardStyles } from './styles';
 
-const tabs = [
+const navSections = [
+  {
+    label: 'Core',
+    items: [
+      { id: 'analyze', icon: Search, label: 'Analyze' },
+      { id: 'chat', icon: Sparkles, label: 'AI Strategist' },
+      { id: 'templates', icon: FileText, label: 'Templates' },
+    ]
+  },
+  {
+    label: 'Manage',
+    items: [
+      { id: 'tracker', icon: Calendar, label: 'Tracker' },
+      { id: 'flagged', icon: Flag, label: 'Flagged' },
+      { id: 'audit', icon: FileWarning, label: 'Audit Log' },
+    ]
+  }
+];
+
+// Flat list for mobile nav
+const mobileNavItems = [
   { id: 'analyze', icon: Search, label: 'Analyze' },
-  { id: 'chat', icon: MessageSquare, label: 'Chat' },
-  { id: 'templates', icon: FileText, label: 'Templates' },
-  { id: 'tracker', icon: Calendar, label: 'Tracker' },
+  { id: 'chat', icon: Sparkles, label: 'AI' },
+  { id: 'templates', icon: FileText, label: 'Letters' },
+  { id: 'tracker', icon: Calendar, label: 'Track' },
   { id: 'flagged', icon: Flag, label: 'Flagged' },
-  { id: 'audit', icon: FileWarning, label: 'Audit' },
 ];
 
 export default function Dashboard() {
@@ -76,20 +96,28 @@ export default function Dashboard() {
         {/* Desktop Sidebar */}
         <aside className="sidebar">
           <div className="sidebar-header">
-            <Link href="/" className="logo">605b<span className="logo-accent">.ai</span></Link>
+            <Link href="/" className="logo">
+              <span>605b</span>
+              <span className="logo-accent">.ai</span>
+            </Link>
           </div>
           <nav className="nav">
-            {tabs.map(tab => (
-              <button
-                key={tab.id}
-                className={`nav-item ${activeTab === tab.id ? 'active' : ''}`}
-                onClick={() => setActiveTab(tab.id)}
-              >
-                <tab.icon size={18} />
-                <span>{tab.label}</span>
-                {tab.id === 'tracker' && disputes.length > 0 && <span className="nav-badge">{disputes.length}</span>}
-                {tab.id === 'flagged' && flaggedItems.length > 0 && <span className="nav-badge">{flaggedItems.length}</span>}
-              </button>
+            {navSections.map((section, sIdx) => (
+              <div key={sIdx}>
+                <div className="nav-section-label">{section.label}</div>
+                {section.items.map(tab => (
+                  <button
+                    key={tab.id}
+                    className={`nav-item ${activeTab === tab.id ? 'active' : ''}`}
+                    onClick={() => setActiveTab(tab.id)}
+                  >
+                    <tab.icon size={18} />
+                    <span>{tab.label}</span>
+                    {tab.id === 'tracker' && disputes.length > 0 && <span className="nav-badge">{disputes.length}</span>}
+                    {tab.id === 'flagged' && flaggedItems.length > 0 && <span className="nav-badge">{flaggedItems.length}</span>}
+                  </button>
+                ))}
+              </div>
             ))}
           </nav>
           <div className="sidebar-footer">
@@ -111,7 +139,10 @@ export default function Dashboard() {
 
         {/* Mobile Header */}
         <div className="mobile-header">
-          <Link href="/" className="logo">605b<span className="logo-accent">.ai</span></Link>
+          <Link href="/" className="logo">
+            <span>605b</span>
+            <span className="logo-accent">.ai</span>
+          </Link>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div className={`sync-indicator ${isSyncing ? 'syncing' : ''} ${lastSyncError ? 'error' : ''}`}>
               {isSyncing ? <Cloud size={14} /> : lastSyncError ? <CloudOff size={14} /> : <Cloud size={14} />}
@@ -123,7 +154,7 @@ export default function Dashboard() {
         {/* Mobile Bottom Nav */}
         <div className="mobile-nav">
           <div className="mobile-nav-items">
-            {tabs.slice(0, 5).map(tab => (
+            {mobileNavItems.map(tab => (
               <button
                 key={tab.id}
                 className={`mobile-nav-item ${activeTab === tab.id ? 'active' : ''}`}
@@ -180,7 +211,7 @@ export default function Dashboard() {
           )}
         </main>
 
-        {/* Command Palette AI - available on all pages */}
+        {/* Command Palette AI - available on all pages except Chat */}
         <CommandPalette currentTab={activeTab} />
       </div>
     </>

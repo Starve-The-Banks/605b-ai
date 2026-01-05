@@ -194,6 +194,11 @@ export default function CommandPalette({ currentTab }) {
 
   const currentSuggestions = PAGE_SUGGESTIONS[currentTab] || PAGE_SUGGESTIONS.chat;
 
+  // Don't render on Chat tab - it has its own full experience
+  if (currentTab === 'chat' && !isOpen) {
+    return null;
+  }
+
   if (!isOpen) {
     return (
       <>

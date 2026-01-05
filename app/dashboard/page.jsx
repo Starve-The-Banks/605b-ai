@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 
 import { useSyncedStorage } from '@/lib/hooks';
-import { AnalyzeTab, ChatTab, TemplatesTab, TrackerTab, FlaggedTab, AuditTab, FloatingChatWidget } from './components';
+import { AnalyzeTab, ChatTab, TemplatesTab, TrackerTab, FlaggedTab, AuditTab, CommandPalette } from './components';
 import { dashboardStyles } from './styles';
 
 const tabs = [
@@ -180,10 +180,8 @@ export default function Dashboard() {
           )}
         </main>
 
-        {/* Floating Help Chat - available on all pages except full chat */}
-        {activeTab !== 'chat' && (
-          <FloatingChatWidget currentTab={activeTab} />
-        )}
+        {/* Command Palette AI - available on all pages */}
+        <CommandPalette currentTab={activeTab} />
       </div>
     </>
   );

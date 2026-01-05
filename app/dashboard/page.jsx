@@ -31,161 +31,86 @@ import {
   Search,
   Trash2,
   Menu,
-  Settings
+  Heart,
+  CreditCard,
+  Gavel
 } from 'lucide-react';
+
+// Import comprehensive templates
+import LETTER_TEMPLATES from '../../lib/templates';
 
 // System prompt for chat
 const SYSTEM_PROMPT = `You are 605b.ai, an expert credit repair assistant specializing in identity theft recovery and consumer protection law. Be direct, cite statutes, give concrete next steps.`;
 
-// Template data
+// Template categories with all templates
 const TEMPLATES = {
   identity_theft: {
-    category: "Identity Theft",
+    category: "Identity Theft Recovery",
     icon: Shield,
     templates: [
-      { id: "605b_bureau", name: "§605B Identity Theft Block", description: "Demand bureaus block fraudulent accounts", deadline: "4 business days" },
-      { id: "605b_furnisher", name: "§605B Direct to Furnisher", description: "Send block demand to creditor", deadline: "4 business days" },
-      { id: "ftc_affidavit", name: "FTC Identity Theft Report", description: "Official identity theft affidavit", deadline: "N/A", external: "https://www.identitytheft.gov/" },
+      { id: "605b_bureau", name: "§605B Identity Theft Block (Bureau)", description: "Demand credit bureaus block all fraudulent accounts within 4 business days", deadline: "4 business days" },
+      { id: "605b_furnisher", name: "§605B Direct to Furnisher", description: "Send block demand directly to the creditor/furnisher", deadline: "4 business days" },
+      { id: "ftc_affidavit", name: "FTC Identity Theft Report", description: "Create official FTC identity theft report at IdentityTheft.gov", deadline: "N/A", external: "https://www.identitytheft.gov/" },
     ]
   },
   disputes: {
-    category: "Credit Disputes",
+    category: "Credit Bureau Disputes",
     icon: FileWarning,
     templates: [
-      { id: "611_dispute", name: "§611 Standard Dispute", description: "Challenge inaccurate information", deadline: "30 days" },
-      { id: "609_disclosure", name: "§609 Method of Verification", description: "Request verification proof", deadline: "15 days" },
-      { id: "623_direct", name: "§623 Direct Furnisher Dispute", description: "Dispute directly with furnisher", deadline: "30 days" },
+      { id: "611_dispute", name: "§611 Standard Dispute", description: "Challenge inaccurate information with credit bureaus - they must investigate within 30 days", deadline: "30 days" },
+      { id: "609_disclosure", name: "§609 Method of Verification Request", description: "Demand proof of HOW they verified disputed information after investigation", deadline: "15 days" },
+      { id: "623_direct", name: "§623 Direct Furnisher Dispute", description: "Dispute directly with the company reporting the information (skip the bureau)", deadline: "30 days" },
     ]
   },
   debt_collection: {
-    category: "Debt Collection",
+    category: "Debt Collection Defense",
     icon: AlertTriangle,
     templates: [
-      { id: "809_validation", name: "§809 Debt Validation", description: "Demand collector prove debt", deadline: "30 days" },
-      { id: "cease_desist", name: "Cease & Desist Letter", description: "Stop collector contact", deadline: "Immediate" },
-      { id: "pay_delete", name: "Pay for Delete Request", description: "Payment for removal", deadline: "Negotiable" },
+      { id: "809_validation", name: "§809 Debt Validation Demand", description: "Force collector to prove the debt is valid and they have authority to collect", deadline: "30 days" },
+      { id: "cease_desist", name: "Cease & Desist Letter", description: "Legally stop all collector phone calls and contact", deadline: "Immediate" },
+      { id: "pay_delete", name: "Pay for Delete Negotiation", description: "Offer settlement in exchange for complete credit report deletion", deadline: "Negotiable" },
     ]
   },
   specialty: {
-    category: "Specialty Agencies",
+    category: "Specialty Consumer Agencies",
     icon: Building2,
     templates: [
-      { id: "chex_dispute", name: "ChexSystems Dispute", description: "Dispute banking history", deadline: "30 days" },
-      { id: "ews_dispute", name: "Early Warning Dispute", description: "Dispute EWS records", deadline: "30 days" },
-      { id: "lexis_dispute", name: "LexisNexis Dispute", description: "Dispute public records", deadline: "30 days" },
+      { id: "chex_dispute", name: "ChexSystems Dispute", description: "Dispute banking history that's blocking you from opening accounts", deadline: "30 days" },
+      { id: "ews_dispute", name: "Early Warning Services Dispute", description: "Dispute EWS records affecting bank account approvals", deadline: "30 days" },
+      { id: "lexis_dispute", name: "LexisNexis Dispute", description: "Dispute public records, insurance claims, and background check data", deadline: "30 days" },
+    ]
+  },
+  medical: {
+    category: "Medical Debt",
+    icon: Heart,
+    templates: [
+      { id: "medical_debt", name: "Medical Debt Dispute", description: "Dispute medical debt using new 2023 protections (paid debt, under $500, 365-day rule)", deadline: "30 days" },
+    ]
+  },
+  goodwill: {
+    category: "Goodwill & Removal Requests",
+    icon: CreditCard,
+    templates: [
+      { id: "goodwill_letter", name: "Goodwill Adjustment Letter", description: "Politely request removal of late payment from otherwise good account", deadline: "Discretionary" },
     ]
   },
   escalation: {
-    category: "Escalation",
-    icon: Scale,
+    category: "Escalation & Legal",
+    icon: Gavel,
     templates: [
-      { id: "cfpb_complaint", name: "CFPB Complaint", description: "File federal complaint", deadline: "15-60 days", external: "https://www.consumerfinance.gov/complaint/" },
-      { id: "state_ag", name: "State Attorney General", description: "File state complaint", deadline: "Varies" },
-      { id: "intent_to_sue", name: "Intent to Sue Letter", description: "Final demand before litigation", deadline: "15-30 days" },
+      { id: "cfpb_complaint", name: "CFPB Complaint Portal", description: "File federal complaint - companies respond 95%+ of time", deadline: "15-60 days", external: "https://www.consumerfinance.gov/complaint/" },
+      { id: "state_ag", name: "State Attorney General Complaint", description: "File formal complaint with your state's consumer protection division", deadline: "Varies by state" },
+      { id: "intent_to_sue", name: "Intent to Sue / Final Demand", description: "Final warning letter before filing lawsuit - often triggers settlement", deadline: "15-30 days" },
     ]
   },
 };
 
-// Letter content
-const LETTER_CONTENT = {
-  "605b_bureau": () => `${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-
-[YOUR NAME]
-[YOUR ADDRESS]
-[CITY, STATE ZIP]
-
-[BUREAU NAME]
-[BUREAU ADDRESS]
-
-Re: Identity Theft Block Request Pursuant to FCRA §605B
-SSN: XXX-XX-[LAST 4]
-
-To Whom It May Concern:
-
-I am a victim of identity theft. Pursuant to the Fair Credit Reporting Act, 15 U.S.C. § 1681c-2 (Section 605B), I am requesting that you block the following fraudulent information from my credit report within four (4) business days of receipt of this letter.
-
-FRAUDULENT ACCOUNTS TO BE BLOCKED:
-[ACCOUNT NAME] - Account #[XXXX] - Opened [DATE]
-
-I have enclosed:
-□ Copy of FTC Identity Theft Report
-□ Copy of government-issued photo ID
-□ Proof of address
-
-Under 15 U.S.C. § 1681c-2(a), you must block this information within four (4) business days. Failure to comply may result in civil liability under 15 U.S.C. § 1681n (willful noncompliance) including statutory damages of $100 to $1,000 per violation.
-
-Sincerely,
-
-______________________________
-[YOUR NAME]`,
-
-  "611_dispute": () => `${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-
-[YOUR NAME]
-[YOUR ADDRESS]
-[CITY, STATE ZIP]
-
-[BUREAU NAME]
-[BUREAU ADDRESS]
-
-Re: Dispute of Inaccurate Information - FCRA §611
-SSN: XXX-XX-[LAST 4]
-
-To Whom It May Concern:
-
-Pursuant to FCRA §611, I am disputing the following inaccurate information:
-
-ITEMS DISPUTED:
-Creditor: [CREDITOR NAME]
-Account Number: [XXXX]
-Reason: [REASON]
-
-Under §611(a)(1)(A), you must conduct a reasonable investigation within 30 days. Under §611(a)(5)(A), if the information is inaccurate or unverifiable, you must delete or modify it.
-
-Please send me an updated copy of my credit report upon completion.
-
-Sincerely,
-
-______________________________
-[YOUR NAME]`,
-
-  "809_validation": () => `${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-
-[YOUR NAME]
-[YOUR ADDRESS]
-[CITY, STATE ZIP]
-
-[COLLECTION AGENCY NAME]
-[ADDRESS]
-
-Re: Debt Validation Request - FDCPA §809
-Reference: [ACCOUNT NUMBER]
-
-To Whom It May Concern:
-
-I am requesting validation of this alleged debt pursuant to FDCPA §809. Please provide:
-
-1. The amount of the debt and how it was calculated
-2. The name and address of the original creditor
-3. A copy of the original signed contract
-4. Proof you are licensed to collect in [STATE]
-5. Complete payment history
-
-Under §809(b), you must cease collection until validation is provided. Violations may result in statutory damages under 15 U.S.C. § 1692k.
-
-Sincerely,
-
-______________________________
-[YOUR NAME]
-
-SENT VIA CERTIFIED MAIL`,
-};
-
+// Get letter content from templates
 const getLetterContent = (templateId) => {
-  if (LETTER_CONTENT[templateId]) {
-    return LETTER_CONTENT[templateId]();
+  if (LETTER_TEMPLATES[templateId]) {
+    return LETTER_TEMPLATES[templateId]();
   }
-  return `[Letter template for ${templateId}]\n\nCustomize this template with your specific information.`;
+  return `[Template ${templateId} - Content coming soon]\n\nThis template is being developed. Please check back shortly.`;
 };
 
 // Local storage hook
@@ -351,7 +276,7 @@ export default function Dashboard() {
       setMessages([{
         id: 1,
         role: 'assistant',
-        content: `Welcome to 605b.ai. I help with credit disputes and identity theft recovery.\n\nI can help with:\n• Identity theft recovery — §605B blocks\n• Credit disputes — §611 disputes\n• Debt collection — §809 validation\n• Escalation — CFPB complaints\n\nWhat's your situation?`
+        content: `Welcome to 605b.ai. I help with credit disputes and identity theft recovery.\n\nI can help with:\n• Identity theft recovery — §605B blocks\n• Credit disputes — §611 disputes\n• Debt collection — §809 validation\n• Escalation — CFPB complaints\n• Medical debt — New 2023 protections\n• Goodwill letters — Late payment removal\n\nWhat's your situation?`
       }]);
     }
   }, []);
@@ -377,7 +302,17 @@ export default function Dashboard() {
   const copyToClipboard = async (text) => {
     await navigator.clipboard.writeText(text);
     setCopySuccess(true);
+    logAction('LETTER_COPIED', { template: generatedLetter?.template?.name });
     setTimeout(() => setCopySuccess(false), 2000);
+  };
+
+  const downloadLetter = () => {
+    const blob = new Blob([generatedLetter.content], { type: 'text/plain' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `${generatedLetter.template.id}_${new Date().toISOString().split('T')[0]}.txt`;
+    a.click();
+    logAction('LETTER_DOWNLOADED', { template: generatedLetter.template.name });
   };
 
   const severityColor = { high: '#ef4444', medium: '#f59e0b', low: '#22c55e' };
@@ -729,6 +664,7 @@ export default function Dashboard() {
         }
         .category-title { display: flex; align-items: center; gap: 12px; font-size: 16px; font-weight: 600; }
         .category-icon { width: 36px; height: 36px; background: rgba(212,165,116,0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #d4a574; }
+        .category-count { font-size: 12px; color: #71717a; font-weight: 400; }
         
         .template-item {
           display: flex;
@@ -741,7 +677,7 @@ export default function Dashboard() {
         }
         .template-info { flex: 1; min-width: 200px; }
         .template-name { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
-        .template-desc { font-size: 13px; color: #71717a; margin-bottom: 4px; }
+        .template-desc { font-size: 13px; color: #71717a; margin-bottom: 4px; line-height: 1.4; }
         .template-deadline { font-size: 12px; color: #d4a574; display: flex; align-items: center; gap: 4px; }
         .template-btn {
           display: flex;
@@ -756,6 +692,7 @@ export default function Dashboard() {
           font-weight: 500;
           cursor: pointer;
           text-decoration: none;
+          white-space: nowrap;
         }
         
         /* Tracker */
@@ -849,7 +786,7 @@ export default function Dashboard() {
           border: 1px solid #27272a;
           border-radius: 16px;
           width: 100%;
-          max-width: 600px;
+          max-width: 700px;
           max-height: 85vh;
           display: flex;
           flex-direction: column;
@@ -875,7 +812,7 @@ export default function Dashboard() {
           justify-content: center;
         }
         .modal-body { padding: 20px; overflow-y: auto; flex: 1; }
-        .modal-footer { display: flex; justify-content: flex-end; gap: 12px; padding: 16px 20px; border-top: 1px solid #27272a; }
+        .modal-footer { display: flex; justify-content: flex-end; gap: 12px; padding: 16px 20px; border-top: 1px solid #27272a; flex-wrap: wrap; }
         
         .letter-instructions {
           display: flex;
@@ -888,6 +825,7 @@ export default function Dashboard() {
           font-size: 13px;
           color: #d4a574;
           margin-bottom: 16px;
+          line-height: 1.5;
         }
         .letter-content {
           background: #1c1c1f;
@@ -898,7 +836,7 @@ export default function Dashboard() {
           line-height: 1.6;
           color: #e4e4e7;
           white-space: pre-wrap;
-          font-family: monospace;
+          font-family: 'SF Mono', Monaco, 'Courier New', monospace;
           overflow-x: auto;
         }
         
@@ -926,6 +864,9 @@ export default function Dashboard() {
           .chat-container { height: calc(100vh - 140px); }
           .chat-messages { padding: 16px; }
           .summary-value { font-size: 24px; }
+          .modal { max-height: 90vh; }
+          .modal-body { padding: 16px; }
+          .letter-content { font-size: 11px; padding: 12px; }
         }
       `}</style>
 
@@ -1136,7 +1077,7 @@ export default function Dashboard() {
               <div className="page-header">
                 <div>
                   <h1 className="page-title">Letter Templates</h1>
-                  <p className="page-subtitle">Generate dispute letters</p>
+                  <p className="page-subtitle">Comprehensive dispute letters citing actual statutes</p>
                 </div>
               </div>
               {Object.entries(TEMPLATES).map(([key, category]) => (
@@ -1144,7 +1085,8 @@ export default function Dashboard() {
                   <button className="category-header" onClick={() => setExpandedCategory(expandedCategory === key ? null : key)}>
                     <div className="category-title">
                       <div className="category-icon"><category.icon size={18} /></div>
-                      {category.category}
+                      <span>{category.category}</span>
+                      <span className="category-count">({category.templates.length})</span>
                     </div>
                     <ChevronDown size={18} style={{ transform: expandedCategory === key ? 'rotate(180deg)' : 'none', transition: '0.2s' }} />
                   </button>
@@ -1153,12 +1095,15 @@ export default function Dashboard() {
                       <div className="template-info">
                         <div className="template-name">{template.name}</div>
                         <div className="template-desc">{template.description}</div>
-                        <div className="template-deadline"><Clock size={12} /> {template.deadline}</div>
+                        <div className="template-deadline"><Clock size={12} /> Response deadline: {template.deadline}</div>
                       </div>
                       {template.external ? (
                         <a href={template.external} target="_blank" rel="noopener noreferrer" className="template-btn">Open <ExternalLink size={14} /></a>
                       ) : (
-                        <button className="template-btn" onClick={() => setGeneratedLetter({ template, content: getLetterContent(template.id) })}>Generate <ChevronRight size={14} /></button>
+                        <button className="template-btn" onClick={() => {
+                          setGeneratedLetter({ template, content: getLetterContent(template.id) });
+                          logAction('LETTER_GENERATED', { template: template.name });
+                        }}>Generate <ChevronRight size={14} /></button>
                       )}
                     </div>
                   ))}
@@ -1173,11 +1118,11 @@ export default function Dashboard() {
               <div className="page-header">
                 <div>
                   <h1 className="page-title">Dispute Tracker</h1>
-                  <p className="page-subtitle">Monitor deadlines</p>
+                  <p className="page-subtitle">Monitor deadlines and responses</p>
                 </div>
                 <button className="btn-primary" onClick={() => {
-                  const agency = prompt('Agency name:');
-                  const type = prompt('Type (605B or 611):');
+                  const agency = prompt('Agency name (e.g., Experian, Equifax, TransUnion):');
+                  const type = prompt('Type (605B for 4-day or 611 for 30-day):');
                   if (agency && type) {
                     setDisputes(prev => [{ id: Date.now(), agency, type: type.toUpperCase(), createdAt: new Date().toISOString(), deadline: calculateDeadline(type.toUpperCase()), status: 'pending' }, ...prev]);
                     logAction('DISPUTE_CREATED', { agency, type });
@@ -1188,7 +1133,7 @@ export default function Dashboard() {
                 <div className="empty-state">
                   <div className="empty-icon"><Calendar size={28} /></div>
                   <div className="empty-title">No disputes tracked</div>
-                  <div className="empty-text">Add disputes to track deadlines</div>
+                  <div className="empty-text">Add disputes to track statutory deadlines</div>
                 </div>
               ) : (
                 disputes.map(d => {
@@ -1200,12 +1145,12 @@ export default function Dashboard() {
                       <div className="dispute-header">
                         <div>
                           <div className="dispute-agency">{d.agency}</div>
-                          <div className="dispute-type">§{d.type} · {formatDate(d.createdAt)}</div>
+                          <div className="dispute-type">§{d.type} · Sent {formatDate(d.createdAt)}</div>
                         </div>
                         <span className="type-badge" style={{ background: d.type === '605B' ? 'rgba(212,165,116,0.15)' : 'rgba(59,130,246,0.15)', color: d.type === '605B' ? '#d4a574' : '#60a5fa' }}>{d.type === '605B' ? '4-day' : '30-day'}</span>
                       </div>
                       <div className="countdown" style={{ color: statusColor }}>
-                        {isOverdue ? <><AlertCircle size={18} /> Overdue {Math.abs(days)}d — VIOLATION</> : <><Clock size={18} /> {days} days left</>}
+                        {isOverdue ? <><AlertCircle size={18} /> Overdue {Math.abs(days)} days — FCRA VIOLATION</> : <><Clock size={18} /> {days} days remaining</>}
                       </div>
                       <div className="dispute-actions">
                         <button className="action-btn" onClick={() => { setDisputes(prev => prev.map(x => x.id === d.id ? {...x, status: 'responded'} : x)); logAction('RESPONSE_RECEIVED', { agency: d.agency }); }}>
@@ -1228,7 +1173,7 @@ export default function Dashboard() {
               <div className="page-header">
                 <div>
                   <h1 className="page-title">Audit Log</h1>
-                  <p className="page-subtitle">Evidence trail</p>
+                  <p className="page-subtitle">Evidence trail for CFPB complaints</p>
                 </div>
                 <button className="btn-secondary" onClick={() => {
                   const data = JSON.stringify({ auditLog, disputes, flaggedItems, exportedAt: new Date().toISOString() }, null, 2);
@@ -1236,11 +1181,12 @@ export default function Dashboard() {
                   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `605b_audit_${new Date().toISOString().split('T')[0]}.json`; a.click();
                 }}><Download size={16} /> Export</button>
               </div>
-              <div className="audit-notice"><Scale size={16} /> This log serves as evidence for CFPB complaints.</div>
+              <div className="audit-notice"><Scale size={16} /> This timestamped log serves as evidence for CFPB complaints and litigation.</div>
               {auditLog.length === 0 ? (
                 <div className="empty-state">
                   <div className="empty-icon"><FileText size={28} /></div>
-                  <div className="empty-title">No actions logged</div>
+                  <div className="empty-title">No actions logged yet</div>
+                  <div className="empty-text">Actions will be recorded automatically</div>
                 </div>
               ) : (
                 auditLog.map(entry => (
@@ -1264,17 +1210,22 @@ export default function Dashboard() {
                 <button className="close-btn" onClick={() => setGeneratedLetter(null)}><X size={18} /></button>
               </div>
               <div className="modal-body">
-                <div className="letter-instructions"><AlertCircle size={16} style={{ flexShrink: 0 }} /> Replace [BRACKETED] text. Send via certified mail.</div>
+                <div className="letter-instructions">
+                  <AlertCircle size={16} style={{ flexShrink: 0, marginTop: 2 }} />
+                  <div>
+                    <strong>Instructions:</strong> Replace all [BRACKETED] text with your specific information. 
+                    Send via CERTIFIED MAIL with return receipt requested. Keep copies of everything.
+                  </div>
+                </div>
                 <pre className="letter-content">{generatedLetter.content}</pre>
               </div>
               <div className="modal-footer">
                 <button className="btn-secondary" onClick={() => copyToClipboard(generatedLetter.content)}>
                   {copySuccess ? <Check size={16} /> : <Copy size={16} />} {copySuccess ? 'Copied!' : 'Copy'}
                 </button>
-                <button className="btn-primary" onClick={() => {
-                  const blob = new Blob([generatedLetter.content], { type: 'text/plain' });
-                  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${generatedLetter.template.id}.txt`; a.click();
-                }}><Download size={16} /> Download</button>
+                <button className="btn-primary" onClick={downloadLetter}>
+                  <Download size={16} /> Download
+                </button>
               </div>
             </div>
           </div>

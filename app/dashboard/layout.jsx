@@ -1,19 +1,26 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
   Search, Sparkles, FileText, Clock, Flag, FileCheck, 
-  ExternalLink, Mic, Send, X, ChevronLeft, ChevronRight
+  ChevronLeft, ChevronRight
 } from 'lucide-react';
 
 export default function DashboardLayout({ children }) {
   const { user } = useUser();
   const pathname = usePathname();
-  const [rightSidebarOpen, setRightSidebarOpen] = useState(true);
-  const [chatInput, setChatInput] = useState('');
+  const isAIStrategist = pathname === '/dashboard/ai-strategist';
+  const [rightSidebarOpen, setRightSidebarOpen] = useState(!isAIStrategist);
+
+  // Auto-close sidebar when navigating to AI Strategist
+  useEffect(() => {
+    if (isAIStrategist) {
+      setRightSidebarOpen(false);
+    }
+  }, [isAIStrategist]);
 
   const sidebarItems = [
     { id: 'analyze', label: 'Analyze', icon: Search, section: 'CORE', href: '/dashboard' },
@@ -111,7 +118,7 @@ export default function DashboardLayout({ children }) {
       <main style={{
         flex: 1,
         marginLeft: '200px',
-        marginRight: rightSidebarOpen ? '340px' : '0px',
+        marginRight: (rightSidebarOpen && !isAIStrategist) ? '340px' : '0px',
         padding: '24px 32px',
         minHeight: '100vh',
         overflowY: 'auto',
@@ -120,8 +127,8 @@ export default function DashboardLayout({ children }) {
         {children}
       </main>
 
-      {/* RIGHT SIDEBAR TOGGLE BUTTON - when sidebar is closed */}
-      {!rightSidebarOpen && (
+      {/* RIGHT SIDEBAR TOGGLE - only show when NOT on AI Strategist */}
+      {!isAIStrategist && !rightSidebarOpen && (
         <button
           onClick={() => setRightSidebarOpen(true)}
           style={{
@@ -147,45 +154,45 @@ export default function DashboardLayout({ children }) {
         </button>
       )}
 
-      {/* RIGHT SIDEBAR - AI CHAT */}
-      <aside style={{
-        width: '340px',
-        background: '#0d0d0f',
-        borderLeft: '1px solid #1a1a1c',
-        position: 'fixed',
-        top: 0,
-        right: rightSidebarOpen ? '0' : '-340px',
-        bottom: 0,
-        display: 'flex',
-        flexDirection: 'column',
-        zIndex: 50,
-        transition: 'right 0.3s ease'
-      }}>
-        <button
-          onClick={() => setRightSidebarOpen(false)}
-          style={{
-            position: 'absolute',
-            left: '-16px',
-            top: '50%',
-            transform: 'translateY(-50%)',
-            width: '32px',
-            height: '64px',
-            background: '#1a1a1c',
-            border: '1px solid #262629',
-            borderRadius: '8px 0 0 8px',
-            color: '#737373',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 60
-          }}
-        >
-          <ChevronRight size={20} />
-        </button>
+      {/* RIGHT SIDEBAR - QUICK AI PANEL (hidden on AI Strategist page) */}
+      {!isAIStrategist && (
+        <aside style={{
+          width: '340px',
+          background: '#0d0d0f',
+          borderLeft: '1px solid #1a1a1c',
+          position: 'fixed',
+          top: 0,
+          right: rightSidebarOpen ? '0' : '-340px',
+          bottom: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          zIndex: 50,
+          transition: 'right 0.3s ease'
+        }}>
+          <button
+            onClick={() => setRightSidebarOpen(false)}
+            style={{
+              position: 'absolute',
+              left: '-16px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              width: '32px',
+              height: '64px',
+              background: '#1a1a1c',
+              border: '1px solid #262629',
+              borderRadius: '8px 0 0 8px',
+              color: '#737373',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 60
+            }}
+          >
+            <ChevronRight size={20} />
+          </button>
 
-        <div style={{ padding: '16px 20px', borderBottom: '1px solid #1a1a1c', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ padding: '16px 20px', borderBottom: '1px solid #1a1a1c', display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div style={{
               width: '40px',
               height: '40px',
@@ -197,129 +204,81 @@ export default function DashboardLayout({ children }) {
             }}>
               <Sparkles size={22} style={{ color: '#0a0a0b' }} />
             </div>
-            <div>
-              <div style={{ fontSize: '15px', fontWeight: 600 }}>AI Strategist</div>
-              <div style={{ fontSize: '12px', color: '#22c55e', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <span style={{ width: '6px', height: '6px', background: '#22c55e', borderRadius: '50%', display: 'inline-block' }}></span>
-                Online
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: '15px', fontWeight: 600 }}>Quick AI Help</div>
+              <div style={{ fontSize: '12px', color: '#737373' }}>
+                <Link href="/dashboard/ai-strategist" style={{ color: '#f7d047', textDecoration: 'none' }}>
+                  Open full chat →
+                </Link>
               </div>
             </div>
           </div>
-          <button 
-            onClick={() => setRightSidebarOpen(false)}
-            style={{
-              width: '32px',
-              height: '32px',
-              background: '#1a1a1c',
-              border: 'none',
-              borderRadius: '8px',
-              color: '#737373',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <X size={18} />
-          </button>
-        </div>
 
-        <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
-          <div style={{ textAlign: 'center', padding: '40px 20px' }}>
-            <div style={{
-              width: '48px',
-              height: '48px',
-              background: 'rgba(247, 208, 71, 0.1)',
-              borderRadius: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              margin: '0 auto 16px',
-              color: '#f7d047'
-            }}>
-              <Sparkles size={24} />
+          <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
+            <div style={{ textAlign: 'center', padding: '40px 20px' }}>
+              <div style={{
+                width: '48px',
+                height: '48px',
+                background: 'rgba(247, 208, 71, 0.1)',
+                borderRadius: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 16px',
+                color: '#f7d047'
+              }}>
+                <Sparkles size={24} />
+              </div>
+              <h4 style={{ fontSize: '15px', fontWeight: 600, marginBottom: '8px' }}>AI Strategist</h4>
+              <p style={{ fontSize: '13px', color: '#737373', lineHeight: 1.5, marginBottom: '20px' }}>
+                Get personalized credit repair guidance. Click below to start a full conversation.
+              </p>
+              <Link 
+                href="/dashboard/ai-strategist"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '12px 24px',
+                  background: 'linear-gradient(135deg, #f7d047 0%, #d4b840 100%)',
+                  borderRadius: '10px',
+                  color: '#09090b',
+                  fontWeight: 600,
+                  fontSize: '14px',
+                  textDecoration: 'none',
+                }}
+              >
+                <Sparkles size={18} />
+                Start Conversation
+              </Link>
             </div>
-            <h4 style={{ fontSize: '15px', fontWeight: 600, marginBottom: '8px' }}>AI Strategist</h4>
-            <p style={{ fontSize: '13px', color: '#737373', lineHeight: 1.5 }}>
-              I'm your credit repair strategist. I know the FCRA inside and out. Upload a credit report for analysis, or tell me what's going on with your credit.
-            </p>
           </div>
-        </div>
 
-        <div style={{ padding: '0 16px 16px' }}>
-          {['What should I dispute first?', 'Explain my rights under 605B', 'How long do bureaus have to respond?'].map((q, i) => (
-            <button key={i} style={{
-              width: '100%',
-              padding: '12px 16px',
-              background: '#1a1a1c',
-              border: '1px solid #262629',
-              borderRadius: '8px',
-              fontSize: '13px',
-              color: '#a3a3a3',
-              cursor: 'pointer',
-              textAlign: 'left',
-              marginBottom: '8px'
-            }}>
-              {q}
-            </button>
-          ))}
-        </div>
-
-        <div style={{ padding: '16px 20px', borderTop: '1px solid #1a1a1c' }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '10px 12px',
-            background: '#1a1a1c',
-            border: '1px solid #262629',
-            borderRadius: '10px'
-          }}>
-            <input 
-              type="text"
-              placeholder="Ask about your disputes..."
-              value={chatInput}
-              onChange={(e) => setChatInput(e.target.value)}
-              style={{
-                flex: 1,
-                background: 'none',
-                border: 'none',
-                color: '#e5e5e5',
-                fontSize: '14px',
-                outline: 'none'
-              }}
-            />
-            <button style={{
-              width: '32px',
-              height: '32px',
-              background: 'none',
-              border: 'none',
-              borderRadius: '6px',
-              color: '#525252',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              <Mic size={18} />
-            </button>
-            <button style={{
-              width: '32px',
-              height: '32px',
-              background: 'linear-gradient(135deg, #f7d047 0%, #d4b840 100%)',
-              border: 'none',
-              borderRadius: '6px',
-              color: '#0a0a0b',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              <Send size={18} />
-            </button>
+          <div style={{ padding: '16px' }}>
+            {['What should I dispute first?', 'Explain my rights under 605B', 'How do I track deadlines?'].map((q, i) => (
+              <Link 
+                key={i} 
+                href="/dashboard/ai-strategist"
+                style={{
+                  display: 'block',
+                  width: '100%',
+                  padding: '12px 16px',
+                  background: '#1a1a1c',
+                  border: '1px solid #262629',
+                  borderRadius: '8px',
+                  fontSize: '13px',
+                  color: '#a3a3a3',
+                  textAlign: 'left',
+                  marginBottom: '8px',
+                  textDecoration: 'none',
+                }}
+              >
+                {q}
+              </Link>
+            ))}
           </div>
-        </div>
-      </aside>
+        </aside>
+      )}
     </div>
   );
 }

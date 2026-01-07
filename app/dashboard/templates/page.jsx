@@ -1,101 +1,408 @@
 "use client";
 
 import { useState } from 'react';
-import { FileText, Download, Search, Filter } from 'lucide-react';
+import { Shield, FileText, AlertTriangle, Building, Scale, Download, Eye, Search, X, Copy, Check, FileWarning, Building2, CreditCard, Clock, Landmark } from 'lucide-react';
+import { TEMPLATES, getLetterContent } from '@/lib/templates';
+
+// Flatten templates for display
+const getAllTemplates = () => {
+  const allTemplates = [];
+  Object.entries(TEMPLATES).forEach(([categoryKey, category]) => {
+    category.templates.forEach(template => {
+      allTemplates.push({
+        ...template,
+        categoryKey,
+        categoryLabel: category.category,
+        categoryIcon: category.icon,
+      });
+    });
+  });
+  return allTemplates;
+};
+
+const CATEGORY_ICONS = {
+  identity_theft: Shield,
+  disputes: FileWarning,
+  debt_collection: AlertTriangle,
+  specialty: Building2,
+  banking: CreditCard,
+  escalation: Scale,
+  followup: Clock,
+};
+
+const PRIORITY_COLORS = {
+  critical: '#ef4444',
+  high: '#f59e0b',
+  medium: '#3b82f6',
+  low: '#22c55e',
+  info: '#6b7280',
+};
 
 export default function TemplatesPage() {
+  const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [copied, setCopied] = useState(false);
 
+  const allTemplates = getAllTemplates();
+  
   const categories = [
-    { id: 'all', label: 'All Templates', count: 62 },
-    { id: '605b', label: 'Section 605B', count: 12 },
-    { id: 'fcra', label: 'FCRA Disputes', count: 18 },
-    { id: 'fdcpa', label: 'FDCPA Letters', count: 10 },
-    { id: 'fcba', label: 'FCBA Disputes', count: 8 },
-    { id: 'chex', label: 'ChexSystems', count: 6 },
-    { id: 'ews', label: 'Early Warning', count: 4 },
-    { id: 'validation', label: 'Debt Validation', count: 4 },
+    { id: 'all', label: 'All Templates', count: allTemplates.length },
+    ...Object.entries(TEMPLATES).map(([key, cat]) => ({
+      id: key,
+      label: cat.category,
+      count: cat.templates.length,
+      icon: cat.icon,
+    }))
   ];
 
-  const templates = [
-    { id: 1, name: 'Identity Theft Affidavit', category: '605b', description: 'FTC Identity Theft Report for 605B claims' },
-    { id: 2, name: '605B Block Request', category: '605b', description: 'Request to block fraudulent accounts under Section 605B' },
-    { id: 3, name: 'Bureau Dispute Letter', category: 'fcra', description: 'Standard dispute letter to credit bureaus' },
-    { id: 4, name: 'Method of Verification Request', category: 'fcra', description: 'Request verification method used by bureau' },
-    { id: 5, name: 'Debt Validation Letter', category: 'validation', description: 'Request validation of debt under FDCPA' },
-    { id: 6, name: 'Cease & Desist Letter', category: 'fdcpa', description: 'Stop collector contact under FDCPA' },
-    { id: 7, name: 'ChexSystems Dispute', category: 'chex', description: 'Dispute inaccurate ChexSystems records' },
-    { id: 8, name: 'EWS Consumer Report Request', category: 'ews', description: 'Request your Early Warning Services report' },
-  ];
+  const filteredTemplates = allTemplates.filter(t => {
+    const matchesCategory = activeCategory === 'all' || t.categoryKey === activeCategory;
+    const matchesSearch = !searchQuery || 
+      t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      t.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (t.deadline && t.deadline.toLowerCase().includes(searchQuery.toLowerCase()));
+    return matchesCategory && matchesSearch;
+  });
 
-  const filteredTemplates = templates.filter(t => 
-    (selectedCategory === 'all' || t.category === selectedCategory) &&
-    (searchQuery === '' || t.name.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const handleCopy = async () => {
+    if (selectedTemplate) {
+      const content = getLetterContent(selectedTemplate.id);
+      await navigator.clipboard.writeText(content);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleDownload = () => {
+    if (selectedTemplate) {
+      const content = getLetterContent(selectedTemplate.id);
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${selectedTemplate.name.replace(/\s+/g, '_')}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  };
+
+  const handleExternalLink = (url) => {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  const styles = {
+    container: {
+      maxWidth: '1200px',
+      margin: '0 auto',
+    },
+    header: {
+      marginBottom: '24px',
+    },
+    title: {
+      fontSize: '24px',
+      fontWeight: 600,
+      marginBottom: '4px',
+    },
+    subtitle: {
+      fontSize: '14px',
+      color: '#737373',
+    },
+    searchBar: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '12px',
+      padding: '14px 18px',
+      background: '#121214',
+      border: '1px solid #1f1f23',
+      borderRadius: '12px',
+      marginBottom: '24px',
+    },
+    searchInput: {
+      flex: 1,
+      background: 'transparent',
+      border: 'none',
+      color: '#e5e5e5',
+      fontSize: '15px',
+      outline: 'none',
+    },
+    filters: {
+      display: 'flex',
+      flexWrap: 'wrap',
+      gap: '8px',
+      marginBottom: '28px',
+    },
+    filterPill: {
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: '8px',
+      padding: '8px 14px',
+      background: '#121214',
+      border: '1px solid #1f1f23',
+      borderRadius: '20px',
+      fontSize: '12px',
+      fontWeight: 500,
+      color: '#a3a3a3',
+      cursor: 'pointer',
+      transition: 'all 0.15s',
+    },
+    filterPillActive: {
+      background: 'rgba(247, 208, 71, 0.1)',
+      borderColor: 'rgba(247, 208, 71, 0.3)',
+      color: '#f7d047',
+    },
+    filterCount: {
+      padding: '2px 6px',
+      background: '#1a1a1c',
+      borderRadius: '10px',
+      fontSize: '10px',
+    },
+    filterCountActive: {
+      background: '#f7d047',
+      color: '#09090b',
+      fontWeight: 600,
+    },
+    resultsInfo: {
+      fontSize: '13px',
+      color: '#737373',
+      marginBottom: '16px',
+    },
+    grid: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
+      gap: '16px',
+    },
+    card: {
+      background: '#121214',
+      border: '1px solid #1f1f23',
+      borderRadius: '12px',
+      padding: '20px',
+      cursor: 'pointer',
+      transition: 'all 0.2s',
+    },
+    cardTop: {
+      display: 'flex',
+      alignItems: 'flex-start',
+      gap: '14px',
+      marginBottom: '12px',
+    },
+    cardIcon: {
+      width: '40px',
+      height: '40px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'rgba(247, 208, 71, 0.1)',
+      border: '1px solid rgba(247, 208, 71, 0.2)',
+      borderRadius: '10px',
+      color: '#f7d047',
+      flexShrink: 0,
+    },
+    cardMeta: {
+      flex: 1,
+      minWidth: 0,
+    },
+    cardTitle: {
+      fontSize: '14px',
+      fontWeight: 600,
+      color: '#e5e5e5',
+      marginBottom: '4px',
+      lineHeight: 1.3,
+    },
+    cardSubtitle: {
+      fontSize: '11px',
+      color: '#737373',
+    },
+    cardDesc: {
+      fontSize: '13px',
+      color: '#a3a3a3',
+      lineHeight: 1.5,
+      marginBottom: '12px',
+    },
+    cardMeta2: {
+      display: 'flex',
+      gap: '12px',
+      alignItems: 'center',
+      marginBottom: '12px',
+    },
+    deadline: {
+      fontSize: '11px',
+      color: '#737373',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '4px',
+    },
+    priorityBadge: {
+      padding: '3px 8px',
+      borderRadius: '4px',
+      fontSize: '10px',
+      fontWeight: 600,
+      textTransform: 'uppercase',
+    },
+    cardActions: {
+      display: 'flex',
+      gap: '8px',
+      paddingTop: '12px',
+      borderTop: '1px solid #1f1f23',
+    },
+    cardBtn: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: '6px',
+      flex: 1,
+      padding: '8px 12px',
+      borderRadius: '8px',
+      fontSize: '12px',
+      fontWeight: 500,
+      cursor: 'pointer',
+      transition: 'all 0.15s',
+      border: 'none',
+    },
+    cardBtnPrimary: {
+      background: 'linear-gradient(135deg, #f7d047 0%, #d4b840 100%)',
+      color: '#09090b',
+    },
+    cardBtnSecondary: {
+      background: '#1a1a1c',
+      border: '1px solid #27272a',
+      color: '#a3a3a3',
+    },
+    modal: {
+      position: 'fixed',
+      inset: 0,
+      background: 'rgba(0, 0, 0, 0.8)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1000,
+      padding: '20px',
+    },
+    modalContent: {
+      background: '#0d0d0f',
+      border: '1px solid #1f1f23',
+      borderRadius: '16px',
+      width: '100%',
+      maxWidth: '900px',
+      maxHeight: '90vh',
+      overflow: 'hidden',
+      display: 'flex',
+      flexDirection: 'column',
+    },
+    modalHeader: {
+      padding: '20px 24px',
+      borderBottom: '1px solid #1f1f23',
+      display: 'flex',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+    },
+    modalTitle: {
+      fontSize: '18px',
+      fontWeight: 600,
+      color: '#e5e5e5',
+      marginBottom: '4px',
+    },
+    modalSubtitle: {
+      fontSize: '13px',
+      color: '#737373',
+    },
+    modalClose: {
+      width: '36px',
+      height: '36px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: '#1a1a1c',
+      border: 'none',
+      borderRadius: '8px',
+      color: '#737373',
+      cursor: 'pointer',
+    },
+    modalBody: {
+      flex: 1,
+      overflow: 'auto',
+      padding: '24px',
+    },
+    templateContent: {
+      background: '#0a0a0b',
+      border: '1px solid #1f1f23',
+      borderRadius: '12px',
+      padding: '20px',
+      fontSize: '12px',
+      lineHeight: 1.6,
+      color: '#a3a3a3',
+      whiteSpace: 'pre-wrap',
+      fontFamily: '"JetBrains Mono", "Fira Code", monospace',
+      maxHeight: '60vh',
+      overflow: 'auto',
+    },
+    modalFooter: {
+      padding: '16px 24px',
+      borderTop: '1px solid #1f1f23',
+      display: 'flex',
+      gap: '12px',
+      justifyContent: 'flex-end',
+    },
+    modalBtn: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+      padding: '10px 20px',
+      borderRadius: '8px',
+      fontSize: '14px',
+      fontWeight: 500,
+      cursor: 'pointer',
+      border: 'none',
+    },
+    emptyState: {
+      textAlign: 'center',
+      padding: '60px 20px',
+      color: '#737373',
+    },
+  };
 
   return (
-    <>
-      <div style={{ marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '24px', fontWeight: 600, marginBottom: '4px' }}>Letter Templates</h1>
-        <p style={{ fontSize: '14px', color: '#737373' }}>62 professionally-crafted dispute and validation letters</p>
+    <div style={styles.container}>
+      <div style={styles.header}>
+        <h1 style={styles.title}>Letter Templates</h1>
+        <p style={styles.subtitle}>{allTemplates.length} professionally-crafted dispute and validation letters</p>
       </div>
 
-      {/* Search and Filter */}
-      <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
-        <div style={{
-          flex: 1,
-          display: 'flex',
-          alignItems: 'center',
-          gap: '10px',
-          padding: '10px 14px',
-          background: '#121214',
-          border: '1px solid #1f1f23',
-          borderRadius: '10px'
-        }}>
-          <Search size={18} style={{ color: '#525252' }} />
-          <input 
-            type="text"
-            placeholder="Search templates..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={{
-              flex: 1,
-              background: 'none',
-              border: 'none',
-              color: '#e5e5e5',
-              fontSize: '14px',
-              outline: 'none'
-            }}
-          />
-        </div>
+      <div style={styles.searchBar}>
+        <Search size={20} style={{ color: '#525252' }} />
+        <input 
+          type="text"
+          style={styles.searchInput}
+          placeholder="Search templates by name, statute, or keyword..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        {searchQuery && (
+          <button 
+            onClick={() => setSearchQuery('')}
+            style={{ background: 'none', border: 'none', color: '#737373', cursor: 'pointer' }}
+          >
+            <X size={18} />
+          </button>
+        )}
       </div>
-
-      {/* Categories */}
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', flexWrap: 'wrap' }}>
+      
+      <div style={styles.filters}>
         {categories.map(cat => (
           <button
             key={cat.id}
-            onClick={() => setSelectedCategory(cat.id)}
             style={{
-              padding: '8px 16px',
-              background: selectedCategory === cat.id ? 'rgba(247, 208, 71, 0.1)' : '#121214',
-              border: `1px solid ${selectedCategory === cat.id ? 'rgba(247, 208, 71, 0.3)' : '#1f1f23'}`,
-              borderRadius: '8px',
-              color: selectedCategory === cat.id ? '#f7d047' : '#a3a3a3',
-              fontSize: '13px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
+              ...styles.filterPill,
+              ...(activeCategory === cat.id ? styles.filterPillActive : {}),
             }}
+            onClick={() => setActiveCategory(cat.id)}
           >
             {cat.label}
             <span style={{
-              padding: '2px 6px',
-              background: selectedCategory === cat.id ? 'rgba(247, 208, 71, 0.2)' : '#1a1a1c',
-              borderRadius: '4px',
-              fontSize: '11px'
+              ...styles.filterCount,
+              ...(activeCategory === cat.id ? styles.filterCountActive : {}),
             }}>
               {cat.count}
             </span>
@@ -103,53 +410,138 @@ export default function TemplatesPage() {
         ))}
       </div>
 
-      {/* Template Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
-        {filteredTemplates.map(template => (
-          <div key={template.id} style={{
-            background: '#121214',
-            border: '1px solid #1f1f23',
-            borderRadius: '12px',
-            padding: '20px',
-            display: 'flex',
-            alignItems: 'flex-start',
-            gap: '14px'
-          }}>
-            <div style={{
-              width: '40px',
-              height: '40px',
-              background: 'rgba(247, 208, 71, 0.1)',
-              borderRadius: '10px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#f7d047',
-              flexShrink: 0
-            }}>
-              <FileText size={20} />
+      <div style={styles.resultsInfo}>
+        Showing {filteredTemplates.length} template{filteredTemplates.length !== 1 ? 's' : ''}
+        {searchQuery && ` matching "${searchQuery}"`}
+      </div>
+      
+      {filteredTemplates.length > 0 ? (
+        <div style={styles.grid}>
+          {filteredTemplates.map(template => {
+            const IconComponent = CATEGORY_ICONS[template.categoryKey] || FileText;
+            return (
+              <div 
+                key={template.id} 
+                style={styles.card}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.borderColor = 'rgba(247, 208, 71, 0.3)';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.borderColor = '#1f1f23';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+              >
+                <div style={styles.cardTop}>
+                  <div style={styles.cardIcon}>
+                    <IconComponent size={20} />
+                  </div>
+                  <div style={styles.cardMeta}>
+                    <div style={styles.cardTitle}>{template.name}</div>
+                    <div style={styles.cardSubtitle}>{template.categoryLabel}</div>
+                  </div>
+                </div>
+                
+                <p style={styles.cardDesc}>{template.description}</p>
+                
+                <div style={styles.cardMeta2}>
+                  {template.deadline && (
+                    <span style={styles.deadline}>
+                      <Clock size={12} />
+                      {template.deadline}
+                    </span>
+                  )}
+                  {template.priority && (
+                    <span style={{
+                      ...styles.priorityBadge,
+                      background: `${PRIORITY_COLORS[template.priority]}20`,
+                      color: PRIORITY_COLORS[template.priority],
+                    }}>
+                      {template.priority}
+                    </span>
+                  )}
+                </div>
+                
+                <div style={styles.cardActions}>
+                  {template.external ? (
+                    <button 
+                      style={{...styles.cardBtn, ...styles.cardBtnPrimary, flex: 1}}
+                      onClick={() => handleExternalLink(template.external)}
+                    >
+                      <Landmark size={14} />
+                      Open Official Site
+                    </button>
+                  ) : (
+                    <>
+                      <button 
+                        style={{...styles.cardBtn, ...styles.cardBtnSecondary}}
+                        onClick={() => setSelectedTemplate(template)}
+                      >
+                        <Eye size={14} />
+                        Preview
+                      </button>
+                      <button 
+                        style={{...styles.cardBtn, ...styles.cardBtnPrimary}}
+                        onClick={() => setSelectedTemplate(template)}
+                      >
+                        <Download size={14} />
+                        Use
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div style={styles.emptyState}>
+          <Search size={48} style={{ opacity: 0.3, marginBottom: '16px' }} />
+          <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '8px', color: '#a3a3a3' }}>No templates found</h3>
+          <p>Try adjusting your search or filter criteria</p>
+        </div>
+      )}
+
+      {/* Template Modal */}
+      {selectedTemplate && !selectedTemplate.external && (
+        <div style={styles.modal} onClick={() => setSelectedTemplate(null)}>
+          <div style={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div style={styles.modalHeader}>
+              <div>
+                <div style={styles.modalTitle}>{selectedTemplate.name}</div>
+                <div style={styles.modalSubtitle}>
+                  {selectedTemplate.categoryLabel}
+                  {selectedTemplate.deadline && ` · Deadline: ${selectedTemplate.deadline}`}
+                </div>
+              </div>
+              <button style={styles.modalClose} onClick={() => setSelectedTemplate(null)}>
+                <X size={20} />
+              </button>
             </div>
-            <div style={{ flex: 1 }}>
-              <h3 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '4px' }}>{template.name}</h3>
-              <p style={{ fontSize: '12px', color: '#737373', marginBottom: '12px' }}>{template.description}</p>
-              <button style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '6px 12px',
-                background: 'rgba(247, 208, 71, 0.1)',
-                border: '1px solid rgba(247, 208, 71, 0.3)',
-                borderRadius: '6px',
-                color: '#f7d047',
-                fontSize: '12px',
-                cursor: 'pointer'
-              }}>
-                <Download size={14} />
-                Use Template
+            
+            <div style={styles.modalBody}>
+              <pre style={styles.templateContent}>{getLetterContent(selectedTemplate.id)}</pre>
+            </div>
+            
+            <div style={styles.modalFooter}>
+              <button 
+                style={{...styles.modalBtn, background: '#1a1a1c', color: '#a3a3a3'}}
+                onClick={handleCopy}
+              >
+                {copied ? <Check size={18} /> : <Copy size={18} />}
+                {copied ? 'Copied!' : 'Copy to Clipboard'}
+              </button>
+              <button 
+                style={{...styles.modalBtn, background: 'linear-gradient(135deg, #f7d047 0%, #d4b840 100%)', color: '#09090b'}}
+                onClick={handleDownload}
+              >
+                <Download size={18} />
+                Download Template
               </button>
             </div>
           </div>
-        ))}
-      </div>
-    </>
+        </div>
+      )}
+    </div>
   );
 }

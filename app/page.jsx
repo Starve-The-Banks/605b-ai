@@ -40,20 +40,14 @@ export default function LandingPage() {
         }
         
         .logo {
-          display: flex;
-          align-items: center;
-          font-size: 20px;
+          font-size: 22px;
           font-weight: 700;
           color: #fafafa;
           text-decoration: none;
-          letter-spacing: -0.03em;
         }
         
         .logo-accent {
-          background: linear-gradient(135deg, #d4a574 0%, #e8c4a0 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
+          color: #f7d047;
         }
         
         .nav-links {
@@ -82,7 +76,7 @@ export default function LandingPage() {
         
         .nav-button-primary {
           padding: 8px 16px;
-          background: #d4a574;
+          background: #f7d047;
           border: none;
           border-radius: 8px;
           color: #09090b;
@@ -161,11 +155,11 @@ export default function LandingPage() {
           align-items: center;
           gap: 8px;
           padding: 8px 16px;
-          background: rgba(212, 165, 116, 0.1);
-          border: 1px solid rgba(212, 165, 116, 0.2);
+          background: rgba(247, 208, 71, 0.1);
+          border: 1px solid rgba(247, 208, 71, 0.2);
           border-radius: 100px;
           font-size: 13px;
-          color: #d4a574;
+          color: #f7d047;
           margin-bottom: 24px;
         }
         
@@ -178,7 +172,7 @@ export default function LandingPage() {
         }
         
         .hero-title-accent {
-          color: #d4a574;
+          color: #f7d047;
         }
         
         .hero-subtitle {
@@ -202,7 +196,7 @@ export default function LandingPage() {
           align-items: center;
           gap: 8px;
           padding: 14px 24px;
-          background: #d4a574;
+          background: #f7d047;
           border: none;
           border-radius: 8px;
           color: #09090b;
@@ -258,7 +252,7 @@ export default function LandingPage() {
         }
         
         .scroll-indicator:hover {
-          color: #d4a574;
+          color: #f7d047;
         }
         
         .scroll-indicator svg {
@@ -294,7 +288,7 @@ export default function LandingPage() {
         .section-label {
           font-size: 13px;
           font-weight: 600;
-          color: #d4a574;
+          color: #f7d047;
           text-transform: uppercase;
           letter-spacing: 0.1em;
           margin-bottom: 12px;
@@ -334,9 +328,9 @@ export default function LandingPage() {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: rgba(212, 165, 116, 0.1);
+          background: rgba(247, 208, 71, 0.1);
           border-radius: 10px;
-          color: #d4a574;
+          color: #f7d047;
           margin-bottom: 16px;
         }
         
@@ -380,10 +374,10 @@ export default function LandingPage() {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: rgba(212, 165, 116, 0.1);
+          background: rgba(247, 208, 71, 0.1);
           border-radius: 10px;
           margin-bottom: 16px;
-          color: #d4a574;
+          color: #f7d047;
         }
         
         .feature-title {
@@ -416,7 +410,7 @@ export default function LandingPage() {
         .statute-number {
           font-size: 28px;
           font-weight: 700;
-          color: #d4a574;
+          color: #f7d047;
           margin-bottom: 8px;
         }
         
@@ -476,18 +470,10 @@ export default function LandingPage() {
         }
         
         .footer-logo {
-          font-size: 18px;
+          font-size: 20px;
           font-weight: 700;
           margin-bottom: 12px;
           color: #fafafa;
-          letter-spacing: -0.03em;
-        }
-        
-        .footer-logo .logo-accent {
-          background: linear-gradient(135deg, #d4a574 0%, #e8c4a0 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
         }
         
         .footer-tagline {
@@ -521,6 +507,10 @@ export default function LandingPage() {
           text-decoration: none;
         }
         
+        .footer-link:hover {
+          color: #f7d047;
+        }
+        
         .footer-disclaimer {
           padding: 24px 0;
           border-bottom: 1px solid #1c1c1f;
@@ -550,6 +540,10 @@ export default function LandingPage() {
           font-size: 13px;
           color: #52525b;
           text-decoration: none;
+        }
+        
+        .footer-bottom-link:hover {
+          color: #f7d047;
         }
         
         /* Mobile Responsive */

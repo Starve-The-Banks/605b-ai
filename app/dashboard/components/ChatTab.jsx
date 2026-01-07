@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect } from 'react';
-import { Send, Loader2, Sparkles, Shield, FileText, Scale, Zap } from 'lucide-react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { Send, Loader2, Sparkles, Shield, FileText, Scale, Zap, Mic, MicOff, Volume2, VolumeX, Phone, PhoneOff } from 'lucide-react';
 import { SYSTEM_PROMPT } from '@/lib/constants';
 
 const INTRO_MESSAGE = `You've got a strategist in your corner now.
@@ -28,21 +28,256 @@ const QUICK_STARTS = [
   { text: "What's the fastest path to clean credit?", icon: Zap },
 ];
 
+// Voice mode system prompt - more conversational
+const VOICE_SYSTEM_PROMPT = `${SYSTEM_PROMPT}
+
+VOICE MODE INSTRUCTIONS:
+- Keep responses concise and conversational (2-4 sentences typically)
+- Avoid markdown formatting, bullet points, or special characters
+- Speak naturally as if in a phone conversation
+- Ask one clarifying question at a time if needed
+- Use simple, clear language that sounds good when spoken aloud
+- Don't use symbols like arrows, asterisks, or dashes for lists`;
+
 export default function ChatTab({ logAction }) {
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showIntro, setShowIntro] = useState(true);
+  
+  // Voice mode state
+  const [voiceMode, setVoiceMode] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [transcript, setTranscript] = useState('');
+  const [voiceSupported, setVoiceSupported] = useState(false);
+  const [audioEnabled, setAudioEnabled] = useState(true);
+  
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const recognitionRef = useRef(null);
+  const audioRef = useRef(null);
+  const audioQueueRef = useRef([]);
+  const isPlayingRef = useRef(false);
+
+  // Check for voice support
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    setVoiceSupported(!!SpeechRecognition);
+  }, []);
+
+  // Initialize speech recognition
+  useEffect(() => {
+    if (!voiceSupported) return;
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    recognition.onresult = (event) => {
+      let finalTranscript = '';
+      let interimTranscript = '';
+
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += transcript;
+        } else {
+          interimTranscript += transcript;
+        }
+      }
+
+      if (finalTranscript) {
+        setTranscript(prev => prev + finalTranscript);
+      }
+      
+      // Show interim results in input
+      if (interimTranscript) {
+        setInputValue(transcript + interimTranscript);
+      }
+    };
+
+    recognition.onerror = (event) => {
+      console.error('Speech recognition error:', event.error);
+      if (event.error !== 'no-speech') {
+        setIsListening(false);
+      }
+    };
+
+    recognition.onend = () => {
+      // Auto-send if we have a transcript and voice mode is active
+      if (transcript && voiceMode) {
+        sendMessage(transcript);
+        setTranscript('');
+      }
+      setIsListening(false);
+    };
+
+    recognitionRef.current = recognition;
+
+    return () => {
+      recognition.abort();
+    };
+  }, [voiceSupported, transcript, voiceMode]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
+    if (!voiceMode) {
+      inputRef.current?.focus();
+    }
+  }, [voiceMode]);
+
+  // Text-to-speech function
+  const speakText = useCallback(async (text) => {
+    if (!audioEnabled || !text) return;
+
+    try {
+      const response = await fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, voice: 'Rachel' }) // ElevenLabs calm, professional voice
+      });
+
+      if (!response.ok) {
+        throw new Error('TTS request failed');
+      }
+
+      const contentType = response.headers.get('content-type');
+      
+      if (contentType?.includes('application/json')) {
+        // Browser TTS fallback
+        const data = await response.json();
+        if (data.useBrowserTTS) {
+          browserSpeak(data.text);
+          return;
+        }
+      }
+
+      // Play audio from API
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      
+      const audio = new Audio(audioUrl);
+      audioRef.current = audio;
+      
+      setIsSpeaking(true);
+      
+      audio.onended = () => {
+        setIsSpeaking(false);
+        URL.revokeObjectURL(audioUrl);
+        
+        // If voice mode is active, start listening again
+        if (voiceMode && recognitionRef.current) {
+          setTimeout(() => {
+            startListening();
+          }, 500);
+        }
+      };
+      
+      audio.onerror = () => {
+        setIsSpeaking(false);
+        URL.revokeObjectURL(audioUrl);
+      };
+      
+      await audio.play();
+      
+    } catch (error) {
+      console.error('TTS error:', error);
+      // Fallback to browser TTS
+      browserSpeak(text);
+    }
+  }, [audioEnabled, voiceMode]);
+
+  // Browser TTS fallback
+  const browserSpeak = (text) => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+      
+      // Try to find a good voice
+      const voices = window.speechSynthesis.getVoices();
+      const preferredVoice = voices.find(v => 
+        v.name.includes('Samantha') || 
+        v.name.includes('Google') || 
+        v.name.includes('Microsoft') ||
+        v.lang.startsWith('en')
+      );
+      if (preferredVoice) {
+        utterance.voice = preferredVoice;
+      }
+      
+      setIsSpeaking(true);
+      
+      utterance.onend = () => {
+        setIsSpeaking(false);
+        if (voiceMode && recognitionRef.current) {
+          setTimeout(() => startListening(), 500);
+        }
+      };
+      
+      utterance.onerror = () => {
+        setIsSpeaking(false);
+      };
+      
+      window.speechSynthesis.speak(utterance);
+    }
+  };
+
+  const startListening = () => {
+    if (recognitionRef.current && !isListening && !isSpeaking) {
+      setTranscript('');
+      setInputValue('');
+      recognitionRef.current.start();
+      setIsListening(true);
+    }
+  };
+
+  const stopListening = () => {
+    if (recognitionRef.current && isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    }
+  };
+
+  const toggleVoiceMode = () => {
+    if (voiceMode) {
+      // Exiting voice mode
+      stopListening();
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      window.speechSynthesis?.cancel();
+      setIsSpeaking(false);
+      setVoiceMode(false);
+    } else {
+      // Entering voice mode
+      setVoiceMode(true);
+      setShowIntro(false);
+      // Start listening after a brief delay
+      setTimeout(() => startListening(), 300);
+    }
+  };
+
+  const stopSpeaking = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+    window.speechSynthesis?.cancel();
+    setIsSpeaking(false);
+  };
 
   const sendMessage = async (text) => {
     const messageText = text || inputValue.trim();
@@ -50,6 +285,7 @@ export default function ChatTab({ logAction }) {
 
     setShowIntro(false);
     setInputValue('');
+    setTranscript('');
     
     const userMsg = { id: Date.now(), role: 'user', content: messageText };
     setMessages(prev => [...prev, userMsg]);
@@ -61,7 +297,7 @@ export default function ChatTab({ logAction }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: [...messages, userMsg].map(m => ({ role: m.role, content: m.content })),
-          systemPrompt: SYSTEM_PROMPT
+          systemPrompt: voiceMode ? VOICE_SYSTEM_PROMPT : SYSTEM_PROMPT
         }),
       });
 
@@ -85,7 +321,13 @@ export default function ChatTab({ logAction }) {
         });
       }
 
-      logAction('AI_CHAT', { query: messageText.substring(0, 50) });
+      logAction('AI_CHAT', { query: messageText.substring(0, 50), voiceMode });
+      
+      // Speak the response if voice mode is active
+      if (voiceMode && audioEnabled) {
+        speakText(assistantMessage);
+      }
+      
     } catch (err) {
       setMessages(prev => [...prev, { id: Date.now() + 1, role: 'assistant', content: `Error: ${err.message}`, isError: true }]);
     } finally {
@@ -274,6 +516,10 @@ export default function ChatTab({ logAction }) {
           border-color: rgba(212, 165, 116, 0.4);
           box-shadow: 0 0 0 3px rgba(212, 165, 116, 0.1);
         }
+        .input-wrapper.voice-active {
+          border-color: rgba(34, 197, 94, 0.5);
+          box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
+        }
         .chat-input {
           flex: 1;
           background: transparent;
@@ -289,19 +535,21 @@ export default function ChatTab({ logAction }) {
         .chat-input::placeholder {
           color: #52525b;
         }
-        .send-btn {
+        .btn-icon {
           width: 40px;
           height: 40px;
           border-radius: 12px;
-          background: linear-gradient(135deg, #d4a574 0%, #c49665 100%);
           border: none;
-          color: #09090b;
           cursor: pointer;
           display: flex;
           align-items: center;
           justify-content: center;
           flex-shrink: 0;
           transition: all 0.2s;
+        }
+        .send-btn {
+          background: linear-gradient(135deg, #d4a574 0%, #c49665 100%);
+          color: #09090b;
         }
         .send-btn:hover {
           transform: scale(1.05);
@@ -313,12 +561,134 @@ export default function ChatTab({ logAction }) {
           box-shadow: none;
           cursor: not-allowed;
         }
+        .mic-btn {
+          background: #27272a;
+          color: #a1a1aa;
+        }
+        .mic-btn:hover {
+          background: #3f3f46;
+          color: #fafafa;
+        }
+        .mic-btn.listening {
+          background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+          color: #09090b;
+          animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+          50% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
+        }
+        .voice-btn {
+          background: transparent;
+          color: #71717a;
+          border: 1px solid #27272a;
+        }
+        .voice-btn:hover {
+          border-color: #3f3f46;
+          color: #a1a1aa;
+        }
+        .voice-btn.active {
+          background: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(34, 197, 94, 0.1) 100%);
+          border-color: rgba(34, 197, 94, 0.5);
+          color: #22c55e;
+        }
         .input-hint {
           display: flex;
           justify-content: center;
+          align-items: center;
+          gap: 16px;
           margin-top: 12px;
           font-size: 12px;
           color: #3f3f46;
+        }
+        .voice-mode-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(9, 9, 11, 0.95);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          z-index: 100;
+          animation: fadeIn 0.3s ease;
+        }
+        .voice-orb {
+          width: 200px;
+          height: 200px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, rgba(212, 165, 116, 0.3) 0%, rgba(212, 165, 116, 0.1) 100%);
+          border: 2px solid rgba(212, 165, 116, 0.4);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 32px;
+          transition: all 0.3s;
+        }
+        .voice-orb.listening {
+          background: linear-gradient(135deg, rgba(34, 197, 94, 0.3) 0%, rgba(34, 197, 94, 0.1) 100%);
+          border-color: rgba(34, 197, 94, 0.5);
+          animation: orbPulse 2s infinite;
+        }
+        .voice-orb.speaking {
+          background: linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(59, 130, 246, 0.1) 100%);
+          border-color: rgba(59, 130, 246, 0.5);
+          animation: orbPulse 1s infinite;
+        }
+        .voice-orb.processing {
+          background: linear-gradient(135deg, rgba(245, 158, 11, 0.3) 0%, rgba(245, 158, 11, 0.1) 100%);
+          border-color: rgba(245, 158, 11, 0.5);
+        }
+        @keyframes orbPulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+        }
+        .voice-status {
+          font-size: 18px;
+          font-weight: 500;
+          color: #fafafa;
+          margin-bottom: 8px;
+        }
+        .voice-transcript {
+          font-size: 15px;
+          color: #a1a1aa;
+          max-width: 400px;
+          text-align: center;
+          min-height: 24px;
+        }
+        .voice-controls {
+          display: flex;
+          gap: 16px;
+          margin-top: 48px;
+        }
+        .voice-control-btn {
+          width: 56px;
+          height: 56px;
+          border-radius: 50%;
+          border: none;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s;
+        }
+        .voice-control-btn.end {
+          background: #ef4444;
+          color: white;
+        }
+        .voice-control-btn.end:hover {
+          background: #dc2626;
+          transform: scale(1.05);
+        }
+        .voice-control-btn.mute {
+          background: #27272a;
+          color: #a1a1aa;
+        }
+        .voice-control-btn.mute:hover {
+          background: #3f3f46;
+        }
+        .voice-control-btn.mute.muted {
+          background: rgba(239, 68, 68, 0.2);
+          color: #ef4444;
         }
         @media (max-width: 768px) {
           .chat-wrapper {
@@ -338,8 +708,58 @@ export default function ChatTab({ logAction }) {
           .msg {
             max-width: 92%;
           }
+          .voice-orb {
+            width: 160px;
+            height: 160px;
+          }
         }
       `}</style>
+
+      {/* Voice Mode Overlay */}
+      {voiceMode && (
+        <div className="voice-mode-overlay">
+          <div className={`voice-orb ${isListening ? 'listening' : isSpeaking ? 'speaking' : isLoading ? 'processing' : ''}`}>
+            {isListening ? (
+              <Mic size={64} color="#22c55e" />
+            ) : isSpeaking ? (
+              <Volume2 size={64} color="#3b82f6" />
+            ) : isLoading ? (
+              <Loader2 size={64} color="#f59e0b" style={{ animation: 'spin 1s linear infinite' }} />
+            ) : (
+              <Sparkles size={64} color="#d4a574" />
+            )}
+          </div>
+          
+          <div className="voice-status">
+            {isListening ? 'Listening...' : isSpeaking ? 'Speaking...' : isLoading ? 'Thinking...' : 'Ready'}
+          </div>
+          
+          <div className="voice-transcript">
+            {inputValue || (isListening ? 'Say something...' : '')}
+          </div>
+          
+          <div className="voice-controls">
+            <button 
+              className={`voice-control-btn mute ${!audioEnabled ? 'muted' : ''}`}
+              onClick={() => {
+                if (isSpeaking) stopSpeaking();
+                setAudioEnabled(!audioEnabled);
+              }}
+              title={audioEnabled ? 'Mute AI voice' : 'Unmute AI voice'}
+            >
+              {audioEnabled ? <Volume2 size={24} /> : <VolumeX size={24} />}
+            </button>
+            
+            <button 
+              className="voice-control-btn end"
+              onClick={toggleVoiceMode}
+              title="End voice conversation"
+            >
+              <PhoneOff size={24} />
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="chat-wrapper">
         <div className="chat-body">
@@ -383,21 +803,63 @@ export default function ChatTab({ logAction }) {
         </div>
 
         <div className="input-area">
-          <div className="input-wrapper">
+          <div className={`input-wrapper ${isListening ? 'voice-active' : ''}`}>
             <textarea
               ref={inputRef}
               className="chat-input"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }}}
-              placeholder="Describe your situation..."
+              placeholder={isListening ? 'Listening...' : 'Describe your situation...'}
               rows={1}
+              disabled={voiceMode}
             />
-            <button className="send-btn" onClick={() => sendMessage()} disabled={!inputValue.trim() || isLoading}>
+            
+            {/* Voice mode toggle */}
+            {voiceSupported && (
+              <button 
+                className={`btn-icon voice-btn ${voiceMode ? 'active' : ''}`}
+                onClick={toggleVoiceMode}
+                title={voiceMode ? 'Exit voice mode' : 'Start voice conversation'}
+              >
+                {voiceMode ? <PhoneOff size={20} /> : <Phone size={20} />}
+              </button>
+            )}
+            
+            {/* Mic button (for quick voice input without full voice mode) */}
+            {voiceSupported && !voiceMode && (
+              <button 
+                className={`btn-icon mic-btn ${isListening ? 'listening' : ''}`}
+                onClick={isListening ? stopListening : startListening}
+                disabled={isLoading}
+                title={isListening ? 'Stop listening' : 'Voice input'}
+              >
+                {isListening ? <MicOff size={20} /> : <Mic size={20} />}
+              </button>
+            )}
+            
+            <button 
+              className="btn-icon send-btn" 
+              onClick={() => sendMessage()} 
+              disabled={!inputValue.trim() || isLoading}
+            >
               {isLoading ? <Loader2 size={20} style={{ animation: 'spin 1s linear infinite' }} /> : <Send size={20} />}
             </button>
           </div>
-          <div className="input-hint">Press Enter to send · Shift+Enter for new line</div>
+          
+          <div className="input-hint">
+            {voiceSupported ? (
+              <>
+                <span>Enter to send</span>
+                <span>·</span>
+                <span>Mic for voice input</span>
+                <span>·</span>
+                <span>Phone for voice call</span>
+              </>
+            ) : (
+              <span>Press Enter to send · Shift+Enter for new line</span>
+            )}
+          </div>
         </div>
       </div>
     </>

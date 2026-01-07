@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Send, Loader2, Sparkles, Shield, FileText, Scale, Zap, Mic, MicOff, Volume2, VolumeX, Phone, PhoneOff } from 'lucide-react';
+import { Send, Loader2, Sparkles, Shield, FileText, Scale, Zap, Mic, MicOff, Volume2, VolumeX, X, AudioLines } from 'lucide-react';
 import { SYSTEM_PROMPT } from '@/lib/constants';
 
 const INTRO_MESSAGE = `You've got a strategist in your corner now.
@@ -57,8 +57,6 @@ export default function ChatTab({ logAction }) {
   const inputRef = useRef(null);
   const recognitionRef = useRef(null);
   const audioRef = useRef(null);
-  const audioQueueRef = useRef([]);
-  const isPlayingRef = useRef(false);
 
   // Check for voice support
   useEffect(() => {
@@ -82,11 +80,11 @@ export default function ChatTab({ logAction }) {
       let interimTranscript = '';
 
       for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcript = event.results[i][0].transcript;
+        const result = event.results[i][0].transcript;
         if (event.results[i].isFinal) {
-          finalTranscript += transcript;
+          finalTranscript += result;
         } else {
-          interimTranscript += transcript;
+          interimTranscript += result;
         }
       }
 
@@ -95,9 +93,7 @@ export default function ChatTab({ logAction }) {
       }
       
       // Show interim results in input
-      if (interimTranscript) {
-        setInputValue(transcript + interimTranscript);
-      }
+      setInputValue(transcript + finalTranscript + interimTranscript);
     };
 
     recognition.onerror = (event) => {
@@ -141,7 +137,7 @@ export default function ChatTab({ logAction }) {
       const response = await fetch('/api/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, voice: 'Rachel' }) // ElevenLabs calm, professional voice
+        body: JSON.stringify({ text, voice: 'Rachel' })
       });
 
       if (!response.ok) {
@@ -151,7 +147,6 @@ export default function ChatTab({ logAction }) {
       const contentType = response.headers.get('content-type');
       
       if (contentType?.includes('application/json')) {
-        // Browser TTS fallback
         const data = await response.json();
         if (data.useBrowserTTS) {
           browserSpeak(data.text);
@@ -159,7 +154,6 @@ export default function ChatTab({ logAction }) {
         }
       }
 
-      // Play audio from API
       const audioBlob = await response.blob();
       const audioUrl = URL.createObjectURL(audioBlob);
       
@@ -176,7 +170,6 @@ export default function ChatTab({ logAction }) {
         setIsSpeaking(false);
         URL.revokeObjectURL(audioUrl);
         
-        // If voice mode is active, start listening again
         if (voiceMode && recognitionRef.current) {
           setTimeout(() => {
             startListening();
@@ -193,12 +186,10 @@ export default function ChatTab({ logAction }) {
       
     } catch (error) {
       console.error('TTS error:', error);
-      // Fallback to browser TTS
       browserSpeak(text);
     }
   }, [audioEnabled, voiceMode]);
 
-  // Browser TTS fallback
   const browserSpeak = (text) => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
@@ -207,7 +198,6 @@ export default function ChatTab({ logAction }) {
       utterance.rate = 1.0;
       utterance.pitch = 1.0;
       
-      // Try to find a good voice
       const voices = window.speechSynthesis.getVoices();
       const preferredVoice = voices.find(v => 
         v.name.includes('Samantha') || 
@@ -240,8 +230,12 @@ export default function ChatTab({ logAction }) {
     if (recognitionRef.current && !isListening && !isSpeaking) {
       setTranscript('');
       setInputValue('');
-      recognitionRef.current.start();
-      setIsListening(true);
+      try {
+        recognitionRef.current.start();
+        setIsListening(true);
+      } catch (e) {
+        console.error('Failed to start recognition:', e);
+      }
     }
   };
 
@@ -254,7 +248,6 @@ export default function ChatTab({ logAction }) {
 
   const toggleVoiceMode = () => {
     if (voiceMode) {
-      // Exiting voice mode
       stopListening();
       if (audioRef.current) {
         audioRef.current.pause();
@@ -263,10 +256,8 @@ export default function ChatTab({ logAction }) {
       setIsSpeaking(false);
       setVoiceMode(false);
     } else {
-      // Entering voice mode
       setVoiceMode(true);
       setShowIntro(false);
-      // Start listening after a brief delay
       setTimeout(() => startListening(), 300);
     }
   };
@@ -323,7 +314,6 @@ export default function ChatTab({ logAction }) {
 
       logAction('AI_CHAT', { query: messageText.substring(0, 50), voiceMode });
       
-      // Speak the response if voice mode is active
       if (voiceMode && audioEnabled) {
         speakText(assistantMessage);
       }
@@ -358,6 +348,10 @@ export default function ChatTab({ logAction }) {
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(10px); }
           to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
         }
         .intro-header {
           display: flex;
@@ -505,7 +499,7 @@ export default function ChatTab({ logAction }) {
         .input-wrapper {
           display: flex;
           align-items: flex-end;
-          gap: 12px;
+          gap: 8px;
           background: linear-gradient(135deg, rgba(24, 24, 27, 0.9) 0%, rgba(24, 24, 27, 0.7) 100%);
           border: 1px solid #27272a;
           border-radius: 16px;
@@ -579,18 +573,16 @@ export default function ChatTab({ logAction }) {
           50% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
         }
         .voice-btn {
-          background: transparent;
-          color: #71717a;
-          border: 1px solid #27272a;
-        }
-        .voice-btn:hover {
-          border-color: #3f3f46;
+          background: #27272a;
           color: #a1a1aa;
         }
+        .voice-btn:hover {
+          background: #3f3f46;
+          color: #fafafa;
+        }
         .voice-btn.active {
-          background: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(34, 197, 94, 0.1) 100%);
-          border-color: rgba(34, 197, 94, 0.5);
-          color: #22c55e;
+          background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+          color: #09090b;
         }
         .input-hint {
           display: flex;
@@ -604,7 +596,7 @@ export default function ChatTab({ logAction }) {
         .voice-mode-overlay {
           position: fixed;
           inset: 0;
-          background: rgba(9, 9, 11, 0.95);
+          background: rgba(9, 9, 11, 0.98);
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -616,8 +608,8 @@ export default function ChatTab({ logAction }) {
           width: 200px;
           height: 200px;
           border-radius: 50%;
-          background: linear-gradient(135deg, rgba(212, 165, 116, 0.3) 0%, rgba(212, 165, 116, 0.1) 100%);
-          border: 2px solid rgba(212, 165, 116, 0.4);
+          background: linear-gradient(135deg, rgba(212, 165, 116, 0.2) 0%, rgba(212, 165, 116, 0.05) 100%);
+          border: 2px solid rgba(212, 165, 116, 0.3);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -630,8 +622,8 @@ export default function ChatTab({ logAction }) {
           animation: orbPulse 2s infinite;
         }
         .voice-orb.speaking {
-          background: linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(59, 130, 246, 0.1) 100%);
-          border-color: rgba(59, 130, 246, 0.5);
+          background: linear-gradient(135deg, rgba(212, 165, 116, 0.3) 0%, rgba(212, 165, 116, 0.1) 100%);
+          border-color: rgba(212, 165, 116, 0.5);
           animation: orbPulse 1s infinite;
         }
         .voice-orb.processing {
@@ -722,11 +714,11 @@ export default function ChatTab({ logAction }) {
             {isListening ? (
               <Mic size={64} color="#22c55e" />
             ) : isSpeaking ? (
-              <Volume2 size={64} color="#3b82f6" />
+              <AudioLines size={64} color="#d4a574" />
             ) : isLoading ? (
               <Loader2 size={64} color="#f59e0b" style={{ animation: 'spin 1s linear infinite' }} />
             ) : (
-              <Sparkles size={64} color="#d4a574" />
+              <AudioLines size={64} color="#d4a574" />
             )}
           </div>
           
@@ -753,9 +745,9 @@ export default function ChatTab({ logAction }) {
             <button 
               className="voice-control-btn end"
               onClick={toggleVoiceMode}
-              title="End voice conversation"
+              title="End voice mode"
             >
-              <PhoneOff size={24} />
+              <X size={24} />
             </button>
           </div>
         </div>
@@ -815,18 +807,18 @@ export default function ChatTab({ logAction }) {
               disabled={voiceMode}
             />
             
-            {/* Voice mode toggle */}
+            {/* Voice mode toggle - waveform icon like OpenAI/Claude */}
             {voiceSupported && (
               <button 
                 className={`btn-icon voice-btn ${voiceMode ? 'active' : ''}`}
                 onClick={toggleVoiceMode}
-                title={voiceMode ? 'Exit voice mode' : 'Start voice conversation'}
+                title={voiceMode ? 'Exit voice mode' : 'Voice mode'}
               >
-                {voiceMode ? <PhoneOff size={20} /> : <Phone size={20} />}
+                <AudioLines size={20} />
               </button>
             )}
             
-            {/* Mic button (for quick voice input without full voice mode) */}
+            {/* Mic button for quick voice input */}
             {voiceSupported && !voiceMode && (
               <button 
                 className={`btn-icon mic-btn ${isListening ? 'listening' : ''}`}
@@ -852,9 +844,9 @@ export default function ChatTab({ logAction }) {
               <>
                 <span>Enter to send</span>
                 <span>·</span>
-                <span>Mic for voice input</span>
+                <span>Mic for dictation</span>
                 <span>·</span>
-                <span>Phone for voice call</span>
+                <span>Waves for voice chat</span>
               </>
             ) : (
               <span>Press Enter to send · Shift+Enter for new line</span>

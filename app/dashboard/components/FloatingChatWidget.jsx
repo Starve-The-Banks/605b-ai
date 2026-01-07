@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Loader2, ChevronDown, Sparkles } from 'lucide-react';
+import { MessageCircle, X, Send, Loader2, ChevronDown, Sparkles, Mic, MicOff, AudioLines } from 'lucide-react';
 
 // Contextual prompts based on which page the user is on
 const CONTEXTUAL_PROMPTS = {
@@ -74,6 +74,12 @@ If they ask how to get their credit reports:
 
 If they seem confused or frustrated, acknowledge their feelings and break things down into smaller steps.`;
 
+const VOICE_SYSTEM_PROMPT = `You are 605b.ai's help assistant. The user is speaking to you via voice.
+
+CURRENT CONTEXT: The user is viewing the {PAGE} page.
+
+Keep responses VERY SHORT (1-2 sentences). Speak naturally. No bullet points or formatting.`;
+
 export default function FloatingChatWidget({ currentTab }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
@@ -81,8 +87,63 @@ export default function FloatingChatWidget({ currentTab }) {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
+  
+  // Voice state
+  const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [voiceSupported, setVoiceSupported] = useState(false);
+  const [voiceMode, setVoiceMode] = useState(false);
+  const [audioEnabled, setAudioEnabled] = useState(true);
+  
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const recognitionRef = useRef(null);
+  const audioRef = useRef(null);
+
+  // Check for voice support
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    setVoiceSupported(!!SpeechRecognition);
+  }, []);
+
+  // Initialize speech recognition
+  useEffect(() => {
+    if (!voiceSupported) return;
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    recognition.onresult = (event) => {
+      let transcript = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript;
+      }
+      setInput(transcript);
+    };
+
+    recognition.onerror = (event) => {
+      console.error('Speech recognition error:', event.error);
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+      // Auto-send if voice mode is active and we have input
+      if (voiceMode && input.trim()) {
+        sendMessage(input);
+      }
+    };
+
+    recognitionRef.current = recognition;
+
+    return () => {
+      recognition.abort();
+    };
+  }, [voiceSupported, voiceMode, input]);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -91,10 +152,10 @@ export default function FloatingChatWidget({ currentTab }) {
 
   // Focus input when opened
   useEffect(() => {
-    if (isOpen && !isMinimized) {
+    if (isOpen && !isMinimized && !voiceMode) {
       setTimeout(() => inputRef.current?.focus(), 100);
     }
-  }, [isOpen, isMinimized]);
+  }, [isOpen, isMinimized, voiceMode]);
 
   // Add welcome message when first opened
   useEffect(() => {
@@ -105,6 +166,103 @@ export default function FloatingChatWidget({ currentTab }) {
       }]);
     }
   }, [isOpen, currentTab, messages.length]);
+
+  const startListening = () => {
+    if (recognitionRef.current && !isListening) {
+      setInput('');
+      try {
+        recognitionRef.current.start();
+        setIsListening(true);
+      } catch (e) {
+        console.error('Failed to start recognition:', e);
+      }
+    }
+  };
+
+  const stopListening = () => {
+    if (recognitionRef.current && isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    }
+  };
+
+  const toggleVoiceMode = () => {
+    if (voiceMode) {
+      stopListening();
+      if (audioRef.current) audioRef.current.pause();
+      window.speechSynthesis?.cancel();
+      setIsSpeaking(false);
+      setVoiceMode(false);
+    } else {
+      setVoiceMode(true);
+      setHasInteracted(true);
+      setTimeout(() => startListening(), 300);
+    }
+  };
+
+  const speakText = async (text) => {
+    if (!audioEnabled || !text) return;
+
+    try {
+      const response = await fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, voice: 'Rachel' })
+      });
+
+      const contentType = response.headers.get('content-type');
+      
+      if (contentType?.includes('application/json')) {
+        const data = await response.json();
+        if (data.useBrowserTTS) {
+          browserSpeak(data.text);
+          return;
+        }
+      }
+
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      
+      if (audioRef.current) audioRef.current.pause();
+      
+      const audio = new Audio(audioUrl);
+      audioRef.current = audio;
+      
+      setIsSpeaking(true);
+      
+      audio.onended = () => {
+        setIsSpeaking(false);
+        URL.revokeObjectURL(audioUrl);
+        if (voiceMode) setTimeout(() => startListening(), 500);
+      };
+      
+      audio.onerror = () => {
+        setIsSpeaking(false);
+        URL.revokeObjectURL(audioUrl);
+      };
+      
+      await audio.play();
+    } catch (error) {
+      browserSpeak(text);
+    }
+  };
+
+  const browserSpeak = (text) => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1.0;
+      
+      setIsSpeaking(true);
+      utterance.onend = () => {
+        setIsSpeaking(false);
+        if (voiceMode) setTimeout(() => startListening(), 500);
+      };
+      utterance.onerror = () => setIsSpeaking(false);
+      
+      window.speechSynthesis.speak(utterance);
+    }
+  };
 
   const sendMessage = async (text) => {
     const messageText = text || input.trim();
@@ -126,7 +284,7 @@ export default function FloatingChatWidget({ currentTab }) {
             role: m.role,
             content: m.content
           })),
-          systemPrompt: SYSTEM_PROMPT.replace('{PAGE}', currentTab.toUpperCase())
+          systemPrompt: (voiceMode ? VOICE_SYSTEM_PROMPT : SYSTEM_PROMPT).replace('{PAGE}', currentTab.toUpperCase())
         })
       });
 
@@ -148,6 +306,11 @@ export default function FloatingChatWidget({ currentTab }) {
           updated[updated.length - 1] = { role: 'assistant', content: assistantMessage };
           return updated;
         });
+      }
+
+      // Speak response if voice mode is active
+      if (voiceMode && audioEnabled) {
+        speakText(assistantMessage);
       }
     } catch (err) {
       setMessages(prev => [...prev, { 
@@ -377,18 +540,24 @@ export default function FloatingChatWidget({ currentTab }) {
         .widget-input::placeholder {
           color: #52525b;
         }
-        .widget-send {
+        .widget-input.listening {
+          border-color: #22c55e;
+          box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
+        }
+        .input-btn {
           width: 40px;
           height: 40px;
           display: flex;
           align-items: center;
           justify-content: center;
-          background: #d4a574;
           border: none;
           border-radius: 8px;
-          color: #09090b;
           cursor: pointer;
           transition: all 0.15s;
+        }
+        .widget-send {
+          background: #d4a574;
+          color: #09090b;
         }
         .widget-send:hover {
           background: #c49665;
@@ -397,6 +566,27 @@ export default function FloatingChatWidget({ currentTab }) {
           background: #3f3f46;
           color: #52525b;
           cursor: not-allowed;
+        }
+        .voice-btn {
+          background: #27272a;
+          color: #a1a1aa;
+        }
+        .voice-btn:hover {
+          background: #3f3f46;
+          color: #fafafa;
+        }
+        .voice-btn.active {
+          background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+          color: #09090b;
+        }
+        .voice-btn.listening {
+          background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+          color: #09090b;
+          animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+          50% { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
         }
         .typing-indicator {
           display: flex;
@@ -415,6 +605,10 @@ export default function FloatingChatWidget({ currentTab }) {
         @keyframes bounce {
           0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
           40% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
         }
         @media (max-width: 768px) {
           .chat-widget {
@@ -441,8 +635,10 @@ export default function FloatingChatWidget({ currentTab }) {
       <div className={`chat-widget ${isMinimized ? 'minimized' : ''}`}>
         <div className="widget-header" onClick={() => setIsMinimized(!isMinimized)}>
           <div className="widget-title">
-            <span className="widget-title-icon"><Sparkles size={16} /></span>
-            Help Assistant
+            <span className="widget-title-icon">
+              {voiceMode ? <AudioLines size={16} /> : <Sparkles size={16} />}
+            </span>
+            {voiceMode ? 'Voice Chat' : 'Help Assistant'}
           </div>
           <div className="widget-actions">
             <button className="widget-btn" onClick={(e) => { e.stopPropagation(); setIsMinimized(!isMinimized); }}>
@@ -486,14 +682,42 @@ export default function FloatingChatWidget({ currentTab }) {
               <input
                 ref={inputRef}
                 type="text"
-                className="widget-input"
-                placeholder="Ask a question..."
+                className={`widget-input ${isListening ? 'listening' : ''}`}
+                placeholder={isListening ? 'Listening...' : voiceMode ? 'Voice mode active' : 'Ask a question...'}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-                disabled={isLoading}
+                disabled={isLoading || voiceMode}
               />
-              <button className="widget-send" onClick={() => sendMessage()} disabled={isLoading || !input.trim()}>
+              
+              {/* Voice mode toggle */}
+              {voiceSupported && (
+                <button 
+                  className={`input-btn voice-btn ${voiceMode ? 'active' : ''} ${isListening ? 'listening' : ''}`}
+                  onClick={toggleVoiceMode}
+                  title={voiceMode ? 'Exit voice mode' : 'Voice mode'}
+                >
+                  <AudioLines size={18} />
+                </button>
+              )}
+              
+              {/* Mic for dictation (when not in voice mode) */}
+              {voiceSupported && !voiceMode && (
+                <button 
+                  className={`input-btn voice-btn ${isListening ? 'listening' : ''}`}
+                  onClick={isListening ? stopListening : startListening}
+                  disabled={isLoading}
+                  title={isListening ? 'Stop' : 'Dictate'}
+                >
+                  {isListening ? <MicOff size={18} /> : <Mic size={18} />}
+                </button>
+              )}
+              
+              <button 
+                className="input-btn widget-send" 
+                onClick={() => sendMessage()} 
+                disabled={isLoading || !input.trim() || voiceMode}
+              >
                 {isLoading ? <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} /> : <Send size={18} />}
               </button>
             </div>

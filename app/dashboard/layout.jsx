@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useState, useEffect, useRef } from 'react';
+import { useUser, SignOutButton } from '@clerk/nextjs';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { 
-  Search, Sparkles, FileText, Clock, Flag, FileCheck, 
-  ChevronLeft, ChevronRight
+import {
+  Search, Sparkles, FileText, Clock, Flag, FileCheck,
+  ChevronLeft, ChevronRight, LogOut, Settings, User, ChevronUp
 } from 'lucide-react';
 
 export default function DashboardLayout({ children }) {
@@ -14,6 +14,8 @@ export default function DashboardLayout({ children }) {
   const pathname = usePathname();
   const isAIStrategist = pathname === '/dashboard/ai-strategist';
   const [rightSidebarOpen, setRightSidebarOpen] = useState(!isAIStrategist);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef(null);
 
   // Auto-close sidebar when navigating to AI Strategist
   useEffect(() => {
@@ -21,6 +23,18 @@ export default function DashboardLayout({ children }) {
       setRightSidebarOpen(false);
     }
   }, [isAIStrategist]);
+
+  // Close user menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setUserMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const sidebarItems = [
     { id: 'analyze', label: 'Analyze', icon: Search, section: 'CORE', href: '/dashboard' },
@@ -77,7 +91,21 @@ export default function DashboardLayout({ children }) {
                       fontSize: '14px',
                       cursor: 'pointer',
                       marginBottom: '2px',
-                      textDecoration: 'none'
+                      textDecoration: 'none',
+                      transition: 'all 0.15s ease',
+                      borderLeft: isActive ? '2px solid #f7d047' : '2px solid transparent',
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isActive) {
+                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                        e.currentTarget.style.color = '#e5e5e5';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isActive) {
+                        e.currentTarget.style.background = 'transparent';
+                        e.currentTarget.style.color = '#a3a3a3';
+                      }
                     }}
                   >
                     <item.icon size={18} />
@@ -89,28 +117,156 @@ export default function DashboardLayout({ children }) {
           ))}
         </nav>
 
-        <div style={{ padding: '16px', borderTop: '1px solid #1a1a1c', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{
-            width: '32px',
-            height: '32px',
-            background: 'linear-gradient(135deg, #f7d047 0%, #d4b840 100%)',
-            borderRadius: '8px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: 600,
-            color: '#0a0a0b',
-            fontSize: '14px'
-          }}>
-            {user?.firstName?.[0] || 'M'}
-          </div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: '13px', fontWeight: 500 }}>{user?.firstName || 'Michael'}</div>
-            <div style={{ fontSize: '11px', color: '#22c55e', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <span style={{ width: '6px', height: '6px', background: '#22c55e', borderRadius: '50%', display: 'inline-block' }}></span>
-              Synced
+        {/* User Menu */}
+        <div ref={userMenuRef} style={{ position: 'relative' }}>
+          {/* Dropdown Menu - appears above the user card */}
+          {userMenuOpen && (
+            <div style={{
+              position: 'absolute',
+              bottom: '100%',
+              left: '8px',
+              right: '8px',
+              marginBottom: '8px',
+              background: '#18181b',
+              border: '1px solid #27272a',
+              borderRadius: '12px',
+              overflow: 'hidden',
+              boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.4)',
+              animation: 'slideUp 0.15s ease-out',
+            }}>
+              <div style={{ padding: '12px 16px', borderBottom: '1px solid #27272a' }}>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: '#fafafa' }}>
+                  {user?.firstName} {user?.lastName}
+                </div>
+                <div style={{ fontSize: '11px', color: '#71717a', marginTop: '2px' }}>
+                  {user?.primaryEmailAddress?.emailAddress}
+                </div>
+              </div>
+
+              <div style={{ padding: '8px' }}>
+                <button
+                  onClick={() => setUserMenuOpen(false)}
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: '10px 12px',
+                    background: 'transparent',
+                    border: 'none',
+                    borderRadius: '8px',
+                    color: '#a1a1aa',
+                    fontSize: '13px',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    transition: 'all 0.15s',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(247, 208, 71, 0.1)';
+                    e.currentTarget.style.color = '#f7d047';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'transparent';
+                    e.currentTarget.style.color = '#a1a1aa';
+                  }}
+                >
+                  <Settings size={16} />
+                  Settings
+                </button>
+
+                <SignOutButton>
+                  <button
+                    style={{
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      padding: '10px 12px',
+                      background: 'transparent',
+                      border: 'none',
+                      borderRadius: '8px',
+                      color: '#a1a1aa',
+                      fontSize: '13px',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      transition: 'all 0.15s',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
+                      e.currentTarget.style.color = '#ef4444';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'transparent';
+                      e.currentTarget.style.color = '#a1a1aa';
+                    }}
+                  >
+                    <LogOut size={16} />
+                    Sign out
+                  </button>
+                </SignOutButton>
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* User Card - clickable */}
+          <button
+            onClick={() => setUserMenuOpen(!userMenuOpen)}
+            style={{
+              width: '100%',
+              padding: '16px',
+              borderTop: '1px solid #1a1a1c',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              background: userMenuOpen ? 'rgba(247, 208, 71, 0.05)' : 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'all 0.15s',
+            }}
+            onMouseEnter={(e) => {
+              if (!userMenuOpen) e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
+            }}
+            onMouseLeave={(e) => {
+              if (!userMenuOpen) e.currentTarget.style.background = 'transparent';
+            }}
+          >
+            <div style={{
+              width: '32px',
+              height: '32px',
+              background: 'linear-gradient(135deg, #f7d047 0%, #d4b840 100%)',
+              borderRadius: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: 600,
+              color: '#0a0a0b',
+              fontSize: '14px'
+            }}>
+              {user?.firstName?.[0] || 'U'}
+            </div>
+            <div style={{ flex: 1, textAlign: 'left' }}>
+              <div style={{ fontSize: '13px', fontWeight: 500, color: '#e5e5e5' }}>{user?.firstName || 'User'}</div>
+              <div style={{ fontSize: '11px', color: '#22c55e', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <span style={{
+                  width: '6px',
+                  height: '6px',
+                  background: '#22c55e',
+                  borderRadius: '50%',
+                  display: 'inline-block',
+                  animation: 'pulseGlow 2s ease-in-out infinite'
+                }}></span>
+                Synced
+              </div>
+            </div>
+            <ChevronUp
+              size={16}
+              style={{
+                color: '#71717a',
+                transform: userMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                transition: 'transform 0.15s',
+              }}
+            />
+          </button>
         </div>
       </aside>
 

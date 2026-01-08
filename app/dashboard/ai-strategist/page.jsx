@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Send, Loader2, Sparkles, Shield, FileText, Scale, Zap, Mic, MicOff, Volume2, VolumeX, X, AudioLines } from 'lucide-react';
+import { Send, Loader2, Sparkles, Shield, FileText, Scale, Zap, Mic, MicOff, Volume2, VolumeX, X, AudioLines, AlertCircle } from 'lucide-react';
 import { SYSTEM_PROMPT } from '@/lib/constants';
 
 const INTRO_MESSAGE = `You've got a strategist in your corner now.
@@ -50,6 +50,7 @@ export default function AIStrategistPage() {
   const [transcript, setTranscript] = useState('');
   const [voiceSupported, setVoiceSupported] = useState(false);
   const [audioEnabled, setAudioEnabled] = useState(true);
+  const [usingBrowserTTS, setUsingBrowserTTS] = useState(false);
   
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -127,6 +128,7 @@ export default function AIStrategistPage() {
     if (!audioEnabled || !text) return;
 
     try {
+      setUsingBrowserTTS(false);
       const response = await fetch('/api/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -138,47 +140,51 @@ export default function AIStrategistPage() {
       }
 
       const contentType = response.headers.get('content-type');
-      
+
       if (contentType?.includes('application/json')) {
         const data = await response.json();
         if (data.useBrowserTTS) {
-          browserSpeak(data.text);
+          setUsingBrowserTTS(true);
+          browserSpeak(data.text || text);
           return;
         }
       }
 
       const audioBlob = await response.blob();
       const audioUrl = URL.createObjectURL(audioBlob);
-      
+
       if (audioRef.current) {
         audioRef.current.pause();
       }
-      
+
       const audio = new Audio(audioUrl);
       audioRef.current = audio;
-      
+
       setIsSpeaking(true);
-      
+
       audio.onended = () => {
         setIsSpeaking(false);
         URL.revokeObjectURL(audioUrl);
-        
+
         if (voiceMode && recognitionRef.current) {
           setTimeout(() => {
             startListening();
           }, 500);
         }
       };
-      
+
       audio.onerror = () => {
         setIsSpeaking(false);
         URL.revokeObjectURL(audioUrl);
+        setUsingBrowserTTS(true);
+        browserSpeak(text);
       };
-      
+
       await audio.play();
-      
+
     } catch (error) {
       console.error('TTS error:', error);
+      setUsingBrowserTTS(true);
       browserSpeak(text);
     }
   }, [audioEnabled, voiceMode]);
@@ -270,7 +276,7 @@ export default function AIStrategistPage() {
     setShowIntro(false);
     setInputValue('');
     setTranscript('');
-    
+
     const userMsg = { id: Date.now(), role: 'user', content: messageText };
     setMessages(prev => [...prev, userMsg]);
     setIsLoading(true);
@@ -285,8 +291,20 @@ export default function AIStrategistPage() {
         }),
       });
 
-      if (!response.ok) throw new Error(await response.text());
-      
+      if (!response.ok) {
+        const contentType = response.headers.get('content-type');
+        let errorMessage = 'Something went wrong';
+
+        if (contentType?.includes('application/json')) {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } else {
+          errorMessage = await response.text();
+        }
+
+        throw new Error(errorMessage);
+      }
+
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       let assistantMessage = '';
@@ -296,7 +314,7 @@ export default function AIStrategistPage() {
       while (reader) {
         const { done, value } = await reader.read();
         if (done) break;
-        
+
         assistantMessage += decoder.decode(value, { stream: true });
         setMessages(prev => {
           const updated = [...prev];
@@ -308,7 +326,7 @@ export default function AIStrategistPage() {
       if (voiceMode && audioEnabled) {
         speakText(assistantMessage);
       }
-      
+
     } catch (err) {
       setMessages(prev => [...prev, { id: Date.now() + 1, role: 'assistant', content: `Error: ${err.message}`, isError: true }]);
     } finally {
@@ -430,6 +448,20 @@ export default function AIStrategistPage() {
       color: '#e4e4e7',
       borderBottomLeftRadius: '4px',
     },
+    errorMsgContent: {
+      padding: '14px 18px',
+      borderRadius: '16px',
+      fontSize: '15px',
+      lineHeight: 1.7,
+      whiteSpace: 'pre-wrap',
+      background: 'rgba(239, 68, 68, 0.1)',
+      border: '1px solid rgba(239, 68, 68, 0.3)',
+      color: '#fca5a5',
+      borderBottomLeftRadius: '4px',
+      display: 'flex',
+      alignItems: 'flex-start',
+      gap: '10px',
+    },
     inputArea: {
       paddingTop: '16px',
       borderTop: '1px solid #1c1c1f',
@@ -539,14 +571,16 @@ export default function AIStrategistPage() {
     },
     typingDots: {
       display: 'flex',
-      gap: '4px',
+      gap: '6px',
       padding: '4px 0',
+      alignItems: 'center',
     },
     typingDot: {
-      width: '6px',
-      height: '6px',
-      background: '#71717a',
+      width: '8px',
+      height: '8px',
+      background: '#f7d047',
       borderRadius: '50%',
+      animation: 'typingBounce 1.4s ease-in-out infinite',
     },
   };
 
@@ -579,6 +613,16 @@ export default function AIStrategistPage() {
           <div style={styles.voiceStatus}>
             {isListening ? 'Listening...' : isSpeaking ? 'Speaking...' : isLoading ? 'Thinking...' : 'Ready'}
           </div>
+          {usingBrowserTTS && isSpeaking && (
+            <div style={{
+              fontSize: '11px',
+              color: '#71717a',
+              marginTop: '-4px',
+              marginBottom: '8px',
+            }}>
+              Using browser voice
+            </div>
+          )}
           
           <div style={styles.voiceTranscript}>
             {inputValue || (isListening ? 'Say something...' : '')}
@@ -654,12 +698,21 @@ export default function AIStrategistPage() {
             <div style={styles.messagesContainer}>
               {messages.map(msg => (
                 <div key={msg.id} style={msg.role === 'user' ? styles.userMsg : styles.assistantMsg}>
-                  <div style={msg.role === 'user' ? styles.userMsgContent : styles.assistantMsgContent}>
-                    {msg.content || (
+                  <div style={
+                    msg.role === 'user'
+                      ? styles.userMsgContent
+                      : msg.isError
+                      ? styles.errorMsgContent
+                      : styles.assistantMsgContent
+                  }>
+                    {msg.isError && <AlertCircle size={18} style={{ flexShrink: 0, marginTop: '2px' }} />}
+                    {msg.content ? (
+                      <span>{msg.content}</span>
+                    ) : (
                       <div style={styles.typingDots}>
-                        <span style={styles.typingDot}></span>
-                        <span style={styles.typingDot}></span>
-                        <span style={styles.typingDot}></span>
+                        <span style={{ ...styles.typingDot, animationDelay: '0ms' }}></span>
+                        <span style={{ ...styles.typingDot, animationDelay: '150ms' }}></span>
+                        <span style={{ ...styles.typingDot, animationDelay: '300ms' }}></span>
                       </div>
                     )}
                   </div>

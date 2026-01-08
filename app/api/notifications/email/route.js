@@ -1,9 +1,16 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
+import { Resend } from 'resend';
 
-// Email notification endpoint
-// For production, integrate with an email service like Resend, SendGrid, or AWS SES
-// Currently returns a mock success for development
+// Initialize Resend only when API key is available (runtime, not build time)
+let resend = null;
+
+function getResend() {
+  if (!resend && process.env.RESEND_API_KEY) {
+    resend = new Resend(process.env.RESEND_API_KEY);
+  }
+  return resend;
+}
 
 export async function POST(request) {
   try {
@@ -13,6 +20,15 @@ export async function POST(request) {
       return NextResponse.json(
         { error: 'Authentication required' },
         { status: 401 }
+      );
+    }
+
+    const resendClient = getResend();
+    if (!resendClient) {
+      console.error('RESEND_API_KEY not configured');
+      return NextResponse.json(
+        { error: 'Email service not configured' },
+        { status: 503 }
       );
     }
 
@@ -42,33 +58,26 @@ export async function POST(request) {
 
     const emailBody = buildEmailBody(urgentItems, warningItems);
 
-    // In production, send email using your preferred service
-    // Example with Resend:
-    // const resend = new Resend(process.env.RESEND_API_KEY);
-    // await resend.emails.send({
-    //   from: '605b.ai <notifications@605b.ai>',
-    //   to: email,
-    //   subject: emailSubject,
-    //   html: emailBody,
-    // });
-
-    // For development, log and return success
-    console.log('Email notification would be sent:', {
+    // Send email via Resend
+    const { data, error } = await resendClient.emails.send({
+      from: '605b.ai <notifications@605b.ai>',
       to: email,
       subject: emailSubject,
-      notificationCount: notifications.length,
+      html: emailBody,
     });
+
+    if (error) {
+      console.error('Resend error:', error);
+      return NextResponse.json(
+        { error: 'Failed to send email', details: error.message },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
-      message: 'Notification queued',
-      // In production, remove this debug info
-      debug: {
-        to: email,
-        subject: emailSubject,
-        urgentCount: urgentItems.length,
-        warningCount: warningItems.length,
-      },
+      message: 'Notification sent',
+      emailId: data?.id,
     });
   } catch (error) {
     console.error('Email notification error:', error);

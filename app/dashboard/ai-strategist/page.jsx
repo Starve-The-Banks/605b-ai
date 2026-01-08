@@ -60,6 +60,14 @@ export default function AIStrategistPage() {
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     setVoiceSupported(!!SpeechRecognition);
+
+    // Preload browser voices (they load asynchronously)
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.getVoices();
+      window.speechSynthesis.onvoiceschanged = () => {
+        window.speechSynthesis.getVoices();
+      };
+    }
   }, []);
 
   useEffect(() => {
@@ -132,6 +140,7 @@ export default function AIStrategistPage() {
       const response = await fetch('/api/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ text, voice: 'Rachel' })
       });
 
@@ -285,6 +294,7 @@ export default function AIStrategistPage() {
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           messages: [...messages, userMsg].map(m => ({ role: m.role, content: m.content })),
           systemPrompt: voiceMode ? VOICE_SYSTEM_PROMPT : SYSTEM_PROMPT

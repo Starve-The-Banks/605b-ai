@@ -6,8 +6,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   Search, Sparkles, FileText, Clock, Flag, FileCheck,
-  ChevronLeft, ChevronRight, LogOut, Settings, User, ChevronUp
+  ChevronLeft, ChevronRight, LogOut, Settings, User, ChevronUp, TrendingUp
 } from 'lucide-react';
+import OnboardingWizard from './components/OnboardingWizard';
 
 export default function DashboardLayout({ children }) {
   const { user } = useUser();
@@ -15,7 +16,16 @@ export default function DashboardLayout({ children }) {
   const isAIStrategist = pathname === '/dashboard/ai-strategist';
   const [rightSidebarOpen, setRightSidebarOpen] = useState(!isAIStrategist);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const userMenuRef = useRef(null);
+
+  // Check if onboarding is complete
+  useEffect(() => {
+    const onboardingComplete = localStorage.getItem('605b_onboarding_complete');
+    if (!onboardingComplete && user) {
+      setShowOnboarding(true);
+    }
+  }, [user]);
 
   // Auto-close sidebar when navigating to AI Strategist
   useEffect(() => {
@@ -36,24 +46,42 @@ export default function DashboardLayout({ children }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const handleOnboardingComplete = () => {
+    setShowOnboarding(false);
+  };
+
+  const handleOnboardingSkip = () => {
+    localStorage.setItem('605b_onboarding_complete', 'true');
+    setShowOnboarding(false);
+  };
+
   const sidebarItems = [
+    { id: 'progress', label: 'Progress', icon: TrendingUp, section: 'CORE', href: '/dashboard/progress' },
     { id: 'analyze', label: 'Analyze', icon: Search, section: 'CORE', href: '/dashboard' },
     { id: 'ai-strategist', label: 'AI Strategist', icon: Sparkles, section: 'CORE', href: '/dashboard/ai-strategist' },
     { id: 'templates', label: 'Templates', icon: FileText, section: 'CORE', href: '/dashboard/templates' },
     { id: 'tracker', label: 'Tracker', icon: Clock, section: 'MANAGE', href: '/dashboard/tracker' },
     { id: 'flagged', label: 'Flagged', icon: Flag, section: 'MANAGE', href: '/dashboard/flagged' },
     { id: 'audit-log', label: 'Audit Log', icon: FileCheck, section: 'MANAGE', href: '/dashboard/audit-log' },
+    { id: 'settings', label: 'Settings', icon: Settings, section: 'MANAGE', href: '/dashboard/settings' },
   ];
 
   return (
-    <div style={{
-      display: 'flex',
-      minHeight: '100vh',
-      background: '#0a0a0b',
-      color: '#e5e5e5',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-    }}>
-      {/* LEFT SIDEBAR */}
+    <>
+      {showOnboarding && (
+        <OnboardingWizard
+          onComplete={handleOnboardingComplete}
+          onSkip={handleOnboardingSkip}
+        />
+      )}
+      <div style={{
+        display: 'flex',
+        minHeight: '100vh',
+        background: '#0a0a0b',
+        color: '#e5e5e5',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+      }}>
+        {/* LEFT SIDEBAR */}
       <aside style={{
         width: '200px',
         background: '#0d0d0f',
@@ -144,7 +172,8 @@ export default function DashboardLayout({ children }) {
               </div>
 
               <div style={{ padding: '8px' }}>
-                <button
+                <Link
+                  href="/dashboard/settings"
                   onClick={() => setUserMenuOpen(false)}
                   style={{
                     width: '100%',
@@ -160,6 +189,7 @@ export default function DashboardLayout({ children }) {
                     cursor: 'pointer',
                     textAlign: 'left',
                     transition: 'all 0.15s',
+                    textDecoration: 'none',
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.background = 'rgba(247, 208, 71, 0.1)';
@@ -172,7 +202,7 @@ export default function DashboardLayout({ children }) {
                 >
                   <Settings size={16} />
                   Settings
-                </button>
+                </Link>
 
                 <SignOutButton>
                   <button
@@ -435,6 +465,7 @@ export default function DashboardLayout({ children }) {
           </div>
         </aside>
       )}
-    </div>
+      </div>
+    </>
   );
 }

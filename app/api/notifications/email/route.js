@@ -60,7 +60,7 @@ export async function POST(request) {
 
     // Send email via Resend
     const { data, error } = await resendClient.emails.send({
-      from: '605b.ai <notifications@605b.ai>',
+      from: '605b.ai <notifications@send.605b.ai>',
       to: email,
       subject: emailSubject,
       html: emailBody,

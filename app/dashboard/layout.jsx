@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   Search, Sparkles, FileText, Clock, Flag, FileCheck,
-  ChevronLeft, ChevronRight, LogOut, Settings, User, ChevronUp, TrendingUp
+  ChevronLeft, ChevronRight, LogOut, Settings, User, ChevronUp, TrendingUp, Bell
 } from 'lucide-react';
 import OnboardingWizard from './components/OnboardingWizard';
 
@@ -17,6 +17,7 @@ export default function DashboardLayout({ children }) {
   const [rightSidebarOpen, setRightSidebarOpen] = useState(!isAIStrategist);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [notifications, setNotifications] = useState([]);
   const userMenuRef = useRef(null);
 
   // Check if onboarding is complete
@@ -26,6 +27,33 @@ export default function DashboardLayout({ children }) {
       setShowOnboarding(true);
     }
   }, [user]);
+
+  // Load notifications from localStorage and check periodically
+  useEffect(() => {
+    const loadNotifications = () => {
+      const savedNotifications = localStorage.getItem('605b_notifications');
+      if (savedNotifications) {
+        setNotifications(JSON.parse(savedNotifications));
+      }
+    };
+
+    loadNotifications();
+    // Check for notification updates every 30 seconds
+    const interval = setInterval(loadNotifications, 30000);
+
+    // Also listen for storage events (in case tracker page updates notifications)
+    const handleStorageChange = (e) => {
+      if (e.key === '605b_notifications') {
+        loadNotifications();
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
 
   // Auto-close sidebar when navigating to AI Strategist
   useEffect(() => {
@@ -122,6 +150,7 @@ export default function DashboardLayout({ children }) {
                       textDecoration: 'none',
                       transition: 'all 0.15s ease',
                       borderLeft: isActive ? '2px solid #f7d047' : '2px solid transparent',
+                      position: 'relative',
                     }}
                     onMouseEnter={(e) => {
                       if (!isActive) {
@@ -137,7 +166,26 @@ export default function DashboardLayout({ children }) {
                     }}
                   >
                     <item.icon size={18} />
-                    {item.label}
+                    <span style={{ flex: 1 }}>{item.label}</span>
+                    {/* Notification badge for Tracker */}
+                    {item.id === 'tracker' && notifications.length > 0 && (
+                      <span style={{
+                        minWidth: '18px',
+                        height: '18px',
+                        padding: '0 5px',
+                        background: notifications.some(n => n.type === 'urgent') ? '#ef4444' : '#f59e0b',
+                        borderRadius: '9px',
+                        fontSize: '10px',
+                        fontWeight: 600,
+                        color: '#fff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        animation: notifications.some(n => n.type === 'urgent') ? 'pulse 2s infinite' : 'none',
+                      }}>
+                        {notifications.length}
+                      </span>
+                    )}
                   </Link>
                 );
               })}

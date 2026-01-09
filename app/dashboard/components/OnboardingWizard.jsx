@@ -8,6 +8,17 @@ import {
   ChevronRight, X
 } from 'lucide-react';
 
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+  return isMobile;
+};
+
 const STEPS = [
   { id: 'welcome', title: 'Welcome' },
   { id: 'situation', title: 'Your Situation' },
@@ -64,6 +75,7 @@ const TIMELINES = [
 
 export default function OnboardingWizard({ onComplete, onSkip }) {
   const { user } = useUser();
+  const isMobile = useIsMobile();
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState({
     situation: null,
@@ -207,18 +219,20 @@ export default function OnboardingWizard({ onComplete, onSkip }) {
       background: 'rgba(9, 9, 11, 0.95)',
       backdropFilter: 'blur(8px)',
       display: 'flex',
-      alignItems: 'center',
+      alignItems: isMobile ? 'flex-end' : 'center',
       justifyContent: 'center',
       zIndex: 1000,
-      padding: '20px',
+      padding: isMobile ? '0' : '20px',
     },
     container: {
       width: '100%',
-      maxWidth: '600px',
+      maxWidth: isMobile ? '100%' : '600px',
+      maxHeight: isMobile ? '95vh' : 'auto',
       background: '#121214',
       border: '1px solid #27272a',
-      borderRadius: '20px',
+      borderRadius: isMobile ? '20px 20px 0 0' : '20px',
       overflow: 'hidden',
+      overflowY: 'auto',
       position: 'relative',
     },
     skipButton: {
@@ -249,21 +263,21 @@ export default function OnboardingWizard({ onComplete, onSkip }) {
       borderRadius: '0 2px 2px 0',
     },
     content: {
-      padding: '40px',
+      padding: isMobile ? '24px 20px' : '40px',
       opacity: isAnimating ? 0 : 1,
       transform: isAnimating ? 'translateX(20px)' : 'translateX(0)',
       transition: 'all 0.2s ease',
     },
     title: {
-      fontSize: '28px',
+      fontSize: isMobile ? '22px' : '28px',
       fontWeight: 700,
       marginBottom: '8px',
       color: '#fafafa',
     },
     subtitle: {
-      fontSize: '15px',
+      fontSize: isMobile ? '14px' : '15px',
       color: '#71717a',
-      marginBottom: '32px',
+      marginBottom: isMobile ? '24px' : '32px',
       lineHeight: 1.6,
     },
     optionGrid: {
@@ -314,10 +328,11 @@ export default function OnboardingWizard({ onComplete, onSkip }) {
       transition: 'all 0.15s',
     },
     footer: {
-      padding: '20px 40px 32px',
+      padding: isMobile ? '16px 20px 24px' : '20px 40px 32px',
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
+      gap: '12px',
     },
     backButton: {
       display: 'flex',

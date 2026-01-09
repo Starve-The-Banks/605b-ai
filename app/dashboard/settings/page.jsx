@@ -10,6 +10,7 @@ import {
 export default function SettingsPage() {
   const { user } = useUser();
   const [saved, setSaved] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [settings, setSettings] = useState({
     emailNotifications: true,
     deadlineReminders: true,
@@ -19,7 +20,13 @@ export default function SettingsPage() {
     voiceSpeed: 1.0,
   });
 
-  // Load settings from localStorage on mount
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   useEffect(() => {
     const savedSettings = localStorage.getItem('605b_settings');
     if (savedSettings) {
@@ -49,6 +56,7 @@ export default function SettingsPage() {
         cursor: 'pointer',
         position: 'relative',
         transition: 'background 0.2s',
+        flexShrink: 0,
       }}
     >
       <div style={{
@@ -66,10 +74,10 @@ export default function SettingsPage() {
 
   return (
     <div style={{ maxWidth: '700px' }}>
-      <div style={{ marginBottom: '32px' }}>
-        <h1 style={{ fontSize: '24px', fontWeight: 600, marginBottom: '4px' }}>Settings</h1>
+      <div style={{ marginBottom: isMobile ? '24px' : '32px' }}>
+        <h1 style={{ fontSize: isMobile ? '20px' : '24px', fontWeight: 600, marginBottom: '4px' }}>Settings</h1>
         <p style={{ fontSize: '14px', color: '#71717a' }}>
-          Manage your notification preferences and account settings
+          Manage your preferences
         </p>
       </div>
 
@@ -78,13 +86,13 @@ export default function SettingsPage() {
         background: '#121214',
         border: '1px solid #1f1f23',
         borderRadius: '12px',
-        padding: '20px 24px',
+        padding: isMobile ? '16px' : '20px 24px',
         marginBottom: '16px',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '12px' : '16px' }}>
           <div style={{
-            width: '48px',
-            height: '48px',
+            width: isMobile ? '40px' : '48px',
+            height: isMobile ? '40px' : '48px',
             background: 'linear-gradient(135deg, #f7d047 0%, #d4b840 100%)',
             borderRadius: '12px',
             display: 'flex',
@@ -92,19 +100,20 @@ export default function SettingsPage() {
             justifyContent: 'center',
             fontWeight: 600,
             color: '#09090b',
-            fontSize: '18px',
+            fontSize: isMobile ? '16px' : '18px',
+            flexShrink: 0,
           }}>
             {user?.firstName?.[0] || 'U'}
           </div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: '16px', fontWeight: 600 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: isMobile ? '14px' : '16px', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {user?.firstName} {user?.lastName}
             </div>
-            <div style={{ fontSize: '13px', color: '#71717a' }}>
+            <div style={{ fontSize: isMobile ? '12px' : '13px', color: '#71717a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {user?.primaryEmailAddress?.emailAddress}
             </div>
           </div>
-          <Shield size={20} style={{ color: '#22c55e' }} />
+          <Shield size={isMobile ? 18 : 20} style={{ color: '#22c55e', flexShrink: 0 }} />
         </div>
       </div>
 
@@ -117,30 +126,31 @@ export default function SettingsPage() {
         marginBottom: '16px',
       }}>
         <div style={{
-          padding: '16px 24px',
+          padding: isMobile ? '14px 16px' : '16px 24px',
           borderBottom: '1px solid #1f1f23',
           display: 'flex',
           alignItems: 'center',
           gap: '12px',
         }}>
-          <Bell size={20} style={{ color: '#f7d047' }} />
+          <Bell size={18} style={{ color: '#f7d047' }} />
           <span style={{ fontSize: '15px', fontWeight: 600 }}>Notifications</span>
         </div>
 
         {/* Email Notifications */}
         <div style={{
-          padding: '16px 24px',
+          padding: isMobile ? '14px 16px' : '16px 24px',
           borderBottom: '1px solid #1f1f23',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
+          gap: '12px',
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <Mail size={18} style={{ color: '#71717a' }} />
-            <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
+            <Mail size={18} style={{ color: '#71717a', flexShrink: 0 }} />
+            <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: '14px', fontWeight: 500 }}>Email Notifications</div>
               <div style={{ fontSize: '12px', color: '#71717a' }}>
-                Receive deadline reminders and updates via email
+                Receive deadline reminders via email
               </div>
             </div>
           </div>
@@ -152,18 +162,19 @@ export default function SettingsPage() {
 
         {/* Deadline Reminders */}
         <div style={{
-          padding: '16px 24px',
+          padding: isMobile ? '14px 16px' : '16px 24px',
           borderBottom: '1px solid #1f1f23',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
+          gap: '12px',
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <Clock size={18} style={{ color: '#71717a' }} />
-            <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
+            <Clock size={18} style={{ color: '#71717a', flexShrink: 0 }} />
+            <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: '14px', fontWeight: 500 }}>Deadline Reminders</div>
               <div style={{ fontSize: '12px', color: '#71717a' }}>
-                Get notified before bureau response deadlines
+                Get notified before deadlines
               </div>
             </div>
           </div>
@@ -176,13 +187,14 @@ export default function SettingsPage() {
         {/* Reminder Days */}
         {settings.deadlineReminders && (
           <div style={{
-            padding: '16px 24px',
+            padding: isMobile ? '14px 16px' : '16px 24px',
             borderBottom: '1px solid #1f1f23',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
+            gap: '12px',
           }}>
-            <div style={{ marginLeft: '30px' }}>
+            <div style={{ marginLeft: isMobile ? '0' : '30px' }}>
               <div style={{ fontSize: '14px', fontWeight: 500 }}>Remind me</div>
               <div style={{ fontSize: '12px', color: '#71717a' }}>
                 Days before deadline
@@ -211,17 +223,18 @@ export default function SettingsPage() {
 
         {/* Site Notifications */}
         <div style={{
-          padding: '16px 24px',
+          padding: isMobile ? '14px 16px' : '16px 24px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
+          gap: '12px',
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <Smartphone size={18} style={{ color: '#71717a' }} />
-            <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
+            <Smartphone size={18} style={{ color: '#71717a', flexShrink: 0 }} />
+            <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: '14px', fontWeight: 500 }}>Site Notifications</div>
               <div style={{ fontSize: '12px', color: '#71717a' }}>
-                Show notification badges in the app
+                Show badges in the app
               </div>
             </div>
           </div>
@@ -241,27 +254,28 @@ export default function SettingsPage() {
         marginBottom: '24px',
       }}>
         <div style={{
-          padding: '16px 24px',
+          padding: isMobile ? '14px 16px' : '16px 24px',
           borderBottom: '1px solid #1f1f23',
           display: 'flex',
           alignItems: 'center',
           gap: '12px',
         }}>
-          <Volume2 size={20} style={{ color: '#f7d047' }} />
+          <Volume2 size={18} style={{ color: '#f7d047' }} />
           <span style={{ fontSize: '15px', fontWeight: 600 }}>Voice & Audio</span>
         </div>
 
         <div style={{
-          padding: '16px 24px',
+          padding: isMobile ? '14px 16px' : '16px 24px',
           borderBottom: '1px solid #1f1f23',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
+          gap: '12px',
         }}>
-          <div>
+          <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: '14px', fontWeight: 500 }}>Voice Mode</div>
             <div style={{ fontSize: '12px', color: '#71717a' }}>
-              Enable voice conversations with AI Strategist
+              Voice conversations with AI
             </div>
           </div>
           <ToggleSwitch
@@ -272,15 +286,16 @@ export default function SettingsPage() {
 
         {settings.voiceEnabled && (
           <div style={{
-            padding: '16px 24px',
+            padding: isMobile ? '14px 16px' : '16px 24px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
+            gap: '12px',
           }}>
-            <div>
+            <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: '14px', fontWeight: 500 }}>Voice Speed</div>
               <div style={{ fontSize: '12px', color: '#71717a' }}>
-                Adjust AI voice playback speed
+                AI voice playback speed
               </div>
             </div>
             <select
@@ -314,7 +329,7 @@ export default function SettingsPage() {
           justifyContent: 'center',
           gap: '8px',
           width: '100%',
-          padding: '14px 24px',
+          padding: isMobile ? '12px 20px' : '14px 24px',
           background: saved ? '#22c55e' : 'linear-gradient(135deg, #f7d047 0%, #d4b840 100%)',
           border: 'none',
           borderRadius: '10px',

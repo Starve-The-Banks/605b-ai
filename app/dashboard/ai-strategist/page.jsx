@@ -43,7 +43,8 @@ export default function AIStrategistPage() {
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showIntro, setShowIntro] = useState(true);
-  
+  const [isMobile, setIsMobile] = useState(false);
+
   const [voiceMode, setVoiceMode] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -51,17 +52,23 @@ export default function AIStrategistPage() {
   const [voiceSupported, setVoiceSupported] = useState(false);
   const [audioEnabled, setAudioEnabled] = useState(true);
   const [usingBrowserTTS, setUsingBrowserTTS] = useState(false);
-  
+
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const recognitionRef = useRef(null);
   const audioRef = useRef(null);
 
   useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     setVoiceSupported(!!SpeechRecognition);
 
-    // Preload browser voices (they load asynchronously)
     if ('speechSynthesis' in window) {
       window.speechSynthesis.getVoices();
       window.speechSynthesis.onvoiceschanged = () => {
@@ -75,7 +82,7 @@ export default function AIStrategistPage() {
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
-    
+
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.lang = 'en-US';
@@ -96,7 +103,7 @@ export default function AIStrategistPage() {
       if (finalTranscript) {
         setTranscript(prev => prev + finalTranscript);
       }
-      
+
       setInputValue(transcript + finalTranscript + interimTranscript);
     };
 
@@ -127,10 +134,10 @@ export default function AIStrategistPage() {
   }, [messages]);
 
   useEffect(() => {
-    if (!voiceMode) {
+    if (!voiceMode && !isMobile) {
       inputRef.current?.focus();
     }
-  }, [voiceMode]);
+  }, [voiceMode, isMobile]);
 
   const speakText = useCallback(async (text) => {
     if (!audioEnabled || !text) return;
@@ -201,35 +208,35 @@ export default function AIStrategistPage() {
   const browserSpeak = (text) => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
-      
+
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.rate = 1.0;
       utterance.pitch = 1.0;
-      
+
       const voices = window.speechSynthesis.getVoices();
-      const preferredVoice = voices.find(v => 
-        v.name.includes('Samantha') || 
-        v.name.includes('Google') || 
+      const preferredVoice = voices.find(v =>
+        v.name.includes('Samantha') ||
+        v.name.includes('Google') ||
         v.name.includes('Microsoft') ||
         v.lang.startsWith('en')
       );
       if (preferredVoice) {
         utterance.voice = preferredVoice;
       }
-      
+
       setIsSpeaking(true);
-      
+
       utterance.onend = () => {
         setIsSpeaking(false);
         if (voiceMode && recognitionRef.current) {
           setTimeout(() => startListening(), 500);
         }
       };
-      
+
       utterance.onerror = () => {
         setIsSpeaking(false);
       };
-      
+
       window.speechSynthesis.speak(utterance);
     }
   };
@@ -348,7 +355,7 @@ export default function AIStrategistPage() {
     container: {
       display: 'flex',
       flexDirection: 'column',
-      height: 'calc(100vh - 48px)',
+      height: isMobile ? 'calc(100vh - 72px)' : 'calc(100vh - 48px)',
       maxWidth: '900px',
       margin: '0 auto',
     },
@@ -358,65 +365,66 @@ export default function AIStrategistPage() {
       paddingBottom: '24px',
     },
     introSection: {
-      padding: '32px 0',
+      padding: isMobile ? '16px 0' : '32px 0',
     },
     introHeader: {
       display: 'flex',
       alignItems: 'center',
-      gap: '16px',
-      marginBottom: '24px',
+      gap: isMobile ? '12px' : '16px',
+      marginBottom: isMobile ? '16px' : '24px',
     },
     introIcon: {
-      width: '56px',
-      height: '56px',
+      width: isMobile ? '48px' : '56px',
+      height: isMobile ? '48px' : '56px',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       background: 'linear-gradient(135deg, rgba(247, 208, 71, 0.2) 0%, rgba(247, 208, 71, 0.05) 100%)',
       border: '1px solid rgba(247, 208, 71, 0.3)',
-      borderRadius: '16px',
+      borderRadius: isMobile ? '12px' : '16px',
       color: '#f7d047',
+      flexShrink: 0,
     },
     introTitle: {
-      fontSize: '22px',
+      fontSize: isMobile ? '18px' : '22px',
       fontWeight: 600,
       color: '#fafafa',
       marginBottom: '4px',
     },
     introSubtitle: {
-      fontSize: '13px',
+      fontSize: isMobile ? '11px' : '13px',
       color: '#71717a',
       letterSpacing: '0.02em',
     },
     introText: {
-      fontSize: '15px',
+      fontSize: isMobile ? '14px' : '15px',
       lineHeight: 1.8,
       color: '#a1a1aa',
       whiteSpace: 'pre-wrap',
     },
     quickStarts: {
       display: 'grid',
-      gridTemplateColumns: 'repeat(2, 1fr)',
+      gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
       gap: '10px',
-      marginTop: '28px',
+      marginTop: isMobile ? '20px' : '28px',
     },
     quickStart: {
       display: 'flex',
       alignItems: 'center',
       gap: '12px',
-      padding: '14px 16px',
+      padding: isMobile ? '12px 14px' : '14px 16px',
       background: 'rgba(24, 24, 27, 0.8)',
       border: '1px solid #27272a',
       borderRadius: '12px',
       color: '#a1a1aa',
-      fontSize: '14px',
+      fontSize: isMobile ? '13px' : '14px',
       cursor: 'pointer',
       textAlign: 'left',
       transition: 'all 0.2s',
     },
     quickStartIcon: {
-      width: '36px',
-      height: '36px',
+      width: isMobile ? '32px' : '36px',
+      height: isMobile ? '32px' : '36px',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -427,20 +435,20 @@ export default function AIStrategistPage() {
     messagesContainer: {
       display: 'flex',
       flexDirection: 'column',
-      gap: '20px',
+      gap: isMobile ? '16px' : '20px',
     },
     userMsg: {
       alignSelf: 'flex-end',
-      maxWidth: '85%',
+      maxWidth: isMobile ? '90%' : '85%',
     },
     assistantMsg: {
       alignSelf: 'flex-start',
-      maxWidth: '85%',
+      maxWidth: isMobile ? '90%' : '85%',
     },
     userMsgContent: {
-      padding: '14px 18px',
+      padding: isMobile ? '12px 14px' : '14px 18px',
       borderRadius: '16px',
-      fontSize: '15px',
+      fontSize: isMobile ? '14px' : '15px',
       lineHeight: 1.7,
       whiteSpace: 'pre-wrap',
       background: 'linear-gradient(135deg, #f7d047 0%, #d4b840 100%)',
@@ -448,9 +456,9 @@ export default function AIStrategistPage() {
       borderBottomRightRadius: '4px',
     },
     assistantMsgContent: {
-      padding: '14px 18px',
+      padding: isMobile ? '12px 14px' : '14px 18px',
       borderRadius: '16px',
-      fontSize: '15px',
+      fontSize: isMobile ? '14px' : '15px',
       lineHeight: 1.7,
       whiteSpace: 'pre-wrap',
       background: '#18181b',
@@ -459,9 +467,9 @@ export default function AIStrategistPage() {
       borderBottomLeftRadius: '4px',
     },
     errorMsgContent: {
-      padding: '14px 18px',
+      padding: isMobile ? '12px 14px' : '14px 18px',
       borderRadius: '16px',
-      fontSize: '15px',
+      fontSize: isMobile ? '14px' : '15px',
       lineHeight: 1.7,
       whiteSpace: 'pre-wrap',
       background: 'rgba(239, 68, 68, 0.1)',
@@ -473,8 +481,9 @@ export default function AIStrategistPage() {
       gap: '10px',
     },
     inputArea: {
-      paddingTop: '16px',
+      paddingTop: isMobile ? '12px' : '16px',
       borderTop: '1px solid #1c1c1f',
+      paddingBottom: isMobile ? '8px' : '0',
     },
     inputWrapper: {
       display: 'flex',
@@ -482,15 +491,15 @@ export default function AIStrategistPage() {
       gap: '8px',
       background: 'linear-gradient(135deg, rgba(24, 24, 27, 0.9) 0%, rgba(24, 24, 27, 0.7) 100%)',
       border: '1px solid #27272a',
-      borderRadius: '16px',
-      padding: '14px 18px',
+      borderRadius: isMobile ? '12px' : '16px',
+      padding: isMobile ? '10px 12px' : '14px 18px',
     },
     chatInput: {
       flex: 1,
       background: 'transparent',
       border: 'none',
       color: '#fafafa',
-      fontSize: '15px',
+      fontSize: isMobile ? '16px' : '15px',
       resize: 'none',
       outline: 'none',
       lineHeight: 1.5,
@@ -498,9 +507,9 @@ export default function AIStrategistPage() {
       maxHeight: '120px',
     },
     btnIcon: {
-      width: '40px',
-      height: '40px',
-      borderRadius: '12px',
+      width: isMobile ? '36px' : '40px',
+      height: isMobile ? '36px' : '40px',
+      borderRadius: isMobile ? '10px' : '12px',
       border: 'none',
       cursor: 'pointer',
       display: 'flex',
@@ -522,7 +531,7 @@ export default function AIStrategistPage() {
       color: '#a1a1aa',
     },
     inputHint: {
-      display: 'flex',
+      display: isMobile ? 'none' : 'flex',
       justifyContent: 'center',
       alignItems: 'center',
       gap: '16px',
@@ -539,10 +548,11 @@ export default function AIStrategistPage() {
       alignItems: 'center',
       justifyContent: 'center',
       zIndex: 100,
+      padding: isMobile ? '20px' : '0',
     },
     voiceOrb: {
-      width: '200px',
-      height: '200px',
+      width: isMobile ? '160px' : '200px',
+      height: isMobile ? '160px' : '200px',
       borderRadius: '50%',
       background: 'linear-gradient(135deg, rgba(247, 208, 71, 0.2) 0%, rgba(247, 208, 71, 0.05) 100%)',
       border: '2px solid rgba(247, 208, 71, 0.3)',
@@ -552,26 +562,27 @@ export default function AIStrategistPage() {
       marginBottom: '32px',
     },
     voiceStatus: {
-      fontSize: '18px',
+      fontSize: isMobile ? '16px' : '18px',
       fontWeight: 500,
       color: '#fafafa',
       marginBottom: '8px',
     },
     voiceTranscript: {
-      fontSize: '15px',
+      fontSize: isMobile ? '14px' : '15px',
       color: '#a1a1aa',
-      maxWidth: '400px',
+      maxWidth: isMobile ? '90%' : '400px',
       textAlign: 'center',
       minHeight: '24px',
+      padding: '0 16px',
     },
     voiceControls: {
       display: 'flex',
       gap: '16px',
-      marginTop: '48px',
+      marginTop: isMobile ? '32px' : '48px',
     },
     voiceControlBtn: {
-      width: '56px',
-      height: '56px',
+      width: isMobile ? '48px' : '56px',
+      height: isMobile ? '48px' : '56px',
       borderRadius: '50%',
       border: 'none',
       cursor: 'pointer',
@@ -600,9 +611,9 @@ export default function AIStrategistPage() {
         <div style={styles.voiceOverlay}>
           <div style={{
             ...styles.voiceOrb,
-            background: isListening 
+            background: isListening
               ? 'linear-gradient(135deg, rgba(34, 197, 94, 0.3) 0%, rgba(34, 197, 94, 0.1) 100%)'
-              : isSpeaking 
+              : isSpeaking
               ? 'linear-gradient(135deg, rgba(247, 208, 71, 0.3) 0%, rgba(247, 208, 71, 0.1) 100%)'
               : isLoading
               ? 'linear-gradient(135deg, rgba(245, 158, 11, 0.3) 0%, rgba(245, 158, 11, 0.1) 100%)'
@@ -610,16 +621,16 @@ export default function AIStrategistPage() {
             borderColor: isListening ? 'rgba(34, 197, 94, 0.5)' : isSpeaking ? 'rgba(247, 208, 71, 0.5)' : isLoading ? 'rgba(245, 158, 11, 0.5)' : 'rgba(247, 208, 71, 0.3)',
           }}>
             {isListening ? (
-              <Mic size={64} color="#22c55e" />
+              <Mic size={isMobile ? 48 : 64} color="#22c55e" />
             ) : isSpeaking ? (
-              <AudioLines size={64} color="#f7d047" />
+              <AudioLines size={isMobile ? 48 : 64} color="#f7d047" />
             ) : isLoading ? (
-              <Loader2 size={64} color="#f59e0b" style={{ animation: 'spin 1s linear infinite' }} />
+              <Loader2 size={isMobile ? 48 : 64} color="#f59e0b" style={{ animation: 'spin 1s linear infinite' }} />
             ) : (
-              <AudioLines size={64} color="#f7d047" />
+              <AudioLines size={isMobile ? 48 : 64} color="#f7d047" />
             )}
           </div>
-          
+
           <div style={styles.voiceStatus}>
             {isListening ? 'Listening...' : isSpeaking ? 'Speaking...' : isLoading ? 'Thinking...' : 'Ready'}
           </div>
@@ -633,13 +644,13 @@ export default function AIStrategistPage() {
               Using browser voice
             </div>
           )}
-          
+
           <div style={styles.voiceTranscript}>
             {inputValue || (isListening ? 'Say something...' : '')}
           </div>
-          
+
           <div style={styles.voiceControls}>
-            <button 
+            <button
               style={{
                 ...styles.voiceControlBtn,
                 background: !audioEnabled ? 'rgba(239, 68, 68, 0.2)' : '#27272a',
@@ -650,10 +661,10 @@ export default function AIStrategistPage() {
                 setAudioEnabled(!audioEnabled);
               }}
             >
-              {audioEnabled ? <Volume2 size={24} /> : <VolumeX size={24} />}
+              {audioEnabled ? <Volume2 size={isMobile ? 20 : 24} /> : <VolumeX size={isMobile ? 20 : 24} />}
             </button>
-            
-            <button 
+
+            <button
               style={{
                 ...styles.voiceControlBtn,
                 background: '#ef4444',
@@ -661,7 +672,7 @@ export default function AIStrategistPage() {
               }}
               onClick={toggleVoiceMode}
             >
-              <X size={24} />
+              <X size={isMobile ? 20 : 24} />
             </button>
           </div>
         </div>
@@ -673,32 +684,22 @@ export default function AIStrategistPage() {
             <div style={styles.introSection}>
               <div style={styles.introHeader}>
                 <div style={styles.introIcon}>
-                  <Sparkles size={28} />
+                  <Sparkles size={isMobile ? 24 : 28} />
                 </div>
                 <div>
                   <div style={styles.introTitle}>AI Credit Strategist</div>
-                  <div style={styles.introSubtitle}>FCRA · FDCPA · Consumer Protection Law</div>
+                  <div style={styles.introSubtitle}>FCRA · FDCPA · Consumer Protection</div>
                 </div>
               </div>
               <div style={styles.introText}>{INTRO_MESSAGE}</div>
               <div style={styles.quickStarts}>
                 {QUICK_STARTS.map((item, i) => (
-                  <button 
-                    key={i} 
-                    style={styles.quickStart} 
+                  <button
+                    key={i}
+                    style={styles.quickStart}
                     onClick={() => sendMessage(item.text)}
-                    onMouseOver={(e) => {
-                      e.currentTarget.style.background = 'rgba(247, 208, 71, 0.1)';
-                      e.currentTarget.style.borderColor = 'rgba(247, 208, 71, 0.3)';
-                      e.currentTarget.style.color = '#f7d047';
-                    }}
-                    onMouseOut={(e) => {
-                      e.currentTarget.style.background = 'rgba(24, 24, 27, 0.8)';
-                      e.currentTarget.style.borderColor = '#27272a';
-                      e.currentTarget.style.color = '#a1a1aa';
-                    }}
                   >
-                    <span style={styles.quickStartIcon}><item.icon size={18} /></span>
+                    <span style={styles.quickStartIcon}><item.icon size={isMobile ? 16 : 18} /></span>
                     <span>{item.text}</span>
                   </button>
                 ))}
@@ -749,9 +750,9 @@ export default function AIStrategistPage() {
               rows={1}
               disabled={voiceMode}
             />
-            
+
             {voiceSupported && (
-              <button 
+              <button
                 style={{
                   ...styles.btnIcon,
                   ...styles.voiceBtn,
@@ -761,12 +762,12 @@ export default function AIStrategistPage() {
                 onClick={toggleVoiceMode}
                 title={voiceMode ? 'Exit voice mode' : 'Voice mode'}
               >
-                <AudioLines size={20} />
+                <AudioLines size={isMobile ? 18 : 20} />
               </button>
             )}
-            
+
             {voiceSupported && !voiceMode && (
-              <button 
+              <button
                 style={{
                   ...styles.btnIcon,
                   ...styles.micBtn,
@@ -777,24 +778,24 @@ export default function AIStrategistPage() {
                 disabled={isLoading}
                 title={isListening ? 'Stop listening' : 'Voice input'}
               >
-                {isListening ? <MicOff size={20} /> : <Mic size={20} />}
+                {isListening ? <MicOff size={isMobile ? 18 : 20} /> : <Mic size={isMobile ? 18 : 20} />}
               </button>
             )}
-            
-            <button 
+
+            <button
               style={{
                 ...styles.btnIcon,
                 ...styles.sendBtn,
                 opacity: !inputValue.trim() || isLoading ? 0.4 : 1,
                 cursor: !inputValue.trim() || isLoading ? 'not-allowed' : 'pointer',
               }}
-              onClick={() => sendMessage()} 
+              onClick={() => sendMessage()}
               disabled={!inputValue.trim() || isLoading}
             >
-              {isLoading ? <Loader2 size={20} style={{ animation: 'spin 1s linear infinite' }} /> : <Send size={20} />}
+              {isLoading ? <Loader2 size={isMobile ? 18 : 20} style={{ animation: 'spin 1s linear infinite' }} /> : <Send size={isMobile ? 18 : 20} />}
             </button>
           </div>
-          
+
           <div style={styles.inputHint}>
             {voiceSupported ? (
               <>

@@ -1,256 +1,333 @@
+"use client";
+
 import Link from 'next/link';
+import { ArrowLeft, ShieldCheck } from 'lucide-react';
 
-export default function PrivacyPage() {
+export default function PrivacyPolicy() {
+  const effectiveDate = "January 9, 2026";
+  
   return (
-    <div style={styles.page}>
-      <nav style={styles.nav}>
-        <Link href="/" style={styles.logo}>
-          605b<span style={{ color: '#d4a574' }}>.ai</span>
+    <div style={{
+      minHeight: '100vh',
+      background: '#09090b',
+      color: '#fafafa',
+      padding: '40px 20px',
+    }}>
+      <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+        <Link 
+          href="/"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            color: '#f7d047',
+            textDecoration: 'none',
+            fontSize: '14px',
+            marginBottom: '32px',
+          }}
+        >
+          <ArrowLeft size={16} />
+          Back to Home
         </Link>
-        <Link href="/" style={styles.backLink}>← Back to Home</Link>
-      </nav>
 
-      <main style={styles.main}>
-        <h1 style={styles.title}>Privacy Policy</h1>
-        <p style={styles.updated}>Last updated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+        <h1 style={{ fontSize: '32px', fontWeight: 700, marginBottom: '8px' }}>Privacy Policy</h1>
+        <p style={{ color: '#71717a', marginBottom: '24px' }}>Effective Date: {effectiveDate}</p>
 
-        <div style={styles.content}>
-          <section style={styles.section}>
-            <h2 style={styles.heading}>1. Introduction</h2>
-            <p style={styles.paragraph}>
-              Ninth Wave LLC ("Company," "we," "us," or "our") operates 605b.ai (the "Service"). This Privacy Policy 
-              explains how we collect, use, disclose, and safeguard your information when you use our Service.
+        {/* Trust Banner */}
+        <div style={{
+          background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.05) 100%)',
+          border: '2px solid rgba(34, 197, 94, 0.4)',
+          borderRadius: '12px',
+          padding: '20px 24px',
+          marginBottom: '32px',
+        }}>
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '12px', 
+            marginBottom: '12px',
+            color: '#22c55e',
+            fontWeight: 700,
+            fontSize: '16px',
+          }}>
+            <ShieldCheck size={24} />
+            YOUR PRIVACY IS PROTECTED
+          </div>
+          <p style={{ fontSize: '15px', color: '#fafafa', lineHeight: 1.6, marginBottom: '0' }}>
+            <strong>We do NOT store your credit report PDF files.</strong> Your uploaded documents are processed in-memory, analyzed, and immediately discarded. We never retain copies of your actual credit report files on our servers. Only the analysis results (flagged items) are saved to your account—and you can delete those anytime.
+          </p>
+        </div>
+
+        <div style={{ 
+          fontSize: '15px', 
+          lineHeight: 1.8, 
+          color: '#d4d4d4',
+        }}>
+          <section style={{ marginBottom: '32px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fafafa', marginBottom: '16px' }}>1. Introduction</h2>
+            <p style={{ marginBottom: '16px' }}>
+              <strong>Ninth Wave Analytics LLC</strong> ("Company," "we," "us," or "our") respects your privacy and is committed to protecting the personal information you share with us. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our 605b.ai website and application (the "Service").
+            </p>
+            <p style={{ marginBottom: '16px' }}>
+              <strong>PLEASE READ THIS PRIVACY POLICY CAREFULLY.</strong> By accessing or using the Service, you acknowledge that you have read, understood, and agree to be bound by this Privacy Policy. If you do not agree with the terms of this Privacy Policy, please do not access the Service.
+            </p>
+            <p>
+              We reserve the right to make changes to this Privacy Policy at any time. We will notify you of any changes by updating the "Effective Date" at the top of this Privacy Policy. Your continued use of the Service after any changes constitutes acceptance of those changes.
             </p>
           </section>
 
-          <section style={styles.section}>
-            <h2 style={styles.heading}>2. Information We Collect</h2>
+          <section style={{ marginBottom: '32px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fafafa', marginBottom: '16px' }}>2. Information We Collect</h2>
             
-            <h3 style={styles.subheading}>Information You Provide</h3>
-            <ul style={styles.list}>
-              <li><strong>Account Information:</strong> Email address and authentication credentials when you create an account</li>
-              <li><strong>Uploaded Documents:</strong> Credit reports and other documents you choose to upload for analysis</li>
-              <li><strong>User Content:</strong> Information you enter into letter templates, dispute tracking, and chat interactions</li>
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#f7d047', marginBottom: '12px' }}>2.1 Information You Provide Directly</h3>
+            <p style={{ marginBottom: '16px' }}>We may collect the following information that you voluntarily provide:</p>
+            <ul style={{ marginBottom: '16px', paddingLeft: '24px' }}>
+              <li style={{ marginBottom: '8px' }}><strong>Account Information:</strong> Name, email address, and password when you create an account</li>
+              <li style={{ marginBottom: '8px' }}><strong>Profile Information:</strong> Information you provide during onboarding, including your situation, goals, and timeline preferences</li>
+              <li style={{ marginBottom: '8px' }}><strong>Credit Report Data:</strong> Information contained in credit reports you upload for analysis, which may include personally identifiable information, account details, payment history, and other financial information</li>
+              <li style={{ marginBottom: '8px' }}><strong>Dispute Information:</strong> Details about disputes you track, including creditor names, account information, dispute types, and correspondence</li>
+              <li style={{ marginBottom: '8px' }}><strong>Communications:</strong> Information you provide when you contact us for support or feedback</li>
             </ul>
 
-            <h3 style={styles.subheading}>Automatically Collected Information</h3>
-            <ul style={styles.list}>
-              <li><strong>Usage Data:</strong> Information about how you interact with the Service</li>
-              <li><strong>Device Information:</strong> Browser type, operating system, and device identifiers</li>
-              <li><strong>Log Data:</strong> IP address, access times, and pages viewed</li>
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#f7d047', marginBottom: '12px' }}>2.2 Information Collected Automatically</h3>
+            <p style={{ marginBottom: '16px' }}>When you access the Service, we may automatically collect:</p>
+            <ul style={{ marginBottom: '16px', paddingLeft: '24px' }}>
+              <li style={{ marginBottom: '8px' }}><strong>Device Information:</strong> Device type, operating system, browser type, and unique device identifiers</li>
+              <li style={{ marginBottom: '8px' }}><strong>Log Data:</strong> IP address, access times, pages viewed, and referring URL</li>
+              <li style={{ marginBottom: '8px' }}><strong>Usage Data:</strong> Features used, actions taken, and time spent on the Service</li>
+              <li style={{ marginBottom: '8px' }}><strong>Cookies and Similar Technologies:</strong> We use cookies and similar tracking technologies to maintain your session and preferences</li>
+            </ul>
+
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#f7d047', marginBottom: '12px' }}>2.3 Sensitive Information</h3>
+            <p style={{ 
+              marginBottom: '16px', 
+              padding: '16px', 
+              background: 'rgba(247, 208, 71, 0.1)', 
+              border: '1px solid rgba(247, 208, 71, 0.2)',
+              borderRadius: '8px',
+            }}>
+              <strong>Important:</strong> Credit reports may contain sensitive personal information including Social Security numbers, dates of birth, addresses, and detailed financial information. We process this information solely to provide the Service and implement strong security measures to protect it. You should only upload credit reports if you are comfortable with our handling of this data as described in this Privacy Policy.
+            </p>
+          </section>
+
+          <section style={{ marginBottom: '32px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fafafa', marginBottom: '16px' }}>3. How We Use Your Information</h2>
+            <p style={{ marginBottom: '16px' }}>We use the information we collect for the following purposes:</p>
+            <ul style={{ marginBottom: '16px', paddingLeft: '24px' }}>
+              <li style={{ marginBottom: '8px' }}><strong>Provide the Service:</strong> To operate, maintain, and improve the Service, including analyzing credit reports, generating dispute letters, and tracking disputes</li>
+              <li style={{ marginBottom: '8px' }}><strong>Account Management:</strong> To create and manage your account, authenticate your identity, and provide customer support</li>
+              <li style={{ marginBottom: '8px' }}><strong>Communications:</strong> To send you service-related notifications, deadline reminders, and respond to your inquiries</li>
+              <li style={{ marginBottom: '8px' }}><strong>AI Processing:</strong> To process your credit reports and provide AI-powered analysis and recommendations</li>
+              <li style={{ marginBottom: '8px' }}><strong>Security:</strong> To detect, prevent, and address technical issues, fraud, and security threats</li>
+              <li style={{ marginBottom: '8px' }}><strong>Legal Compliance:</strong> To comply with applicable laws, regulations, and legal processes</li>
+              <li style={{ marginBottom: '8px' }}><strong>Improvement:</strong> To analyze usage patterns and improve the Service</li>
             </ul>
           </section>
 
-          <section style={styles.section}>
-            <h2 style={styles.heading}>3. How We Use Your Information</h2>
-            <p style={styles.paragraph}>We use collected information to:</p>
-            <ul style={styles.list}>
-              <li>Provide, maintain, and improve the Service</li>
-              <li>Process and analyze your uploaded documents</li>
-              <li>Generate personalized letter templates</li>
-              <li>Provide AI-assisted educational guidance</li>
-              <li>Communicate with you about the Service</li>
-              <li>Ensure security and prevent fraud</li>
-              <li>Comply with legal obligations</li>
+          <section style={{ marginBottom: '32px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fafafa', marginBottom: '16px' }}>4. How We Share Your Information</h2>
+            <p style={{ marginBottom: '16px' }}>
+              <strong>We do not sell your personal information.</strong> We may share your information in the following circumstances:
+            </p>
+
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#f7d047', marginBottom: '12px' }}>4.1 Service Providers</h3>
+            <p style={{ marginBottom: '16px' }}>We share information with third-party service providers who perform services on our behalf:</p>
+            <ul style={{ marginBottom: '16px', paddingLeft: '24px' }}>
+              <li style={{ marginBottom: '8px' }}><strong>Clerk:</strong> Authentication and user management</li>
+              <li style={{ marginBottom: '8px' }}><strong>Anthropic:</strong> AI processing for credit report analysis (credit report content is processed but not stored by Anthropic)</li>
+              <li style={{ marginBottom: '8px' }}><strong>Upstash:</strong> Database services for storing your disputes, settings, and audit logs</li>
+              <li style={{ marginBottom: '8px' }}><strong>Resend:</strong> Email delivery for notifications and reminders</li>
+              <li style={{ marginBottom: '8px' }}><strong>Vercel:</strong> Website hosting and infrastructure</li>
             </ul>
+
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#f7d047', marginBottom: '12px' }}>4.2 Legal Requirements</h3>
+            <p style={{ marginBottom: '16px' }}>
+              We may disclose your information if required to do so by law or in response to valid requests by public authorities (e.g., a court or government agency).
+            </p>
+
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#f7d047', marginBottom: '12px' }}>4.3 Business Transfers</h3>
+            <p style={{ marginBottom: '16px' }}>
+              If we are involved in a merger, acquisition, or sale of assets, your information may be transferred as part of that transaction.
+            </p>
+
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#f7d047', marginBottom: '12px' }}>4.4 With Your Consent</h3>
+            <p>
+              We may share your information with third parties when you have given us your consent to do so.
+            </p>
           </section>
 
-          <section style={styles.section}>
-            <h2 style={styles.heading}>4. Data Storage and Security</h2>
-            <div style={styles.highlight}>
-              <p style={styles.paragraph}>
-                <strong>Document Processing:</strong> Uploaded credit reports are processed to extract text for analysis. 
-                We implement industry-standard security measures to protect your data during transmission and storage.
-              </p>
-              <p style={styles.paragraph}>
-                <strong>Local Storage:</strong> Some data (such as dispute tracking and audit logs) may be stored locally 
-                in your browser for convenience. This data remains on your device unless you explicitly export it.
-              </p>
+          <section style={{ marginBottom: '32px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fafafa', marginBottom: '16px' }}>5. Data Storage and Security</h2>
+            
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#f7d047', marginBottom: '12px' }}>5.1 Data Storage</h3>
+            <p style={{ marginBottom: '16px' }}>
+              Your data is stored on secure servers provided by our service providers. We use industry-standard encryption for data in transit (TLS/SSL) and at rest.
+            </p>
+
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#f7d047', marginBottom: '12px' }}>5.2 Credit Report Processing — NO PDF STORAGE</h3>
+            <p style={{ 
+              marginBottom: '16px', 
+              padding: '16px', 
+              background: 'rgba(34, 197, 94, 0.1)', 
+              border: '1px solid rgba(34, 197, 94, 0.3)',
+              borderRadius: '8px',
+            }}>
+              <strong>Important Privacy Protection:</strong> We do NOT store your credit report PDF files. Your uploaded documents are processed in-memory, analyzed, and immediately discarded. We never retain copies of your actual credit report files on our servers.
+            </p>
+            <p style={{ marginBottom: '16px' }}>
+              When you upload a credit report for analysis:
+            </p>
+            <ul style={{ marginBottom: '16px', paddingLeft: '24px' }}>
+              <li style={{ marginBottom: '8px' }}><strong>PDF files are NOT stored</strong> — Files are processed in-memory and immediately discarded after analysis</li>
+              <li style={{ marginBottom: '8px' }}><strong>Text is extracted temporarily</strong> — Report content is extracted, sent to our AI for analysis, then deleted</li>
+              <li style={{ marginBottom: '8px' }}><strong>Only findings are saved</strong> — We store only the analysis results (flagged items, issues found) in your account, not the original report content</li>
+              <li style={{ marginBottom: '8px' }}><strong>AI provider does not retain data</strong> — Our AI provider (Anthropic) processes your data in real-time and does not store it after the request completes</li>
+              <li style={{ marginBottom: '8px' }}><strong>You control your data</strong> — You can delete your flagged items and analysis results at any time</li>
+            </ul>
+
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#f7d047', marginBottom: '12px' }}>5.3 Security Measures</h3>
+            <p style={{ marginBottom: '16px' }}>
+              We implement appropriate technical and organizational security measures to protect your personal information, including:
+            </p>
+            <ul style={{ marginBottom: '16px', paddingLeft: '24px' }}>
+              <li style={{ marginBottom: '8px' }}>Encryption of data in transit and at rest</li>
+              <li style={{ marginBottom: '8px' }}>Secure authentication through our identity provider</li>
+              <li style={{ marginBottom: '8px' }}>Regular security assessments</li>
+              <li style={{ marginBottom: '8px' }}>Access controls limiting employee access to personal data</li>
+            </ul>
+            <p>
+              However, no method of transmission over the Internet or electronic storage is 100% secure. While we strive to use commercially acceptable means to protect your personal information, we cannot guarantee its absolute security.
+            </p>
+          </section>
+
+          <section style={{ marginBottom: '32px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fafafa', marginBottom: '16px' }}>6. Data Retention</h2>
+            <p style={{ marginBottom: '16px' }}>
+              We retain your personal information for as long as your account is active or as needed to provide you the Service. We may also retain certain information as required by law or for legitimate business purposes, such as:
+            </p>
+            <ul style={{ marginBottom: '16px', paddingLeft: '24px' }}>
+              <li style={{ marginBottom: '8px' }}>Audit logs are retained for potential litigation support</li>
+              <li style={{ marginBottom: '8px' }}>Account information is retained until you request deletion</li>
+              <li style={{ marginBottom: '8px' }}>Aggregated, anonymized data may be retained indefinitely for analytics</li>
+            </ul>
+            <p>
+              You may request deletion of your account and associated data at any time by contacting us.
+            </p>
+          </section>
+
+          <section style={{ marginBottom: '32px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fafafa', marginBottom: '16px' }}>7. Your Rights and Choices</h2>
+            
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#f7d047', marginBottom: '12px' }}>7.1 Access and Portability</h3>
+            <p style={{ marginBottom: '16px' }}>
+              You may access your personal information through your account dashboard. You may export your dispute history and audit log at any time.
+            </p>
+
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#f7d047', marginBottom: '12px' }}>7.2 Correction</h3>
+            <p style={{ marginBottom: '16px' }}>
+              You may update or correct your account information at any time through your account settings.
+            </p>
+
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#f7d047', marginBottom: '12px' }}>7.3 Deletion</h3>
+            <p style={{ marginBottom: '16px' }}>
+              You may request deletion of your account and personal information by contacting us. We will delete or anonymize your information within 30 days, except where we are required to retain it by law.
+            </p>
+
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#f7d047', marginBottom: '12px' }}>7.4 Email Communications</h3>
+            <p style={{ marginBottom: '16px' }}>
+              You may opt out of non-essential email communications through your account settings. You cannot opt out of transactional emails related to your account.
+            </p>
+
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#f7d047', marginBottom: '12px' }}>7.5 Cookies</h3>
+            <p>
+              Most web browsers are set to accept cookies by default. You can usually modify your browser settings to remove or reject cookies. Note that removing or rejecting cookies may affect the availability and functionality of the Service.
+            </p>
+          </section>
+
+          <section style={{ marginBottom: '32px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fafafa', marginBottom: '16px' }}>8. State-Specific Rights</h2>
+            
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#f7d047', marginBottom: '12px' }}>8.1 California Residents (CCPA/CPRA)</h3>
+            <p style={{ marginBottom: '16px' }}>
+              If you are a California resident, you have additional rights under the California Consumer Privacy Act (CCPA) and California Privacy Rights Act (CPRA):
+            </p>
+            <ul style={{ marginBottom: '16px', paddingLeft: '24px' }}>
+              <li style={{ marginBottom: '8px' }}><strong>Right to Know:</strong> You may request information about the categories and specific pieces of personal information we have collected about you</li>
+              <li style={{ marginBottom: '8px' }}><strong>Right to Delete:</strong> You may request deletion of your personal information, subject to certain exceptions</li>
+              <li style={{ marginBottom: '8px' }}><strong>Right to Correct:</strong> You may request correction of inaccurate personal information</li>
+              <li style={{ marginBottom: '8px' }}><strong>Right to Opt-Out:</strong> We do not sell personal information, so this right does not apply</li>
+              <li style={{ marginBottom: '8px' }}><strong>Right to Non-Discrimination:</strong> We will not discriminate against you for exercising your privacy rights</li>
+            </ul>
+            <p style={{ marginBottom: '16px' }}>
+              To exercise these rights, please contact us using the information provided below.
+            </p>
+
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#f7d047', marginBottom: '12px' }}>8.2 Other State Laws</h3>
+            <p>
+              If you are a resident of Virginia, Colorado, Connecticut, Utah, or other states with comprehensive privacy laws, you may have similar rights. Please contact us to exercise your rights under applicable state law.
+            </p>
+          </section>
+
+          <section style={{ marginBottom: '32px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fafafa', marginBottom: '16px' }}>9. Children's Privacy</h2>
+            <p>
+              The Service is not intended for individuals under the age of 18. We do not knowingly collect personal information from children under 18. If you are a parent or guardian and believe your child has provided us with personal information, please contact us immediately. If we become aware that we have collected personal information from a child under 18, we will take steps to delete that information.
+            </p>
+          </section>
+
+          <section style={{ marginBottom: '32px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fafafa', marginBottom: '16px' }}>10. International Data Transfers</h2>
+            <p>
+              Your information may be transferred to and processed in countries other than your country of residence, including the United States. These countries may have data protection laws that are different from the laws of your country. By using the Service, you consent to the transfer of your information to the United States and other countries.
+            </p>
+          </section>
+
+          <section style={{ marginBottom: '32px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fafafa', marginBottom: '16px' }}>11. Third-Party Links</h2>
+            <p>
+              The Service may contain links to third-party websites (such as AnnualCreditReport.com, IdentityTheft.gov, and credit bureau websites). We are not responsible for the privacy practices of these third-party sites. We encourage you to review the privacy policies of any third-party sites you visit.
+            </p>
+          </section>
+
+          <section style={{ marginBottom: '32px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fafafa', marginBottom: '16px' }}>12. Do Not Track</h2>
+            <p>
+              Some browsers have a "Do Not Track" feature that signals to websites that you do not want to have your online activity tracked. The Service does not currently respond to "Do Not Track" signals.
+            </p>
+          </section>
+
+          <section style={{ marginBottom: '32px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fafafa', marginBottom: '16px' }}>13. Contact Us</h2>
+            <p style={{ marginBottom: '16px' }}>
+              If you have any questions about this Privacy Policy or our privacy practices, or if you wish to exercise your privacy rights, please contact us at:
+            </p>
+            <div style={{ 
+              background: '#121214', 
+              border: '1px solid #27272a', 
+              borderRadius: '8px', 
+              padding: '16px',
+              marginBottom: '16px',
+            }}>
+              <p style={{ marginBottom: '4px' }}><strong>Ninth Wave Analytics LLC</strong></p>
+              <p style={{ marginBottom: '4px' }}>Email: privacy@9thwave.io</p>
             </div>
-          </section>
-
-          <section style={styles.section}>
-            <h2 style={styles.heading}>5. Third-Party Services</h2>
-            <p style={styles.paragraph}>We use the following third-party services:</p>
-            <ul style={styles.list}>
-              <li><strong>Clerk:</strong> For authentication and user management</li>
-              <li><strong>Anthropic:</strong> For AI-powered analysis and chat functionality</li>
-              <li><strong>Vercel:</strong> For hosting and infrastructure</li>
-            </ul>
-            <p style={styles.paragraph}>
-              These services have their own privacy policies governing their use of your data. We encourage you to 
-              review their policies.
+            <p>
+              We will respond to your request within 30 days (or sooner if required by applicable law).
             </p>
           </section>
 
-          <section style={styles.section}>
-            <h2 style={styles.heading}>6. Data Sharing</h2>
-            <p style={styles.paragraph}>We do not sell your personal information. We may share information:</p>
-            <ul style={styles.list}>
-              <li>With service providers who assist in operating the Service</li>
-              <li>To comply with legal obligations or valid legal processes</li>
-              <li>To protect our rights, privacy, safety, or property</li>
-              <li>In connection with a merger, acquisition, or sale of assets (with notice to you)</li>
-            </ul>
-          </section>
-
-          <section style={styles.section}>
-            <h2 style={styles.heading}>7. Your Rights</h2>
-            <p style={styles.paragraph}>Depending on your location, you may have the right to:</p>
-            <ul style={styles.list}>
-              <li>Access the personal information we hold about you</li>
-              <li>Request correction of inaccurate information</li>
-              <li>Request deletion of your information</li>
-              <li>Export your data in a portable format</li>
-              <li>Opt out of certain data processing activities</li>
-            </ul>
-            <p style={styles.paragraph}>
-              To exercise these rights, contact us at <a href="mailto:admin@9thwave.io" style={styles.link}>admin@9thwave.io</a>.
-            </p>
-          </section>
-
-          <section style={styles.section}>
-            <h2 style={styles.heading}>8. Data Retention</h2>
-            <p style={styles.paragraph}>
-              We retain your information for as long as your account is active or as needed to provide the Service. 
-              You may request deletion of your account and associated data at any time.
-            </p>
-          </section>
-
-          <section style={styles.section}>
-            <h2 style={styles.heading}>9. Children's Privacy</h2>
-            <p style={styles.paragraph}>
-              The Service is not intended for individuals under 18 years of age. We do not knowingly collect 
-              personal information from children under 18.
-            </p>
-          </section>
-
-          <section style={styles.section}>
-            <h2 style={styles.heading}>10. Changes to This Policy</h2>
-            <p style={styles.paragraph}>
-              We may update this Privacy Policy from time to time. We will notify you of material changes by 
-              posting the new policy on this page and updating the "Last updated" date.
-            </p>
-          </section>
-
-          <section style={styles.section}>
-            <h2 style={styles.heading}>11. Contact Us</h2>
-            <p style={styles.paragraph}>
-              For questions about this Privacy Policy, contact us at:
-            </p>
-            <p style={styles.paragraph}>
-              <a href="mailto:admin@9thwave.io" style={styles.link}>admin@9thwave.io</a><br />
-              Ninth Wave LLC<br />
-              Delaware, USA
-            </p>
-          </section>
+          <div style={{ 
+            borderTop: '1px solid #27272a', 
+            paddingTop: '24px', 
+            marginTop: '40px',
+            textAlign: 'center',
+            color: '#71717a',
+            fontSize: '13px',
+          }}>
+            <p>© {new Date().getFullYear()} Ninth Wave Analytics LLC. All rights reserved.</p>
+          </div>
         </div>
-      </main>
-
-      <footer style={styles.footer}>
-        <div>© {new Date().getFullYear()} Ninth Wave LLC · Delaware, USA</div>
-        <div style={styles.footerLinks}>
-          <Link href="/terms" style={styles.footerLink}>Terms of Service</Link>
-        </div>
-      </footer>
+      </div>
     </div>
   );
 }
-
-const styles = {
-  page: {
-    minHeight: '100vh',
-    background: '#09090b',
-    color: '#fafafa',
-  },
-  nav: {
-    padding: '20px 40px',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderBottom: '1px solid #1c1c1f',
-  },
-  logo: {
-    fontSize: '20px',
-    fontWeight: '700',
-    color: '#fafafa',
-    textDecoration: 'none',
-  },
-  backLink: {
-    fontSize: '14px',
-    color: '#71717a',
-    textDecoration: 'none',
-  },
-  main: {
-    maxWidth: '800px',
-    margin: '0 auto',
-    padding: '60px 40px',
-  },
-  title: {
-    fontSize: '36px',
-    fontWeight: '700',
-    marginBottom: '8px',
-  },
-  updated: {
-    fontSize: '14px',
-    color: '#71717a',
-    marginBottom: '48px',
-  },
-  content: {},
-  section: {
-    marginBottom: '40px',
-  },
-  heading: {
-    fontSize: '20px',
-    fontWeight: '600',
-    marginBottom: '16px',
-    color: '#fafafa',
-  },
-  subheading: {
-    fontSize: '16px',
-    fontWeight: '600',
-    marginTop: '20px',
-    marginBottom: '12px',
-    color: '#e4e4e7',
-  },
-  paragraph: {
-    fontSize: '15px',
-    lineHeight: '1.7',
-    color: '#a1a1aa',
-    marginBottom: '16px',
-  },
-  list: {
-    fontSize: '15px',
-    lineHeight: '1.8',
-    color: '#a1a1aa',
-    paddingLeft: '24px',
-    marginBottom: '16px',
-  },
-  highlight: {
-    padding: '24px',
-    background: '#0f0f11',
-    border: '1px solid #27272a',
-    borderRadius: '12px',
-  },
-  link: {
-    color: '#d4a574',
-    textDecoration: 'none',
-  },
-  footer: {
-    padding: '24px 40px',
-    borderTop: '1px solid #1c1c1f',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    fontSize: '13px',
-    color: '#52525b',
-  },
-  footerLinks: {
-    display: 'flex',
-    gap: '24px',
-  },
-  footerLink: {
-    color: '#52525b',
-    textDecoration: 'none',
-  },
-};

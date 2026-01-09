@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useUser, useAuth } from '@clerk/nextjs';
 import {
   Shield, FileText, Scale, Zap, ArrowRight, ArrowLeft,
   Check, Target, Clock, AlertTriangle, Sparkles, Upload,
@@ -75,6 +75,7 @@ const TIMELINES = [
 
 export default function OnboardingWizard({ onComplete, onSkip }) {
   const { user } = useUser();
+  const { isSignedIn } = useAuth();
   const isMobile = useIsMobile();
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState({
@@ -123,9 +124,25 @@ export default function OnboardingWizard({ onComplete, onSkip }) {
     setTimeout(goNext, 300);
   };
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
+    // Save to localStorage first (offline-first)
     localStorage.setItem('605b_onboarding_complete', 'true');
     localStorage.setItem('605b_user_profile', JSON.stringify(answers));
+    localStorage.setItem('605b_onboarding_date', new Date().toISOString());
+
+    // Sync to server
+    if (isSignedIn) {
+      try {
+        await fetch('/api/user-data/profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ profile: answers }),
+        });
+      } catch (error) {
+        console.error('Failed to sync profile:', error);
+      }
+    }
+
     onComplete?.(answers);
   };
 

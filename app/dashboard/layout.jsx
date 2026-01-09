@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
-import { useUser, SignOutButton } from '@clerk/nextjs';
+import { useUser, useAuth, SignOutButton } from '@clerk/nextjs';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -12,12 +12,14 @@ import OnboardingWizard from './components/OnboardingWizard';
 
 export default function DashboardLayout({ children }) {
   const { user } = useUser();
+  const { isSignedIn } = useAuth();
   const pathname = usePathname();
   const isAIStrategist = pathname === '/dashboard/ai-strategist';
   const [rightSidebarOpen, setRightSidebarOpen] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [onboardingChecked, setOnboardingChecked] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [isMobile, setIsMobile] = useState(false);
   const userMenuRef = useRef(null);
@@ -36,13 +38,44 @@ export default function DashboardLayout({ children }) {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Check if onboarding is complete
+  // Check if onboarding is complete (localStorage first, then server)
   useEffect(() => {
-    const onboardingComplete = localStorage.getItem('605b_onboarding_complete');
-    if (!onboardingComplete && user) {
+    if (!user || onboardingChecked) return;
+
+    const checkOnboarding = async () => {
+      // Check localStorage first (instant)
+      const localComplete = localStorage.getItem('605b_onboarding_complete');
+      if (localComplete === 'true') {
+        setOnboardingChecked(true);
+        return;
+      }
+
+      // Check server if signed in
+      if (isSignedIn) {
+        try {
+          const res = await fetch('/api/user-data/profile');
+          if (res.ok) {
+            const { profile } = await res.json();
+            if (profile?.onboardingComplete) {
+              // Sync to localStorage
+              localStorage.setItem('605b_onboarding_complete', 'true');
+              localStorage.setItem('605b_user_profile', JSON.stringify(profile));
+              setOnboardingChecked(true);
+              return;
+            }
+          }
+        } catch (error) {
+          console.error('Failed to check onboarding status:', error);
+        }
+      }
+
+      // Not complete - show onboarding
       setShowOnboarding(true);
-    }
-  }, [user]);
+      setOnboardingChecked(true);
+    };
+
+    checkOnboarding();
+  }, [user, isSignedIn, onboardingChecked]);
 
   // Load notifications from localStorage and check periodically
   useEffect(() => {

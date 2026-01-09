@@ -1,20 +1,69 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { 
   Search, Upload, ExternalLink, AlertCircle, ChevronDown, ChevronUp,
-  BookOpen, Shield, Scale, TrendingUp, AlertTriangle, CheckCircle, Clock
+  BookOpen, Shield, Scale, TrendingUp, AlertTriangle, CheckCircle, Clock,
+  FileText, RefreshCw, Flag
 } from 'lucide-react';
+import { useFlaggedItems } from '@/lib/useUserData';
 
 export default function AnalyzePage() {
+  const router = useRouter();
+  const { saveFindings } = useFlaggedItems();
   const [resourcesExpanded, setResourcesExpanded] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState(null);
+  const [error, setError] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
 
-  const handleFileUpload = (e) => {
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const handleFileUpload = async (e) => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
+    
     setIsUploading(true);
-    setTimeout(() => setIsUploading(false), 2000);
+    setIsAnalyzing(true);
+    setError(null);
+    setAnalysisResult(null);
+
+    try {
+      const formData = new FormData();
+      files.forEach(file => formData.append('files', file));
+
+      const response = await fetch('/api/analyze', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Analysis failed');
+      }
+
+      setAnalysisResult(data);
+
+      // Save findings to flagged items if there are any
+      if (data.analysis?.findings && data.analysis.findings.length > 0) {
+        await saveFindings(data.analysis.findings);
+      }
+
+    } catch (err) {
+      console.error('Analysis error:', err);
+      setError(err.message);
+    } finally {
+      setIsUploading(false);
+      setIsAnalyzing(false);
+    }
   };
 
   const analysisFeatures = [
@@ -43,9 +92,110 @@ export default function AnalyzePage() {
   return (
     <>
       <div style={{ marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '24px', fontWeight: 600, marginBottom: '4px' }}>Analyze Reports</h1>
+        <h1 style={{ fontSize: isMobile ? '20px' : '24px', fontWeight: 600, marginBottom: '4px' }}>Analyze Reports</h1>
         <p style={{ fontSize: '14px', color: '#737373' }}>AI-powered analysis identifies disputes, fraud, and violations</p>
       </div>
+
+      {/* Analysis Result */}
+      {analysisResult && (
+        <div style={{ 
+          background: '#121214', 
+          border: '1px solid #22c55e', 
+          borderRadius: '12px', 
+          padding: '20px 24px', 
+          marginBottom: '24px' 
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+            <div style={{
+              width: '40px',
+              height: '40px',
+              background: 'rgba(34, 197, 94, 0.1)',
+              borderRadius: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <CheckCircle size={20} style={{ color: '#22c55e' }} />
+            </div>
+            <div>
+              <h2 style={{ fontSize: '16px', fontWeight: 600 }}>Analysis Complete</h2>
+              <p style={{ fontSize: '13px', color: '#71717a' }}>
+                {analysisResult.filesProcessed?.length || 0} file(s) processed
+              </p>
+            </div>
+          </div>
+
+          {/* Summary */}
+          {analysisResult.analysis?.summary && (
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
+              gap: '12px',
+              marginBottom: '16px',
+            }}>
+              <div style={{ padding: '12px', background: '#1a1a1c', borderRadius: '8px' }}>
+                <div style={{ fontSize: '11px', color: '#71717a', marginBottom: '4px' }}>Total Accounts</div>
+                <div style={{ fontSize: '20px', fontWeight: 600 }}>{analysisResult.analysis.summary.totalAccounts || 0}</div>
+              </div>
+              <div style={{ padding: '12px', background: '#1a1a1c', borderRadius: '8px' }}>
+                <div style={{ fontSize: '11px', color: '#71717a', marginBottom: '4px' }}>Potential Issues</div>
+                <div style={{ fontSize: '20px', fontWeight: 600, color: '#f59e0b' }}>{analysisResult.analysis.summary.potentialIssues || 0}</div>
+              </div>
+              <div style={{ padding: '12px', background: '#1a1a1c', borderRadius: '8px' }}>
+                <div style={{ fontSize: '11px', color: '#71717a', marginBottom: '4px' }}>High Priority</div>
+                <div style={{ fontSize: '20px', fontWeight: 600, color: '#ef4444' }}>{analysisResult.analysis.summary.highPriorityItems || 0}</div>
+              </div>
+              <div style={{ padding: '12px', background: '#1a1a1c', borderRadius: '8px' }}>
+                <div style={{ fontSize: '11px', color: '#71717a', marginBottom: '4px' }}>Assessment</div>
+                <div style={{ fontSize: '13px', fontWeight: 500 }}>{analysisResult.analysis.summary.overallAssessment || 'N/A'}</div>
+              </div>
+            </div>
+          )}
+
+          {/* Action Button */}
+          {analysisResult.analysis?.findings?.length > 0 && (
+            <button
+              onClick={() => router.push('/dashboard/flagged')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '12px 20px',
+                background: 'linear-gradient(135deg, #f7d047 0%, #d4b840 100%)',
+                border: 'none',
+                borderRadius: '8px',
+                color: '#09090b',
+                fontSize: '14px',
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              <Flag size={18} />
+              View {analysisResult.analysis.findings.length} Flagged Items
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Error */}
+      {error && (
+        <div style={{
+          background: 'rgba(239, 68, 68, 0.1)',
+          border: '1px solid rgba(239, 68, 68, 0.3)',
+          borderRadius: '12px',
+          padding: '16px 20px',
+          marginBottom: '24px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+        }}>
+          <AlertCircle size={20} style={{ color: '#ef4444', flexShrink: 0 }} />
+          <div>
+            <div style={{ fontSize: '14px', fontWeight: 500, color: '#ef4444' }}>Analysis Failed</div>
+            <div style={{ fontSize: '13px', color: '#a1a1aa' }}>{error}</div>
+          </div>
+        </div>
+      )}
 
       {/* Comprehensive Credit Analysis */}
       <div style={{ background: '#121214', border: '1px solid #1f1f23', borderRadius: '12px', padding: '20px 24px', marginBottom: '24px' }}>
@@ -72,7 +222,7 @@ export default function AnalyzePage() {
             </p>
           </div>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '12px' }}>
           {analysisFeatures.map((feature, i) => (
             <div key={i} style={{
               display: 'flex',
@@ -107,7 +257,7 @@ export default function AnalyzePage() {
 
       {/* Upload Section */}
       <div style={{ background: '#121214', border: '1px solid #1f1f23', borderRadius: '12px', padding: '24px', marginBottom: '24px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
           <h3 style={{ fontSize: '15px', fontWeight: 600 }}>Upload Credit Reports</h3>
           <div style={{
             display: 'flex',
@@ -126,11 +276,13 @@ export default function AnalyzePage() {
         </div>
         <label style={{
           display: 'block',
-          border: '2px dashed #262629',
+          border: isAnalyzing ? '2px solid #f7d047' : '2px dashed #262629',
           borderRadius: '12px',
-          padding: '48px 24px',
+          padding: isMobile ? '32px 16px' : '48px 24px',
           textAlign: 'center',
-          cursor: 'pointer'
+          cursor: isAnalyzing ? 'not-allowed' : 'pointer',
+          opacity: isAnalyzing ? 0.7 : 1,
+          transition: 'all 0.2s',
         }}>
           <div style={{
             width: '56px',
@@ -143,11 +295,26 @@ export default function AnalyzePage() {
             margin: '0 auto 16px',
             color: '#f7d047'
           }}>
-            <Upload size={24} />
+            {isAnalyzing ? (
+              <RefreshCw size={24} style={{ animation: 'spin 1s linear infinite' }} />
+            ) : (
+              <Upload size={24} />
+            )}
           </div>
-          <div style={{ fontSize: '15px', fontWeight: 500, marginBottom: '4px' }}>Tap to upload credit reports</div>
-          <div style={{ fontSize: '13px', color: '#737373' }}>PDF files from Experian, Equifax, TransUnion</div>
-          <input type="file" accept=".pdf" multiple onChange={handleFileUpload} style={{ display: 'none' }} />
+          <div style={{ fontSize: '15px', fontWeight: 500, marginBottom: '4px' }}>
+            {isAnalyzing ? 'Analyzing your reports...' : 'Tap to upload credit reports'}
+          </div>
+          <div style={{ fontSize: '13px', color: '#737373' }}>
+            {isAnalyzing ? 'This may take a minute' : 'PDF files from Experian, Equifax, TransUnion'}
+          </div>
+          <input 
+            type="file" 
+            accept=".pdf" 
+            multiple 
+            onChange={handleFileUpload} 
+            disabled={isAnalyzing}
+            style={{ display: 'none' }} 
+          />
         </label>
       </div>
 
@@ -155,7 +322,7 @@ export default function AnalyzePage() {
       <div style={{ background: '#121214', border: '1px solid #1f1f23', borderRadius: '12px', padding: '32px 24px', textAlign: 'center', marginBottom: '24px' }}>
         <h3 style={{ fontSize: '15px', fontWeight: 600, marginBottom: '8px' }}>Don't have your reports yet?</h3>
         <p style={{ fontSize: '13px', color: '#737373', marginBottom: '20px' }}>You're entitled to free credit reports from each bureau every week.</p>
-        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
           <a href="https://www.annualcreditreport.com" target="_blank" rel="noopener noreferrer" style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -259,6 +426,13 @@ export default function AnalyzePage() {
           </div>
         )}
       </div>
+
+      <style jsx global>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </>
   );
 }

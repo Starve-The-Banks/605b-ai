@@ -141,6 +141,12 @@ export async function POST(request) {
       case 'checkout.session.completed': {
         const session = event.data.object;
         
+        // CRITICAL: Only grant access if payment is confirmed
+        if (session.payment_status !== 'paid') {
+          console.log(`Session ${session.id} not paid yet (status: ${session.payment_status}), skipping`);
+          break;
+        }
+        
         const clerkUserId = session.metadata?.clerkUserId || session.client_reference_id;
         const productType = session.metadata?.productType;
         const productId = session.metadata?.productId;

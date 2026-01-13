@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 
 // Lazy initialization to avoid build-time errors
 let stripe = null;
+let redis = null;
 
 function getStripe() {
   if (!stripe) {
@@ -12,7 +13,20 @@ function getStripe() {
   return stripe;
 }
 
+function getRedis() {
+  if (!redis) {
+    const { Redis } = require('@upstash/redis');
+    redis = Redis.fromEnv();
+  }
+  return redis;
+}
+
+// Disclaimer text version - stored with each purchase for chargeback defense
+const DISCLAIMER_TEXT_V1 = "I understand this is self-service software, not a credit repair service. 605b.ai does not send letters on my behalf, contact creditors or bureaus for me, or guarantee any outcome.";
+const CURRENT_DISCLAIMER_VERSION = "v1";
+
 // Tier configuration - matches pricing page exactly
+// Server-side price mapping - client only sends tier ID, never amount
 const TIER_CONFIG = {
   free: {
     name: 'Credit Report Analyzer',
@@ -57,11 +71,15 @@ const ADDON_CONFIG = {
   },
 };
 
+// Allowlist of valid tier IDs - reject anything not in this list
+const VALID_TIER_IDS = ['free', 'toolkit', 'advanced', 'identity-theft'];
+const VALID_ADDON_IDS = ['extra-analysis', 'ai-credits', 'attorney-export'];
 const TIER_ORDER = ['free', 'toolkit', 'advanced', 'identity-theft'];
 
 export async function POST(request) {
   try {
     const stripeClient = getStripe();
+    const redisClient = getRedis();
     const { userId } = await auth();
     const user = await currentUser();
 
@@ -72,6 +90,15 @@ export async function POST(request) {
     const body = await request.json();
     const { tierId, addonId, disclaimerAccepted, disclaimerTimestamp, upgradeFrom } = body;
 
+    // Validate tier/addon ID against allowlist (security: prevent injection)
+    if (tierId && !VALID_TIER_IDS.includes(tierId)) {
+      return NextResponse.json({ error: 'Invalid tier' }, { status: 400 });
+    }
+    if (addonId && !VALID_ADDON_IDS.includes(addonId)) {
+      return NextResponse.json({ error: 'Invalid add-on' }, { status: 400 });
+    }
+
+    // Require disclaimer for paid products
     if ((tierId && tierId !== 'free') || addonId) {
       if (!disclaimerAccepted) {
         return NextResponse.json({ 
@@ -80,14 +107,15 @@ export async function POST(request) {
       }
     }
 
+    // Get or create Stripe customer (with proper dedup)
+    const customerId = await getOrCreateStripeCustomer(stripeClient, redisClient, user, userId);
+
     if (addonId) {
       const addon = ADDON_CONFIG[addonId];
-      if (!addon) {
-        return NextResponse.json({ error: 'Invalid add-on' }, { status: 400 });
-      }
+      // Amount comes from server config, not client
 
       const session = await createCheckoutSession(stripeClient, {
-        user,
+        customerId,
         userId,
         product: addon,
         productType: 'addon',
@@ -107,10 +135,7 @@ export async function POST(request) {
       }
 
       const tier = TIER_CONFIG[tierId];
-      if (!tier) {
-        return NextResponse.json({ error: 'Invalid tier' }, { status: 400 });
-      }
-
+      // Amount comes from server config, not client
       let finalAmount = tier.amount;
       let isUpgrade = false;
       
@@ -129,7 +154,7 @@ export async function POST(request) {
       }
 
       const session = await createCheckoutSession(stripeClient, {
-        user,
+        customerId,
         userId,
         product: { ...tier, amount: finalAmount },
         productType: 'tier',
@@ -153,18 +178,44 @@ export async function POST(request) {
   }
 }
 
-async function createCheckoutSession(stripeClient, { user, userId, product, productType, productId, disclaimerTimestamp, isUpgrade, upgradeFrom }) {
-  let customerId;
+// Customer deduplication: store stripeCustomerId on user, reuse forever
+async function getOrCreateStripeCustomer(stripeClient, redisClient, user, userId) {
   const email = user.emailAddresses[0]?.emailAddress;
   
+  // 1. First check if we have a stored stripeCustomerId for this user
+  try {
+    const userProfile = await redisClient.get(`user:${userId}:profile`);
+    if (userProfile) {
+      const profile = typeof userProfile === 'string' ? JSON.parse(userProfile) : userProfile;
+      if (profile.stripeCustomerId) {
+        // Verify customer still exists in Stripe
+        try {
+          const customer = await stripeClient.customers.retrieve(profile.stripeCustomerId);
+          if (!customer.deleted) {
+            return profile.stripeCustomerId;
+          }
+        } catch (e) {
+          // Customer doesn't exist, continue to create new one
+          console.log('Stored Stripe customer not found, creating new one');
+        }
+      }
+    }
+  } catch (e) {
+    console.error('Error reading user profile:', e);
+  }
+
+  // 2. Fallback: search by email (for migrating existing customers)
   const existingCustomers = await stripeClient.customers.list({
     email: email,
     limit: 1,
   });
 
+  let customerId;
+
   if (existingCustomers.data.length > 0) {
     customerId = existingCustomers.data[0].id;
   } else {
+    // 3. Create new customer
     const customer = await stripeClient.customers.create({
       email: email,
       name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || undefined,
@@ -175,6 +226,25 @@ async function createCheckoutSession(stripeClient, { user, userId, product, prod
     customerId = customer.id;
   }
 
+  // 4. Store stripeCustomerId on user profile for future use
+  try {
+    const existingProfile = await redisClient.get(`user:${userId}:profile`);
+    const profile = existingProfile 
+      ? (typeof existingProfile === 'string' ? JSON.parse(existingProfile) : existingProfile)
+      : {};
+    
+    await redisClient.set(`user:${userId}:profile`, JSON.stringify({
+      ...profile,
+      stripeCustomerId: customerId,
+    }));
+  } catch (e) {
+    console.error('Error storing stripeCustomerId:', e);
+  }
+
+  return customerId;
+}
+
+async function createCheckoutSession(stripeClient, { customerId, userId, product, productType, productId, disclaimerTimestamp, isUpgrade, upgradeFrom }) {
   let productName = `605b.ai ${product.name}`;
   let productDescription = `One-time software license`;
   
@@ -207,7 +277,10 @@ async function createCheckoutSession(stripeClient, { user, userId, product, prod
       clerkUserId: userId,
       productType: productType,
       productId: productId,
+      // Store disclaimer acceptance with text version for chargeback defense
       disclaimerAccepted: 'true',
+      disclaimerVersion: CURRENT_DISCLAIMER_VERSION,
+      disclaimerText: DISCLAIMER_TEXT_V1,
       disclaimerTimestamp: disclaimerTimestamp || new Date().toISOString(),
       isUpgrade: isUpgrade ? 'true' : 'false',
       upgradeFrom: upgradeFrom || '',

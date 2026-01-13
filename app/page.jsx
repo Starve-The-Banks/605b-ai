@@ -40,7 +40,7 @@ function ParticleField() {
     const initParticles = () => {
       particlesRef.current = [];
       // Wider spacing on mobile = fewer particles = better performance
-      const spacing = isMobileRef.current ? 120 : 80;
+      const spacing = isMobileRef.current ? 100 : 70;
       const cols = Math.ceil(width / spacing) + 1;
       const rows = Math.ceil(height / spacing) + 1;
 
@@ -51,8 +51,8 @@ function ParticleField() {
             baseY: j * spacing,
             x: i * spacing + (j % 2) * (spacing / 2),
             y: j * spacing,
-            size: isMobileRef.current ? Math.random() * 1 + 0.6 : Math.random() * 1.2 + 0.8,
-            opacity: Math.random() * 0.15 + 0.05,
+            size: isMobileRef.current ? Math.random() * 2 + 2 : Math.random() * 2.5 + 2.5,
+            opacity: Math.random() * 0.4 + 0.35,
           });
         }
       }
@@ -69,22 +69,22 @@ function ParticleField() {
         const dx = mouseRef.current.x - p.x;
         const dy = mouseRef.current.y - p.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        const maxDist = isMobile ? 100 : 150;
+        const maxDist = isMobile ? 150 : 200;
 
         if (dist < maxDist) {
           const force = (maxDist - dist) / maxDist;
           const angle = Math.atan2(dy, dx);
-          p.x = p.baseX - Math.cos(angle) * force * (isMobile ? 20 : 25);
-          p.y = p.baseY - Math.sin(angle) * force * (isMobile ? 20 : 25);
+          p.x = p.baseX - Math.cos(angle) * force * (isMobile ? 50 : 70);
+          p.y = p.baseY - Math.sin(angle) * force * (isMobile ? 50 : 70);
         } else {
-          p.x += (p.baseX - p.x) * 0.06;
-          p.y += (p.baseY - p.y) * 0.06;
+          p.x += (p.baseX - p.x) * 0.18;
+          p.y += (p.baseY - p.y) * 0.18;
         }
       });
 
       // Draw connections (skip on mobile for performance)
       if (!isMobile) {
-        const connectionDist = 100;
+        const connectionDist = 140;
         for (let i = 0; i < particles.length; i++) {
           for (let j = i + 1; j < particles.length; j++) {
             const p1 = particles[i];
@@ -94,12 +94,12 @@ function ParticleField() {
             const dist = Math.sqrt(dx * dx + dy * dy);
 
             if (dist < connectionDist) {
-              const opacity = (1 - dist / connectionDist) * 0.08;
+              const opacity = (1 - dist / connectionDist) * 0.4;
               ctx.beginPath();
               ctx.moveTo(p1.x, p1.y);
               ctx.lineTo(p2.x, p2.y);
               ctx.strokeStyle = `rgba(247, 208, 71, ${opacity})`;
-              ctx.lineWidth = 0.5;
+              ctx.lineWidth = 1.5;
               ctx.stroke();
             }
           }

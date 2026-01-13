@@ -623,6 +623,7 @@ export default function LandingPage() {
           <div className="nav-links">
             <a href="#how-it-works" className="nav-link">How It Works</a>
             <a href="#features" className="nav-link">Features</a>
+            <Link href="/pricing" className="nav-link">Pricing</Link>
             {isSignedIn ? (
               <Link href="/dashboard" className="nav-button-primary">Dashboard</Link>
             ) : (
@@ -648,6 +649,7 @@ export default function LandingPage() {
           <div className="mobile-menu-links">
             <a href="#how-it-works" className="mobile-menu-link" onClick={() => setMobileMenuOpen(false)}>How It Works</a>
             <a href="#features" className="mobile-menu-link" onClick={() => setMobileMenuOpen(false)}>Features</a>
+            <Link href="/pricing" className="mobile-menu-link" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
           </div>
           <div className="mobile-menu-buttons">
             {isSignedIn ? (
@@ -808,6 +810,7 @@ export default function LandingPage() {
                 <Link href="/sign-up" className="footer-link">Get Started</Link>
                 <a href="#features" className="footer-link">Features</a>
                 <a href="#how-it-works" className="footer-link">How It Works</a>
+                <Link href="/pricing" className="footer-link">Pricing</Link>
               </div>
               <div className="footer-column">
                 <div className="footer-column-title">Legal</div>

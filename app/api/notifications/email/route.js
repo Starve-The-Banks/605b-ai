@@ -1,12 +1,12 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import { Resend } from 'resend';
 
-// Initialize Resend only when API key is available (runtime, not build time)
+// Lazy initialization to avoid build-time errors
 let resend = null;
 
 function getResend() {
   if (!resend && process.env.RESEND_API_KEY) {
+    const { Resend } = require('resend');
     resend = new Resend(process.env.RESEND_API_KEY);
   }
   return resend;
@@ -48,7 +48,6 @@ export async function POST(request) {
       );
     }
 
-    // Build email content
     const urgentItems = notifications.filter(n => n.type === 'urgent');
     const warningItems = notifications.filter(n => n.type === 'warning');
 
@@ -58,7 +57,6 @@ export async function POST(request) {
 
     const emailBody = buildEmailBody(urgentItems, warningItems);
 
-    // Send email via Resend
     const { data, error } = await resendClient.emails.send({
       from: '605b.ai <notifications@send.605b.ai>',
       to: email,
@@ -102,7 +100,6 @@ function buildEmailBody(urgentItems, warningItems) {
         <tr>
           <td align="center" style="padding: 40px 20px;">
             <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 600px;">
-              <!-- Header -->
               <tr>
                 <td style="padding-bottom: 24px;">
                   <h1 style="margin: 0; color: #f7d047; font-size: 24px; font-weight: 700;">
@@ -110,8 +107,6 @@ function buildEmailBody(urgentItems, warningItems) {
                   </h1>
                 </td>
               </tr>
-
-              <!-- Main Content -->
               <tr>
                 <td style="background-color: #121214; border-radius: 12px; padding: 32px; border: 1px solid #27272a;">
                   ${urgentItems.length > 0 ? `
@@ -126,7 +121,6 @@ function buildEmailBody(urgentItems, warningItems) {
                     `).join('')}
                   </div>
                   ` : ''}
-
                   ${warningItems.length > 0 ? `
                   <div style="background-color: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px; padding: 16px; margin-bottom: 24px;">
                     <h2 style="margin: 0 0 12px 0; color: #f59e0b; font-size: 16px; font-weight: 600;">
@@ -139,19 +133,15 @@ function buildEmailBody(urgentItems, warningItems) {
                     `).join('')}
                   </div>
                   ` : ''}
-
                   <p style="margin: 0 0 24px 0; color: #a1a1aa; font-size: 14px; line-height: 1.6;">
                     Under the Fair Credit Reporting Act (FCRA), credit bureaus must respond to disputes within 30 days.
                     If they miss this deadline, you may have additional leverage for escalation or legal action.
                   </p>
-
                   <a href="https://605b.ai/dashboard/tracker" style="display: inline-block; background: linear-gradient(135deg, #f7d047 0%, #d4b840 100%); color: #09090b; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; font-size: 14px;">
                     View Your Disputes →
                   </a>
                 </td>
               </tr>
-
-              <!-- Footer -->
               <tr>
                 <td style="padding-top: 24px; text-align: center;">
                   <p style="margin: 0; color: #52525b; font-size: 12px;">

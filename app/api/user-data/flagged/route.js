@@ -1,8 +1,16 @@
-import { Redis } from '@upstash/redis';
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
-const redis = Redis.fromEnv();
+// Lazy initialization to avoid build-time errors
+let redis = null;
+
+function getRedis() {
+  if (!redis) {
+    const { Redis } = require('@upstash/redis');
+    redis = Redis.fromEnv();
+  }
+  return redis;
+}
 
 // Get flagged items
 export async function GET() {
@@ -12,7 +20,8 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const flaggedItems = await redis.get(`user:${userId}:flagged`) || [];
+    const redisClient = getRedis();
+    const flaggedItems = await redisClient.get(`user:${userId}:flagged`) || [];
     return NextResponse.json({ flaggedItems });
   } catch (error) {
     console.error('Error fetching flagged items:', error);
@@ -28,6 +37,7 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const redisClient = getRedis();
     const { action, items, itemId, updates } = await request.json();
 
     // Save findings from PDF analysis (replace all)
@@ -35,14 +45,13 @@ export async function POST(request) {
       const flaggedItems = items.map((item, index) => ({
         ...item,
         id: item.id || `flagged-${Date.now()}-${index}`,
-        status: 'pending', // pending, disputed, resolved, dismissed
+        status: 'pending',
         createdAt: new Date().toISOString(),
       }));
       
-      await redis.set(`user:${userId}:flagged`, flaggedItems);
+      await redisClient.set(`user:${userId}:flagged`, flaggedItems);
       
-      // Log to audit
-      await appendAuditLog(userId, {
+      await appendAuditLog(redisClient, userId, {
         action: 'upload_report',
         findingsCount: flaggedItems.length,
         timestamp: new Date().toISOString(),
@@ -53,7 +62,7 @@ export async function POST(request) {
 
     // Add new findings (append)
     if (action === 'add' && items) {
-      const existing = await redis.get(`user:${userId}:flagged`) || [];
+      const existing = await redisClient.get(`user:${userId}:flagged`) || [];
       const newItems = items.map((item, index) => ({
         ...item,
         id: item.id || `flagged-${Date.now()}-${index}`,
@@ -62,24 +71,24 @@ export async function POST(request) {
       }));
       
       const updated = [...existing, ...newItems];
-      await redis.set(`user:${userId}:flagged`, updated);
+      await redisClient.set(`user:${userId}:flagged`, updated);
       
       return NextResponse.json({ success: true, flaggedItems: updated });
     }
 
     // Update single item status (e.g., mark as disputed)
     if (action === 'update' && itemId) {
-      const existing = await redis.get(`user:${userId}:flagged`) || [];
+      const existing = await redisClient.get(`user:${userId}:flagged`) || [];
       const updated = existing.map(item => 
         item.id === itemId 
           ? { ...item, ...updates, updatedAt: new Date().toISOString() }
           : item
       );
       
-      await redis.set(`user:${userId}:flagged`, updated);
+      await redisClient.set(`user:${userId}:flagged`, updated);
       
       if (updates.status === 'disputed') {
-        await appendAuditLog(userId, {
+        await appendAuditLog(redisClient, userId, {
           action: 'flag_item',
           itemId,
           account: existing.find(i => i.id === itemId)?.account,
@@ -92,21 +101,21 @@ export async function POST(request) {
 
     // Dismiss item
     if (action === 'dismiss' && itemId) {
-      const existing = await redis.get(`user:${userId}:flagged`) || [];
+      const existing = await redisClient.get(`user:${userId}:flagged`) || [];
       const updated = existing.map(item => 
         item.id === itemId 
           ? { ...item, status: 'dismissed', updatedAt: new Date().toISOString() }
           : item
       );
       
-      await redis.set(`user:${userId}:flagged`, updated);
+      await redisClient.set(`user:${userId}:flagged`, updated);
       
       return NextResponse.json({ success: true, flaggedItems: updated });
     }
 
     // Clear all flagged items
     if (action === 'clear') {
-      await redis.set(`user:${userId}:flagged`, []);
+      await redisClient.set(`user:${userId}:flagged`, []);
       return NextResponse.json({ success: true, flaggedItems: [] });
     }
 
@@ -117,11 +126,11 @@ export async function POST(request) {
   }
 }
 
-async function appendAuditLog(userId, entry) {
+async function appendAuditLog(redisClient, userId, entry) {
   try {
-    const existing = await redis.get(`user:${userId}:audit`) || [];
+    const existing = await redisClient.get(`user:${userId}:audit`) || [];
     const updated = [...existing, { ...entry, id: `audit-${Date.now()}` }].slice(-500);
-    await redis.set(`user:${userId}:audit`, updated);
+    await redisClient.set(`user:${userId}:audit`, updated);
   } catch (error) {
     console.error('Failed to append audit log:', error);
   }

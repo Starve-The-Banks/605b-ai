@@ -1,8 +1,16 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import { Redis } from '@upstash/redis';
 
-const redis = Redis.fromEnv();
+// Lazy initialization to avoid build-time errors
+let redis = null;
+
+function getRedis() {
+  if (!redis) {
+    const { Redis } = require('@upstash/redis');
+    redis = Redis.fromEnv();
+  }
+  return redis;
+}
 
 // Action to field mapping
 const USAGE_FIELDS = {
@@ -20,17 +28,16 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const redisClient = getRedis();
     const body = await request.json();
     const { action, increment = 1 } = body;
 
-    // Validate action
     const field = USAGE_FIELDS[action];
     if (!field) {
       return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     }
 
-    // Get current tier data
-    const tierDataRaw = await redis.get(`user:${userId}:tier`);
+    const tierDataRaw = await redisClient.get(`user:${userId}:tier`);
     
     if (!tierDataRaw) {
       return NextResponse.json({ error: 'No tier data found' }, { status: 404 });
@@ -38,21 +45,17 @@ export async function POST(request) {
 
     const tierData = typeof tierDataRaw === 'string' ? JSON.parse(tierDataRaw) : tierDataRaw;
 
-    // Update usage
     const currentUsage = tierData[field] || 0;
     tierData[field] = currentUsage + increment;
 
-    // Update remaining counts if applicable
     if (action === 'analyze_pdf' && tierData.features?.pdfAnalyses !== -1) {
       tierData.pdfAnalysesRemaining = Math.max(0, 
         (tierData.features?.pdfAnalyses || 1) - tierData.pdfAnalysesUsed
       );
     }
 
-    // Save updated tier data
-    await redis.set(`user:${userId}:tier`, JSON.stringify(tierData));
+    await redisClient.set(`user:${userId}:tier`, JSON.stringify(tierData));
 
-    // Also log to audit trail
     const auditEntry = {
       id: `usage_${Date.now()}`,
       type: 'usage',
@@ -60,12 +63,12 @@ export async function POST(request) {
       timestamp: new Date().toISOString(),
     };
 
-    const existingAudit = await redis.get(`user:${userId}:audit`);
+    const existingAudit = await redisClient.get(`user:${userId}:audit`);
     const auditLog = existingAudit 
       ? (typeof existingAudit === 'string' ? JSON.parse(existingAudit) : existingAudit)
       : [];
     auditLog.unshift(auditEntry);
-    await redis.set(`user:${userId}:audit`, JSON.stringify(auditLog.slice(0, 1000)));
+    await redisClient.set(`user:${userId}:audit`, JSON.stringify(auditLog.slice(0, 1000)));
 
     return NextResponse.json({ 
       success: true,
@@ -90,8 +93,8 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get current tier data
-    const tierDataRaw = await redis.get(`user:${userId}:tier`);
+    const redisClient = getRedis();
+    const tierDataRaw = await redisClient.get(`user:${userId}:tier`);
     
     if (!tierDataRaw) {
       return NextResponse.json({

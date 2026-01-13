@@ -1,10 +1,25 @@
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
-import Stripe from 'stripe';
-import { Redis } from '@upstash/redis';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-const redis = Redis.fromEnv();
+// Lazy initialization to avoid build-time errors
+let stripe = null;
+let redis = null;
+
+function getStripe() {
+  if (!stripe) {
+    const Stripe = require('stripe').default;
+    stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+  }
+  return stripe;
+}
+
+function getRedis() {
+  if (!redis) {
+    const { Redis } = require('@upstash/redis');
+    redis = Redis.fromEnv();
+  }
+  return redis;
+}
 
 // Updated tier features to match new pricing structure
 const TIER_FEATURES = {
@@ -74,6 +89,9 @@ const ADDON_GRANTS = {
 };
 
 export async function POST(request) {
+  const stripeClient = getStripe();
+  const redisClient = getRedis();
+  
   const body = await request.text();
   const headersList = await headers();
   const signature = headersList.get('stripe-signature');
@@ -85,7 +103,7 @@ export async function POST(request) {
   let event;
 
   try {
-    event = stripe.webhooks.constructEvent(
+    event = stripeClient.webhooks.constructEvent(
       body,
       signature,
       process.env.STRIPE_WEBHOOK_SECRET
@@ -117,7 +135,7 @@ export async function POST(request) {
 
         let existingData = {};
         try {
-          const existing = await redis.get(`user:${clerkUserId}:tier`);
+          const existing = await redisClient.get(`user:${clerkUserId}:tier`);
           if (existing) {
             existingData = typeof existing === 'string' ? JSON.parse(existing) : existing;
           }
@@ -162,14 +180,14 @@ export async function POST(request) {
           ],
         };
 
-        await redis.set(`user:${clerkUserId}:tier`, JSON.stringify(userTierData));
+        await redisClient.set(`user:${clerkUserId}:tier`, JSON.stringify(userTierData));
 
-        const existingProfile = await redis.get(`user:${clerkUserId}:profile`);
+        const existingProfile = await redisClient.get(`user:${clerkUserId}:profile`);
         const profile = existingProfile 
           ? (typeof existingProfile === 'string' ? JSON.parse(existingProfile) : existingProfile)
           : {};
         
-        await redis.set(`user:${clerkUserId}:profile`, JSON.stringify({
+        await redisClient.set(`user:${clerkUserId}:profile`, JSON.stringify({
           ...profile,
           tier: productId,
           tierPurchasedAt: new Date().toISOString(),
@@ -188,12 +206,12 @@ export async function POST(request) {
           timestamp: new Date().toISOString(),
         };
 
-        const existingAudit = await redis.get(`user:${clerkUserId}:audit`);
+        const existingAudit = await redisClient.get(`user:${clerkUserId}:audit`);
         const auditLog = existingAudit 
           ? (typeof existingAudit === 'string' ? JSON.parse(existingAudit) : existingAudit)
           : [];
         auditLog.unshift(auditEntry);
-        await redis.set(`user:${clerkUserId}:audit`, JSON.stringify(auditLog.slice(0, 1000)));
+        await redisClient.set(`user:${clerkUserId}:audit`, JSON.stringify(auditLog.slice(0, 1000)));
 
         console.log(`User ${clerkUserId} ${isUpgrade ? 'upgraded to' : 'purchased'} ${productId} tier`);
       }
@@ -202,7 +220,7 @@ export async function POST(request) {
         const addonGrant = ADDON_GRANTS[productId];
         
         if (addonGrant) {
-          const existingTier = await redis.get(`user:${clerkUserId}:tier`);
+          const existingTier = await redisClient.get(`user:${clerkUserId}:tier`);
           const tierData = existingTier 
             ? (typeof existingTier === 'string' ? JSON.parse(existingTier) : existingTier)
             : {};
@@ -223,7 +241,7 @@ export async function POST(request) {
             amountPaid: session.amount_total,
           });
 
-          await redis.set(`user:${clerkUserId}:tier`, JSON.stringify(tierData));
+          await redisClient.set(`user:${clerkUserId}:tier`, JSON.stringify(tierData));
 
           const auditEntry = {
             id: `addon_${Date.now()}`,
@@ -236,12 +254,12 @@ export async function POST(request) {
             timestamp: new Date().toISOString(),
           };
 
-          const existingAudit = await redis.get(`user:${clerkUserId}:audit`);
+          const existingAudit = await redisClient.get(`user:${clerkUserId}:audit`);
           const auditLog = existingAudit 
             ? (typeof existingAudit === 'string' ? JSON.parse(existingAudit) : existingAudit)
             : [];
           auditLog.unshift(auditEntry);
-          await redis.set(`user:${clerkUserId}:audit`, JSON.stringify(auditLog.slice(0, 1000)));
+          await redisClient.set(`user:${clerkUserId}:audit`, JSON.stringify(auditLog.slice(0, 1000)));
 
           console.log(`User ${clerkUserId} purchased add-on: ${productId}`);
         }

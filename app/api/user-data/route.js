@@ -1,8 +1,16 @@
-import { Redis } from '@upstash/redis';
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
-const redis = Redis.fromEnv();
+// Lazy initialization to avoid build-time errors
+let redis = null;
+
+function getRedis() {
+  if (!redis) {
+    const { Redis } = require('@upstash/redis');
+    redis = Redis.fromEnv();
+  }
+  return redis;
+}
 
 // Get user data
 export async function GET() {
@@ -13,7 +21,8 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const data = await redis.get(`user:${userId}:data`);
+    const redisClient = getRedis();
+    const data = await redisClient.get(`user:${userId}:data`);
 
     return NextResponse.json({
       disputes: data?.disputes || [],
@@ -35,10 +44,11 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const redisClient = getRedis();
     const body = await request.json();
     const { disputes, auditLog, flaggedItems } = body;
 
-    await redis.set(`user:${userId}:data`, {
+    await redisClient.set(`user:${userId}:data`, {
       disputes: disputes || [],
       auditLog: auditLog || [],
       flaggedItems: flaggedItems || [],

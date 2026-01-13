@@ -1,8 +1,16 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import { Redis } from '@upstash/redis';
 
-const redis = Redis.fromEnv();
+// Lazy initialization to avoid build-time errors
+let redis = null;
+
+function getRedis() {
+  if (!redis) {
+    const { Redis } = require('@upstash/redis');
+    redis = Redis.fromEnv();
+  }
+  return redis;
+}
 
 // Default tier features
 const TIER_FEATURES = {
@@ -62,7 +70,6 @@ export async function GET() {
     const { userId } = await auth();
 
     if (!userId) {
-      // Return free tier for unauthenticated users
       return NextResponse.json({
         tierData: {
           tier: 'free',
@@ -73,11 +80,10 @@ export async function GET() {
       });
     }
 
-    // Get user's tier data from Redis
-    const tierDataRaw = await redis.get(`user:${userId}:tier`);
+    const redisClient = getRedis();
+    const tierDataRaw = await redisClient.get(`user:${userId}:tier`);
     
     if (!tierDataRaw) {
-      // User hasn't purchased, return free tier
       return NextResponse.json({
         tierData: {
           tier: 'free',
@@ -90,7 +96,6 @@ export async function GET() {
 
     const tierData = typeof tierDataRaw === 'string' ? JSON.parse(tierDataRaw) : tierDataRaw;
 
-    // Ensure features are up-to-date (in case we've updated tier definitions)
     if (tierData.tier && TIER_FEATURES[tierData.tier]) {
       tierData.features = { ...TIER_FEATURES[tierData.tier], ...tierData.features };
     }
@@ -117,19 +122,17 @@ export async function POST(request) {
     const body = await request.json();
     const { tier } = body;
 
-    // Validate tier
     if (!TIER_FEATURES[tier]) {
       return NextResponse.json({ error: 'Invalid tier' }, { status: 400 });
     }
 
-    // Only allow setting to 'free' tier via this endpoint
-    // Paid tiers should only be set via Stripe webhook
     if (tier !== 'free') {
       return NextResponse.json({ 
         error: 'Paid tiers can only be activated through purchase' 
       }, { status: 400 });
     }
 
+    const redisClient = getRedis();
     const tierData = {
       tier: 'free',
       features: TIER_FEATURES.free,
@@ -138,7 +141,7 @@ export async function POST(request) {
       pdfAnalysesRemaining: 1,
     };
 
-    await redis.set(`user:${userId}:tier`, JSON.stringify(tierData));
+    await redisClient.set(`user:${userId}:tier`, JSON.stringify(tierData));
 
     return NextResponse.json({ tierData });
 

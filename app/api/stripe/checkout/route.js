@@ -265,6 +265,13 @@ async function getOrCreateStripeCustomer(stripeClient, redisClient, user, userId
 }
 
 async function createCheckoutSession(stripeClient, { customerId, userId, priceId, productName, productType, productId, disclaimerTimestamp, isUpgrade, upgradeFrom }) {
+  // CRITICAL: Validate APP_URL is set
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+  if (!appUrl || !appUrl.startsWith('http')) {
+    console.error('[CONFIG ERROR] NEXT_PUBLIC_APP_URL is not set or invalid:', appUrl);
+    throw new Error('Server configuration error: APP_URL not configured. Please contact support.');
+  }
+
   // Use Stripe Price ID as source of truth - never pass amount
   const session = await stripeClient.checkout.sessions.create({
     customer: customerId,
@@ -277,8 +284,8 @@ async function createCheckoutSession(stripeClient, { customerId, userId, priceId
         quantity: 1,
       },
     ],
-    success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?success=true&${productType}=${productId}`,
-    cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing?canceled=true`,
+    success_url: `${appUrl}/dashboard?success=true&${productType}=${productId}`,
+    cancel_url: `${appUrl}/pricing?canceled=true`,
     metadata: {
       clerkUserId: userId,
       productType: productType,

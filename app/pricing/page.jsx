@@ -232,7 +232,7 @@ export default function PricingPage() {
 
   return (
     <>
-      <style jsx>{`
+      <style jsx global>{`
         .pricing-page {
           min-height: 100vh;
           background: #09090b;
@@ -276,6 +276,17 @@ export default function PricingPage() {
           border-radius: 8px;
           color: #fafafa;
           font-size: 14px;
+          text-decoration: none;
+        }
+
+        .nav-link-primary {
+          padding: 8px 16px;
+          background: #f7d047;
+          border: none;
+          border-radius: 8px;
+          color: #09090b;
+          font-size: 14px;
+          font-weight: 600;
           text-decoration: none;
         }
 
@@ -1028,7 +1039,7 @@ export default function PricingPage() {
             ) : (
               <>
                 <Link href="/sign-in" className="nav-link">Log In</Link>
-                <Link href="/sign-up" className="nav-link" style={{ background: '#f7d047', color: '#09090b', border: 'none' }}>
+                <Link href="/sign-up" className="nav-link-primary">
                   Get Started
                 </Link>
               </>

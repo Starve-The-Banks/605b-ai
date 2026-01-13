@@ -11,7 +11,7 @@ const TIER_FEATURES = {
   free: {
     pdfAnalyses: 1,
     pdfExport: false,
-    templates: 'none', // No downloads
+    templates: 'none',
     aiChat: false,
     auditExport: false,
     identityTheftWorkflow: false,
@@ -22,7 +22,7 @@ const TIER_FEATURES = {
   toolkit: {
     pdfAnalyses: 1,
     pdfExport: true,
-    templates: 'basic', // Core bureau templates
+    templates: 'basic',
     aiChat: false,
     auditExport: false,
     identityTheftWorkflow: false,
@@ -33,7 +33,7 @@ const TIER_FEATURES = {
   advanced: {
     pdfAnalyses: 3,
     pdfExport: true,
-    templates: 'full', // All 62 templates
+    templates: 'full',
     aiChat: true,
     auditExport: true,
     identityTheftWorkflow: false,
@@ -42,7 +42,7 @@ const TIER_FEATURES = {
     disputeTracker: true,
   },
   'identity-theft': {
-    pdfAnalyses: -1, // Unlimited
+    pdfAnalyses: -1,
     pdfExport: true,
     templates: 'full',
     aiChat: true,
@@ -55,7 +55,6 @@ const TIER_FEATURES = {
   },
 };
 
-// Add-on features
 const ADDON_GRANTS = {
   'extra-analysis': {
     type: 'increment',
@@ -65,7 +64,7 @@ const ADDON_GRANTS = {
   'ai-credits': {
     type: 'increment',
     field: 'aiCreditsRemaining',
-    amount: 50, // Number of messages
+    amount: 50,
   },
   'attorney-export': {
     type: 'unlock',
@@ -96,12 +95,10 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
   }
 
-  // Handle the event
   switch (event.type) {
     case 'checkout.session.completed': {
       const session = event.data.object;
       
-      // Get metadata
       const clerkUserId = session.metadata?.clerkUserId;
       const productType = session.metadata?.productType;
       const productId = session.metadata?.productId;
@@ -115,11 +112,9 @@ export async function POST(request) {
         break;
       }
 
-      // Handle tier purchase
       if (productType === 'tier' && productId) {
         const features = TIER_FEATURES[productId] || TIER_FEATURES.free;
 
-        // Get existing tier data to preserve usage stats if upgrading
         let existingData = {};
         try {
           const existing = await redis.get(`user:${clerkUserId}:tier`);
@@ -130,24 +125,18 @@ export async function POST(request) {
           console.error('Error parsing existing tier data:', e);
         }
 
-        // Calculate remaining analyses
         let pdfAnalysesRemaining = features.pdfAnalyses;
         if (isUpgrade && existingData.pdfAnalysesUsed) {
-          // Keep track of used analyses but add new tier's allowance
-          const previousAllowance = TIER_FEATURES[upgradeFrom]?.pdfAnalyses || 0;
           const used = existingData.pdfAnalysesUsed || 0;
           
-          // If upgrading to unlimited, set to -1
           if (features.pdfAnalyses === -1) {
             pdfAnalysesRemaining = -1;
           } else {
-            // Add the difference in allowances
             pdfAnalysesRemaining = features.pdfAnalyses - used;
             if (pdfAnalysesRemaining < 0) pdfAnalysesRemaining = 0;
           }
         }
 
-        // Store the user's tier and features
         const userTierData = {
           tier: productId,
           features: features,
@@ -155,15 +144,12 @@ export async function POST(request) {
           stripeSessionId: session.id,
           stripeCustomerId: session.customer,
           amountPaid: session.amount_total,
-          // Compliance tracking
           disclaimerAccepted: disclaimerAccepted,
           disclaimerTimestamp: disclaimerTimestamp,
-          // Usage tracking
           pdfAnalysesUsed: existingData.pdfAnalysesUsed || 0,
           pdfAnalysesRemaining: pdfAnalysesRemaining,
           aiCreditsUsed: existingData.aiCreditsUsed || 0,
-          aiCreditsRemaining: features.aiChat ? -1 : 0, // Unlimited for paid tiers with AI
-          // Upgrade tracking
+          aiCreditsRemaining: features.aiChat ? -1 : 0,
           isUpgrade: isUpgrade,
           upgradedFrom: upgradeFrom || null,
           previousPurchases: [
@@ -178,7 +164,6 @@ export async function POST(request) {
 
         await redis.set(`user:${clerkUserId}:tier`, JSON.stringify(userTierData));
 
-        // Update profile
         const existingProfile = await redis.get(`user:${clerkUserId}:profile`);
         const profile = existingProfile 
           ? (typeof existingProfile === 'string' ? JSON.parse(existingProfile) : existingProfile)
@@ -190,7 +175,6 @@ export async function POST(request) {
           tierPurchasedAt: new Date().toISOString(),
         }));
 
-        // Log the purchase
         const auditEntry = {
           id: `purchase_${Date.now()}`,
           type: 'purchase',
@@ -214,7 +198,6 @@ export async function POST(request) {
         console.log(`User ${clerkUserId} ${isUpgrade ? 'upgraded to' : 'purchased'} ${productId} tier`);
       }
 
-      // Handle add-on purchase
       if (productType === 'addon' && productId) {
         const addonGrant = ADDON_GRANTS[productId];
         
@@ -232,7 +215,6 @@ export async function POST(request) {
             tierData.features[addonGrant.field] = addonGrant.value;
           }
 
-          // Track add-on purchases
           tierData.addons = tierData.addons || [];
           tierData.addons.push({
             addonId: productId,
@@ -243,7 +225,6 @@ export async function POST(request) {
 
           await redis.set(`user:${clerkUserId}:tier`, JSON.stringify(tierData));
 
-          // Audit log
           const auditEntry = {
             id: `addon_${Date.now()}`,
             type: 'purchase',
@@ -281,18 +262,8 @@ export async function POST(request) {
     }
 
     case 'charge.refunded': {
-      // Handle refunds - potentially revoke access
       const charge = event.data.object;
       console.log('Charge refunded:', charge.id);
-      // In production, you might want to downgrade the user's tier
-      break;
-    }
-
-    case 'customer.subscription.created':
-    case 'customer.subscription.updated':
-    case 'customer.subscription.deleted': {
-      // We don't use subscriptions, but log if one somehow gets created
-      console.warn('Subscription event received (should not happen):', event.type);
       break;
     }
 

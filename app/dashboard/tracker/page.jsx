@@ -5,8 +5,10 @@ import { useUser } from '@clerk/nextjs';
 import {
   Clock, Plus, CheckCircle, AlertCircle, Hourglass, X,
   Calendar, Building2, FileText, Bell, Mail, Trash2,
-  ChevronDown, AlertTriangle
+  ChevronDown, AlertTriangle, Loader2
 } from 'lucide-react';
+import { useUserTier } from '@/lib/useUserTier';
+import { UpgradePrompt } from '../components/UpgradePrompt';
 
 const BUREAUS = ['Experian', 'Equifax', 'TransUnion'];
 const DISPUTE_TYPES = [
@@ -21,6 +23,7 @@ const DISPUTE_TYPES = [
 
 export default function TrackerPage() {
   const { user } = useUser();
+  const { tier, hasFeature, loading: tierLoading } = useUserTier();
   const [disputes, setDisputes] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -176,6 +179,32 @@ export default function TrackerPage() {
     if (daysRemaining <= 7) return '#f59e0b';
     return '#3b82f6';
   };
+
+  // Check if user has tracker access (toolkit or higher)
+  const hasTrackerAccess = hasFeature('disputeTracker');
+
+  // Show loading state while checking tier
+  if (tierLoading) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '400px' }}>
+        <Loader2 size={24} style={{ animation: 'spin 1s linear infinite', color: '#f7d047' }} />
+      </div>
+    );
+  }
+
+  // Show upgrade prompt if user doesn't have access
+  if (!hasTrackerAccess) {
+    return (
+      <div style={{ padding: '40px 20px' }}>
+        <UpgradePrompt
+          feature="dispute-tracker"
+          requiredTier="toolkit"
+          title="Unlock Dispute Tracker"
+          description="Track your dispute deadlines, monitor bureau responses, and never miss a 30-day deadline again. Get notified when bureaus are violating your rights."
+        />
+      </div>
+    );
+  }
 
   return (
     <>

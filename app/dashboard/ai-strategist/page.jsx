@@ -3,6 +3,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Send, Loader2, Sparkles, Shield, FileText, Scale, Zap, Mic, MicOff, Volume2, VolumeX, X, AudioLines, AlertCircle } from 'lucide-react';
 import { SYSTEM_PROMPT } from '@/lib/constants';
+import { useUserTier } from '@/lib/useUserTier';
+import { UpgradePrompt } from '../components/UpgradePrompt';
 
 const INTRO_MESSAGE = `You've got a strategist in your corner now.
 
@@ -39,11 +41,38 @@ VOICE MODE INSTRUCTIONS:
 - Don't use symbols like arrows, asterisks, or dashes for lists`;
 
 export default function AIStrategistPage() {
+  const { tier, loading: tierLoading, hasFeature } = useUserTier();
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showIntro, setShowIntro] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
+
+  // Check if user has AI chat access (advanced or identity-theft tier)
+  const hasAIAccess = hasFeature('aiChat');
+
+  // Show loading state while checking tier
+  if (tierLoading) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '400px' }}>
+        <Loader2 size={24} style={{ animation: 'spin 1s linear infinite', color: '#f7d047' }} />
+      </div>
+    );
+  }
+
+  // Show upgrade prompt if user doesn't have access
+  if (!hasAIAccess) {
+    return (
+      <div style={{ padding: '40px 20px' }}>
+        <UpgradePrompt
+          feature="ai-chat"
+          requiredTier="advanced"
+          title="Unlock AI Strategist"
+          description="Get personalized credit repair guidance with our AI strategist. Ask questions about your specific situation, get letter recommendations, and learn your rights under FCRA."
+        />
+      </div>
+    );
+  }
 
   const [voiceMode, setVoiceMode] = useState(false);
   const [isListening, setIsListening] = useState(false);

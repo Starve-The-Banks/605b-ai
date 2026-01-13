@@ -5,19 +5,29 @@ import { useRouter } from 'next/navigation';
 import { 
   Search, Upload, ExternalLink, AlertCircle, ChevronDown, ChevronUp,
   BookOpen, Shield, Scale, TrendingUp, AlertTriangle, CheckCircle, Clock,
-  FileText, RefreshCw, Flag
+  FileText, RefreshCw, Flag, Lock, Loader2
 } from 'lucide-react';
 import { useFlaggedItems } from '@/lib/useUserData';
+import { useUserTier } from '@/lib/useUserTier';
+import { UsageLimitWarning } from './components/UpgradePrompt';
+import Link from 'next/link';
 
 export default function AnalyzePage() {
   const router = useRouter();
   const { saveFindings } = useFlaggedItems();
+  const { tier, hasFeature, getUsageStats, recordUsage, loading: tierLoading } = useUserTier();
   const [resourcesExpanded, setResourcesExpanded] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
   const [error, setError] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
+
+  // Get usage stats for PDF analyses
+  const usageStats = getUsageStats();
+  const pdfAnalysesRemaining = usageStats.pdfAnalyses?.remaining ?? 1;
+  const canAnalyze = usageStats.pdfAnalyses?.isUnlimited || pdfAnalysesRemaining > 0;
+  const canExport = hasFeature('analysisExport');
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -29,6 +39,12 @@ export default function AnalyzePage() {
   const handleFileUpload = async (e) => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
+
+    // Check if user can analyze
+    if (!canAnalyze) {
+      setError('You have reached your PDF analysis limit. Please upgrade to analyze more reports.');
+      return;
+    }
     
     setIsUploading(true);
     setIsAnalyzing(true);
@@ -51,6 +67,9 @@ export default function AnalyzePage() {
       }
 
       setAnalysisResult(data);
+
+      // Record usage
+      await recordUsage('analyze_pdf');
 
       // Save findings to flagged items if there are any
       if (data.analysis?.findings && data.analysis.findings.length > 0) {
@@ -259,63 +278,132 @@ export default function AnalyzePage() {
       <div style={{ background: '#121214', border: '1px solid #1f1f23', borderRadius: '12px', padding: '24px', marginBottom: '24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
           <h3 style={{ fontSize: '15px', fontWeight: 600 }}>Upload Credit Reports</h3>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '6px 12px',
-            background: 'rgba(247, 208, 71, 0.1)',
-            border: '1px solid rgba(247, 208, 71, 0.2)',
-            borderRadius: '100px',
-            fontSize: '12px',
-            color: '#f7d047'
-          }}>
-            <CheckCircle size={14} />
-            Best results with all 3 bureaus
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+            {/* Usage indicator */}
+            {!usageStats.pdfAnalyses?.isUnlimited && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 12px',
+                background: pdfAnalysesRemaining > 0 ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                border: `1px solid ${pdfAnalysesRemaining > 0 ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`,
+                borderRadius: '100px',
+                fontSize: '12px',
+                color: pdfAnalysesRemaining > 0 ? '#22c55e' : '#ef4444'
+              }}>
+                {pdfAnalysesRemaining > 0 ? (
+                  <>{pdfAnalysesRemaining} analysis{pdfAnalysesRemaining !== 1 ? 'es' : ''} remaining</>
+                ) : (
+                  <>No analyses remaining</>
+                )}
+              </div>
+            )}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '6px 12px',
+              background: 'rgba(247, 208, 71, 0.1)',
+              border: '1px solid rgba(247, 208, 71, 0.2)',
+              borderRadius: '100px',
+              fontSize: '12px',
+              color: '#f7d047'
+            }}>
+              <CheckCircle size={14} />
+              Best results with all 3 bureaus
+            </div>
           </div>
         </div>
-        <label style={{
-          display: 'block',
-          border: isAnalyzing ? '2px solid #f7d047' : '2px dashed #262629',
-          borderRadius: '12px',
-          padding: isMobile ? '32px 16px' : '48px 24px',
-          textAlign: 'center',
-          cursor: isAnalyzing ? 'not-allowed' : 'pointer',
-          opacity: isAnalyzing ? 0.7 : 1,
-          transition: 'all 0.2s',
-        }}>
-          <div style={{
-            width: '56px',
-            height: '56px',
-            background: '#1a1a1c',
+        
+        {canAnalyze ? (
+          <label style={{
+            display: 'block',
+            border: isAnalyzing ? '2px solid #f7d047' : '2px dashed #262629',
             borderRadius: '12px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto 16px',
-            color: '#f7d047'
+            padding: isMobile ? '32px 16px' : '48px 24px',
+            textAlign: 'center',
+            cursor: isAnalyzing ? 'not-allowed' : 'pointer',
+            opacity: isAnalyzing ? 0.7 : 1,
+            transition: 'all 0.2s',
           }}>
-            {isAnalyzing ? (
-              <RefreshCw size={24} style={{ animation: 'spin 1s linear infinite' }} />
-            ) : (
-              <Upload size={24} />
-            )}
+            <div style={{
+              width: '56px',
+              height: '56px',
+              background: '#1a1a1c',
+              borderRadius: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 16px',
+              color: '#f7d047'
+            }}>
+              {isAnalyzing ? (
+                <RefreshCw size={24} style={{ animation: 'spin 1s linear infinite' }} />
+              ) : (
+                <Upload size={24} />
+              )}
+            </div>
+            <div style={{ fontSize: '15px', fontWeight: 500, marginBottom: '4px' }}>
+              {isAnalyzing ? 'Analyzing your reports...' : 'Tap to upload credit reports'}
+            </div>
+            <div style={{ fontSize: '13px', color: '#737373' }}>
+              {isAnalyzing ? 'This may take a minute' : 'PDF files from Experian, Equifax, TransUnion'}
+            </div>
+            <input 
+              type="file" 
+              accept=".pdf" 
+              multiple 
+              onChange={handleFileUpload} 
+              disabled={isAnalyzing}
+              style={{ display: 'none' }} 
+            />
+          </label>
+        ) : (
+          <div style={{
+            border: '2px dashed #27272a',
+            borderRadius: '12px',
+            padding: isMobile ? '32px 16px' : '48px 24px',
+            textAlign: 'center',
+          }}>
+            <div style={{
+              width: '56px',
+              height: '56px',
+              background: 'rgba(113, 113, 122, 0.1)',
+              borderRadius: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 16px',
+              color: '#71717a'
+            }}>
+              <Lock size={24} />
+            </div>
+            <div style={{ fontSize: '15px', fontWeight: 500, marginBottom: '4px', color: '#a1a1aa' }}>
+              Analysis Limit Reached
+            </div>
+            <div style={{ fontSize: '13px', color: '#71717a', marginBottom: '16px' }}>
+              Upgrade your plan to analyze more credit reports
+            </div>
+            <Link
+              href="/pricing"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '10px 20px',
+                background: 'linear-gradient(135deg, #f7d047 0%, #d4b840 100%)',
+                borderRadius: '8px',
+                color: '#09090b',
+                fontSize: '14px',
+                fontWeight: 600,
+                textDecoration: 'none',
+              }}
+            >
+              Upgrade Plan
+            </Link>
           </div>
-          <div style={{ fontSize: '15px', fontWeight: 500, marginBottom: '4px' }}>
-            {isAnalyzing ? 'Analyzing your reports...' : 'Tap to upload credit reports'}
-          </div>
-          <div style={{ fontSize: '13px', color: '#737373' }}>
-            {isAnalyzing ? 'This may take a minute' : 'PDF files from Experian, Equifax, TransUnion'}
-          </div>
-          <input 
-            type="file" 
-            accept=".pdf" 
-            multiple 
-            onChange={handleFileUpload} 
-            disabled={isAnalyzing}
-            style={{ display: 'none' }} 
-          />
-        </label>
+        )}
       </div>
 
       {/* Don't have reports */}

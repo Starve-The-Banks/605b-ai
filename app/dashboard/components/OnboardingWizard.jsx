@@ -5,7 +5,8 @@ import { useUser, useAuth } from '@clerk/nextjs';
 import {
   Shield, FileText, Scale, Zap, ArrowRight, ArrowLeft,
   Check, Target, Clock, AlertTriangle, Sparkles, Upload,
-  ChevronRight, X
+  ChevronRight, X, Crown, CreditCard, Building, Users,
+  HelpCircle, FileSearch
 } from 'lucide-react';
 
 const useIsMobile = () => {
@@ -22,9 +23,9 @@ const useIsMobile = () => {
 const STEPS = [
   { id: 'welcome', title: 'Welcome' },
   { id: 'situation', title: 'Your Situation' },
-  { id: 'goals', title: 'Your Goals' },
-  { id: 'timeline', title: 'Timeline' },
-  { id: 'gameplan', title: 'Your Game Plan' },
+  { id: 'scope', title: 'Scope' },
+  { id: 'complexity', title: 'Details' },
+  { id: 'recommendation', title: 'Recommendation' },
 ];
 
 const SITUATIONS = [
@@ -34,6 +35,7 @@ const SITUATIONS = [
     title: "I'm a victim of identity theft",
     description: "Fraudulent accounts were opened in my name",
     color: '#ef4444',
+    baseScore: 50, // High complexity - always goes to identity theft tier
   },
   {
     id: 'collections',
@@ -41,6 +43,7 @@ const SITUATIONS = [
     title: "I have collections to dispute",
     description: "Debt collectors are reporting inaccurate info",
     color: '#f59e0b',
+    baseScore: 20,
   },
   {
     id: 'errors',
@@ -48,6 +51,7 @@ const SITUATIONS = [
     title: "I found errors on my report",
     description: "Incorrect balances, dates, or account info",
     color: '#3b82f6',
+    baseScore: 5,
   },
   {
     id: 'rebuild',
@@ -55,23 +59,105 @@ const SITUATIONS = [
     title: "I want to rebuild my credit",
     description: "Starting fresh and need guidance",
     color: '#22c55e',
+    baseScore: 0,
   },
 ];
 
-const GOALS = [
-  { id: 'remove-fraud', label: 'Remove fraudulent accounts', icon: Shield },
-  { id: 'remove-collections', label: 'Remove collection accounts', icon: AlertTriangle },
-  { id: 'fix-errors', label: 'Fix reporting errors', icon: FileText },
-  { id: 'improve-score', label: 'Improve my credit score', icon: Zap },
-  { id: 'qualify-loan', label: 'Qualify for a loan/mortgage', icon: Target },
-  { id: 'understand-rights', label: 'Understand my legal rights', icon: Scale },
+const ITEM_COUNTS = [
+  { id: '1-3', label: '1-3 items', score: 0 },
+  { id: '4-10', label: '4-10 items', score: 10 },
+  { id: '11-20', label: '11-20 items', score: 20 },
+  { id: '20+', label: '20+ items', score: 35 },
+  { id: 'unknown', label: "I'm not sure yet", score: 10 },
 ];
 
-const TIMELINES = [
-  { id: 'urgent', label: 'Urgent - Need results ASAP', description: 'Active fraud or immediate need', icon: '🚨' },
-  { id: 'months', label: '1-3 months', description: 'Working toward a specific goal', icon: '📅' },
-  { id: 'flexible', label: 'Flexible timeline', description: 'No rush, doing it right', icon: '⏳' },
+const BUREAU_COUNTS = [
+  { id: '1', label: '1 bureau', description: 'Only one report has issues', score: 0 },
+  { id: '2', label: '2 bureaus', description: 'Issues on two reports', score: 10 },
+  { id: '3', label: 'All 3 bureaus', description: 'Issues across all reports', score: 15 },
+  { id: 'unknown', label: "I'm not sure yet", description: "Haven't pulled all reports", score: 5 },
 ];
+
+const COMPLEXITY_FACTORS = [
+  { id: 'creditors', label: 'I need to dispute directly with creditors', score: 15, icon: Building },
+  { id: 'collectors', label: 'I\'m dealing with debt collectors', score: 15, icon: Users },
+  { id: 'old-debt', label: 'Some debts may be past statute of limitations', score: 5, icon: Clock },
+  { id: 'mixed-fraud', label: 'Mix of fraud and my own accounts', score: 25, icon: Shield },
+  { id: 'prior-disputes', label: 'I\'ve disputed before with no success', score: 15, icon: AlertTriangle },
+  { id: 'litigation', label: 'I may need to escalate to legal action', score: 30, icon: Scale },
+];
+
+// Updated tier structure to match pricing page exactly
+const TIERS = {
+  free: {
+    id: 'free',
+    name: 'Credit Report Analyzer',
+    price: 0,
+    icon: FileSearch,
+    color: '#6b7280',
+    maxScore: 0, // Educational only
+    description: 'Understand your situation first',
+    features: [
+      '1 PDF analysis (read-only)',
+      'Issue categorization',
+      'Educational walkthrough',
+      '"What you can do" checklist',
+    ],
+    note: 'No letter downloads or exports',
+  },
+  toolkit: {
+    id: 'toolkit',
+    name: 'Dispute Toolkit',
+    price: 39,
+    icon: FileText,
+    color: '#3b82f6',
+    maxScore: 20,
+    description: 'Core dispute documentation',
+    features: [
+      'Full analysis export (PDF)',
+      'Core bureau dispute templates',
+      'Dispute tracker',
+      'Certified mail checklist',
+      'Educational guidance',
+    ],
+  },
+  advanced: {
+    id: 'advanced',
+    name: 'Advanced Dispute Suite',
+    price: 89,
+    icon: Zap,
+    color: '#f7d047',
+    maxScore: 50,
+    description: 'Full dispute capabilities',
+    features: [
+      'Everything in Toolkit',
+      'Full template library (62 letters)',
+      'Creditor dispute templates',
+      'CFPB + FTC complaint generators',
+      'AI Strategist (educational)',
+      'Escalation templates',
+      'Audit log export',
+    ],
+  },
+  'identity-theft': {
+    id: 'identity-theft',
+    name: '605B Identity Theft Toolkit',
+    price: 179,
+    icon: Shield,
+    color: '#22c55e',
+    maxScore: Infinity,
+    description: 'Complete fraud documentation',
+    features: [
+      'Everything in Advanced Suite',
+      '605B-specific workflows',
+      'FTC Identity Theft Report integration',
+      'Identity theft affidavits',
+      'Police report templates',
+      'Evidence packet builder',
+      'Attorney-ready documents',
+    ],
+  },
+};
 
 export default function OnboardingWizard({ onComplete, onSkip }) {
   const { user } = useUser();
@@ -80,10 +166,55 @@ export default function OnboardingWizard({ onComplete, onSkip }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState({
     situation: null,
-    goals: [],
-    timeline: null,
+    itemCount: null,
+    bureauCount: null,
+    complexityFactors: [],
   });
   const [isAnimating, setIsAnimating] = useState(false);
+
+  // Calculate complexity score
+  const calculateScore = () => {
+    let score = 0;
+
+    // Base score from situation
+    const situation = SITUATIONS.find(s => s.id === answers.situation);
+    if (situation) score += situation.baseScore;
+
+    // Item count score
+    const itemCount = ITEM_COUNTS.find(i => i.id === answers.itemCount);
+    if (itemCount) score += itemCount.score;
+
+    // Bureau count score
+    const bureauCount = BUREAU_COUNTS.find(b => b.id === answers.bureauCount);
+    if (bureauCount) score += bureauCount.score;
+
+    // Complexity factors
+    answers.complexityFactors.forEach(factorId => {
+      const factor = COMPLEXITY_FACTORS.find(f => f.id === factorId);
+      if (factor) score += factor.score;
+    });
+
+    return score;
+  };
+
+  const getRecommendedTier = () => {
+    const score = calculateScore();
+
+    // Identity theft situation always recommends identity theft toolkit
+    if (answers.situation === 'identity-theft') {
+      return TIERS['identity-theft'];
+    }
+
+    // Mixed fraud factor also suggests identity theft toolkit
+    if (answers.complexityFactors.includes('mixed-fraud')) {
+      return TIERS['identity-theft'];
+    }
+
+    // Score-based recommendations
+    if (score <= TIERS.toolkit.maxScore) return TIERS.toolkit;
+    if (score <= TIERS.advanced.maxScore) return TIERS.advanced;
+    return TIERS['identity-theft'];
+  };
 
   const goNext = () => {
     if (currentStep < STEPS.length - 1) {
@@ -110,130 +241,88 @@ export default function OnboardingWizard({ onComplete, onSkip }) {
     setTimeout(goNext, 300);
   };
 
-  const toggleGoal = (goalId) => {
-    setAnswers(prev => ({
-      ...prev,
-      goals: prev.goals.includes(goalId)
-        ? prev.goals.filter(g => g !== goalId)
-        : [...prev.goals, goalId]
-    }));
-  };
-
-  const selectTimeline = (timelineId) => {
-    setAnswers(prev => ({ ...prev, timeline: timelineId }));
+  const selectItemCount = (countId) => {
+    setAnswers(prev => ({ ...prev, itemCount: countId }));
     setTimeout(goNext, 300);
   };
 
-  const handleComplete = async () => {
-    // Save to localStorage first (offline-first)
-    localStorage.setItem('605b_onboarding_complete', 'true');
-    localStorage.setItem('605b_user_profile', JSON.stringify(answers));
-    localStorage.setItem('605b_onboarding_date', new Date().toISOString());
+  const selectBureauCount = (countId) => {
+    setAnswers(prev => ({ ...prev, bureauCount: countId }));
+  };
 
-    // Sync to server
+  const toggleComplexityFactor = (factorId) => {
+    setAnswers(prev => ({
+      ...prev,
+      complexityFactors: prev.complexityFactors.includes(factorId)
+        ? prev.complexityFactors.filter(f => f !== factorId)
+        : [...prev.complexityFactors, factorId]
+    }));
+  };
+
+  const handleSelectTier = async (tierId) => {
+    // Save assessment to localStorage
+    localStorage.setItem('605b_onboarding_complete', 'true');
+    localStorage.setItem('605b_assessment', JSON.stringify({
+      ...answers,
+      score: calculateScore(),
+      recommendedTier: getRecommendedTier().id,
+      selectedTier: tierId,
+      completedAt: new Date().toISOString(),
+    }));
+
+    // Save selected tier
+    localStorage.setItem('605b_tier', tierId);
+
+    // Sync to server if signed in
     if (isSignedIn) {
       try {
         await fetch('/api/user-data/profile', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ profile: answers }),
+          body: JSON.stringify({
+            profile: {
+              onboardingComplete: true,
+              assessment: answers,
+              score: calculateScore(),
+              recommendedTier: getRecommendedTier().id,
+              selectedTier: tierId,
+            }
+          }),
         });
       } catch (error) {
         console.error('Failed to sync profile:', error);
       }
     }
 
-    onComplete?.(answers);
+    // If they selected a paid tier, redirect to pricing with their tier highlighted
+    if (tierId !== 'free') {
+      window.location.href = `/pricing?recommended=${tierId}`;
+    } else {
+      onComplete?.({ ...answers, selectedTier: tierId });
+    }
   };
 
-  const getGamePlan = () => {
-    const plan = [];
+  const handleContinueFree = () => {
+    localStorage.setItem('605b_onboarding_complete', 'true');
+    localStorage.setItem('605b_tier', 'free');
+    
+    // Save assessment even for free users
+    localStorage.setItem('605b_assessment', JSON.stringify({
+      ...answers,
+      score: calculateScore(),
+      recommendedTier: getRecommendedTier().id,
+      selectedTier: 'free',
+      completedAt: new Date().toISOString(),
+    }));
 
-    if (answers.situation === 'identity-theft') {
-      plan.push({
-        step: 1,
-        title: 'File an Identity Theft Report',
-        description: 'Get your FTC Identity Theft Report at IdentityTheft.gov',
-        action: 'Go to IdentityTheft.gov',
-        link: 'https://www.identitytheft.gov',
-        priority: 'high',
-      });
-      plan.push({
-        step: 2,
-        title: 'Upload Your Credit Reports',
-        description: 'Upload reports from all 3 bureaus for analysis',
-        action: 'Upload Reports',
-        href: '/dashboard',
-        priority: 'high',
-      });
-      plan.push({
-        step: 3,
-        title: 'Send 605B Identity Theft Blocks',
-        description: 'Use our templates to demand fraudulent accounts be blocked',
-        action: 'View Templates',
-        href: '/dashboard/templates',
-        priority: 'high',
-      });
-    } else if (answers.situation === 'collections') {
-      plan.push({
-        step: 1,
-        title: 'Upload Your Credit Reports',
-        description: 'We\'ll identify all collection accounts',
-        action: 'Upload Reports',
-        href: '/dashboard',
-        priority: 'high',
-      });
-      plan.push({
-        step: 2,
-        title: 'Send Debt Validation Letters',
-        description: 'Force collectors to prove the debt is valid',
-        action: 'View Templates',
-        href: '/dashboard/templates',
-        priority: 'medium',
-      });
-      plan.push({
-        step: 3,
-        title: 'Track Response Deadlines',
-        description: 'Collectors have 30 days to validate',
-        action: 'View Tracker',
-        href: '/dashboard/tracker',
-        priority: 'medium',
-      });
-    } else {
-      plan.push({
-        step: 1,
-        title: 'Upload Your Credit Reports',
-        description: 'Get your free reports from AnnualCreditReport.com',
-        action: 'Upload Reports',
-        href: '/dashboard',
-        priority: 'high',
-      });
-      plan.push({
-        step: 2,
-        title: 'Talk to AI Strategist',
-        description: 'Get personalized guidance for your situation',
-        action: 'Start Chat',
-        href: '/dashboard/ai-strategist',
-        priority: 'medium',
-      });
-      plan.push({
-        step: 3,
-        title: 'Review Dispute Templates',
-        description: 'Browse our library of FCRA-compliant letters',
-        action: 'View Templates',
-        href: '/dashboard/templates',
-        priority: 'medium',
-      });
-    }
-
-    return plan;
+    onComplete?.({ ...answers, selectedTier: 'free' });
   };
 
   const styles = {
     overlay: {
       position: 'fixed',
       inset: 0,
-      background: 'rgba(9, 9, 11, 0.95)',
+      background: 'rgba(9, 9, 11, 0.97)',
       backdropFilter: 'blur(8px)',
       display: 'flex',
       alignItems: isMobile ? 'flex-end' : 'center',
@@ -243,13 +332,14 @@ export default function OnboardingWizard({ onComplete, onSkip }) {
     },
     container: {
       width: '100%',
-      maxWidth: isMobile ? '100%' : '600px',
-      maxHeight: isMobile ? '95vh' : 'auto',
+      maxWidth: isMobile ? '100%' : '640px',
+      maxHeight: isMobile ? '95vh' : '90vh',
       background: '#121214',
       border: '1px solid #27272a',
       borderRadius: isMobile ? '20px 20px 0 0' : '20px',
       overflow: 'hidden',
-      overflowY: 'auto',
+      display: 'flex',
+      flexDirection: 'column',
       position: 'relative',
     },
     skipButton: {
@@ -272,6 +362,7 @@ export default function OnboardingWizard({ onComplete, onSkip }) {
       height: '4px',
       background: '#27272a',
       position: 'relative',
+      flexShrink: 0,
     },
     progressFill: {
       height: '100%',
@@ -284,6 +375,8 @@ export default function OnboardingWizard({ onComplete, onSkip }) {
       opacity: isAnimating ? 0 : 1,
       transform: isAnimating ? 'translateX(20px)' : 'translateX(0)',
       transition: 'all 0.2s ease',
+      overflowY: 'auto',
+      flex: 1,
     },
     title: {
       fontSize: isMobile ? '22px' : '28px',
@@ -312,6 +405,7 @@ export default function OnboardingWizard({ onComplete, onSkip }) {
       cursor: 'pointer',
       transition: 'all 0.2s',
       textAlign: 'left',
+      width: '100%',
     },
     optionIcon: {
       width: '48px',
@@ -322,7 +416,7 @@ export default function OnboardingWizard({ onComplete, onSkip }) {
       justifyContent: 'center',
       flexShrink: 0,
     },
-    goalOption: {
+    factorOption: {
       display: 'flex',
       alignItems: 'center',
       gap: '12px',
@@ -332,6 +426,7 @@ export default function OnboardingWizard({ onComplete, onSkip }) {
       borderRadius: '10px',
       cursor: 'pointer',
       transition: 'all 0.2s',
+      width: '100%',
     },
     checkbox: {
       width: '22px',
@@ -350,6 +445,8 @@ export default function OnboardingWizard({ onComplete, onSkip }) {
       justifyContent: 'space-between',
       alignItems: 'center',
       gap: '12px',
+      borderTop: '1px solid #1c1c1f',
+      flexShrink: 0,
     },
     backButton: {
       display: 'flex',
@@ -376,23 +473,47 @@ export default function OnboardingWizard({ onComplete, onSkip }) {
       fontWeight: 600,
       cursor: 'pointer',
     },
-    planCard: {
-      padding: '16px 20px',
+    tierCard: {
+      padding: '24px',
       background: '#1a1a1c',
-      border: '1px solid #27272a',
-      borderRadius: '12px',
-      marginBottom: '12px',
+      border: '2px solid',
+      borderRadius: '16px',
+      marginBottom: '16px',
+      cursor: 'pointer',
+      transition: 'all 0.2s',
+      position: 'relative',
     },
-    planStep: {
-      width: '28px',
-      height: '28px',
-      borderRadius: '50%',
+    tierHeader: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '16px',
+      marginBottom: '16px',
+    },
+    tierIcon: {
+      width: '52px',
+      height: '52px',
+      borderRadius: '14px',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      fontSize: '13px',
-      fontWeight: 600,
-      flexShrink: 0,
+    },
+    tierPrice: {
+      fontSize: '32px',
+      fontWeight: 700,
+      marginBottom: '16px',
+    },
+    tierFeatures: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '8px',
+      marginBottom: '16px',
+    },
+    tierFeature: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+      fontSize: '14px',
+      color: '#a1a1aa',
     },
   };
 
@@ -415,10 +536,10 @@ export default function OnboardingWizard({ onComplete, onSkip }) {
               }}>
                 <Sparkles size={36} color="#f7d047" />
               </div>
-              <h1 style={styles.title}>Welcome, {user?.firstName || 'there'}!</h1>
+              <h1 style={styles.title}>Welcome{user?.firstName ? `, ${user.firstName}` : ''}!</h1>
               <p style={styles.subtitle}>
-                Let's set up your credit repair strategy. This takes about 2 minutes
-                and helps us personalize your experience.
+                Let's understand your situation so we can recommend the right tools for you.
+                This takes about 60 seconds.
               </p>
             </div>
             <div style={{
@@ -426,16 +547,15 @@ export default function OnboardingWizard({ onComplete, onSkip }) {
               border: '1px solid rgba(247, 208, 71, 0.2)',
               borderRadius: '12px',
               padding: '16px 20px',
-              marginBottom: '24px',
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <Scale size={20} color="#f7d047" />
+                <HelpCircle size={20} color="#f7d047" />
                 <div>
                   <div style={{ fontSize: '14px', fontWeight: 500, color: '#fafafa' }}>
-                    We'll guide you through:
+                    Quick assessment
                   </div>
                   <div style={{ fontSize: '13px', color: '#a1a1aa', marginTop: '4px' }}>
-                    Your situation → Your goals → A personalized game plan
+                    We'll analyze your situation and recommend the right toolkit
                   </div>
                 </div>
               </div>
@@ -448,7 +568,7 @@ export default function OnboardingWizard({ onComplete, onSkip }) {
           <>
             <h1 style={styles.title}>What brings you here?</h1>
             <p style={styles.subtitle}>
-              Select the option that best describes your current situation
+              Select the option that best describes your situation
             </p>
             <div style={styles.optionGrid}>
               {SITUATIONS.map(situation => (
@@ -468,7 +588,7 @@ export default function OnboardingWizard({ onComplete, onSkip }) {
                   }}>
                     <situation.icon size={24} />
                   </div>
-                  <div>
+                  <div style={{ flex: 1 }}>
                     <div style={{ fontSize: '15px', fontWeight: 600, color: '#fafafa', marginBottom: '2px' }}>
                       {situation.title}
                     </div>
@@ -476,169 +596,321 @@ export default function OnboardingWizard({ onComplete, onSkip }) {
                       {situation.description}
                     </div>
                   </div>
-                  <ChevronRight size={20} style={{ color: '#3f3f46', marginLeft: 'auto' }} />
+                  <ChevronRight size={20} style={{ color: '#3f3f46' }} />
                 </button>
               ))}
             </div>
           </>
         );
 
-      case 'goals':
+      case 'scope':
         return (
           <>
-            <h1 style={styles.title}>What are your goals?</h1>
+            <h1 style={styles.title}>How many items need attention?</h1>
             <p style={styles.subtitle}>
-              Select all that apply - we'll prioritize your game plan accordingly
+              Estimate the number of accounts or errors you need to address
             </p>
             <div style={styles.optionGrid}>
-              {GOALS.map(goal => {
-                const isSelected = answers.goals.includes(goal.id);
-                return (
-                  <button
-                    key={goal.id}
-                    style={{
-                      ...styles.goalOption,
-                      borderColor: isSelected ? '#f7d047' : '#27272a',
-                      background: isSelected ? 'rgba(247, 208, 71, 0.1)' : '#1a1a1c',
-                    }}
-                    onClick={() => toggleGoal(goal.id)}
-                  >
-                    <div style={{
-                      ...styles.checkbox,
-                      background: isSelected ? '#f7d047' : 'transparent',
-                      borderColor: isSelected ? '#f7d047' : '#3f3f46',
-                    }}>
-                      {isSelected && <Check size={14} color="#09090b" />}
-                    </div>
-                    <goal.icon size={18} style={{ color: isSelected ? '#f7d047' : '#71717a' }} />
-                    <span style={{ fontSize: '14px', color: isSelected ? '#fafafa' : '#a1a1aa' }}>
-                      {goal.label}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </>
-        );
-
-      case 'timeline':
-        return (
-          <>
-            <h1 style={styles.title}>What's your timeline?</h1>
-            <p style={styles.subtitle}>
-              This helps us prioritize your next steps
-            </p>
-            <div style={styles.optionGrid}>
-              {TIMELINES.map(timeline => (
+              {ITEM_COUNTS.map(count => (
                 <button
-                  key={timeline.id}
+                  key={count.id}
                   style={{
                     ...styles.option,
-                    borderColor: answers.timeline === timeline.id ? '#f7d047' : '#27272a',
-                    background: answers.timeline === timeline.id ? 'rgba(247, 208, 71, 0.1)' : '#1a1a1c',
+                    borderColor: answers.itemCount === count.id ? '#f7d047' : '#27272a',
+                    background: answers.itemCount === count.id ? 'rgba(247, 208, 71, 0.1)' : '#1a1a1c',
+                    padding: '14px 20px',
                   }}
-                  onClick={() => selectTimeline(timeline.id)}
+                  onClick={() => selectItemCount(count.id)}
                 >
                   <div style={{
-                    ...styles.optionIcon,
-                    background: '#27272a',
-                    fontSize: '24px',
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '10px',
+                    background: answers.itemCount === count.id ? 'rgba(247, 208, 71, 0.2)' : '#27272a',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: answers.itemCount === count.id ? '#f7d047' : '#71717a',
+                    fontSize: '16px',
+                    fontWeight: 600,
                   }}>
-                    {timeline.icon}
+                    {count.id === 'unknown' ? '?' : count.id.split('-')[0]}
                   </div>
-                  <div>
-                    <div style={{ fontSize: '15px', fontWeight: 600, color: '#fafafa', marginBottom: '2px' }}>
-                      {timeline.label}
-                    </div>
-                    <div style={{ fontSize: '13px', color: '#71717a' }}>
-                      {timeline.description}
-                    </div>
-                  </div>
+                  <span style={{
+                    fontSize: '15px',
+                    fontWeight: 500,
+                    color: answers.itemCount === count.id ? '#fafafa' : '#a1a1aa',
+                  }}>
+                    {count.label}
+                  </span>
                 </button>
               ))}
             </div>
           </>
         );
 
-      case 'gameplan':
-        const plan = getGamePlan();
+      case 'complexity':
+        return (
+          <>
+            <h1 style={styles.title}>Tell us more about your case</h1>
+            <p style={styles.subtitle}>
+              Select all that apply to your situation
+            </p>
+
+            {/* Bureau count */}
+            <div style={{ marginBottom: '24px' }}>
+              <div style={{ fontSize: '14px', fontWeight: 600, color: '#a1a1aa', marginBottom: '12px' }}>
+                How many bureaus have issues?
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
+                {BUREAU_COUNTS.map(bureau => (
+                  <button
+                    key={bureau.id}
+                    style={{
+                      padding: '12px 16px',
+                      background: answers.bureauCount === bureau.id ? 'rgba(247, 208, 71, 0.1)' : '#1a1a1c',
+                      border: `2px solid ${answers.bureauCount === bureau.id ? '#f7d047' : '#27272a'}`,
+                      borderRadius: '10px',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                    }}
+                    onClick={() => selectBureauCount(bureau.id)}
+                  >
+                    <div style={{
+                      fontSize: '14px',
+                      fontWeight: 600,
+                      color: answers.bureauCount === bureau.id ? '#fafafa' : '#a1a1aa',
+                    }}>
+                      {bureau.label}
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#52525b', marginTop: '2px' }}>
+                      {bureau.description}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Complexity factors */}
+            <div>
+              <div style={{ fontSize: '14px', fontWeight: 600, color: '#a1a1aa', marginBottom: '12px' }}>
+                Additional factors (select all that apply)
+              </div>
+              <div style={styles.optionGrid}>
+                {COMPLEXITY_FACTORS.map(factor => {
+                  const isSelected = answers.complexityFactors.includes(factor.id);
+                  return (
+                    <button
+                      key={factor.id}
+                      style={{
+                        ...styles.factorOption,
+                        borderColor: isSelected ? '#f7d047' : '#27272a',
+                        background: isSelected ? 'rgba(247, 208, 71, 0.1)' : '#1a1a1c',
+                      }}
+                      onClick={() => toggleComplexityFactor(factor.id)}
+                    >
+                      <div style={{
+                        ...styles.checkbox,
+                        background: isSelected ? '#f7d047' : 'transparent',
+                        borderColor: isSelected ? '#f7d047' : '#3f3f46',
+                      }}>
+                        {isSelected && <Check size={14} color="#09090b" />}
+                      </div>
+                      <factor.icon size={18} style={{ color: isSelected ? '#f7d047' : '#71717a' }} />
+                      <span style={{ fontSize: '14px', color: isSelected ? '#fafafa' : '#a1a1aa' }}>
+                        {factor.label}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </>
+        );
+
+      case 'recommendation':
+        const recommendedTier = getRecommendedTier();
+        const score = calculateScore();
+
+        // Get other paid tiers (excluding free and recommended)
+        const otherTiers = Object.values(TIERS)
+          .filter(t => t.id !== recommendedTier.id && t.id !== 'free');
+
         return (
           <>
             <div style={{ textAlign: 'center', marginBottom: '24px' }}>
               <div style={{
                 width: '64px',
                 height: '64px',
-                background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+                background: `${recommendedTier.color}20`,
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 margin: '0 auto 16px',
+                color: recommendedTier.color,
               }}>
-                <Check size={32} color="white" />
+                <recommendedTier.icon size={32} />
               </div>
-              <h1 style={styles.title}>Your Game Plan</h1>
+              <h1 style={styles.title}>Our Recommendation</h1>
               <p style={styles.subtitle}>
-                Here's your personalized roadmap based on your situation
+                Based on your assessment, here's what we recommend
               </p>
             </div>
-            <div>
-              {plan.map((item, index) => (
-                <div key={index} style={styles.planCard}>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
-                    <div style={{
-                      ...styles.planStep,
-                      background: item.priority === 'high' ? '#f7d047' : '#27272a',
-                      color: item.priority === 'high' ? '#09090b' : '#a1a1aa',
-                    }}>
-                      {item.step}
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: '15px', fontWeight: 600, color: '#fafafa', marginBottom: '4px' }}>
-                        {item.title}
-                      </div>
-                      <div style={{ fontSize: '13px', color: '#71717a', marginBottom: '12px' }}>
-                        {item.description}
-                      </div>
-                      {item.href ? (
-                        <a
-                          href={item.href}
-                          onClick={handleComplete}
-                          style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                            fontSize: '13px',
-                            color: '#f7d047',
-                            textDecoration: 'none',
-                          }}
-                        >
-                          {item.action}
-                          <ArrowRight size={14} />
-                        </a>
-                      ) : (
-                        <a
-                          href={item.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                            fontSize: '13px',
-                            color: '#f7d047',
-                            textDecoration: 'none',
-                          }}
-                        >
-                          {item.action}
-                          <ArrowRight size={14} />
-                        </a>
-                      )}
-                    </div>
+
+            {/* Recommended Tier */}
+            <div
+              style={{
+                ...styles.tierCard,
+                borderColor: recommendedTier.color,
+                background: `linear-gradient(135deg, ${recommendedTier.color}15 0%, #1a1a1c 100%)`,
+              }}
+            >
+              <div style={{
+                position: 'absolute',
+                top: '-1px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                padding: '4px 12px',
+                background: recommendedTier.color,
+                color: '#09090b',
+                fontSize: '11px',
+                fontWeight: 700,
+                borderRadius: '0 0 8px 8px',
+                textTransform: 'uppercase',
+              }}>
+                Recommended
+              </div>
+
+              <div style={styles.tierHeader}>
+                <div style={{
+                  ...styles.tierIcon,
+                  background: `${recommendedTier.color}20`,
+                  color: recommendedTier.color,
+                }}>
+                  <recommendedTier.icon size={28} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '20px', fontWeight: 700, color: '#fafafa' }}>
+                    {recommendedTier.name}
+                  </div>
+                  <div style={{ fontSize: '14px', color: '#71717a' }}>
+                    {recommendedTier.description}
                   </div>
                 </div>
+              </div>
+
+              <div style={styles.tierPrice}>
+                {recommendedTier.price === 0 ? (
+                  <span style={{ color: '#6b7280' }}>Free</span>
+                ) : (
+                  <>
+                    <span style={{ color: '#71717a', fontSize: '18px' }}>$</span>
+                    {recommendedTier.price}
+                    <span style={{ fontSize: '14px', color: '#52525b', fontWeight: 400 }}> one-time</span>
+                  </>
+                )}
+              </div>
+
+              <div style={styles.tierFeatures}>
+                {recommendedTier.features.map((feature, i) => (
+                  <div key={i} style={styles.tierFeature}>
+                    <Check size={16} color={recommendedTier.color} />
+                    {feature}
+                  </div>
+                ))}
+              </div>
+
+              {recommendedTier.note && (
+                <div style={{
+                  padding: '8px 12px',
+                  background: 'rgba(107, 114, 128, 0.1)',
+                  borderRadius: '6px',
+                  fontSize: '12px',
+                  color: '#9ca3af',
+                  marginBottom: '16px',
+                  textAlign: 'center',
+                }}>
+                  {recommendedTier.note}
+                </div>
+              )}
+
+              <button
+                style={{
+                  width: '100%',
+                  padding: '14px',
+                  background: recommendedTier.price === 0 ? '#27272a' : recommendedTier.color,
+                  border: 'none',
+                  borderRadius: '10px',
+                  color: recommendedTier.price === 0 ? '#fafafa' : '#09090b',
+                  fontSize: '15px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                }}
+                onClick={() => handleSelectTier(recommendedTier.id)}
+              >
+                {recommendedTier.price === 0 ? 'Start Free' : `Get ${recommendedTier.name.split(' ')[0]}`}
+                <ArrowRight size={18} />
+              </button>
+            </div>
+
+            {/* Other options */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              margin: '20px 0',
+            }}>
+              <div style={{ flex: 1, height: '1px', background: '#27272a' }} />
+              <span style={{ fontSize: '13px', color: '#52525b' }}>or choose another option</span>
+              <div style={{ flex: 1, height: '1px', background: '#27272a' }} />
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              {otherTiers.map(tier => (
+                <button
+                  key={tier.id}
+                  style={{
+                    flex: 1,
+                    minWidth: '140px',
+                    padding: '14px',
+                    background: '#1a1a1c',
+                    border: '1px solid #27272a',
+                    borderRadius: '10px',
+                    cursor: 'pointer',
+                    textAlign: 'center',
+                  }}
+                  onClick={() => handleSelectTier(tier.id)}
+                >
+                  <div style={{ fontSize: '14px', fontWeight: 600, color: '#fafafa' }}>
+                    {tier.name.length > 20 ? tier.name.split(' ')[0] : tier.name}
+                  </div>
+                  <div style={{ fontSize: '13px', color: '#71717a' }}>
+                    ${tier.price}
+                  </div>
+                </button>
               ))}
             </div>
+
+            <button
+              style={{
+                width: '100%',
+                marginTop: '16px',
+                padding: '12px',
+                background: 'transparent',
+                border: 'none',
+                color: '#52525b',
+                fontSize: '13px',
+                cursor: 'pointer',
+              }}
+              onClick={handleContinueFree}
+            >
+              Continue with free analysis only →
+            </button>
           </>
         );
     }
@@ -648,9 +920,9 @@ export default function OnboardingWizard({ onComplete, onSkip }) {
     switch (STEPS[currentStep].id) {
       case 'welcome': return true;
       case 'situation': return !!answers.situation;
-      case 'goals': return answers.goals.length > 0;
-      case 'timeline': return !!answers.timeline;
-      case 'gameplan': return true;
+      case 'scope': return !!answers.itemCount;
+      case 'complexity': return !!answers.bureauCount;
+      case 'recommendation': return true;
       default: return false;
     }
   };
@@ -675,22 +947,17 @@ export default function OnboardingWizard({ onComplete, onSkip }) {
           {renderStep()}
         </div>
 
-        <div style={styles.footer}>
-          {currentStep > 0 ? (
-            <button style={styles.backButton} onClick={goBack}>
-              <ArrowLeft size={16} />
-              Back
-            </button>
-          ) : (
-            <div />
-          )}
+        {STEPS[currentStep].id !== 'recommendation' && (
+          <div style={styles.footer}>
+            {currentStep > 0 ? (
+              <button style={styles.backButton} onClick={goBack}>
+                <ArrowLeft size={16} />
+                Back
+              </button>
+            ) : (
+              <div />
+            )}
 
-          {STEPS[currentStep].id === 'gameplan' ? (
-            <button style={styles.nextButton} onClick={handleComplete}>
-              Let's Go!
-              <ArrowRight size={18} />
-            </button>
-          ) : (
             <button
               style={{
                 ...styles.nextButton,
@@ -703,8 +970,8 @@ export default function OnboardingWizard({ onComplete, onSkip }) {
               Continue
               <ArrowRight size={18} />
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

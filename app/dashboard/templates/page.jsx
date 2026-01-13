@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from 'react';
-import { Shield, FileText, AlertTriangle, Building, Scale, Download, Eye, Search, X, Copy, Check, FileWarning, Building2, CreditCard, Clock, Landmark } from 'lucide-react';
+import { Shield, FileText, AlertTriangle, Building, Scale, Download, Eye, Search, X, Copy, Check, FileWarning, Building2, CreditCard, Clock, Landmark, Lock } from 'lucide-react';
 import { TEMPLATES, getLetterContent } from '@/lib/templates';
+import { useUserTier } from '@/lib/useUserTier';
+import { UpgradePrompt, LockedBadge } from '../components/UpgradePrompt';
 
 // Flatten templates for display
 const getAllTemplates = () => {
@@ -38,11 +40,51 @@ const PRIORITY_COLORS = {
   info: '#6b7280',
 };
 
+// Template category restrictions by tier
+const CATEGORY_TIERS = {
+  identity_theft: 'identity-theft',
+  disputes: 'toolkit',
+  debt_collection: 'advanced',
+  specialty: 'advanced',
+  banking: 'advanced',
+  escalation: 'advanced',
+  followup: 'toolkit',
+};
+
+// Core bureau templates available in toolkit tier
+const CORE_TEMPLATE_IDS = [
+  'bureau_dispute_inaccurate',
+  'bureau_dispute_not_mine',
+  'bureau_dispute_identity_theft',
+  'bureau_dispute_obsolete',
+  'bureau_dispute_reinvestigation',
+  'debt_validation_initial',
+  'debt_validation_followup',
+  'bureau_dispute_balance',
+  'bureau_dispute_status',
+  'bureau_dispute_duplicate',
+];
+
 export default function TemplatesPage() {
+  const { tier, hasFeature, loading: tierLoading } = useUserTier();
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
+  // Determine what templates user can access
+  const canDownload = hasFeature('letterDownloads');
+  const hasFullLibrary = hasFeature('templates') === 'full' || tier === 'advanced' || tier === 'identity-theft';
+  const has605BAccess = hasFeature('identityTheftWorkflow');
+
+  // Check if a specific template is accessible
+  const isTemplateAccessible = (template) => {
+    if (!canDownload) return false;
+    if (hasFullLibrary) return true;
+    // Toolkit tier: only core templates
+    return CORE_TEMPLATE_IDS.includes(template.id);
+  };
 
   const allTemplates = getAllTemplates();
   
@@ -471,7 +513,7 @@ export default function TemplatesPage() {
                       <Landmark size={14} />
                       Open Official Site
                     </button>
-                  ) : (
+                  ) : isTemplateAccessible(template) ? (
                     <>
                       <button 
                         style={{...styles.cardBtn, ...styles.cardBtnSecondary}}
@@ -488,6 +530,23 @@ export default function TemplatesPage() {
                         Use
                       </button>
                     </>
+                  ) : (
+                    <>
+                      <button 
+                        style={{...styles.cardBtn, ...styles.cardBtnSecondary}}
+                        onClick={() => setSelectedTemplate(template)}
+                      >
+                        <Eye size={14} />
+                        Preview
+                      </button>
+                      <button 
+                        style={{...styles.cardBtn, ...styles.cardBtnSecondary, opacity: 0.6}}
+                        onClick={() => setShowUpgradeModal(true)}
+                      >
+                        <Lock size={14} />
+                        {!canDownload ? 'Upgrade' : 'Pro'}
+                      </button>
+                    </>
                   )}
                 </div>
               </div>
@@ -499,6 +558,29 @@ export default function TemplatesPage() {
           <Search size={48} style={{ opacity: 0.3, marginBottom: '16px' }} />
           <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '8px', color: '#a3a3a3' }}>No templates found</h3>
           <p>Try adjusting your search or filter criteria</p>
+        </div>
+      )}
+
+      {/* Upgrade Modal */}
+      {showUpgradeModal && (
+        <div style={styles.modal} onClick={() => setShowUpgradeModal(false)}>
+          <div style={{...styles.modalContent, maxWidth: '500px', padding: '0'}} onClick={(e) => e.stopPropagation()}>
+            <button
+              style={{...styles.modalClose, position: 'absolute', top: '16px', right: '16px', zIndex: 10}}
+              onClick={() => setShowUpgradeModal(false)}
+            >
+              <X size={20} />
+            </button>
+            <UpgradePrompt
+              feature="letter-downloads"
+              requiredTier={!canDownload ? 'toolkit' : 'advanced'}
+              title={!canDownload ? 'Unlock Letter Downloads' : 'Unlock Full Template Library'}
+              description={!canDownload 
+                ? 'Upgrade to the Dispute Toolkit to download and customize letter templates for your disputes.'
+                : 'Upgrade to the Advanced Suite to access all 62 professional letter templates including creditor disputes, escalations, and more.'
+              }
+            />
+          </div>
         </div>
       )}
 
@@ -524,20 +606,41 @@ export default function TemplatesPage() {
             </div>
             
             <div style={styles.modalFooter}>
-              <button 
-                style={{...styles.modalBtn, background: '#1a1a1c', color: '#a3a3a3'}}
-                onClick={handleCopy}
-              >
-                {copied ? <Check size={18} /> : <Copy size={18} />}
-                {copied ? 'Copied!' : 'Copy to Clipboard'}
-              </button>
-              <button 
-                style={{...styles.modalBtn, background: 'linear-gradient(135deg, #f7d047 0%, #d4b840 100%)', color: '#09090b'}}
-                onClick={handleDownload}
-              >
-                <Download size={18} />
-                Download Template
-              </button>
+              {isTemplateAccessible(selectedTemplate) ? (
+                <>
+                  <button 
+                    style={{...styles.modalBtn, background: '#1a1a1c', color: '#a3a3a3'}}
+                    onClick={handleCopy}
+                  >
+                    {copied ? <Check size={18} /> : <Copy size={18} />}
+                    {copied ? 'Copied!' : 'Copy to Clipboard'}
+                  </button>
+                  <button 
+                    style={{...styles.modalBtn, background: 'linear-gradient(135deg, #f7d047 0%, #d4b840 100%)', color: '#09090b'}}
+                    onClick={handleDownload}
+                  >
+                    <Download size={18} />
+                    Download Template
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button 
+                    style={{...styles.modalBtn, background: '#1a1a1c', color: '#52525b', cursor: 'not-allowed'}}
+                    disabled
+                  >
+                    <Lock size={18} />
+                    Copy Locked
+                  </button>
+                  <button 
+                    style={{...styles.modalBtn, background: 'linear-gradient(135deg, #f7d047 0%, #d4b840 100%)', color: '#09090b'}}
+                    onClick={() => { setSelectedTemplate(null); setShowUpgradeModal(true); }}
+                  >
+                    <Lock size={18} />
+                    Upgrade to Download
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>

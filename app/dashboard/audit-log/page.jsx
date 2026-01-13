@@ -3,9 +3,11 @@
 import { useState, useEffect } from 'react';
 import { 
   FileCheck, Download, RefreshCw, FileText, Shield, Clock,
-  Flag, Upload, Sparkles, Check
+  Flag, Upload, Sparkles, Check, Lock
 } from 'lucide-react';
 import { useAuditLog } from '@/lib/useUserData';
+import { useUserTier } from '@/lib/useUserTier';
+import Link from 'next/link';
 
 const ACTION_ICONS = {
   add_dispute: FileText,
@@ -33,8 +35,12 @@ const ACTION_LABELS = {
 
 export default function AuditLogPage() {
   const { auditLog, loading, exportCSV, refresh } = useAuditLog();
+  const { hasFeature } = useUserTier();
   const [exporting, setExporting] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+
+  // Check if user can export audit log
+  const canExport = hasFeature('auditExport');
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -90,31 +96,53 @@ export default function AuditLogPage() {
             <RefreshCw size={16} />
             Refresh
           </button>
-          <button 
-            onClick={handleExport}
-            disabled={exporting || auditLog.length === 0}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '10px 18px',
-              background: '#121214',
-              border: '1px solid #1f1f23',
-              borderRadius: '8px',
-              color: auditLog.length === 0 ? '#52525b' : '#e5e5e5',
-              fontSize: '14px',
-              fontWeight: 500,
-              cursor: auditLog.length === 0 ? 'not-allowed' : 'pointer',
-              opacity: exporting ? 0.7 : 1,
-            }}
-          >
-            {exporting ? (
-              <RefreshCw size={18} style={{ animation: 'spin 1s linear infinite' }} />
-            ) : (
-              <Download size={18} />
-            )}
-            Export CSV
-          </button>
+          {canExport ? (
+            <button 
+              onClick={handleExport}
+              disabled={exporting || auditLog.length === 0}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '10px 18px',
+                background: '#121214',
+                border: '1px solid #1f1f23',
+                borderRadius: '8px',
+                color: auditLog.length === 0 ? '#52525b' : '#e5e5e5',
+                fontSize: '14px',
+                fontWeight: 500,
+                cursor: auditLog.length === 0 ? 'not-allowed' : 'pointer',
+                opacity: exporting ? 0.7 : 1,
+              }}
+            >
+              {exporting ? (
+                <RefreshCw size={18} style={{ animation: 'spin 1s linear infinite' }} />
+              ) : (
+                <Download size={18} />
+              )}
+              Export CSV
+            </button>
+          ) : (
+            <Link
+              href="/pricing?highlight=advanced"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '10px 18px',
+                background: 'rgba(247, 208, 71, 0.1)',
+                border: '1px solid rgba(247, 208, 71, 0.3)',
+                borderRadius: '8px',
+                color: '#f7d047',
+                fontSize: '14px',
+                fontWeight: 500,
+                textDecoration: 'none',
+              }}
+            >
+              <Lock size={16} />
+              Upgrade to Export
+            </Link>
+          )}
         </div>
       </div>
 

@@ -6,13 +6,15 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   Search, Sparkles, FileText, Clock, Flag, FileCheck,
-  ChevronLeft, ChevronRight, LogOut, Settings, User, ChevronUp, TrendingUp, Bell, Menu, X
+  ChevronLeft, ChevronRight, LogOut, Settings, User, ChevronUp, TrendingUp, Bell, Menu, X, Lock, Crown
 } from 'lucide-react';
 import OnboardingWizard from './components/OnboardingWizard';
+import { useUserTier } from '@/lib/useUserTier';
 
 export default function DashboardLayout({ children }) {
   const { user } = useUser();
   const { isSignedIn } = useAuth();
+  const { tier, tierName, tierColor, hasFeature } = useUserTier();
   const pathname = usePathname();
   const isAIStrategist = pathname === '/dashboard/ai-strategist';
   const [rightSidebarOpen, setRightSidebarOpen] = useState(false);
@@ -131,13 +133,19 @@ export default function DashboardLayout({ children }) {
   const sidebarItems = [
     { id: 'progress', label: 'Progress', icon: TrendingUp, section: 'CORE', href: '/dashboard/progress' },
     { id: 'analyze', label: 'Analyze', icon: Search, section: 'CORE', href: '/dashboard' },
-    { id: 'ai-strategist', label: 'AI Strategist', icon: Sparkles, section: 'CORE', href: '/dashboard/ai-strategist' },
+    { id: 'ai-strategist', label: 'AI Strategist', icon: Sparkles, section: 'CORE', href: '/dashboard/ai-strategist', requiresTier: 'advanced' },
     { id: 'templates', label: 'Templates', icon: FileText, section: 'CORE', href: '/dashboard/templates' },
-    { id: 'tracker', label: 'Tracker', icon: Clock, section: 'MANAGE', href: '/dashboard/tracker' },
+    { id: 'tracker', label: 'Tracker', icon: Clock, section: 'MANAGE', href: '/dashboard/tracker', requiresTier: 'toolkit' },
     { id: 'flagged', label: 'Flagged', icon: Flag, section: 'MANAGE', href: '/dashboard/flagged' },
     { id: 'audit-log', label: 'Audit Log', icon: FileCheck, section: 'MANAGE', href: '/dashboard/audit-log' },
     { id: 'settings', label: 'Settings', icon: Settings, section: 'MANAGE', href: '/dashboard/settings' },
   ];
+
+  // Check if user has access to a feature based on tier
+  const hasTierAccess = (requiredTier) => {
+    const tierLevels = { 'free': 0, 'toolkit': 1, 'advanced': 2, 'identity-theft': 3 };
+    return tierLevels[tier] >= tierLevels[requiredTier];
+  };
 
   const SidebarContent = () => (
     <>
@@ -159,6 +167,7 @@ export default function DashboardLayout({ children }) {
             <div style={{ padding: '16px 12px 8px', fontSize: '11px', fontWeight: 600, color: '#525252', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{section}</div>
             {sidebarItems.filter(item => item.section === section).map(item => {
               const isActive = pathname === item.href || (item.href === '/dashboard' && pathname === '/dashboard');
+              const isLocked = item.requiresTier && !hasTierAccess(item.requiresTier);
               return (
                 <Link
                   key={item.id}
@@ -169,7 +178,7 @@ export default function DashboardLayout({ children }) {
                     gap: '10px',
                     padding: '10px 12px',
                     borderRadius: '8px',
-                    color: isActive ? '#f7d047' : '#a3a3a3',
+                    color: isLocked ? '#52525b' : (isActive ? '#f7d047' : '#a3a3a3'),
                     background: isActive ? 'rgba(247, 208, 71, 0.1)' : 'transparent',
                     fontSize: '14px',
                     cursor: 'pointer',
@@ -178,11 +187,15 @@ export default function DashboardLayout({ children }) {
                     transition: 'all 0.15s ease',
                     borderLeft: isActive ? '2px solid #f7d047' : '2px solid transparent',
                     position: 'relative',
+                    opacity: isLocked ? 0.7 : 1,
                   }}
                 >
                   <item.icon size={18} />
                   <span style={{ flex: 1 }}>{item.label}</span>
-                  {item.id === 'tracker' && notifications.length > 0 && (
+                  {isLocked && (
+                    <Lock size={12} style={{ color: '#52525b' }} />
+                  )}
+                  {item.id === 'tracker' && !isLocked && notifications.length > 0 && (
                     <span style={{
                       minWidth: '18px',
                       height: '18px',
@@ -230,9 +243,54 @@ export default function DashboardLayout({ children }) {
               <div style={{ fontSize: '11px', color: '#71717a', marginTop: '2px', wordBreak: 'break-all' }}>
                 {user?.primaryEmailAddress?.emailAddress}
               </div>
+              {/* Tier Badge */}
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                marginTop: '8px',
+                padding: '4px 8px',
+                background: `${tierColor}15`,
+                border: `1px solid ${tierColor}30`,
+                borderRadius: '4px',
+                fontSize: '10px',
+                fontWeight: 600,
+                color: tierColor,
+                textTransform: 'uppercase',
+              }}>
+                {tier === 'identity-theft' && <Crown size={10} />}
+                {tierName}
+              </div>
             </div>
 
             <div style={{ padding: '8px' }}>
+              {tier === 'free' && (
+                <Link
+                  href="/pricing"
+                  onClick={() => setUserMenuOpen(false)}
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: '10px 12px',
+                    background: 'rgba(247, 208, 71, 0.1)',
+                    border: '1px solid rgba(247, 208, 71, 0.2)',
+                    borderRadius: '8px',
+                    color: '#f7d047',
+                    fontSize: '13px',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    transition: 'all 0.15s',
+                    textDecoration: 'none',
+                    marginBottom: '4px',
+                  }}
+                >
+                  <Crown size={16} />
+                  Upgrade Plan
+                </Link>
+              )}
               <Link
                 href="/dashboard/settings"
                 onClick={() => setUserMenuOpen(false)}

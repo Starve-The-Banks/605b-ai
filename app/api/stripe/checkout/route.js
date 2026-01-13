@@ -30,29 +30,29 @@ const DISCLAIMER_VERSIONS = {
 };
 const CURRENT_DISCLAIMER_VERSION = "v1";
 
-// Tier configuration - priceId is source of truth for charging
-// displayAmount is ONLY for UI, never used for actual charges
+// Tier configuration - priceId is source of truth for full purchase
+// amount is used for upgrade calculations
 const TIER_CONFIG = {
   free: {
     name: 'Credit Report Analyzer',
-    displayAmount: 0,  // UI only
+    amount: 0,
     features: ['1 PDF analysis (read-only)', 'Issue categorization', 'Educational walkthrough'],
   },
   toolkit: {
     priceId: process.env.STRIPE_TOOLKIT_PRICE_ID,
-    displayAmount: 3900,  // UI only - Stripe priceId is source of truth
+    amount: 3900,  // $39.00 in cents
     name: 'Dispute Toolkit',
     features: ['Full analysis export', 'Core bureau templates', 'Dispute tracker'],
   },
   advanced: {
     priceId: process.env.STRIPE_ADVANCED_PRICE_ID,
-    displayAmount: 8900,  // UI only
+    amount: 8900,  // $89.00 in cents
     name: 'Advanced Dispute Suite',
     features: ['Full template library (62)', 'Creditor templates', 'AI Strategist', 'CFPB/FTC generators'],
   },
   'identity-theft': {
     priceId: process.env.STRIPE_IDENTITY_THEFT_PRICE_ID,
-    displayAmount: 17900,  // UI only
+    amount: 17900,  // $179.00 in cents
     name: '605B Identity Theft Toolkit',
     features: ['605B workflows', 'FTC integration', 'Fraud affidavits', 'Attorney-ready docs'],
   },
@@ -61,17 +61,17 @@ const TIER_CONFIG = {
 const ADDON_CONFIG = {
   'extra-analysis': {
     priceId: process.env.STRIPE_EXTRA_ANALYSIS_PRICE_ID,
-    displayAmount: 700,
+    amount: 700,
     name: 'Additional Report Analysis',
   },
   'ai-credits': {
     priceId: process.env.STRIPE_AI_CREDITS_PRICE_ID,
-    displayAmount: 1000,
+    amount: 1000,
     name: 'AI Strategist Credits',
   },
   'attorney-export': {
     priceId: process.env.STRIPE_ATTORNEY_EXPORT_PRICE_ID,
-    displayAmount: 3900,
+    amount: 3900,
     name: 'Attorney Export Pack',
   },
 };
@@ -93,7 +93,7 @@ export async function POST(request) {
     }
 
     const body = await request.json();
-    const { tierId, addonId, disclaimerAccepted, disclaimerTimestamp, upgradeFrom } = body;
+    const { tierId, addonId, disclaimerAccepted, disclaimerTimestamp } = body;
 
     // Validate tier/addon ID against allowlist (security: prevent injection)
     if (tierId && !VALID_TIER_IDS.includes(tierId)) {
@@ -106,7 +106,6 @@ export async function POST(request) {
     }
 
     // SERVER-SIDE ENFORCEMENT: Require disclaimer for paid products
-    // This prevents checkbox bypass from malicious API callers
     if ((tierId && tierId !== 'free') || addonId) {
       if (disclaimerAccepted !== true) {
         console.log(`[ABUSE] Checkout attempted without disclaimer: user ${userId}, tier ${tierId || addonId}`);
@@ -155,33 +154,76 @@ export async function POST(request) {
         return NextResponse.json({ error: 'Configuration error' }, { status: 500 });
       }
 
-      // For upgrades, we'd need to handle proration differently
-      // For now, upgrades create a new charge for the full tier price
-      // (Could implement Stripe proration later)
+      // Check if user has an existing tier (potential upgrade)
+      const existingTierData = await getUserTierData(redisClient, userId);
+      const currentTier = existingTierData?.tier;
+      const currentTierIndex = currentTier ? TIER_ORDER.indexOf(currentTier) : -1;
+      const newTierIndex = TIER_ORDER.indexOf(tierId);
+
+      // Determine if this is an upgrade
       let isUpgrade = false;
-      if (upgradeFrom && TIER_CONFIG[upgradeFrom]) {
-        const currentTierIndex = TIER_ORDER.indexOf(upgradeFrom);
-        const newTierIndex = TIER_ORDER.indexOf(tierId);
+      let upgradeFrom = null;
+      let amountToCharge = tier.amount;
+      let priceId = tier.priceId;
+
+      if (currentTier && currentTierIndex >= 0 && currentTierIndex < newTierIndex) {
+        // This is an upgrade!
+        isUpgrade = true;
+        upgradeFrom = currentTier;
+
+        // Calculate the amount they've already paid
+        const amountAlreadyPaid = existingTierData.amountPaid || TIER_CONFIG[currentTier]?.amount || 0;
         
-        if (newTierIndex > currentTierIndex) {
-          isUpgrade = true;
-        } else {
+        // Calculate the difference
+        amountToCharge = tier.amount - amountAlreadyPaid;
+
+        if (amountToCharge <= 0) {
+          // Edge case: they've already paid enough (shouldn't happen normally)
+          console.log(`[UPGRADE] User ${userId} has already paid ${amountAlreadyPaid}, new tier costs ${tier.amount}`);
           return NextResponse.json({ 
-            error: 'Cannot downgrade tiers' 
+            error: 'You have already paid for this tier or higher' 
           }, { status: 400 });
         }
+
+        console.log(`[UPGRADE] User ${userId}: ${currentTier} → ${tierId}, paid: ${amountAlreadyPaid}, difference: ${amountToCharge}`);
+
+        // Create a one-time price for the upgrade amount
+        const upgradePrice = await stripeClient.prices.create({
+          currency: 'usd',
+          unit_amount: amountToCharge,
+          product_data: {
+            name: `Upgrade: ${TIER_CONFIG[currentTier].name} → ${tier.name}`,
+            metadata: {
+              type: 'tier_upgrade',
+              fromTier: currentTier,
+              toTier: tierId,
+              originalPrice: tier.amount,
+              creditApplied: amountAlreadyPaid,
+            },
+          },
+        });
+
+        priceId = upgradePrice.id;
+      } else if (currentTier && currentTierIndex >= newTierIndex) {
+        // Trying to buy same tier or downgrade
+        return NextResponse.json({ 
+          error: currentTierIndex === newTierIndex 
+            ? 'You already own this tier' 
+            : 'Cannot downgrade tiers'
+        }, { status: 400 });
       }
 
       const session = await createCheckoutSession(stripeClient, {
         customerId,
         userId,
-        priceId: tier.priceId,
+        priceId,
         productName: tier.name,
         productType: 'tier',
         productId: tierId,
         disclaimerTimestamp,
         isUpgrade,
         upgradeFrom,
+        amountToCharge,
       });
 
       return NextResponse.json({ url: session.url });
@@ -195,6 +237,18 @@ export async function POST(request) {
       { error: error.message || 'Failed to create checkout session' },
       { status: 500 }
     );
+  }
+}
+
+// Get user's current tier data from Redis
+async function getUserTierData(redisClient, userId) {
+  try {
+    const tierData = await redisClient.get(`user:${userId}:tier`);
+    if (!tierData) return null;
+    return typeof tierData === 'string' ? JSON.parse(tierData) : tierData;
+  } catch (e) {
+    console.error('Error reading user tier data:', e);
+    return null;
   }
 }
 
@@ -264,7 +318,7 @@ async function getOrCreateStripeCustomer(stripeClient, redisClient, user, userId
   return customerId;
 }
 
-async function createCheckoutSession(stripeClient, { customerId, userId, priceId, productName, productType, productId, disclaimerTimestamp, isUpgrade, upgradeFrom }) {
+async function createCheckoutSession(stripeClient, { customerId, userId, priceId, productName, productType, productId, disclaimerTimestamp, isUpgrade, upgradeFrom, amountToCharge }) {
   // CRITICAL: Validate APP_URL is set
   const appUrl = process.env.NEXT_PUBLIC_APP_URL;
   if (!appUrl || !appUrl.startsWith('http')) {
@@ -272,7 +326,7 @@ async function createCheckoutSession(stripeClient, { customerId, userId, priceId
     throw new Error('Server configuration error: APP_URL not configured. Please contact support.');
   }
 
-  // Use Stripe Price ID as source of truth - never pass amount
+  // Use Stripe Price ID as source of truth
   const session = await stripeClient.checkout.sessions.create({
     customer: customerId,
     client_reference_id: userId,
@@ -280,22 +334,22 @@ async function createCheckoutSession(stripeClient, { customerId, userId, priceId
     mode: 'payment',
     line_items: [
       {
-        price: priceId,  // Stripe Price ID is source of truth
+        price: priceId,
         quantity: 1,
       },
     ],
-    success_url: `${appUrl}/dashboard?success=true&${productType}=${productId}`,
+    success_url: `${appUrl}/dashboard?success=true&${productType}=${productId}${isUpgrade ? '&upgrade=true' : ''}`,
     cancel_url: `${appUrl}/pricing?canceled=true`,
     metadata: {
       clerkUserId: userId,
       productType: productType,
       productId: productId,
-      // Store only disclaimer VERSION - full text stored server-side
       disclaimerAccepted: 'true',
       disclaimerVersion: CURRENT_DISCLAIMER_VERSION,
       disclaimerTimestamp: disclaimerTimestamp || new Date().toISOString(),
       isUpgrade: isUpgrade ? 'true' : 'false',
       upgradeFrom: upgradeFrom || '',
+      amountCharged: amountToCharge ? String(amountToCharge) : '',
     },
     invoice_creation: {
       enabled: true,
@@ -303,7 +357,9 @@ async function createCheckoutSession(stripeClient, { customerId, userId, priceId
     allow_promotion_codes: true,
     custom_text: {
       submit: {
-        message: 'By completing this purchase, you acknowledge that 605b.ai provides self-service software tools only and does not perform credit repair services on your behalf.',
+        message: isUpgrade 
+          ? `Upgrade from ${TIER_CONFIG[upgradeFrom]?.name || upgradeFrom} - you're only paying the difference!`
+          : 'By completing this purchase, you acknowledge that 605b.ai provides self-service software tools only and does not perform credit repair services on your behalf.',
       },
     },
   });
@@ -319,17 +375,45 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    return NextResponse.json({
-      tiers: Object.entries(TIER_CONFIG).map(([id, config]) => ({
+    const redisClient = getRedis();
+    const userTierData = await getUserTierData(redisClient, userId);
+    const currentTier = userTierData?.tier || 'free';
+    const amountPaid = userTierData?.amountPaid || 0;
+
+    // Calculate upgrade prices for each tier
+    const tiersWithUpgradePricing = Object.entries(TIER_CONFIG).map(([id, config]) => {
+      const currentIndex = TIER_ORDER.indexOf(currentTier);
+      const tierIndex = TIER_ORDER.indexOf(id);
+      
+      let upgradePrice = null;
+      let isUpgrade = false;
+      
+      if (tierIndex > currentIndex && id !== 'free') {
+        isUpgrade = true;
+        upgradePrice = config.amount - amountPaid;
+        if (upgradePrice < 0) upgradePrice = 0;
+      }
+
+      return {
         id,
         name: config.name,
-        amount: config.displayAmount,  // For UI display only
+        amount: config.amount,
         features: config.features,
-      })),
+        isUpgrade,
+        upgradePrice,
+        isCurrentTier: id === currentTier,
+        isOwned: tierIndex <= currentIndex && currentIndex > 0,
+      };
+    });
+
+    return NextResponse.json({
+      tiers: tiersWithUpgradePricing,
+      currentTier,
+      amountPaid,
       addons: Object.entries(ADDON_CONFIG).map(([id, config]) => ({
         id,
         name: config.name,
-        amount: config.displayAmount,  // For UI display only
+        amount: config.amount,
       })),
     });
 

@@ -88,6 +88,19 @@ const ADDON_GRANTS = {
   },
 };
 
+// Idempotency: Check if event was already processed
+async function isEventProcessed(redisClient, eventId) {
+  const key = `stripe:event:${eventId}`;
+  const exists = await redisClient.get(key);
+  return !!exists;
+}
+
+// Idempotency: Mark event as processed (expire after 24 hours)
+async function markEventProcessed(redisClient, eventId) {
+  const key = `stripe:event:${eventId}`;
+  await redisClient.set(key, new Date().toISOString(), { ex: 86400 });
+}
+
 export async function POST(request) {
   const stripeClient = getStripe();
   const redisClient = getRedis();
@@ -113,143 +126,107 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
   }
 
-  switch (event.type) {
-    case 'checkout.session.completed': {
-      const session = event.data.object;
-      
-      const clerkUserId = session.metadata?.clerkUserId;
-      const productType = session.metadata?.productType;
-      const productId = session.metadata?.productId;
-      const isUpgrade = session.metadata?.isUpgrade === 'true';
-      const upgradeFrom = session.metadata?.upgradeFrom;
-      const disclaimerAccepted = session.metadata?.disclaimerAccepted === 'true';
-      const disclaimerTimestamp = session.metadata?.disclaimerTimestamp;
+  // Idempotency guard: Skip if already processed
+  const alreadyProcessed = await isEventProcessed(redisClient, event.id);
+  if (alreadyProcessed) {
+    console.log(`Event ${event.id} already processed, skipping`);
+    return NextResponse.json({ received: true, skipped: true });
+  }
 
-      if (!clerkUserId) {
-        console.error('Missing clerkUserId in checkout session');
-        break;
-      }
+  // Mark as processed immediately to prevent race conditions
+  await markEventProcessed(redisClient, event.id);
 
-      if (productType === 'tier' && productId) {
-        const features = TIER_FEATURES[productId] || TIER_FEATURES.free;
-
-        let existingData = {};
-        try {
-          const existing = await redisClient.get(`user:${clerkUserId}:tier`);
-          if (existing) {
-            existingData = typeof existing === 'string' ? JSON.parse(existing) : existing;
-          }
-        } catch (e) {
-          console.error('Error parsing existing tier data:', e);
-        }
-
-        let pdfAnalysesRemaining = features.pdfAnalyses;
-        if (isUpgrade && existingData.pdfAnalysesUsed) {
-          const used = existingData.pdfAnalysesUsed || 0;
-          
-          if (features.pdfAnalyses === -1) {
-            pdfAnalysesRemaining = -1;
-          } else {
-            pdfAnalysesRemaining = features.pdfAnalyses - used;
-            if (pdfAnalysesRemaining < 0) pdfAnalysesRemaining = 0;
-          }
-        }
-
-        const userTierData = {
-          tier: productId,
-          features: features,
-          purchasedAt: new Date().toISOString(),
-          stripeSessionId: session.id,
-          stripeCustomerId: session.customer,
-          amountPaid: session.amount_total,
-          disclaimerAccepted: disclaimerAccepted,
-          disclaimerTimestamp: disclaimerTimestamp,
-          pdfAnalysesUsed: existingData.pdfAnalysesUsed || 0,
-          pdfAnalysesRemaining: pdfAnalysesRemaining,
-          aiCreditsUsed: existingData.aiCreditsUsed || 0,
-          aiCreditsRemaining: features.aiChat ? -1 : 0,
-          isUpgrade: isUpgrade,
-          upgradedFrom: upgradeFrom || null,
-          previousPurchases: [
-            ...(existingData.previousPurchases || []),
-            ...(isUpgrade ? [{
-              tier: upgradeFrom,
-              purchasedAt: existingData.purchasedAt,
-              amountPaid: existingData.amountPaid,
-            }] : []),
-          ],
-        };
-
-        await redisClient.set(`user:${clerkUserId}:tier`, JSON.stringify(userTierData));
-
-        const existingProfile = await redisClient.get(`user:${clerkUserId}:profile`);
-        const profile = existingProfile 
-          ? (typeof existingProfile === 'string' ? JSON.parse(existingProfile) : existingProfile)
-          : {};
+  try {
+    switch (event.type) {
+      case 'checkout.session.completed': {
+        const session = event.data.object;
         
-        await redisClient.set(`user:${clerkUserId}:profile`, JSON.stringify({
-          ...profile,
-          tier: productId,
-          tierPurchasedAt: new Date().toISOString(),
-        }));
+        const clerkUserId = session.metadata?.clerkUserId || session.client_reference_id;
+        const productType = session.metadata?.productType;
+        const productId = session.metadata?.productId;
+        const isUpgrade = session.metadata?.isUpgrade === 'true';
+        const upgradeFrom = session.metadata?.upgradeFrom;
+        const disclaimerAccepted = session.metadata?.disclaimerAccepted === 'true';
+        const disclaimerTimestamp = session.metadata?.disclaimerTimestamp;
 
-        const auditEntry = {
-          id: `purchase_${Date.now()}`,
-          type: 'purchase',
-          action: isUpgrade ? 'tier_upgrade' : 'tier_purchase',
-          details: {
+        if (!clerkUserId) {
+          console.error('Missing clerkUserId in checkout session');
+          break;
+        }
+
+        if (productType === 'tier' && productId) {
+          const features = TIER_FEATURES[productId] || TIER_FEATURES.free;
+
+          let existingData = {};
+          try {
+            const existing = await redisClient.get(`user:${clerkUserId}:tier`);
+            if (existing) {
+              existingData = typeof existing === 'string' ? JSON.parse(existing) : existing;
+            }
+          } catch (e) {
+            console.error('Error parsing existing tier data:', e);
+          }
+
+          let pdfAnalysesRemaining = features.pdfAnalyses;
+          if (isUpgrade && existingData.pdfAnalysesUsed) {
+            const used = existingData.pdfAnalysesUsed || 0;
+            
+            if (features.pdfAnalyses === -1) {
+              pdfAnalysesRemaining = -1;
+            } else {
+              pdfAnalysesRemaining = features.pdfAnalyses - used;
+              if (pdfAnalysesRemaining < 0) pdfAnalysesRemaining = 0;
+            }
+          }
+
+          const userTierData = {
             tier: productId,
-            amount: session.amount_total,
-            isUpgrade: isUpgrade,
-            upgradeFrom: upgradeFrom,
-          },
-          timestamp: new Date().toISOString(),
-        };
-
-        const existingAudit = await redisClient.get(`user:${clerkUserId}:audit`);
-        const auditLog = existingAudit 
-          ? (typeof existingAudit === 'string' ? JSON.parse(existingAudit) : existingAudit)
-          : [];
-        auditLog.unshift(auditEntry);
-        await redisClient.set(`user:${clerkUserId}:audit`, JSON.stringify(auditLog.slice(0, 1000)));
-
-        console.log(`User ${clerkUserId} ${isUpgrade ? 'upgraded to' : 'purchased'} ${productId} tier`);
-      }
-
-      if (productType === 'addon' && productId) {
-        const addonGrant = ADDON_GRANTS[productId];
-        
-        if (addonGrant) {
-          const existingTier = await redisClient.get(`user:${clerkUserId}:tier`);
-          const tierData = existingTier 
-            ? (typeof existingTier === 'string' ? JSON.parse(existingTier) : existingTier)
-            : {};
-
-          if (addonGrant.type === 'increment') {
-            const currentValue = tierData[addonGrant.field] || 0;
-            tierData[addonGrant.field] = currentValue === -1 ? -1 : currentValue + addonGrant.amount;
-          } else if (addonGrant.type === 'unlock') {
-            tierData.features = tierData.features || {};
-            tierData.features[addonGrant.field] = addonGrant.value;
-          }
-
-          tierData.addons = tierData.addons || [];
-          tierData.addons.push({
-            addonId: productId,
+            features: features,
             purchasedAt: new Date().toISOString(),
             stripeSessionId: session.id,
+            stripeCustomerId: session.customer,
             amountPaid: session.amount_total,
-          });
+            disclaimerAccepted: disclaimerAccepted,
+            disclaimerTimestamp: disclaimerTimestamp,
+            pdfAnalysesUsed: existingData.pdfAnalysesUsed || 0,
+            pdfAnalysesRemaining: pdfAnalysesRemaining,
+            aiCreditsUsed: existingData.aiCreditsUsed || 0,
+            aiCreditsRemaining: features.aiChat ? -1 : 0,
+            isUpgrade: isUpgrade,
+            upgradedFrom: upgradeFrom || null,
+            previousPurchases: [
+              ...(existingData.previousPurchases || []),
+              ...(isUpgrade ? [{
+                tier: upgradeFrom,
+                purchasedAt: existingData.purchasedAt,
+                amountPaid: existingData.amountPaid,
+              }] : []),
+            ],
+          };
 
-          await redisClient.set(`user:${clerkUserId}:tier`, JSON.stringify(tierData));
+          await redisClient.set(`user:${clerkUserId}:tier`, JSON.stringify(userTierData));
+
+          const existingProfile = await redisClient.get(`user:${clerkUserId}:profile`);
+          const profile = existingProfile 
+            ? (typeof existingProfile === 'string' ? JSON.parse(existingProfile) : existingProfile)
+            : {};
+          
+          await redisClient.set(`user:${clerkUserId}:profile`, JSON.stringify({
+            ...profile,
+            tier: productId,
+            tierPurchasedAt: new Date().toISOString(),
+          }));
 
           const auditEntry = {
-            id: `addon_${Date.now()}`,
+            id: `purchase_${Date.now()}`,
             type: 'purchase',
-            action: 'addon_purchase',
+            action: isUpgrade ? 'tier_upgrade' : 'tier_purchase',
             details: {
-              addon: productId,
+              tier: productId,
               amount: session.amount_total,
+              isUpgrade: isUpgrade,
+              upgradeFrom: upgradeFrom,
+              stripeEventId: event.id,
             },
             timestamp: new Date().toISOString(),
           };
@@ -261,32 +238,91 @@ export async function POST(request) {
           auditLog.unshift(auditEntry);
           await redisClient.set(`user:${clerkUserId}:audit`, JSON.stringify(auditLog.slice(0, 1000)));
 
-          console.log(`User ${clerkUserId} purchased add-on: ${productId}`);
+          console.log(`User ${clerkUserId} ${isUpgrade ? 'upgraded to' : 'purchased'} ${productId} tier`);
         }
+
+        if (productType === 'addon' && productId) {
+          const addonGrant = ADDON_GRANTS[productId];
+          
+          if (addonGrant) {
+            const existingTier = await redisClient.get(`user:${clerkUserId}:tier`);
+            const tierData = existingTier 
+              ? (typeof existingTier === 'string' ? JSON.parse(existingTier) : existingTier)
+              : {};
+
+            if (addonGrant.type === 'increment') {
+              const currentValue = tierData[addonGrant.field] || 0;
+              tierData[addonGrant.field] = currentValue === -1 ? -1 : currentValue + addonGrant.amount;
+            } else if (addonGrant.type === 'unlock') {
+              tierData.features = tierData.features || {};
+              tierData.features[addonGrant.field] = addonGrant.value;
+            }
+
+            tierData.addons = tierData.addons || [];
+            tierData.addons.push({
+              addonId: productId,
+              purchasedAt: new Date().toISOString(),
+              stripeSessionId: session.id,
+              amountPaid: session.amount_total,
+            });
+
+            await redisClient.set(`user:${clerkUserId}:tier`, JSON.stringify(tierData));
+
+            const auditEntry = {
+              id: `addon_${Date.now()}`,
+              type: 'purchase',
+              action: 'addon_purchase',
+              details: {
+                addon: productId,
+                amount: session.amount_total,
+                stripeEventId: event.id,
+              },
+              timestamp: new Date().toISOString(),
+            };
+
+            const existingAudit = await redisClient.get(`user:${clerkUserId}:audit`);
+            const auditLog = existingAudit 
+              ? (typeof existingAudit === 'string' ? JSON.parse(existingAudit) : existingAudit)
+              : [];
+            auditLog.unshift(auditEntry);
+            await redisClient.set(`user:${clerkUserId}:audit`, JSON.stringify(auditLog.slice(0, 1000)));
+
+            console.log(`User ${clerkUserId} purchased add-on: ${productId}`);
+          }
+        }
+
+        break;
       }
 
-      break;
-    }
+      case 'payment_intent.succeeded': {
+        console.log('Payment succeeded:', event.data.object.id);
+        break;
+      }
 
-    case 'payment_intent.succeeded': {
-      console.log('Payment succeeded:', event.data.object.id);
-      break;
-    }
+      case 'payment_intent.payment_failed': {
+        const paymentIntent = event.data.object;
+        console.log('Payment failed:', paymentIntent.id, paymentIntent.last_payment_error?.message);
+        break;
+      }
 
-    case 'payment_intent.payment_failed': {
-      const paymentIntent = event.data.object;
-      console.log('Payment failed:', paymentIntent.id, paymentIntent.last_payment_error?.message);
-      break;
-    }
+      case 'charge.refunded': {
+        const charge = event.data.object;
+        console.log('Charge refunded:', charge.id);
+        
+        // Optionally: revoke entitlements on refund
+        // You could look up the user by charge.customer and downgrade their tier
+        // For now, just log it - manual review recommended for refunds
+        
+        break;
+      }
 
-    case 'charge.refunded': {
-      const charge = event.data.object;
-      console.log('Charge refunded:', charge.id);
-      break;
+      default:
+        console.log(`Unhandled event type: ${event.type}`);
     }
-
-    default:
-      console.log(`Unhandled event type: ${event.type}`);
+  } catch (processingError) {
+    // Log error but still return 200 to prevent Stripe retries
+    // The event is already marked as processed
+    console.error('Error processing webhook event:', processingError);
   }
 
   return NextResponse.json({ received: true });

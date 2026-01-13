@@ -185,6 +185,7 @@ async function createCheckoutSession(stripeClient, { user, userId, product, prod
 
   const session = await stripeClient.checkout.sessions.create({
     customer: customerId,
+    client_reference_id: userId,
     payment_method_types: ['card'],
     line_items: [
       {

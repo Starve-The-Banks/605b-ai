@@ -139,6 +139,7 @@ export default function DashboardLayout({ children }) {
     { id: 'flagged', label: 'Flagged', icon: Flag, section: 'MANAGE', href: '/dashboard/flagged' },
     { id: 'audit-log', label: 'Audit Log', icon: FileCheck, section: 'MANAGE', href: '/dashboard/audit-log' },
     { id: 'settings', label: 'Settings', icon: Settings, section: 'MANAGE', href: '/dashboard/settings' },
+    { id: 'account', label: 'Account', icon: User, section: 'MANAGE', href: '/dashboard/account' },
   ];
 
   // Check if user has access to a feature based on tier
@@ -264,9 +265,9 @@ export default function DashboardLayout({ children }) {
             </div>
 
             <div style={{ padding: '8px' }}>
-              {tier === 'free' && (
+              {tier !== 'identity-theft' && (
                 <Link
-                  href="/pricing"
+                  href="/dashboard/account"
                   onClick={() => setUserMenuOpen(false)}
                   style={{
                     width: '100%',

@@ -6,13 +6,6 @@ import { Redis } from '@upstash/redis';
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const redis = Redis.fromEnv();
 
-// This is needed to get the raw body for Stripe signature verification
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
-
 // Updated tier features to match new pricing structure
 const TIER_FEATURES = {
   free: {

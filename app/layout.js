@@ -2,12 +2,12 @@ import { ClerkProvider } from '@clerk/nextjs';
 import './globals.css';
 
 export const metadata = {
-  title: '605b.ai - Credit Repair for Identity Theft Victims',
-  description: 'Professional-grade tools to dispute fraudulent accounts, track bureau deadlines, and build an audit trail for potential litigation. Powered by FCRA Section 605B.',
-  keywords: 'credit repair, identity theft, FCRA, 605B, dispute letters, credit bureau, TransUnion, Experian, Equifax',
+  title: '605b.ai - Credit Dispute Documentation Software',
+  description: 'Self-service software tools to organize credit disputes, generate FCRA-compliant letter templates, track bureau deadlines, and build documentation for identity theft victims.',
+  keywords: 'credit dispute software, identity theft documentation, FCRA 605B, dispute letters, credit bureau dispute, TransUnion, Experian, Equifax, dispute tracking',
   openGraph: {
-    title: '605b.ai - Credit Repair for Identity Theft Victims',
-    description: 'Professional-grade tools to dispute fraudulent accounts using federal consumer protection law.',
+    title: '605b.ai - Credit Dispute Documentation Software',
+    description: 'Self-service software tools to organize credit disputes and generate FCRA-compliant documentation.',
     type: 'website',
   },
 };

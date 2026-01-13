@@ -13,8 +13,10 @@ Self-service software tools to help users:
 ## What It Is NOT
 
 - ❌ Not a credit repair organization (CRO)
+- ❌ Not a credit repair service
 - ❌ Not a law firm or legal service
 - ❌ Does not send letters on your behalf
+- ❌ Does not contact creditors or bureaus for you
 - ❌ No outcome guarantees
 
 ## Tech Stack
@@ -22,14 +24,14 @@ Self-service software tools to help users:
 - **Framework:** Next.js 14 (App Router)
 - **Auth:** Clerk
 - **Database:** Upstash Redis
-- **Payments:** Stripe (one-time payments)
+- **Payments:** Stripe (one-time payments only)
 - **AI:** Anthropic Claude
 - **TTS:** ElevenLabs (optional)
 - **Hosting:** Vercel
 
 ## Route Map
 
-### Public Routes (no auth)
+### Public Routes (no auth required)
 ```
 /                   → Landing page
 /pricing            → Pricing tiers
@@ -91,14 +93,21 @@ Deployed on Vercel. Environment variables configured in Vercel dashboard.
 # Build for production
 npm run build
 
-# Deploy
+# Deploy (auto on push to main)
 git push origin main
 ```
 
+## Legal Entity
+
+**Ninth Wave Analytics LLC**  
+Delaware Limited Liability Company
+
 ## License
 
-Proprietary - Ninth Wave Analytics LLC
+Proprietary. All rights reserved.
 
-## Legal
+Copyright © 2026 Ninth Wave Analytics LLC
 
-605b.ai provides software tools and educational information only. Not legal advice. Results vary by individual circumstances. See `/terms` for full disclaimer.
+## Disclaimer
+
+605b.ai provides self-service software tools and educational information only. We are not a credit repair organization, law firm, or credit counseling service. We do not provide legal advice, credit repair services, or guarantees of any outcomes. Results depend entirely on individual circumstances. See `/terms` for full disclaimer.

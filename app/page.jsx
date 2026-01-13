@@ -835,7 +835,7 @@ export default function LandingPage() {
           </div>
 
           <div className="footer-bottom">
-            <div>© {new Date().getFullYear()} Ninth Wave LLC · Delaware, USA</div>
+            <div>© {new Date().getFullYear()} Ninth Wave Analytics LLC · Delaware, USA</div>
             <div className="footer-bottom-links">
               <Link href="/terms" className="footer-bottom-link">Terms</Link>
               <Link href="/privacy" className="footer-bottom-link">Privacy</Link>

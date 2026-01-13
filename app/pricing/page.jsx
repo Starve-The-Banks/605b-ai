@@ -154,7 +154,7 @@ export default function PricingPage() {
   const { user } = useUser();
   const [loading, setLoading] = useState(null);
   const [expandedFaq, setExpandedFaq] = useState(null);
-  const [showComparison, setShowComparison] = useState(false);
+  const [showComparison, setShowComparison] = useState(true);
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
   const [showDisclaimerError, setShowDisclaimerError] = useState(false);
 
@@ -921,6 +921,44 @@ export default function PricingPage() {
           </p>
         </section>
 
+        {/* Important Disclosure - MOVED UP */}
+        <section className="disclaimer-section" id="checkout-disclaimer" style={{ marginTop: '0', marginBottom: '40px' }}>
+          <div className={`disclaimer-box ${showDisclaimerError && !disclaimerAccepted ? 'error' : ''}`}>
+            <div className="disclaimer-title">
+              <AlertTriangle size={18} />
+              Important: Please Read Before Purchasing
+            </div>
+            <div className="disclaimer-text">
+              605b.ai is <strong>self-service dispute documentation software</strong>.
+              <br /><br />
+              • We do <strong>not</strong> send letters on your behalf<br />
+              • We do <strong>not</strong> contact creditors or credit bureaus for you<br />
+              • We do <strong>not</strong> guarantee any outcome<br />
+              <br />
+              You are responsible for reviewing, printing, and sending all correspondence you generate. This platform is an educational and organizational tool designed to help you exercise your rights under federal consumer protection law.
+            </div>
+            <label className="disclaimer-checkbox">
+              <input
+                type="checkbox"
+                checked={disclaimerAccepted}
+                onChange={(e) => {
+                  setDisclaimerAccepted(e.target.checked);
+                  if (e.target.checked) setShowDisclaimerError(false);
+                }}
+              />
+              <span className="disclaimer-checkbox-text">
+                I understand this is self-service software, not a credit repair service.
+              </span>
+            </label>
+            {showDisclaimerError && !disclaimerAccepted && (
+              <div className="disclaimer-error">
+                <AlertTriangle size={14} />
+                Please acknowledge the disclaimer to continue with purchase
+              </div>
+            )}
+          </div>
+        </section>
+
         {/* Pricing Cards */}
         <section className="pricing-section">
           <div className="pricing-grid">
@@ -993,54 +1031,18 @@ export default function PricingPage() {
                     'Processing...'
                   ) : tier.isFree ? (
                     <>
-                      Start Free
+                      Start Free Analysis
                       <ArrowRight size={16} />
                     </>
                   ) : (
                     <>
-                      Get {tier.name.split(' ')[0]}
+                      Buy {tier.name} — ${tier.price}
                       <ArrowRight size={16} />
                     </>
                   )}
                 </button>
               </div>
             ))}
-          </div>
-        </section>
-
-        {/* Checkout Disclaimer */}
-        <section className="disclaimer-section" id="checkout-disclaimer">
-          <div className={`disclaimer-box ${showDisclaimerError && !disclaimerAccepted ? 'error' : ''}`}>
-            <div className="disclaimer-title">
-              <AlertTriangle size={18} />
-              Important Disclosure
-            </div>
-            <div className="disclaimer-text">
-              CreditClear (605b.ai) is self-service dispute management software.
-              <br /><br />
-              We do not send letters on your behalf, contact creditors or credit bureaus for you, or guarantee any outcome. You are responsible for reviewing, printing, and sending all correspondence you generate.
-              <br /><br />
-              This platform is an educational and organizational tool designed to help users exercise their rights under federal consumer protection law.
-            </div>
-            <label className="disclaimer-checkbox">
-              <input
-                type="checkbox"
-                checked={disclaimerAccepted}
-                onChange={(e) => {
-                  setDisclaimerAccepted(e.target.checked);
-                  if (e.target.checked) setShowDisclaimerError(false);
-                }}
-              />
-              <span className="disclaimer-checkbox-text">
-                I understand CreditClear does not perform credit repair services on my behalf.
-              </span>
-            </label>
-            {showDisclaimerError && !disclaimerAccepted && (
-              <div className="disclaimer-error">
-                <AlertTriangle size={14} />
-                Please acknowledge the disclaimer to continue with purchase
-              </div>
-            )}
           </div>
         </section>
 

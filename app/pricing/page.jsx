@@ -1034,6 +1034,7 @@ export default function PricingPage() {
             605b<span className="logo-accent">.ai</span>
           </Link>
           <div className="nav-links">
+            <Link href="/about" className="nav-link" style={{ border: 'none', padding: '8px 12px' }}>About</Link>
             {isSignedIn ? (
               <Link href="/dashboard" className="nav-link">Dashboard</Link>
             ) : (
@@ -1060,6 +1061,7 @@ export default function PricingPage() {
           </div>
           <div className="mobile-menu-links">
             <Link href="/" className="mobile-menu-link" onClick={() => setMobileMenuOpen(false)}>Home</Link>
+            <Link href="/about" className="mobile-menu-link" onClick={() => setMobileMenuOpen(false)}>About</Link>
             <a href="#checkout-disclaimer" className="mobile-menu-link" onClick={() => setMobileMenuOpen(false)}>Pricing</a>
           </div>
           <div className="mobile-menu-buttons">

@@ -2,8 +2,186 @@
 
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
-import { ArrowRight, Shield, Clock, FileText, Scale, Upload, Flag, BarChart3, Menu, X, ChevronDown } from 'lucide-react';
-import { useState } from 'react';
+import { ArrowRight, Shield, Clock, FileText, Scale, Upload, Flag, BarChart3, Menu, X, ChevronDown, Lock, Eye, Send } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+
+// Interactive particle field component
+function ParticleField() {
+  const canvasRef = useRef(null);
+  const mouseRef = useRef({ x: -1000, y: -1000 });
+  const particlesRef = useRef([]);
+  const animationRef = useRef(null);
+  const isMobileRef = useRef(false);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    let width = canvas.offsetWidth;
+    let height = canvas.offsetHeight;
+
+    // Check if mobile
+    const checkMobile = () => {
+      isMobileRef.current = window.innerWidth < 768;
+    };
+    checkMobile();
+
+    const setSize = () => {
+      checkMobile();
+      width = canvas.offsetWidth;
+      height = canvas.offsetHeight;
+      canvas.width = width * window.devicePixelRatio;
+      canvas.height = height * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      initParticles();
+    };
+
+    const initParticles = () => {
+      particlesRef.current = [];
+      // Wider spacing on mobile = fewer particles = better performance
+      const spacing = isMobileRef.current ? 120 : 80;
+      const cols = Math.ceil(width / spacing) + 1;
+      const rows = Math.ceil(height / spacing) + 1;
+
+      for (let i = 0; i < cols; i++) {
+        for (let j = 0; j < rows; j++) {
+          particlesRef.current.push({
+            baseX: i * spacing + (j % 2) * (spacing / 2),
+            baseY: j * spacing,
+            x: i * spacing + (j % 2) * (spacing / 2),
+            y: j * spacing,
+            size: isMobileRef.current ? Math.random() * 1 + 0.6 : Math.random() * 1.2 + 0.8,
+            opacity: Math.random() * 0.15 + 0.05,
+          });
+        }
+      }
+    };
+
+    const animate = () => {
+      ctx.clearRect(0, 0, width, height);
+
+      const particles = particlesRef.current;
+      const isMobile = isMobileRef.current;
+
+      // Update positions
+      particles.forEach((p) => {
+        const dx = mouseRef.current.x - p.x;
+        const dy = mouseRef.current.y - p.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const maxDist = isMobile ? 100 : 150;
+
+        if (dist < maxDist) {
+          const force = (maxDist - dist) / maxDist;
+          const angle = Math.atan2(dy, dx);
+          p.x = p.baseX - Math.cos(angle) * force * (isMobile ? 20 : 25);
+          p.y = p.baseY - Math.sin(angle) * force * (isMobile ? 20 : 25);
+        } else {
+          p.x += (p.baseX - p.x) * 0.06;
+          p.y += (p.baseY - p.y) * 0.06;
+        }
+      });
+
+      // Draw connections (skip on mobile for performance)
+      if (!isMobile) {
+        const connectionDist = 100;
+        for (let i = 0; i < particles.length; i++) {
+          for (let j = i + 1; j < particles.length; j++) {
+            const p1 = particles[i];
+            const p2 = particles[j];
+            const dx = p1.x - p2.x;
+            const dy = p1.y - p2.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist < connectionDist) {
+              const opacity = (1 - dist / connectionDist) * 0.08;
+              ctx.beginPath();
+              ctx.moveTo(p1.x, p1.y);
+              ctx.lineTo(p2.x, p2.y);
+              ctx.strokeStyle = `rgba(247, 208, 71, ${opacity})`;
+              ctx.lineWidth = 0.5;
+              ctx.stroke();
+            }
+          }
+        }
+      }
+
+      // Draw particles
+      particles.forEach((p) => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(247, 208, 71, ${p.opacity})`;
+        ctx.fill();
+      });
+
+      animationRef.current = requestAnimationFrame(animate);
+    };
+
+    // Mouse events (desktop)
+    const handleMouseMove = (e) => {
+      const rect = canvas.getBoundingClientRect();
+      mouseRef.current = {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      };
+    };
+
+    const handleMouseLeave = () => {
+      mouseRef.current = { x: -1000, y: -1000 };
+    };
+
+    // Touch events (mobile)
+    const handleTouchMove = (e) => {
+      if (e.touches.length > 0) {
+        const rect = canvas.getBoundingClientRect();
+        const touch = e.touches[0];
+        mouseRef.current = {
+          x: touch.clientX - rect.left,
+          y: touch.clientY - rect.top,
+        };
+      }
+    };
+
+    const handleTouchEnd = () => {
+      mouseRef.current = { x: -1000, y: -1000 };
+    };
+
+    setSize();
+    animate();
+
+    window.addEventListener('resize', setSize);
+    canvas.addEventListener('mousemove', handleMouseMove);
+    canvas.addEventListener('mouseleave', handleMouseLeave);
+    canvas.addEventListener('touchmove', handleTouchMove, { passive: true });
+    canvas.addEventListener('touchend', handleTouchEnd);
+
+    return () => {
+      window.removeEventListener('resize', setSize);
+      canvas.removeEventListener('mousemove', handleMouseMove);
+      canvas.removeEventListener('mouseleave', handleMouseLeave);
+      canvas.removeEventListener('touchmove', handleTouchMove);
+      canvas.removeEventListener('touchend', handleTouchEnd);
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        pointerEvents: 'auto',
+        zIndex: 0,
+      }}
+    />
+  );
+}
 
 export default function LandingPage() {
   const { isSignedIn } = useAuth();
@@ -61,6 +239,10 @@ export default function LandingPage() {
           text-decoration: none;
           font-size: 14px;
           font-weight: 500;
+        }
+        
+        .nav-link:hover {
+          color: #fafafa;
         }
         
         .nav-button {
@@ -138,7 +320,7 @@ export default function LandingPage() {
           gap: 12px;
         }
         
-        /* Hero */
+        /* Hero - New Design */
         .hero {
           min-height: 100vh;
           display: flex;
@@ -148,27 +330,32 @@ export default function LandingPage() {
           text-align: center;
           padding: 120px 24px 80px;
           position: relative;
+          background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(247, 208, 71, 0.08), transparent);
+          overflow: hidden;
         }
         
         .hero-badge {
           display: inline-flex;
           align-items: center;
           gap: 8px;
-          padding: 8px 16px;
-          background: rgba(247, 208, 71, 0.1);
-          border: 1px solid rgba(247, 208, 71, 0.2);
+          padding: 10px 18px;
+          background: rgba(247, 208, 71, 0.08);
+          border: 1px solid rgba(247, 208, 71, 0.15);
           border-radius: 100px;
           font-size: 13px;
+          font-weight: 500;
           color: #f7d047;
-          margin-bottom: 24px;
+          margin-bottom: 32px;
+          letter-spacing: 0.02em;
         }
         
         .hero-title {
-          font-size: clamp(32px, 8vw, 64px);
+          font-size: clamp(36px, 9vw, 72px);
           font-weight: 700;
-          line-height: 1.1;
-          letter-spacing: -0.03em;
-          margin-bottom: 20px;
+          line-height: 1.05;
+          letter-spacing: -0.035em;
+          margin-bottom: 24px;
+          max-width: 900px;
         }
         
         .hero-title-accent {
@@ -176,11 +363,18 @@ export default function LandingPage() {
         }
         
         .hero-subtitle {
-          font-size: 16px;
-          line-height: 1.7;
+          font-size: clamp(17px, 2.5vw, 20px);
+          line-height: 1.6;
           color: #a1a1aa;
-          max-width: 520px;
-          margin-bottom: 32px;
+          max-width: 640px;
+          margin-bottom: 12px;
+        }
+        
+        .hero-note {
+          font-size: 14px;
+          color: #52525b;
+          margin-bottom: 40px;
+          font-style: italic;
         }
         
         .hero-cta {
@@ -188,49 +382,75 @@ export default function LandingPage() {
           gap: 12px;
           flex-wrap: wrap;
           justify-content: center;
-          margin-bottom: 32px;
+          margin-bottom: 48px;
         }
         
         .btn-primary {
           display: inline-flex;
           align-items: center;
           gap: 8px;
-          padding: 14px 24px;
+          padding: 16px 28px;
           background: #f7d047;
           border: none;
-          border-radius: 8px;
+          border-radius: 10px;
           color: #09090b;
-          font-size: 15px;
+          font-size: 16px;
           font-weight: 600;
           text-decoration: none;
+          transition: all 0.2s;
+        }
+        
+        .btn-primary:hover {
+          background: #e5c33f;
+          transform: translateY(-2px);
         }
         
         .btn-secondary {
           display: inline-flex;
           align-items: center;
           gap: 8px;
-          padding: 14px 24px;
+          padding: 16px 28px;
           background: transparent;
           border: 1px solid #27272a;
-          border-radius: 8px;
+          border-radius: 10px;
           color: #fafafa;
-          font-size: 15px;
+          font-size: 16px;
           font-weight: 500;
           text-decoration: none;
+          transition: all 0.2s;
         }
         
-        .disclaimer-banner {
+        .btn-secondary:hover {
+          background: rgba(255, 255, 255, 0.05);
+          border-color: #3f3f46;
+        }
+        
+        .hero-trust {
           display: flex;
-          align-items: flex-start;
-          gap: 12px;
-          padding: 16px 20px;
-          background: rgba(113, 113, 122, 0.1);
-          border: 1px solid rgba(113, 113, 122, 0.2);
-          border-radius: 12px;
-          font-size: 14px;
-          color: #a1a1aa;
-          max-width: 600px;
-          text-align: left;
+          gap: 32px;
+          flex-wrap: wrap;
+          justify-content: center;
+          padding-top: 32px;
+          border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        
+        .hero-trust-item {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 13px;
+          color: #71717a;
+        }
+        
+        .hero-trust-icon {
+          width: 32px;
+          height: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(247, 208, 71, 0.08);
+          border-radius: 8px;
+          color: #f7d047;
         }
         
         .scroll-indicator {
@@ -260,15 +480,73 @@ export default function LandingPage() {
         }
         
         @keyframes bounceDown {
-          0%, 20%, 50%, 80%, 100% {
-            transform: translateY(0);
-          }
-          40% {
-            transform: translateY(8px);
-          }
-          60% {
-            transform: translateY(4px);
-          }
+          0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+          40% { transform: translateY(8px); }
+          60% { transform: translateY(4px); }
+        }
+        
+        /* Why Section - Primary Asset */
+        .why-section {
+          padding: 100px 24px;
+          background: #09090b;
+          border-top: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        
+        .why-container {
+          max-width: 720px;
+          margin: 0 auto;
+        }
+        
+        .why-label {
+          font-size: 12px;
+          font-weight: 600;
+          color: #f7d047;
+          text-transform: uppercase;
+          letter-spacing: 0.15em;
+          margin-bottom: 16px;
+        }
+        
+        .why-title {
+          font-size: clamp(28px, 5vw, 40px);
+          font-weight: 700;
+          letter-spacing: -0.02em;
+          margin-bottom: 32px;
+          line-height: 1.2;
+        }
+        
+        .why-content {
+          font-size: 17px;
+          line-height: 1.8;
+          color: #a1a1aa;
+        }
+        
+        .why-content p {
+          margin-bottom: 24px;
+        }
+        
+        .why-content strong {
+          color: #fafafa;
+          font-weight: 500;
+        }
+        
+        .why-highlight {
+          padding: 24px 28px;
+          background: rgba(247, 208, 71, 0.06);
+          border-left: 3px solid #f7d047;
+          border-radius: 0 12px 12px 0;
+          margin: 32px 0;
+          font-size: 16px;
+          color: #e5e5e5;
+          font-style: italic;
+        }
+        
+        .why-closing {
+          font-size: 18px;
+          color: #fafafa;
+          font-weight: 500;
+          padding-top: 16px;
+          border-top: 1px solid rgba(255, 255, 255, 0.06);
+          margin-top: 32px;
         }
         
         /* Sections */
@@ -286,11 +564,11 @@ export default function LandingPage() {
         }
         
         .section-label {
-          font-size: 13px;
+          font-size: 12px;
           font-weight: 600;
           color: #f7d047;
           text-transform: uppercase;
-          letter-spacing: 0.1em;
+          letter-spacing: 0.15em;
           margin-bottom: 12px;
         }
         
@@ -320,6 +598,12 @@ export default function LandingPage() {
           background: #111113;
           border: 1px solid #1c1c1f;
           border-radius: 12px;
+          transition: all 0.2s;
+        }
+        
+        .step-card:hover {
+          border-color: #27272a;
+          transform: translateY(-2px);
         }
         
         .step-icon {
@@ -366,6 +650,11 @@ export default function LandingPage() {
           background: #0f0f11;
           border: 1px solid #1c1c1f;
           border-radius: 12px;
+          transition: all 0.2s;
+        }
+        
+        .feature-card:hover {
+          border-color: #27272a;
         }
         
         .feature-icon {
@@ -405,6 +694,11 @@ export default function LandingPage() {
           background: #111113;
           border: 1px solid #1c1c1f;
           border-radius: 12px;
+          transition: all 0.2s;
+        }
+        
+        .statute-card:hover {
+          border-color: rgba(247, 208, 71, 0.3);
         }
         
         .statute-number {
@@ -429,32 +723,38 @@ export default function LandingPage() {
         
         /* CTA */
         .cta-section {
-          padding: 80px 24px;
+          padding: 100px 24px;
           text-align: center;
+          background: linear-gradient(180deg, #09090b 0%, #0c0c0e 100%);
         }
         
         .cta-title {
-          font-size: clamp(28px, 5vw, 36px);
+          font-size: clamp(28px, 5vw, 40px);
           font-weight: 700;
           margin-bottom: 16px;
+          letter-spacing: -0.02em;
         }
         
         .cta-subtitle {
-          font-size: 16px;
+          font-size: 17px;
           color: #a1a1aa;
           margin-bottom: 32px;
+          max-width: 500px;
+          margin-left: auto;
+          margin-right: auto;
         }
         
         .cta-disclaimer {
           font-size: 13px;
           color: #52525b;
-          margin-top: 16px;
+          margin-top: 20px;
         }
         
         /* Footer */
         .footer {
           border-top: 1px solid #1c1c1f;
           padding: 0 24px;
+          background: #0c0c0e;
         }
         
         .footer-main {
@@ -554,6 +854,8 @@ export default function LandingPage() {
           
           .mobile-menu-btn {
             display: block;
+            min-width: 44px;
+            min-height: 44px;
           }
           
           .hero {
@@ -563,24 +865,54 @@ export default function LandingPage() {
           
           .hero-badge {
             font-size: 12px;
-            padding: 6px 12px;
+            padding: 8px 14px;
           }
           
           .hero-subtitle {
-            font-size: 15px;
+            font-size: 16px;
+          }
+          
+          .hero-note {
+            font-size: 13px;
+          }
+          
+          .hero-cta {
+            width: 100%;
+            max-width: 320px;
           }
           
           .btn-primary, .btn-secondary {
-            padding: 12px 20px;
-            font-size: 14px;
+            padding: 14px 24px;
+            font-size: 15px;
             width: 100%;
             justify-content: center;
+            min-height: 48px;
           }
           
-          .disclaimer-banner {
-            flex-direction: column;
-            gap: 8px;
-            font-size: 13px;
+          .hero-trust {
+            gap: 20px;
+            padding-top: 24px;
+          }
+          
+          .hero-trust-item {
+            font-size: 12px;
+          }
+          
+          .scroll-indicator {
+            display: none;
+          }
+          
+          .why-section {
+            padding: 60px 20px;
+          }
+          
+          .why-content {
+            font-size: 16px;
+          }
+          
+          .why-highlight {
+            padding: 20px 24px;
+            font-size: 15px;
           }
           
           .section {
@@ -591,12 +923,34 @@ export default function LandingPage() {
             margin-bottom: 32px;
           }
           
+          .steps-grid {
+            grid-template-columns: 1fr;
+          }
+          
+          .features-grid {
+            grid-template-columns: 1fr;
+          }
+          
+          .statute-grid {
+            grid-template-columns: 1fr;
+          }
+          
+          .cta-section .btn-primary {
+            max-width: 320px;
+          }
+          
           .footer-main {
             flex-direction: column;
           }
           
           .footer-links {
             gap: 32px;
+          }
+          
+          .mobile-menu-link {
+            min-height: 44px;
+            display: flex;
+            align-items: center;
           }
         }
         
@@ -621,8 +975,9 @@ export default function LandingPage() {
             605b<span className="logo-accent">.ai</span>
           </Link>
           <div className="nav-links">
+            <a href="#why" className="nav-link">Why</a>
             <a href="#how-it-works" className="nav-link">How It Works</a>
-            <a href="#features" className="nav-link">Features</a>
+            <Link href="/about" className="nav-link">About</Link>
             <Link href="/pricing" className="nav-link">Pricing</Link>
             {isSignedIn ? (
               <Link href="/dashboard" className="nav-button-primary">Dashboard</Link>
@@ -647,8 +1002,9 @@ export default function LandingPage() {
             </button>
           </div>
           <div className="mobile-menu-links">
+            <a href="#why" className="mobile-menu-link" onClick={() => setMobileMenuOpen(false)}>Why</a>
             <a href="#how-it-works" className="mobile-menu-link" onClick={() => setMobileMenuOpen(false)}>How It Works</a>
-            <a href="#features" className="mobile-menu-link" onClick={() => setMobileMenuOpen(false)}>Features</a>
+            <Link href="/about" className="mobile-menu-link" onClick={() => setMobileMenuOpen(false)}>About</Link>
             <Link href="/pricing" className="mobile-menu-link" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
           </div>
           <div className="mobile-menu-buttons">
@@ -663,47 +1019,93 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Hero */}
+        {/* Hero - New Copy */}
         <section className="hero">
-          <div className="hero-badge">
-            <Shield size={14} />
-            Document Management Software
-          </div>
-          <h1 className="hero-title">
-            Organize your credit<br />
-            <span className="hero-title-accent">dispute process.</span>
-          </h1>
-          <p className="hero-subtitle">
-            Software tools to help you understand your rights under the Fair Credit Reporting Act, 
-            organize documentation, and track your dispute workflow. Results depend on individual circumstances.
-          </p>
-          <div className="hero-cta">
-            {isSignedIn ? (
-              <Link href="/dashboard" className="btn-primary">
-                Go to Dashboard <ArrowRight size={18} />
-              </Link>
-            ) : (
-              <>
-                <Link href="/sign-up" className="btn-primary">
-                  Get Started Free <ArrowRight size={18} />
+          <ParticleField />
+          <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div className="hero-badge">
+              <Shield size={14} />
+              Self-Service Software
+            </div>
+            <h1 className="hero-title">
+              All the tools. One place.<br />
+              <span className="hero-title-accent">You stay in control.</span>
+            </h1>
+            <p className="hero-subtitle">
+              Self-service software that organizes the credit dispute and identity theft 
+              process into a clear, transparent workflow. No monthly fees. No promises. 
+              No one acting on your behalf.
+            </p>
+            <p className="hero-note">
+              If you can follow directions and mail certified letters, you can use this.
+            </p>
+            <div className="hero-cta">
+              {isSignedIn ? (
+                <Link href="/dashboard" className="btn-primary">
+                  Go to Dashboard <ArrowRight size={18} />
                 </Link>
-                <Link href="/sign-in" className="btn-secondary">
-                  I have an account
-                </Link>
-              </>
-            )}
+              ) : (
+                <>
+                  <Link href="/sign-up" className="btn-primary">
+                    Get Started Free <ArrowRight size={18} />
+                  </Link>
+                  <Link href="/pricing" className="btn-secondary">
+                    View Pricing
+                  </Link>
+                </>
+              )}
+            </div>
+            <div className="hero-trust">
+              <div className="hero-trust-item">
+                <div className="hero-trust-icon"><Eye size={16} /></div>
+                <span>Nothing hidden</span>
+              </div>
+              <div className="hero-trust-item">
+                <div className="hero-trust-icon"><Lock size={16} /></div>
+                <span>You control everything</span>
+              </div>
+              <div className="hero-trust-item">
+                <div className="hero-trust-icon"><Send size={16} /></div>
+                <span>You send it yourself</span>
+              </div>
+            </div>
           </div>
-          <div className="disclaimer-banner">
-            <Scale size={16} style={{ flexShrink: 0, marginTop: 2 }} />
-            <span>
-              605b.ai provides software tools and educational guidance. We do not provide legal advice, 
-              credit repair services, or guarantees of outcomes.
-            </span>
-          </div>
-          <a href="#how-it-works" className="scroll-indicator">
-            <span>Learn more</span>
+          <a href="#why" className="scroll-indicator">
+            <span>Learn why</span>
             <ChevronDown size={20} />
           </a>
+        </section>
+
+        {/* Why 605b.ai Exists - Primary Asset */}
+        <section className="why-section" id="why">
+          <div className="why-container">
+            <div className="why-label">Our Philosophy</div>
+            <h2 className="why-title">Why 605b.ai Exists</h2>
+            <div className="why-content">
+              <p>
+                <strong>The lawful credit dispute process isn't secret — it's fragmented.</strong>
+              </p>
+              <p>
+                Over time, that fragmentation gave rise to an industry built around acting as an 
+                intermediary between people and their own rights. Most services operate behind 
+                the scenes, charge ongoing fees, reuse generic templates, and keep the mechanics opaque.
+              </p>
+              <p>
+                <strong>We took the opposite approach.</strong>
+              </p>
+              <p>
+                605b.ai compiles and structures the real dispute process into self-service software 
+                that keeps everything transparent and user-controlled. Nothing is sent on your behalf. 
+                Nothing is hidden. You generate the documents, review them, and send them yourself.
+              </p>
+              <div className="why-highlight">
+                In practice, this is a decentralization of a service model that depends on opacity and dependency.
+              </div>
+              <p className="why-closing">
+                If you can follow directions and go to the post office, you can use this.
+              </p>
+            </div>
+          </div>
         </section>
 
         {/* How It Works */}
@@ -717,7 +1119,7 @@ export default function LandingPage() {
             <div className="steps-grid">
               {[
                 { icon: Upload, num: '01', title: 'Upload & Identify', desc: 'Upload your credit reports. Our software helps you identify items you may want to review or dispute.' },
-                { icon: FileText, num: '02', title: 'Organize Documentation', desc: 'Generate letter templates based on FCRA sections. Customize with your specific information.' },
+                { icon: FileText, num: '02', title: 'Generate Documents', desc: 'Choose from 62+ letter templates based on FCRA sections. Customize with your specific information.' },
                 { icon: Flag, num: '03', title: 'Track Your Workflow', desc: 'Log sent correspondence, track statutory response windows, and maintain an organized timeline.' },
                 { icon: BarChart3, num: '04', title: 'Document Everything', desc: 'Maintain an audit trail of all actions. Export records for your personal documentation.' },
               ].map((step, i) => (
@@ -744,8 +1146,8 @@ export default function LandingPage() {
               {[
                 { icon: Upload, title: 'Report Analysis', desc: 'Upload credit report PDFs. Software identifies items and provides educational context about relevant FCRA sections.' },
                 { icon: Clock, title: 'Deadline Tracking', desc: 'Track statutory response windows. The software calculates timeframes based on FCRA requirements.' },
-                { icon: FileText, title: 'Letter Templates', desc: 'Access template library for common dispute correspondence. Customize templates with your information.' },
-                { icon: Shield, title: 'Educational Guidance', desc: 'AI assistant trained on consumer protection statutes provides educational information about your rights.' },
+                { icon: FileText, title: '62+ Letter Templates', desc: 'Access the full template library for dispute correspondence. Customize templates with your information.' },
+                { icon: Shield, title: 'AI Guidance', desc: 'AI assistant trained on consumer protection statutes provides educational information about your rights.' },
                 { icon: Flag, title: 'Item Flagging', desc: 'Flag items you want to address. Organize your workflow by priority and status.' },
                 { icon: Scale, title: 'Audit Trail', desc: 'Automatic logging of all actions. Export your complete documentation history.' },
               ].map((feature, i) => (
@@ -762,8 +1164,8 @@ export default function LandingPage() {
         {/* Statutes */}
         <section className="section section-dark">
           <div className="container">
-            <div className="section-label">Reference</div>
-            <h2 className="section-title">Built around FCRA procedures</h2>
+            <div className="section-label">Legal Framework</div>
+            <h2 className="section-title">Built around federal law</h2>
             <p className="section-subtitle">
               Our templates and workflows reference these federal consumer protection provisions.
             </p>
@@ -785,9 +1187,10 @@ export default function LandingPage() {
 
         {/* CTA */}
         <section className="cta-section">
-          <h2 className="cta-title">Ready to get organized?</h2>
+          <h2 className="cta-title">Ready to take control?</h2>
           <p className="cta-subtitle">
-            Start using software tools to manage your credit dispute documentation.
+            Start organizing your credit dispute process today. 
+            Free to analyze. Upgrade when you're ready to act.
           </p>
           <Link href="/sign-up" className="btn-primary">
             Get Started Free <ArrowRight size={18} />
@@ -802,7 +1205,7 @@ export default function LandingPage() {
           <div className="footer-main">
             <div className="footer-brand">
               <div className="footer-logo">605b<span className="logo-accent">.ai</span></div>
-              <p className="footer-tagline">Document management software for credit dispute workflows.</p>
+              <p className="footer-tagline">Self-service software for credit dispute organization.</p>
             </div>
             <div className="footer-links">
               <div className="footer-column">
@@ -813,13 +1216,14 @@ export default function LandingPage() {
                 <Link href="/pricing" className="footer-link">Pricing</Link>
               </div>
               <div className="footer-column">
-                <div className="footer-column-title">Legal</div>
+                <div className="footer-column-title">Company</div>
+                <Link href="/about" className="footer-link">About</Link>
                 <Link href="/terms" className="footer-link">Terms of Service</Link>
                 <Link href="/privacy" className="footer-link">Privacy Policy</Link>
               </div>
               <div className="footer-column">
                 <div className="footer-column-title">Contact</div>
-                <a href="mailto:admin@9thwave.io" className="footer-link">admin@9thwave.io</a>
+                <a href="mailto:support@9thwave.io" className="footer-link">support@9thwave.io</a>
               </div>
             </div>
           </div>

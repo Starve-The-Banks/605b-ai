@@ -88,8 +88,10 @@ const ADDON_GRANTS = {
   },
 };
 
-// Idempotency: Check if event was already processed
-// Using 90-day TTL for durability and auditability
+// ===========================================
+// IDEMPOTENCY & LOOKUP HELPERS
+// ===========================================
+
 const IDEMPOTENCY_TTL_SECONDS = 90 * 24 * 60 * 60; // 90 days
 
 async function isEventProcessed(redisClient, eventId) {
@@ -106,19 +108,132 @@ async function markEventProcessed(redisClient, eventId, eventType) {
   }), { ex: IDEMPOTENCY_TTL_SECONDS });
 }
 
-// Also store by session.id for additional lookup capability
+// ===========================================
+// REVERSE MAPPING: Store all Stripe ID → userId lookups
+// ===========================================
+
+async function storeReverseMappings(redisClient, { sessionId, paymentIntentId, chargeId, customerId, userId }) {
+  const mappings = [
+    sessionId && [`stripe:session:${sessionId}:user`, userId],
+    paymentIntentId && [`stripe:pi:${paymentIntentId}:user`, userId],
+    chargeId && [`stripe:charge:${chargeId}:user`, userId],
+    customerId && [`stripe:customer:${customerId}:user`, userId],
+  ].filter(Boolean);
+
+  for (const [key, value] of mappings) {
+    await redisClient.set(key, value, { ex: IDEMPOTENCY_TTL_SECONDS });
+  }
+}
+
+// Resolve userId from any Stripe ID using the mapping chain
+async function resolveUserFromStripeIds(redisClient, stripeClient, { chargeId, paymentIntentId, customerId, sessionId }) {
+  // 1. Try session ID first (most reliable)
+  if (sessionId) {
+    const userId = await redisClient.get(`stripe:session:${sessionId}:user`);
+    if (userId) return userId;
+  }
+
+  // 2. Try payment intent
+  if (paymentIntentId) {
+    const userId = await redisClient.get(`stripe:pi:${paymentIntentId}:user`);
+    if (userId) return userId;
+  }
+
+  // 3. Try charge ID
+  if (chargeId) {
+    const userId = await redisClient.get(`stripe:charge:${chargeId}:user`);
+    if (userId) return userId;
+    
+    // If not found, fetch the charge to get payment_intent
+    try {
+      const charge = await stripeClient.charges.retrieve(chargeId);
+      if (charge.payment_intent) {
+        const piUserId = await redisClient.get(`stripe:pi:${charge.payment_intent}:user`);
+        if (piUserId) return piUserId;
+      }
+    } catch (e) {
+      console.error('Error fetching charge:', e);
+    }
+  }
+
+  // 4. Try customer ID (least specific, but useful)
+  if (customerId) {
+    const userId = await redisClient.get(`stripe:customer:${customerId}:user`);
+    if (userId) return userId;
+  }
+
+  return null;
+}
+
+// ===========================================
+// PURCHASE RECORD STORAGE
+// ===========================================
+
 async function storePurchaseRecord(redisClient, sessionId, data) {
-  const key = `stripe:session:${sessionId}`;
+  const key = `stripe:purchase:${sessionId}`;
   await redisClient.set(key, JSON.stringify(data), { ex: IDEMPOTENCY_TTL_SECONDS });
 }
 
 async function getPurchaseRecord(redisClient, sessionId) {
-  const key = `stripe:session:${sessionId}`;
+  const key = `stripe:purchase:${sessionId}`;
   const record = await redisClient.get(key);
   return record ? (typeof record === 'string' ? JSON.parse(record) : record) : null;
 }
 
-// Helper to revoke/freeze user access
+// ===========================================
+// GRANT IDEMPOTENCY: Check if already granted for this session
+// ===========================================
+
+async function isAlreadyGranted(redisClient, userId, sessionId) {
+  const entitlement = await redisClient.get(`entitlement:${userId}`);
+  if (!entitlement) return false;
+  
+  const data = typeof entitlement === 'string' ? JSON.parse(entitlement) : entitlement;
+  return data.sessionId === sessionId;
+}
+
+async function markEntitlementGranted(redisClient, userId, tier, sessionId) {
+  await redisClient.set(`entitlement:${userId}`, JSON.stringify({
+    tier,
+    sessionId,
+    grantedAt: new Date().toISOString(),
+  }), { ex: IDEMPOTENCY_TTL_SECONDS });
+}
+
+// ===========================================
+// ACCESS CONTROL HELPERS
+// ===========================================
+
+async function freezeUserAccess(redisClient, userId, reason, eventId) {
+  try {
+    const existingTier = await redisClient.get(`user:${userId}:tier`);
+    const tierData = existingTier 
+      ? (typeof existingTier === 'string' ? JSON.parse(existingTier) : existingTier)
+      : {};
+
+    tierData.accessFrozen = true;
+    tierData.frozenAt = new Date().toISOString();
+    tierData.frozenReason = reason;
+    tierData.frozenEventId = eventId;
+    // Keep accessRevoked false - frozen is temporary pending dispute resolution
+
+    await redisClient.set(`user:${userId}:tier`, JSON.stringify(tierData));
+
+    // Audit log
+    await addAuditEntry(redisClient, userId, {
+      type: 'access_change',
+      action: 'access_frozen',
+      details: { reason, stripeEventId: eventId },
+    });
+
+    console.log(`[FROZEN] User ${userId} - Reason: ${reason}`);
+    return true;
+  } catch (e) {
+    console.error('Error freezing user access:', e);
+    return false;
+  }
+}
+
 async function revokeUserAccess(redisClient, userId, reason, eventId) {
   try {
     const existingTier = await redisClient.get(`user:${userId}:tier`);
@@ -127,6 +242,7 @@ async function revokeUserAccess(redisClient, userId, reason, eventId) {
       : {};
 
     tierData.accessRevoked = true;
+    tierData.accessFrozen = false; // Clear frozen state
     tierData.revokedAt = new Date().toISOString();
     tierData.revokedReason = reason;
     tierData.revokedEventId = eventId;
@@ -134,31 +250,20 @@ async function revokeUserAccess(redisClient, userId, reason, eventId) {
     await redisClient.set(`user:${userId}:tier`, JSON.stringify(tierData));
 
     // Audit log
-    const auditEntry = {
-      id: `revoke_${Date.now()}`,
+    await addAuditEntry(redisClient, userId, {
       type: 'access_change',
       action: 'access_revoked',
-      details: {
-        reason: reason,
-        stripeEventId: eventId,
-      },
-      timestamp: new Date().toISOString(),
-    };
+      details: { reason, stripeEventId: eventId },
+    });
 
-    const existingAudit = await redisClient.get(`user:${userId}:audit`);
-    const auditLog = existingAudit 
-      ? (typeof existingAudit === 'string' ? JSON.parse(existingAudit) : existingAudit)
-      : [];
-    auditLog.unshift(auditEntry);
-    await redisClient.set(`user:${userId}:audit`, JSON.stringify(auditLog.slice(0, 1000)));
-
-    console.log(`[ACCESS REVOKED] User ${userId} - Reason: ${reason}`);
+    console.log(`[REVOKED] User ${userId} - Reason: ${reason}`);
+    return true;
   } catch (e) {
     console.error('Error revoking user access:', e);
+    return false;
   }
 }
 
-// Helper to restore user access (e.g., dispute won)
 async function restoreUserAccess(redisClient, userId, reason, eventId) {
   try {
     const existingTier = await redisClient.get(`user:${userId}:tier`);
@@ -167,6 +272,7 @@ async function restoreUserAccess(redisClient, userId, reason, eventId) {
       : {};
 
     tierData.accessRevoked = false;
+    tierData.accessFrozen = false;
     tierData.restoredAt = new Date().toISOString();
     tierData.restoredReason = reason;
     tierData.restoredEventId = eventId;
@@ -174,37 +280,78 @@ async function restoreUserAccess(redisClient, userId, reason, eventId) {
     await redisClient.set(`user:${userId}:tier`, JSON.stringify(tierData));
 
     // Audit log
-    const auditEntry = {
-      id: `restore_${Date.now()}`,
+    await addAuditEntry(redisClient, userId, {
       type: 'access_change',
       action: 'access_restored',
-      details: {
-        reason: reason,
-        stripeEventId: eventId,
-      },
-      timestamp: new Date().toISOString(),
-    };
+      details: { reason, stripeEventId: eventId },
+    });
 
-    const existingAudit = await redisClient.get(`user:${userId}:audit`);
-    const auditLog = existingAudit 
-      ? (typeof existingAudit === 'string' ? JSON.parse(existingAudit) : existingAudit)
-      : [];
-    auditLog.unshift(auditEntry);
-    await redisClient.set(`user:${userId}:audit`, JSON.stringify(auditLog.slice(0, 1000)));
-
-    console.log(`[ACCESS RESTORED] User ${userId} - Reason: ${reason}`);
+    console.log(`[RESTORED] User ${userId} - Reason: ${reason}`);
+    return true;
   } catch (e) {
     console.error('Error restoring user access:', e);
+    return false;
   }
 }
 
-// Helper to find user by Stripe customer ID
-async function findUserByStripeCustomer(redisClient, stripeCustomerId) {
-  // This would ideally use a reverse index, but for now we rely on
-  // the purchase record storing the userId
-  // In production, maintain a stripe:customer:{id} -> userId mapping
-  return null; // Caller should use purchase record instead
+// Flag user for manual review (partial refunds, suspicious activity)
+async function flagUserForReview(redisClient, userId, reason, eventId, metadata = {}) {
+  try {
+    const existingTier = await redisClient.get(`user:${userId}:tier`);
+    const tierData = existingTier 
+      ? (typeof existingTier === 'string' ? JSON.parse(existingTier) : existingTier)
+      : {};
+
+    tierData.flaggedForReview = true;
+    tierData.flaggedAt = new Date().toISOString();
+    tierData.flaggedReason = reason;
+    tierData.flaggedEventId = eventId;
+    tierData.flaggedMetadata = metadata;
+
+    await redisClient.set(`user:${userId}:tier`, JSON.stringify(tierData));
+
+    // Also add to a review queue for easy lookup
+    await redisClient.lpush('review:queue', JSON.stringify({
+      userId,
+      reason,
+      eventId,
+      metadata,
+      flaggedAt: new Date().toISOString(),
+    }));
+
+    // Audit log
+    await addAuditEntry(redisClient, userId, {
+      type: 'flag',
+      action: 'flagged_for_review',
+      details: { reason, stripeEventId: eventId, ...metadata },
+    });
+
+    console.log(`[FLAGGED] User ${userId} - Reason: ${reason}`);
+    return true;
+  } catch (e) {
+    console.error('Error flagging user:', e);
+    return false;
+  }
 }
+
+async function addAuditEntry(redisClient, userId, entry) {
+  const auditEntry = {
+    id: `${entry.action}_${Date.now()}`,
+    ...entry,
+    timestamp: new Date().toISOString(),
+  };
+
+  const existingAudit = await redisClient.get(`user:${userId}:audit`);
+  const auditLog = existingAudit 
+    ? (typeof existingAudit === 'string' ? JSON.parse(existingAudit) : existingAudit)
+    : [];
+  auditLog.unshift(auditEntry);
+  await redisClient.set(`user:${userId}:audit`, JSON.stringify(auditLog.slice(0, 1000)));
+}
+
+// ===========================================
+// MAIN WEBHOOK HANDLER
+// ===========================================
 
 export async function POST(request) {
   const stripeClient = getStripe();
@@ -269,10 +416,20 @@ export async function POST(request) {
           break;
         }
 
-        // Store purchase record for lookup by session ID
+        // Store ALL reverse mappings for future event resolution
+        await storeReverseMappings(redisClient, {
+          sessionId: session.id,
+          paymentIntentId: session.payment_intent,
+          customerId: session.customer,
+          userId: clerkUserId,
+          // chargeId will be stored when we get charge events
+        });
+
+        // Store purchase record
         await storePurchaseRecord(redisClient, session.id, {
           userId: clerkUserId,
           customerId: session.customer,
+          paymentIntentId: session.payment_intent,
           productType,
           productId,
           amountTotal: session.amount_total,
@@ -282,6 +439,13 @@ export async function POST(request) {
         });
 
         if (productType === 'tier' && productId) {
+          // GRANT IDEMPOTENCY: Check if already granted for this session
+          const alreadyGranted = await isAlreadyGranted(redisClient, clerkUserId, session.id);
+          if (alreadyGranted) {
+            console.log(`[SKIP] Tier already granted for user ${clerkUserId}, session ${session.id}`);
+            break;
+          }
+
           const features = TIER_FEATURES[productId] || TIER_FEATURES.free;
 
           let existingData = {};
@@ -311,6 +475,7 @@ export async function POST(request) {
             features: features,
             purchasedAt: new Date().toISOString(),
             stripeSessionId: session.id,
+            stripePaymentIntentId: session.payment_intent,
             stripeCustomerId: session.customer,
             amountPaid: session.amount_total,
             disclaimerAccepted: disclaimerAccepted,
@@ -322,7 +487,8 @@ export async function POST(request) {
             aiCreditsRemaining: features.aiChat ? -1 : 0,
             isUpgrade: isUpgrade,
             upgradedFrom: upgradeFrom || null,
-            accessRevoked: false,  // Explicitly set access as active
+            accessRevoked: false,
+            accessFrozen: false,
             previousPurchases: [
               ...(existingData.previousPurchases || []),
               ...(isUpgrade ? [{
@@ -334,6 +500,9 @@ export async function POST(request) {
           };
 
           await redisClient.set(`user:${clerkUserId}:tier`, JSON.stringify(userTierData));
+
+          // Mark entitlement as granted (for idempotency)
+          await markEntitlementGranted(redisClient, clerkUserId, productId, session.id);
 
           // Update profile
           const existingProfile = await redisClient.get(`user:${clerkUserId}:profile`);
@@ -349,27 +518,18 @@ export async function POST(request) {
           }));
 
           // Audit log
-          const auditEntry = {
-            id: `purchase_${Date.now()}`,
+          await addAuditEntry(redisClient, clerkUserId, {
             type: 'purchase',
             action: isUpgrade ? 'tier_upgrade' : 'tier_purchase',
             details: {
               tier: productId,
               amount: session.amount_total,
-              isUpgrade: isUpgrade,
-              upgradeFrom: upgradeFrom,
+              isUpgrade,
+              upgradeFrom,
               stripeEventId: event.id,
               stripeSessionId: session.id,
             },
-            timestamp: new Date().toISOString(),
-          };
-
-          const existingAudit = await redisClient.get(`user:${clerkUserId}:audit`);
-          const auditLog = existingAudit 
-            ? (typeof existingAudit === 'string' ? JSON.parse(existingAudit) : existingAudit)
-            : [];
-          auditLog.unshift(auditEntry);
-          await redisClient.set(`user:${clerkUserId}:audit`, JSON.stringify(auditLog.slice(0, 1000)));
+          });
 
           console.log(`[PURCHASE] User ${clerkUserId} ${isUpgrade ? 'upgraded to' : 'purchased'} ${productId} tier`);
         }
@@ -401,8 +561,7 @@ export async function POST(request) {
 
             await redisClient.set(`user:${clerkUserId}:tier`, JSON.stringify(tierData));
 
-            const auditEntry = {
-              id: `addon_${Date.now()}`,
+            await addAuditEntry(redisClient, clerkUserId, {
               type: 'purchase',
               action: 'addon_purchase',
               details: {
@@ -410,15 +569,7 @@ export async function POST(request) {
                 amount: session.amount_total,
                 stripeEventId: event.id,
               },
-              timestamp: new Date().toISOString(),
-            };
-
-            const existingAudit = await redisClient.get(`user:${clerkUserId}:audit`);
-            const auditLog = existingAudit 
-              ? (typeof existingAudit === 'string' ? JSON.parse(existingAudit) : existingAudit)
-              : [];
-            auditLog.unshift(auditEntry);
-            await redisClient.set(`user:${clerkUserId}:audit`, JSON.stringify(auditLog.slice(0, 1000)));
+            });
 
             console.log(`[ADDON] User ${clerkUserId} purchased add-on: ${productId}`);
           }
@@ -428,11 +579,30 @@ export async function POST(request) {
       }
 
       // ============================================
+      // CHARGE CREATED - Store charge → user mapping
+      // ============================================
+      case 'charge.succeeded': {
+        const charge = event.data.object;
+        
+        // Store charge ID mapping for future refund/dispute resolution
+        const userId = await resolveUserFromStripeIds(redisClient, stripeClient, {
+          paymentIntentId: charge.payment_intent,
+          customerId: charge.customer,
+        });
+        
+        if (userId) {
+          await redisClient.set(`stripe:charge:${charge.id}:user`, userId, { ex: IDEMPOTENCY_TTL_SECONDS });
+          console.log(`[CHARGE] Stored mapping: charge ${charge.id} → user ${userId}`);
+        }
+        
+        break;
+      }
+
+      // ============================================
       // PAYMENT SUCCESS (alternate event)
       // ============================================
       case 'payment_intent.succeeded': {
         // We use checkout.session.completed as canonical event
-        // This is just for logging
         console.log(`[INFO] Payment succeeded: ${event.data.object.id}`);
         break;
       }
@@ -447,65 +617,71 @@ export async function POST(request) {
       }
 
       // ============================================
-      // REFUND - Revoke access
+      // REFUND - Handle full vs partial differently
       // ============================================
       case 'charge.refunded': {
         const charge = event.data.object;
-        console.log(`[REFUND] Charge refunded: ${charge.id}, amount: ${charge.amount_refunded}`);
+        const isFullRefund = charge.amount_refunded >= charge.amount;
         
-        // Try to find the user via payment intent -> checkout session
-        // For full refunds, revoke access
-        if (charge.amount_refunded >= charge.amount) {
-          // Full refund - revoke access
-          // Look up user from purchase record if we stored the payment_intent
-          const paymentIntentId = charge.payment_intent;
-          
-          // In a production system, you'd have a reverse lookup
-          // For now, log for manual review
-          console.log(`[REFUND] Full refund on charge ${charge.id}, payment_intent ${paymentIntentId} - MANUAL REVIEW REQUIRED`);
-          
-          // If we had the session ID, we could:
-          // const purchaseRecord = await getPurchaseRecord(redisClient, sessionId);
-          // if (purchaseRecord?.userId) {
-          //   await revokeUserAccess(redisClient, purchaseRecord.userId, 'refund', event.id);
-          // }
+        console.log(`[REFUND] Charge ${charge.id}, refunded: ${charge.amount_refunded}/${charge.amount}, full: ${isFullRefund}`);
+        
+        // Resolve user from our mappings
+        const userId = await resolveUserFromStripeIds(redisClient, stripeClient, {
+          chargeId: charge.id,
+          paymentIntentId: charge.payment_intent,
+          customerId: charge.customer,
+        });
+        
+        if (!userId) {
+          console.error(`[REFUND] Could not resolve userId for charge ${charge.id} - MANUAL REVIEW REQUIRED`);
+          break;
+        }
+        
+        if (isFullRefund) {
+          // Full refund → REVOKE access
+          await revokeUserAccess(redisClient, userId, 'full_refund', event.id);
+        } else {
+          // Partial refund → FLAG for manual review, don't change tier
+          await flagUserForReview(redisClient, userId, 'partial_refund', event.id, {
+            chargeId: charge.id,
+            amountRefunded: charge.amount_refunded,
+            amountTotal: charge.amount,
+            refundPercentage: Math.round((charge.amount_refunded / charge.amount) * 100),
+          });
         }
         
         break;
       }
 
       // ============================================
-      // DISPUTE CREATED - Immediately freeze access
+      // DISPUTE CREATED - FREEZE immediately
       // ============================================
       case 'charge.dispute.created': {
         const dispute = event.data.object;
         console.log(`[DISPUTE CREATED] Dispute ${dispute.id} on charge ${dispute.charge}, reason: ${dispute.reason}`);
         
-        // Freeze access immediately on dispute
-        // This is important for fraud prevention
-        const chargeId = dispute.charge;
+        // Resolve user
+        const userId = await resolveUserFromStripeIds(redisClient, stripeClient, {
+          chargeId: dispute.charge,
+        });
         
-        // Look up the charge to get payment_intent -> session -> user
-        try {
-          const charge = await stripeClient.charges.retrieve(chargeId);
-          const paymentIntentId = charge.payment_intent;
-          
-          // Log for manual review - in production, implement reverse lookup
-          console.log(`[DISPUTE] FREEZE ACCESS - Dispute on payment_intent ${paymentIntentId} - MANUAL REVIEW REQUIRED`);
-          
-          // Store dispute record for tracking
-          await redisClient.set(`stripe:dispute:${dispute.id}`, JSON.stringify({
-            chargeId: chargeId,
-            paymentIntentId: paymentIntentId,
-            reason: dispute.reason,
-            amount: dispute.amount,
-            status: dispute.status,
-            createdAt: new Date().toISOString(),
-          }), { ex: IDEMPOTENCY_TTL_SECONDS });
-          
-        } catch (e) {
-          console.error('Error processing dispute:', e);
+        if (userId) {
+          // FREEZE access immediately (not revoke - pending resolution)
+          await freezeUserAccess(redisClient, userId, `dispute_${dispute.reason}`, event.id);
+        } else {
+          console.error(`[DISPUTE] Could not resolve userId for charge ${dispute.charge} - MANUAL REVIEW REQUIRED`);
         }
+        
+        // Store dispute record
+        await redisClient.set(`stripe:dispute:${dispute.id}`, JSON.stringify({
+          disputeId: dispute.id,
+          chargeId: dispute.charge,
+          userId: userId || 'UNKNOWN',
+          reason: dispute.reason,
+          amount: dispute.amount,
+          status: dispute.status,
+          createdAt: new Date().toISOString(),
+        }), { ex: IDEMPOTENCY_TTL_SECONDS });
         
         break;
       }
@@ -515,35 +691,45 @@ export async function POST(request) {
       // ============================================
       case 'charge.dispute.funds_withdrawn': {
         const dispute = event.data.object;
-        console.log(`[DISPUTE FUNDS WITHDRAWN] Dispute ${dispute.id} - funds withdrawn, amount: ${dispute.amount}`);
+        console.log(`[DISPUTE WITHDRAWN] Dispute ${dispute.id} - funds withdrawn`);
         
-        // Funds have been taken - ensure access is revoked
-        // This is the "we definitely lost" signal
+        // Funds taken = we're likely losing. Ensure frozen/revoked.
+        const userId = await resolveUserFromStripeIds(redisClient, stripeClient, {
+          chargeId: dispute.charge,
+        });
+        
+        if (userId) {
+          // Upgrade from frozen to revoked
+          await revokeUserAccess(redisClient, userId, 'dispute_funds_withdrawn', event.id);
+        }
         
         break;
       }
 
       // ============================================
-      // DISPUTE CLOSED - Maybe restore access if won
+      // DISPUTE CLOSED - Restore if won
       // ============================================
       case 'charge.dispute.closed': {
         const dispute = event.data.object;
         console.log(`[DISPUTE CLOSED] Dispute ${dispute.id} - status: ${dispute.status}`);
         
-        if (dispute.status === 'won') {
-          // We won the dispute - restore access
-          console.log(`[DISPUTE WON] Dispute ${dispute.id} won - consider restoring access`);
-          
-          // Look up user and restore
-          // const purchaseRecord = ...
-          // if (purchaseRecord?.userId) {
-          //   await restoreUserAccess(redisClient, purchaseRecord.userId, 'dispute_won', event.id);
-          // }
-          
-        } else if (dispute.status === 'lost') {
-          // We lost - ensure access stays revoked
-          console.log(`[DISPUTE LOST] Dispute ${dispute.id} lost - access remains revoked`);
+        const userId = await resolveUserFromStripeIds(redisClient, stripeClient, {
+          chargeId: dispute.charge,
+        });
+        
+        if (!userId) {
+          console.error(`[DISPUTE CLOSED] Could not resolve userId for charge ${dispute.charge}`);
+          break;
         }
+        
+        if (dispute.status === 'won') {
+          // We won the dispute - RESTORE access
+          await restoreUserAccess(redisClient, userId, 'dispute_won', event.id);
+        } else if (dispute.status === 'lost') {
+          // We lost - ensure access is revoked (not just frozen)
+          await revokeUserAccess(redisClient, userId, 'dispute_lost', event.id);
+        }
+        // For 'warning_closed' or other statuses, leave as-is
         
         break;
       }
@@ -556,7 +742,6 @@ export async function POST(request) {
     }
   } catch (processingError) {
     // Log error but still return 200 to prevent Stripe retries
-    // The event is already marked as processed
     console.error('[ERROR] Processing webhook event:', processingError);
   }
 

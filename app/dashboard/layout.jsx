@@ -9,12 +9,12 @@ import {
   ChevronLeft, ChevronRight, LogOut, Settings, User, ChevronUp, TrendingUp, Bell, Menu, X, Lock, Crown
 } from 'lucide-react';
 import OnboardingWizard from './components/OnboardingWizard';
-import { useUserTier } from '@/lib/useUserTier';
+import { useUserTier, AccessRestrictionBanner } from '@/lib/useUserTier';
 
 export default function DashboardLayout({ children }) {
   const { user } = useUser();
   const { isSignedIn } = useAuth();
-  const { tier, tierName, tierColor, hasFeature } = useUserTier();
+  const { tier, tierName, tierColor, hasFeature, isAccessFrozen, isAccessRevoked } = useUserTier();
   const pathname = usePathname();
   const isAIStrategist = pathname === '/dashboard/ai-strategist';
   const [rightSidebarOpen, setRightSidebarOpen] = useState(false);
@@ -484,6 +484,7 @@ export default function DashboardLayout({ children }) {
           transition: 'margin-right 0.3s ease',
           width: isMobile ? '100%' : 'auto',
         }}>
+          <AccessRestrictionBanner />
           {children}
         </main>
 

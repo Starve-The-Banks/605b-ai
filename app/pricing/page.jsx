@@ -7,7 +7,7 @@ import {
   Check, X, Shield, Zap, Crown, ArrowRight, FileText,
   MessageSquare, Clock, Download, Scale, AlertTriangle,
   ChevronDown, ChevronUp, HelpCircle, Eye, Sparkles,
-  FileSearch, Lock, Plus
+  FileSearch, Lock, Plus, Menu
 } from 'lucide-react';
 
 const TIERS = [
@@ -157,6 +157,7 @@ export default function PricingPage() {
   const [showComparison, setShowComparison] = useState(true);
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
   const [showDisclaimerError, setShowDisclaimerError] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleCheckout = async (tier) => {
     // Free tier goes straight to signup
@@ -610,6 +611,92 @@ export default function PricingPage() {
           cursor: pointer;
         }
 
+        .mobile-menu-btn {
+          display: none;
+          background: none;
+          border: none;
+          color: #fafafa;
+          cursor: pointer;
+          padding: 8px;
+        }
+
+        .mobile-menu {
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: #09090b;
+          z-index: 200;
+          padding: 20px;
+          flex-direction: column;
+        }
+
+        .mobile-menu.open {
+          display: flex;
+        }
+
+        .mobile-menu-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 40px;
+        }
+
+        .mobile-menu-links {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+
+        .mobile-menu-link {
+          display: block;
+          padding: 14px 0;
+          font-size: 18px;
+          font-weight: 600;
+          color: #fafafa;
+          text-decoration: none;
+          border-bottom: 1px solid #27272a;
+        }
+
+        .mobile-menu-buttons {
+          margin-top: auto;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .mobile-menu-btn-primary {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          padding: 14px 24px;
+          background: #f7d047;
+          border: none;
+          border-radius: 10px;
+          color: #09090b;
+          font-size: 16px;
+          font-weight: 600;
+          text-decoration: none;
+        }
+
+        .mobile-menu-btn-secondary {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          padding: 14px 24px;
+          background: transparent;
+          border: 1px solid #27272a;
+          border-radius: 10px;
+          color: #fafafa;
+          font-size: 16px;
+          font-weight: 500;
+          text-decoration: none;
+        }
+
         .disclaimer-checkbox:hover {
           background: rgba(247, 208, 71, 0.08);
         }
@@ -876,13 +963,56 @@ export default function PricingPage() {
         }
 
         @media (max-width: 768px) {
+          .nav { padding: 12px 16px; }
           .nav-links { display: none; }
-          .pricing-grid { grid-template-columns: 1fr; }
-          .hero { padding: 120px 20px 40px; }
-          .comparison-table { font-size: 11px; }
+          .mobile-menu-btn { display: block; }
+          .pricing-grid { grid-template-columns: 1fr; padding: 0; }
+          .hero { padding: 100px 16px 32px; }
+          .hero-badge { font-size: 12px; padding: 6px 12px; }
+          .hero-title { font-size: 26px; }
+          .hero-subtitle { font-size: 14px; }
+          .hero-note { font-size: 13px; }
+          .pricing-section { padding: 0 16px 32px; }
+          .disclaimer-section { padding: 0 16px; margin-bottom: 32px !important; }
+          .disclaimer-box { padding: 16px; }
+          .disclaimer-title { font-size: 14px; }
+          .disclaimer-text { font-size: 12px; }
+          .disclaimer-checkbox { padding: 10px 12px; }
+          .disclaimer-checkbox input { width: 18px; height: 18px; }
+          .disclaimer-checkbox-text { font-size: 13px; }
+          .pricing-card { padding: 20px; }
+          .tier-header { gap: 12px; }
+          .tier-icon { width: 40px; height: 40px; }
+          .tier-name { font-size: 16px; }
+          .tier-desc { font-size: 12px; }
+          .price-amount { font-size: 36px; }
+          .price-free { font-size: 28px; }
+          .price-label { font-size: 12px; }
+          .tier-best-for { font-size: 11px; padding: 8px 12px; }
+          .feature-item { font-size: 12px; padding: 5px 0; }
+          .feature-icon { width: 16px; height: 16px; }
+          .buy-button { padding: 14px 20px; font-size: 14px; min-height: 48px; }
+          .comparison-section { padding: 0 16px; overflow-x: auto; }
+          .comparison-table { font-size: 10px; min-width: 500px; }
           .comparison-table th,
-          .comparison-table td { padding: 10px 8px; }
+          .comparison-table td { padding: 8px 6px; white-space: nowrap; }
+          .comparison-toggle { font-size: 13px; padding: 10px 16px; }
+          .addons-section { padding: 0 16px; }
           .addons-grid { grid-template-columns: 1fr; }
+          .addon-card { flex-direction: column; align-items: flex-start; gap: 12px; }
+          .addon-card > div:last-child { width: 100%; justify-content: space-between; }
+          .addon-button { flex: 1; justify-content: center; min-height: 44px; }
+          .legal-section { padding: 32px 16px; }
+          .legal-title { font-size: 18px; }
+          .legal-text { font-size: 13px; }
+          .faq-section { padding: 40px 16px; }
+          .faq-title { font-size: 20px; margin-bottom: 24px; }
+          .faq-question { padding: 14px 16px; font-size: 14px; }
+          .faq-answer { padding: 0 16px 14px; font-size: 13px; }
+          .cta-section { padding: 40px 16px 60px; }
+          .cta-title { font-size: 22px; }
+          .cta-text { font-size: 14px; }
+          .cta-button { padding: 14px 24px; font-size: 15px; width: 100%; justify-content: center; }
         }
       `}</style>
 
@@ -904,7 +1034,40 @@ export default function PricingPage() {
               </>
             )}
           </div>
+          <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(true)}>
+            <Menu size={24} />
+          </button>
         </nav>
+
+        {/* Mobile Menu */}
+        <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
+          <div className="mobile-menu-header">
+            <span className="logo">605b<span className="logo-accent">.ai</span></span>
+            <button className="mobile-menu-btn" style={{ display: 'block' }} onClick={() => setMobileMenuOpen(false)}>
+              <X size={24} />
+            </button>
+          </div>
+          <div className="mobile-menu-links">
+            <Link href="/" className="mobile-menu-link" onClick={() => setMobileMenuOpen(false)}>Home</Link>
+            <a href="#checkout-disclaimer" className="mobile-menu-link" onClick={() => setMobileMenuOpen(false)}>Pricing</a>
+          </div>
+          <div className="mobile-menu-buttons">
+            {isSignedIn ? (
+              <Link href="/dashboard" className="mobile-menu-btn-primary" onClick={() => setMobileMenuOpen(false)}>
+                Dashboard
+              </Link>
+            ) : (
+              <>
+                <Link href="/sign-up" className="mobile-menu-btn-primary" onClick={() => setMobileMenuOpen(false)}>
+                  Get Started
+                </Link>
+                <Link href="/sign-in" className="mobile-menu-btn-secondary" onClick={() => setMobileMenuOpen(false)}>
+                  Log In
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
 
         {/* Hero */}
         <section className="hero">

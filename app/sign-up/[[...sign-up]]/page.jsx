@@ -11,20 +11,24 @@ export default function SignUpPage() {
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      justifyContent: 'center',
-      padding: '40px 20px',
+      padding: '20px',
     }}>
-      <Link href="/" style={{
-        position: 'absolute',
-        top: '32px',
-        left: '40px',
-        fontSize: '24px',
-        fontWeight: '700',
-        color: '#fafafa',
-        textDecoration: 'none',
+      <div style={{
+        width: '100%',
+        maxWidth: '400px',
+        marginBottom: '32px',
+        paddingTop: '20px',
       }}>
-        605b<span style={{ color: '#f7d047' }}>.ai</span>
-      </Link>
+        <Link href="/" style={{
+          fontSize: '22px',
+          fontWeight: '700',
+          color: '#fafafa',
+          textDecoration: 'none',
+          display: 'inline-block',
+        }}>
+          605b<span style={{ color: '#f7d047' }}>.ai</span>
+        </Link>
+      </div>
 
       <SignUp 
         afterSignUpUrl="/dashboard"
@@ -41,10 +45,19 @@ export default function SignUpPage() {
             formButtonPrimary: {
               backgroundColor: '#f7d047',
               color: '#09090b',
+              minHeight: '44px',
             },
             card: { 
               backgroundColor: '#18181b', 
-              border: '1px solid #27272a' 
+              border: '1px solid #27272a',
+              width: '100%',
+              maxWidth: '400px',
+            },
+            formFieldInput: {
+              minHeight: '44px',
+            },
+            socialButtonsBlockButton: {
+              minHeight: '44px',
             },
           }
         }}

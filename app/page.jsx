@@ -21,7 +21,6 @@ function ParticleField() {
     let width = canvas.offsetWidth;
     let height = canvas.offsetHeight;
 
-    // Check if mobile
     const checkMobile = () => {
       isMobileRef.current = window.innerWidth < 768;
     };
@@ -39,23 +38,35 @@ function ParticleField() {
 
     const initParticles = () => {
       particlesRef.current = [];
-      // Wider spacing on mobile = fewer particles = better performance
-      const spacing = isMobileRef.current ? 100 : 70;
+      const spacing = isMobileRef.current ? 45 : 35;
       const cols = Math.ceil(width / spacing) + 1;
       const rows = Math.ceil(height / spacing) + 1;
 
       for (let i = 0; i < cols; i++) {
         for (let j = 0; j < rows; j++) {
           particlesRef.current.push({
-            baseX: i * spacing + (j % 2) * (spacing / 2),
-            baseY: j * spacing,
             x: i * spacing + (j % 2) * (spacing / 2),
             y: j * spacing,
-            size: isMobileRef.current ? Math.random() * 2 + 2 : Math.random() * 2.5 + 2.5,
-            opacity: Math.random() * 0.4 + 0.35,
+            direction: (i + j) % 2 === 0 ? 1 : -1,
           });
         }
       }
+    };
+
+    const drawTriangle = (x, y, size, direction, opacity) => {
+      ctx.beginPath();
+      if (direction === 1) {
+        ctx.moveTo(x - size * 0.5, y - size * 0.5);
+        ctx.lineTo(x + size * 0.5, y);
+        ctx.lineTo(x - size * 0.5, y + size * 0.5);
+      } else {
+        ctx.moveTo(x + size * 0.5, y - size * 0.5);
+        ctx.lineTo(x - size * 0.5, y);
+        ctx.lineTo(x + size * 0.5, y + size * 0.5);
+      }
+      ctx.closePath();
+      ctx.fillStyle = `rgba(247, 208, 71, ${opacity})`;
+      ctx.fill();
     };
 
     const animate = () => {
@@ -63,61 +74,31 @@ function ParticleField() {
 
       const particles = particlesRef.current;
       const isMobile = isMobileRef.current;
+      const maxDist = isMobile ? 180 : 250;
+      const minSize = 2;
+      const maxSize = isMobile ? 12 : 16;
 
-      // Update positions
       particles.forEach((p) => {
         const dx = mouseRef.current.x - p.x;
         const dy = mouseRef.current.y - p.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        const maxDist = isMobile ? 150 : 200;
 
+        let size, opacity;
         if (dist < maxDist) {
-          const force = (maxDist - dist) / maxDist;
-          const angle = Math.atan2(dy, dx);
-          p.x = p.baseX - Math.cos(angle) * force * (isMobile ? 50 : 70);
-          p.y = p.baseY - Math.sin(angle) * force * (isMobile ? 50 : 70);
+          const proximity = 1 - (dist / maxDist);
+          size = minSize + (maxSize - minSize) * proximity;
+          opacity = 0.06 + 0.22 * proximity;
         } else {
-          p.x += (p.baseX - p.x) * 0.18;
-          p.y += (p.baseY - p.y) * 0.18;
+          size = minSize;
+          opacity = 0.06;
         }
-      });
 
-      // Draw connections (skip on mobile for performance)
-      if (!isMobile) {
-        const connectionDist = 140;
-        for (let i = 0; i < particles.length; i++) {
-          for (let j = i + 1; j < particles.length; j++) {
-            const p1 = particles[i];
-            const p2 = particles[j];
-            const dx = p1.x - p2.x;
-            const dy = p1.y - p2.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-
-            if (dist < connectionDist) {
-              const opacity = (1 - dist / connectionDist) * 0.4;
-              ctx.beginPath();
-              ctx.moveTo(p1.x, p1.y);
-              ctx.lineTo(p2.x, p2.y);
-              ctx.strokeStyle = `rgba(247, 208, 71, ${opacity})`;
-              ctx.lineWidth = 1.5;
-              ctx.stroke();
-            }
-          }
-        }
-      }
-
-      // Draw particles
-      particles.forEach((p) => {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(247, 208, 71, ${p.opacity})`;
-        ctx.fill();
+        drawTriangle(p.x, p.y, size, p.direction, opacity);
       });
 
       animationRef.current = requestAnimationFrame(animate);
     };
 
-    // Mouse events (desktop)
     const handleMouseMove = (e) => {
       const rect = canvas.getBoundingClientRect();
       mouseRef.current = {
@@ -130,7 +111,6 @@ function ParticleField() {
       mouseRef.current = { x: -1000, y: -1000 };
     };
 
-    // Touch events (mobile)
     const handleTouchMove = (e) => {
       if (e.touches.length > 0) {
         const rect = canvas.getBoundingClientRect();

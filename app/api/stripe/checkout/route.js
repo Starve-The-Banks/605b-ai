@@ -21,33 +21,38 @@ function getRedis() {
   return redis;
 }
 
-// Disclaimer text version - stored with each purchase for chargeback defense
-const DISCLAIMER_TEXT_V1 = "I understand this is self-service software, not a credit repair service. 605b.ai does not send letters on my behalf, contact creditors or bureaus for me, or guarantee any outcome.";
+// Disclaimer versions - stored server-side, only version sent to Stripe
+const DISCLAIMER_VERSIONS = {
+  v1: {
+    text: "I understand this is self-service software, not a credit repair service. 605b.ai does not send letters on my behalf, contact creditors or bureaus for me, or guarantee any outcome.",
+    effectiveDate: "2026-01-13",
+  },
+};
 const CURRENT_DISCLAIMER_VERSION = "v1";
 
-// Tier configuration - matches pricing page exactly
-// Server-side price mapping - client only sends tier ID, never amount
+// Tier configuration - priceId is source of truth for charging
+// displayAmount is ONLY for UI, never used for actual charges
 const TIER_CONFIG = {
   free: {
     name: 'Credit Report Analyzer',
-    amount: 0,
+    displayAmount: 0,  // UI only
     features: ['1 PDF analysis (read-only)', 'Issue categorization', 'Educational walkthrough'],
   },
   toolkit: {
     priceId: process.env.STRIPE_TOOLKIT_PRICE_ID,
-    amount: 3900,
+    displayAmount: 3900,  // UI only - Stripe priceId is source of truth
     name: 'Dispute Toolkit',
     features: ['Full analysis export', 'Core bureau templates', 'Dispute tracker'],
   },
   advanced: {
     priceId: process.env.STRIPE_ADVANCED_PRICE_ID,
-    amount: 8900,
+    displayAmount: 8900,  // UI only
     name: 'Advanced Dispute Suite',
     features: ['Full template library (62)', 'Creditor templates', 'AI Strategist', 'CFPB/FTC generators'],
   },
   'identity-theft': {
     priceId: process.env.STRIPE_IDENTITY_THEFT_PRICE_ID,
-    amount: 17900,
+    displayAmount: 17900,  // UI only
     name: '605B Identity Theft Toolkit',
     features: ['605B workflows', 'FTC integration', 'Fraud affidavits', 'Attorney-ready docs'],
   },
@@ -56,17 +61,17 @@ const TIER_CONFIG = {
 const ADDON_CONFIG = {
   'extra-analysis': {
     priceId: process.env.STRIPE_EXTRA_ANALYSIS_PRICE_ID,
-    amount: 700,
+    displayAmount: 700,
     name: 'Additional Report Analysis',
   },
   'ai-credits': {
     priceId: process.env.STRIPE_AI_CREDITS_PRICE_ID,
-    amount: 1000,
+    displayAmount: 1000,
     name: 'AI Strategist Credits',
   },
   'attorney-export': {
     priceId: process.env.STRIPE_ATTORNEY_EXPORT_PRICE_ID,
-    amount: 3900,
+    displayAmount: 3900,
     name: 'Attorney Export Pack',
   },
 };
@@ -92,15 +97,19 @@ export async function POST(request) {
 
     // Validate tier/addon ID against allowlist (security: prevent injection)
     if (tierId && !VALID_TIER_IDS.includes(tierId)) {
+      console.log(`[ABUSE] Invalid tier ID attempted: ${tierId} by user ${userId}`);
       return NextResponse.json({ error: 'Invalid tier' }, { status: 400 });
     }
     if (addonId && !VALID_ADDON_IDS.includes(addonId)) {
+      console.log(`[ABUSE] Invalid addon ID attempted: ${addonId} by user ${userId}`);
       return NextResponse.json({ error: 'Invalid add-on' }, { status: 400 });
     }
 
-    // Require disclaimer for paid products
+    // SERVER-SIDE ENFORCEMENT: Require disclaimer for paid products
+    // This prevents checkbox bypass from malicious API callers
     if ((tierId && tierId !== 'free') || addonId) {
-      if (!disclaimerAccepted) {
+      if (disclaimerAccepted !== true) {
+        console.log(`[ABUSE] Checkout attempted without disclaimer: user ${userId}, tier ${tierId || addonId}`);
         return NextResponse.json({ 
           error: 'Disclaimer acknowledgment required for purchase' 
         }, { status: 400 });
@@ -112,12 +121,17 @@ export async function POST(request) {
 
     if (addonId) {
       const addon = ADDON_CONFIG[addonId];
-      // Amount comes from server config, not client
+      
+      if (!addon.priceId) {
+        console.error(`Missing priceId for addon: ${addonId}`);
+        return NextResponse.json({ error: 'Configuration error' }, { status: 500 });
+      }
 
       const session = await createCheckoutSession(stripeClient, {
         customerId,
         userId,
-        product: addon,
+        priceId: addon.priceId,
+        productName: addon.name,
         productType: 'addon',
         productId: addonId,
         disclaimerTimestamp,
@@ -135,16 +149,21 @@ export async function POST(request) {
       }
 
       const tier = TIER_CONFIG[tierId];
-      // Amount comes from server config, not client
-      let finalAmount = tier.amount;
-      let isUpgrade = false;
       
+      if (!tier.priceId) {
+        console.error(`Missing priceId for tier: ${tierId}`);
+        return NextResponse.json({ error: 'Configuration error' }, { status: 500 });
+      }
+
+      // For upgrades, we'd need to handle proration differently
+      // For now, upgrades create a new charge for the full tier price
+      // (Could implement Stripe proration later)
+      let isUpgrade = false;
       if (upgradeFrom && TIER_CONFIG[upgradeFrom]) {
         const currentTierIndex = TIER_ORDER.indexOf(upgradeFrom);
         const newTierIndex = TIER_ORDER.indexOf(tierId);
         
         if (newTierIndex > currentTierIndex) {
-          finalAmount = tier.amount - TIER_CONFIG[upgradeFrom].amount;
           isUpgrade = true;
         } else {
           return NextResponse.json({ 
@@ -156,7 +175,8 @@ export async function POST(request) {
       const session = await createCheckoutSession(stripeClient, {
         customerId,
         userId,
-        product: { ...tier, amount: finalAmount },
+        priceId: tier.priceId,
+        productName: tier.name,
         productType: 'tier',
         productId: tierId,
         disclaimerTimestamp,
@@ -244,43 +264,28 @@ async function getOrCreateStripeCustomer(stripeClient, redisClient, user, userId
   return customerId;
 }
 
-async function createCheckoutSession(stripeClient, { customerId, userId, product, productType, productId, disclaimerTimestamp, isUpgrade, upgradeFrom }) {
-  let productName = `605b.ai ${product.name}`;
-  let productDescription = `One-time software license`;
-  
-  if (isUpgrade) {
-    productName = `605b.ai ${product.name} (Upgrade)`;
-    productDescription = `Upgrade from ${TIER_CONFIG[upgradeFrom]?.name || upgradeFrom}`;
-  }
-
+async function createCheckoutSession(stripeClient, { customerId, userId, priceId, productName, productType, productId, disclaimerTimestamp, isUpgrade, upgradeFrom }) {
+  // Use Stripe Price ID as source of truth - never pass amount
   const session = await stripeClient.checkout.sessions.create({
     customer: customerId,
     client_reference_id: userId,
     payment_method_types: ['card'],
+    mode: 'payment',
     line_items: [
       {
-        price_data: {
-          currency: 'usd',
-          product_data: {
-            name: productName,
-            description: productDescription,
-          },
-          unit_amount: product.amount,
-        },
+        price: priceId,  // Stripe Price ID is source of truth
         quantity: 1,
       },
     ],
-    mode: 'payment',
     success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?success=true&${productType}=${productId}`,
     cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing?canceled=true`,
     metadata: {
       clerkUserId: userId,
       productType: productType,
       productId: productId,
-      // Store disclaimer acceptance with text version for chargeback defense
+      // Store only disclaimer VERSION - full text stored server-side
       disclaimerAccepted: 'true',
       disclaimerVersion: CURRENT_DISCLAIMER_VERSION,
-      disclaimerText: DISCLAIMER_TEXT_V1,
       disclaimerTimestamp: disclaimerTimestamp || new Date().toISOString(),
       isUpgrade: isUpgrade ? 'true' : 'false',
       upgradeFrom: upgradeFrom || '',
@@ -311,13 +316,13 @@ export async function GET() {
       tiers: Object.entries(TIER_CONFIG).map(([id, config]) => ({
         id,
         name: config.name,
-        amount: config.amount,
+        amount: config.displayAmount,  // For UI display only
         features: config.features,
       })),
       addons: Object.entries(ADDON_CONFIG).map(([id, config]) => ({
         id,
         name: config.name,
-        amount: config.amount,
+        amount: config.displayAmount,  // For UI display only
       })),
     });
 

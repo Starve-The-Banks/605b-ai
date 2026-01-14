@@ -40,29 +40,99 @@ const PRIORITY_COLORS = {
   info: '#6b7280',
 };
 
-// Template category restrictions by tier
+// Template tier requirements by category
+// free = no templates (can only view names/descriptions)
+// toolkit = basic dispute templates
+// advanced = full library except 605B
+// identity-theft = everything including 605B workflows
 const CATEGORY_TIERS = {
-  identity_theft: 'identity-theft',
-  disputes: 'toolkit',
-  debt_collection: 'advanced',
-  specialty: 'advanced',
-  banking: 'advanced',
-  escalation: 'advanced',
-  followup: 'toolkit',
+  identity_theft: 'identity-theft',  // Only identity-theft tier
+  disputes: 'toolkit',               // Toolkit and above
+  debt_collection: 'advanced',       // Advanced and above
+  specialty: 'advanced',             // Advanced and above
+  banking: 'advanced',               // Advanced and above
+  escalation: 'advanced',            // Advanced and above
+  followup: 'toolkit',               // Toolkit and above
 };
 
-// Core bureau templates available in toolkit tier
-const CORE_TEMPLATE_IDS = [
-  'bureau_dispute_inaccurate',
-  'bureau_dispute_not_mine',
-  'bureau_dispute_identity_theft',
-  'bureau_dispute_obsolete',
-  'bureau_dispute_reinvestigation',
-  'debt_validation_initial',
-  'debt_validation_followup',
-  'bureau_dispute_balance',
-  'bureau_dispute_status',
-  'bureau_dispute_duplicate',
+// Toolkit tier templates - basic bureau disputes and debt validation
+const TOOLKIT_TEMPLATE_IDS = [
+  // Credit Bureau Disputes (disputes category)
+  '611_dispute',
+  '609_disclosure',
+  '623_direct',
+  'reinvestigation_failure',
+  'outdated_info_removal',
+  'balance_dispute',
+  'account_ownership_dispute',
+  'late_payment_dispute',
+  // Follow-up templates (followup category)
+  'no_response_followup',
+  'dispute_response_rebuttal',
+  'certified_mail_instructions',
+  'documentation_checklist',
+  'consumer_statement',
+];
+
+// Advanced tier adds these (on top of toolkit)
+const ADVANCED_TEMPLATE_IDS = [
+  // Remaining disputes
+  'reinsertion_notice',
+  'public_record_dispute',
+  // All debt collection
+  '809_validation',
+  'cease_desist',
+  'pay_delete',
+  'time_barred_debt',
+  'id_theft_to_collector',
+  'harassment_complaint',
+  'third_party_disclosure',
+  'workplace_contact_cease',
+  'goodwill_adjustment',
+  'settlement_offer',
+  // All specialty agencies
+  'chex_dispute',
+  'ews_dispute',
+  'lexis_dispute',
+  'innovis_dispute',
+  'nctue_dispute',
+  'telecheck_dispute',
+  'clue_dispute',
+  'corelogic_dispute',
+  'medical_debt_dispute',
+  'sagestream_dispute',
+  // All banking
+  'reg_e_dispute',
+  'reg_z_dispute',
+  'billing_error_notice',
+  'provisional_credit_demand',
+  'fraud_claim_appeal',
+  'account_closure_fraud',
+  // All escalation
+  'cfpb_complaint',
+  'state_ag',
+  'intent_to_sue',
+  'occ_complaint',
+  'fdic_complaint',
+  'ncua_complaint',
+  'ftc_complaint',
+  'small_claims_demand',
+];
+
+// Identity theft tier adds these (full 605B workflows)
+const IDENTITY_THEFT_TEMPLATE_IDS = [
+  '605b_bureau',
+  '605b_furnisher',
+  'extended_fraud_alert',
+  'initial_fraud_alert',
+  'credit_freeze',
+  'police_report_request',
+  'fraudulent_inquiry_removal',
+  'ssa_notification',
+  'irs_14039',
+  'fraudulent_bank_closure',
+  'address_dispute',
+  'ftc_affidavit',
 ];
 
 export default function TemplatesPage() {
@@ -73,17 +143,43 @@ export default function TemplatesPage() {
   const [copied, setCopied] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
-  // Determine what templates user can access
-  const canDownload = hasFeature('letterDownloads');
-  const hasFullLibrary = hasFeature('templates') === 'full' || tier === 'advanced' || tier === 'identity-theft';
-  const has605BAccess = hasFeature('identityTheftWorkflow');
+  // Tier hierarchy for comparisons
+  const TIER_LEVELS = { 'free': 0, 'toolkit': 1, 'advanced': 2, 'identity-theft': 3 };
+  const userTierLevel = TIER_LEVELS[tier] || 0;
 
-  // Check if a specific template is accessible
+  // Check if a specific template is accessible based on user's tier
   const isTemplateAccessible = (template) => {
-    if (!canDownload) return false;
-    if (hasFullLibrary) return true;
-    // Toolkit tier: only core templates
-    return CORE_TEMPLATE_IDS.includes(template.id);
+    // Free tier has no template access
+    if (userTierLevel === 0) return false;
+
+    // External links (like FTC, annualcreditreport) are always accessible
+    if (template.external) return true;
+
+    // Identity-theft tier templates require identity-theft tier
+    if (IDENTITY_THEFT_TEMPLATE_IDS.includes(template.id)) {
+      return userTierLevel >= 3; // identity-theft tier
+    }
+
+    // Advanced tier templates require advanced or higher
+    if (ADVANCED_TEMPLATE_IDS.includes(template.id)) {
+      return userTierLevel >= 2; // advanced or identity-theft
+    }
+
+    // Toolkit templates require toolkit or higher
+    if (TOOLKIT_TEMPLATE_IDS.includes(template.id)) {
+      return userTierLevel >= 1; // toolkit, advanced, or identity-theft
+    }
+
+    // Default: require advanced for any unmapped templates
+    return userTierLevel >= 2;
+  };
+
+  // For upgrade prompts - determine what tier is needed for a template
+  const getRequiredTier = (template) => {
+    if (IDENTITY_THEFT_TEMPLATE_IDS.includes(template.id)) return 'identity-theft';
+    if (ADVANCED_TEMPLATE_IDS.includes(template.id)) return 'advanced';
+    if (TOOLKIT_TEMPLATE_IDS.includes(template.id)) return 'toolkit';
+    return 'advanced';
   };
 
   const allTemplates = getAllTemplates();
@@ -533,10 +629,14 @@ export default function TemplatesPage() {
                   ) : (
                     <button
                       style={{...styles.cardBtn, ...styles.cardBtnPrimary, flex: 1}}
-                      onClick={() => setShowUpgradeModal(true)}
+                      onClick={() => {
+                        setSelectedTemplate(template);
+                        setShowUpgradeModal(true);
+                      }}
                     >
                       <Lock size={14} />
-                      {!canDownload ? 'Upgrade to Access' : 'Unlock Template'}
+                      {getRequiredTier(template) === 'identity-theft' ? '605B Tier' :
+                       getRequiredTier(template) === 'advanced' ? 'Advanced' : 'Upgrade'}
                     </button>
                   )}
                 </div>
@@ -554,21 +654,30 @@ export default function TemplatesPage() {
 
       {/* Upgrade Modal */}
       {showUpgradeModal && (
-        <div style={styles.modal} onClick={() => setShowUpgradeModal(false)}>
+        <div style={styles.modal} onClick={() => { setShowUpgradeModal(false); setSelectedTemplate(null); }}>
           <div style={{...styles.modalContent, maxWidth: '500px', padding: '0'}} onClick={(e) => e.stopPropagation()}>
             <button
               style={{...styles.modalClose, position: 'absolute', top: '16px', right: '16px', zIndex: 10}}
-              onClick={() => setShowUpgradeModal(false)}
+              onClick={() => { setShowUpgradeModal(false); setSelectedTemplate(null); }}
             >
               <X size={20} />
             </button>
             <UpgradePrompt
               feature="letter-downloads"
-              requiredTier={!canDownload ? 'toolkit' : 'advanced'}
-              title={!canDownload ? 'Unlock Letter Downloads' : 'Unlock Full Template Library'}
-              description={!canDownload 
-                ? 'Upgrade to the Dispute Toolkit to download and customize letter templates for your disputes.'
-                : 'Upgrade to the Advanced Suite to access all 62 professional letter templates including creditor disputes, escalations, and more.'
+              requiredTier={selectedTemplate ? getRequiredTier(selectedTemplate) : 'toolkit'}
+              title={
+                selectedTemplate && getRequiredTier(selectedTemplate) === 'identity-theft'
+                  ? 'Unlock 605B Identity Theft Templates'
+                  : selectedTemplate && getRequiredTier(selectedTemplate) === 'advanced'
+                  ? 'Unlock Advanced Templates'
+                  : 'Unlock Letter Templates'
+              }
+              description={
+                selectedTemplate && getRequiredTier(selectedTemplate) === 'identity-theft'
+                  ? 'Upgrade to the 605B Identity Theft Toolkit to access fraud alerts, police report templates, and complete identity theft recovery workflows.'
+                  : selectedTemplate && getRequiredTier(selectedTemplate) === 'advanced'
+                  ? 'Upgrade to the Advanced Suite to access creditor disputes, escalation letters, specialty agency templates, and more.'
+                  : 'Upgrade to the Dispute Toolkit to download and customize letter templates for your disputes.'
               }
             />
           </div>
@@ -621,20 +730,23 @@ export default function TemplatesPage() {
                     <Lock size={36} style={{ color: '#f7d047' }} />
                   </div>
                   <h3 style={{ fontSize: '20px', fontWeight: 600, marginBottom: '8px', color: '#e5e5e5' }}>
-                    Premium Template
+                    {getRequiredTier(selectedTemplate) === 'identity-theft' ? '605B Template' :
+                     getRequiredTier(selectedTemplate) === 'advanced' ? 'Advanced Template' : 'Premium Template'}
                   </h3>
                   <p style={{ fontSize: '14px', color: '#737373', textAlign: 'center', maxWidth: '400px', marginBottom: '8px', lineHeight: 1.6 }}>
                     This professionally-crafted letter template includes proper legal citations,
                     formatting, and strategic language to maximize effectiveness.
                   </p>
                   <p style={{ fontSize: '13px', color: '#525252', textAlign: 'center', maxWidth: '400px', marginBottom: '24px' }}>
-                    {!canDownload
-                      ? 'Upgrade to the Dispute Toolkit to access letter templates'
-                      : 'Upgrade to the Advanced Suite to unlock all 62 templates'
+                    {getRequiredTier(selectedTemplate) === 'identity-theft'
+                      ? 'Upgrade to the 605B Identity Theft Toolkit for complete fraud recovery workflows'
+                      : getRequiredTier(selectedTemplate) === 'advanced'
+                      ? 'Upgrade to the Advanced Suite to unlock this template'
+                      : 'Upgrade to the Dispute Toolkit to access letter templates'
                     }
                   </p>
                   <button
-                    onClick={() => { setSelectedTemplate(null); setShowUpgradeModal(true); }}
+                    onClick={() => setShowUpgradeModal(true)}
                     style={{
                       display: 'flex',
                       alignItems: 'center',

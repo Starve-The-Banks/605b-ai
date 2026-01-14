@@ -1,5 +1,6 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
+import { usageSchema, validateBody } from '@/lib/validation';
 
 // Lazy initialization to avoid build-time errors
 let redis = null;
@@ -28,14 +29,17 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const redisClient = getRedis();
+    // Validate request body with Zod
     const body = await request.json();
-    const { action, increment = 1 } = body;
-
-    const field = USAGE_FIELDS[action];
-    if (!field) {
-      return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
+    const { data, error: validationError } = validateBody(usageSchema, body);
+    if (validationError) {
+      return NextResponse.json({ error: validationError }, { status: 400 });
     }
+
+    const { action, increment } = data;
+
+    const redisClient = getRedis();
+    const field = USAGE_FIELDS[action];
 
     const tierDataRaw = await redisClient.get(`user:${userId}:tier`);
     

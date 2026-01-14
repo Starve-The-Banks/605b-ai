@@ -1,5 +1,6 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
+import { tierPostSchema, validateBody } from '@/lib/validation';
 
 // Lazy initialization to avoid build-time errors
 let redis = null;
@@ -119,12 +120,14 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Validate request body with Zod
     const body = await request.json();
-    const { tier } = body;
-
-    if (!TIER_FEATURES[tier]) {
-      return NextResponse.json({ error: 'Invalid tier' }, { status: 400 });
+    const { data, error: validationError } = validateBody(tierPostSchema, body);
+    if (validationError) {
+      return NextResponse.json({ error: validationError }, { status: 400 });
     }
+
+    const { tier } = data;
 
     if (tier !== 'free') {
       return NextResponse.json({ 

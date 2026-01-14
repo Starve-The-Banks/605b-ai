@@ -6,6 +6,8 @@ import { rateLimit, LIMITS } from '@/lib/rateLimit';
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB per file
 const MAX_FILES = 3;
 const ALLOWED_MIME_TYPES = ['application/pdf'];
+// PDF magic bytes: %PDF- (0x25504446)
+const PDF_MAGIC_BYTES = [0x25, 0x50, 0x44, 0x46, 0x2D]; // %PDF-
 
 export async function POST(req) {
   try {
@@ -53,6 +55,7 @@ export async function POST(req) {
     }
 
     // Validate each file
+    const fileBuffers = [];
     for (const file of files) {
       // Check file size
       if (file.size > MAX_FILE_SIZE) {
@@ -73,6 +76,33 @@ export async function POST(req) {
           headers: { 'Content-Type': 'application/json' }
         });
       }
+
+      // Read file buffer for magic bytes validation
+      const arrayBuffer = await file.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
+      // Validate PDF magic bytes (%PDF-)
+      if (buffer.length < 5) {
+        return new Response(JSON.stringify({
+          error: `File "${file.name}" is too small to be a valid PDF.`
+        }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      const hasPdfMagic = PDF_MAGIC_BYTES.every((byte, i) => buffer[i] === byte);
+      if (!hasPdfMagic) {
+        return new Response(JSON.stringify({
+          error: `File "${file.name}" is not a valid PDF file (invalid file header).`
+        }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      // Store buffer for later use to avoid re-reading
+      fileBuffers.push({ file, buffer });
     }
 
     if (!process.env.ANTHROPIC_API_KEY) {
@@ -82,13 +112,10 @@ export async function POST(req) {
       });
     }
 
-    // Extract text from PDFs
+    // Extract text from PDFs using pre-validated buffers
     const pdfTexts = [];
 
-    for (const file of files) {
-      const arrayBuffer = await file.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-
+    for (const { file, buffer } of fileBuffers) {
       // Dynamic import pdf-parse to avoid build issues
       const pdfParse = (await import('pdf-parse/lib/pdf-parse.js')).default;
       const pdfData = await pdfParse(buffer);

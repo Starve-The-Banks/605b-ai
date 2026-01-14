@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { auth } from '@clerk/nextjs/server';
 import { rateLimit, LIMITS } from '@/lib/rateLimit';
+import { chatSchema, validateBody } from '@/lib/validation';
 
 export async function POST(req) {
   try {
@@ -25,14 +26,17 @@ export async function POST(req) {
       });
     }
 
-    const { messages, systemPrompt } = await req.json();
-
-    if (!messages || !Array.isArray(messages)) {
-      return new Response(JSON.stringify({ error: 'Messages required' }), {
+    // Validate request body with Zod
+    const body = await req.json();
+    const { data, error: validationError } = validateBody(chatSchema, body);
+    if (validationError) {
+      return new Response(JSON.stringify({ error: validationError }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' }
       });
     }
+
+    const { messages, systemPrompt } = data;
 
     if (!process.env.ANTHROPIC_API_KEY) {
       return new Response(JSON.stringify({ error: 'API key not configured' }), {

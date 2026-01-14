@@ -1,5 +1,6 @@
 import { auth } from '@clerk/nextjs/server';
 import { rateLimit, rateLimitChars, LIMITS } from '@/lib/rateLimit';
+import { ttsSchema, validateBody } from '@/lib/validation';
 
 export async function POST(req) {
   try {
@@ -12,18 +13,18 @@ export async function POST(req) {
       });
     }
 
-    const { text, voice = 'Rachel' } = await req.json();
-
-    if (!text || typeof text !== 'string') {
-      return new Response(JSON.stringify({ error: 'Text required' }), {
+    // Validate request body with Zod
+    const body = await req.json();
+    const { data, error: validationError } = validateBody(ttsSchema, body);
+    if (validationError) {
+      return new Response(JSON.stringify({ error: validationError }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' }
       });
     }
 
-    // Limit text length to control costs
-    const maxLength = 5000;
-    const truncatedText = text.slice(0, maxLength);
+    const { text, voice = 'Rachel' } = data;
+    const truncatedText = text;
     const charCount = truncatedText.length;
 
     // Check daily TTS request limit (15/day)

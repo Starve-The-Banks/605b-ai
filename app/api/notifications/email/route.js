@@ -1,5 +1,6 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
+import { emailNotificationSchema, validateBody } from '@/lib/validation';
 
 // Lazy initialization to avoid build-time errors
 let resend = null;
@@ -32,21 +33,17 @@ export async function POST(request) {
       );
     }
 
-    const { notifications, email } = await request.json();
-
-    if (!email) {
+    // Validate request body with Zod
+    const body = await request.json();
+    const { data, error: validationError } = validateBody(emailNotificationSchema, body);
+    if (validationError) {
       return NextResponse.json(
-        { error: 'Email address required' },
+        { error: validationError },
         { status: 400 }
       );
     }
 
-    if (!notifications || notifications.length === 0) {
-      return NextResponse.json(
-        { error: 'No notifications to send' },
-        { status: 400 }
-      );
-    }
+    const { notifications, email } = data;
 
     const urgentItems = notifications.filter(n => n.type === 'urgent');
     const warningItems = notifications.filter(n => n.type === 'warning');
@@ -57,17 +54,17 @@ export async function POST(request) {
 
     const emailBody = buildEmailBody(urgentItems, warningItems);
 
-    const { data, error } = await resendClient.emails.send({
+    const { data: emailResult, error: sendError } = await resendClient.emails.send({
       from: '605b.ai <notifications@send.605b.ai>',
       to: email,
       subject: emailSubject,
       html: emailBody,
     });
 
-    if (error) {
-      console.error('Resend error:', error);
+    if (sendError) {
+      console.error('Resend error:', sendError);
       return NextResponse.json(
-        { error: 'Failed to send email', details: error.message },
+        { error: 'Failed to send email', details: sendError.message },
         { status: 500 }
       );
     }
@@ -75,7 +72,7 @@ export async function POST(request) {
     return NextResponse.json({
       success: true,
       message: 'Notification sent',
-      emailId: data?.id,
+      emailId: emailResult?.id,
     });
   } catch (error) {
     console.error('Email notification error:', error);

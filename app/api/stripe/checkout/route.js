@@ -1,5 +1,6 @@
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
+import { stripeCheckoutSchema, validateBody } from '@/lib/validation';
 
 // Lazy initialization to avoid build-time errors
 let stripe = null;
@@ -92,18 +93,15 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Validate request body with Zod
     const body = await request.json();
-    const { tierId, addonId, disclaimerAccepted, disclaimerTimestamp } = body;
+    const { data, error: validationError } = validateBody(stripeCheckoutSchema, body);
+    if (validationError) {
+      console.log(`[ABUSE] Invalid checkout request from user ${userId}: ${validationError}`);
+      return NextResponse.json({ error: validationError }, { status: 400 });
+    }
 
-    // Validate tier/addon ID against allowlist (security: prevent injection)
-    if (tierId && !VALID_TIER_IDS.includes(tierId)) {
-      console.log(`[ABUSE] Invalid tier ID attempted: ${tierId} by user ${userId}`);
-      return NextResponse.json({ error: 'Invalid tier' }, { status: 400 });
-    }
-    if (addonId && !VALID_ADDON_IDS.includes(addonId)) {
-      console.log(`[ABUSE] Invalid addon ID attempted: ${addonId} by user ${userId}`);
-      return NextResponse.json({ error: 'Invalid add-on' }, { status: 400 });
-    }
+    const { tierId, addonId, disclaimerAccepted, disclaimerTimestamp } = data;
 
     // SERVER-SIDE ENFORCEMENT: Require disclaimer for paid products
     if ((tierId && tierId !== 'free') || addonId) {

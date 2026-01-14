@@ -1,5 +1,6 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
+import { userDataSchema, validateBody } from '@/lib/validation';
 
 // Lazy initialization to avoid build-time errors
 let redis = null;
@@ -11,11 +12,6 @@ function getRedis() {
   }
   return redis;
 }
-
-// Limits to prevent abuse
-const MAX_DISPUTES = 100;
-const MAX_AUDIT_LOG = 1000;
-const MAX_FLAGGED_ITEMS = 500;
 
 // Get user data
 export async function GET() {
@@ -48,20 +44,16 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const redisClient = getRedis();
+    // Validate request body with Zod
     const body = await request.json();
-    let { disputes, auditLog, flaggedItems } = body;
+    const { data, error: validationError } = validateBody(userDataSchema, body);
+    if (validationError) {
+      return NextResponse.json({ error: validationError }, { status: 400 });
+    }
 
-    // Validate and truncate arrays to prevent abuse
-    if (!Array.isArray(disputes)) disputes = [];
-    if (!Array.isArray(auditLog)) auditLog = [];
-    if (!Array.isArray(flaggedItems)) flaggedItems = [];
+    const { disputes, auditLog, flaggedItems } = data;
 
-    // Enforce limits (keep most recent)
-    disputes = disputes.slice(-MAX_DISPUTES);
-    auditLog = auditLog.slice(-MAX_AUDIT_LOG);
-    flaggedItems = flaggedItems.slice(-MAX_FLAGGED_ITEMS);
-
+    const redisClient = getRedis();
     await redisClient.set(`user:${userId}:data`, {
       disputes,
       auditLog,

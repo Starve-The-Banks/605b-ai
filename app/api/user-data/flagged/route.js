@@ -1,5 +1,6 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
+import { flaggedItemsActionSchema, validateBody } from '@/lib/validation';
 
 // Lazy initialization to avoid build-time errors
 let redis = null;
@@ -14,7 +15,6 @@ function getRedis() {
 
 // Limits to prevent abuse
 const MAX_FLAGGED_ITEMS = 500;
-const MAX_ITEMS_PER_REQUEST = 100;
 
 // Get flagged items
 export async function GET() {
@@ -40,18 +40,20 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Validate request body with Zod
+    const body = await request.json();
+    const { data, error: validationError } = validateBody(flaggedItemsActionSchema, body);
+    if (validationError) {
+      return NextResponse.json({ error: validationError }, { status: 400 });
+    }
+
     const redisClient = getRedis();
-    const { action, items, itemId, updates } = await request.json();
+    const { action } = data;
 
     // Save findings from PDF analysis (replace all)
-    if (action === 'save' && items) {
-      // Validate items is an array and limit size
-      if (!Array.isArray(items)) {
-        return NextResponse.json({ error: 'Items must be an array' }, { status: 400 });
-      }
-
-      // Limit items to prevent abuse
-      const limitedItems = items.slice(0, MAX_ITEMS_PER_REQUEST);
+    if (action === 'save') {
+      const { items } = data;
+      const limitedItems = items;
 
       const flaggedItems = limitedItems.map((item, index) => ({
         ...item,
@@ -72,14 +74,9 @@ export async function POST(request) {
     }
 
     // Add new findings (append)
-    if (action === 'add' && items) {
-      // Validate items is an array and limit size
-      if (!Array.isArray(items)) {
-        return NextResponse.json({ error: 'Items must be an array' }, { status: 400 });
-      }
-
-      // Limit items to prevent abuse
-      const limitedItems = items.slice(0, MAX_ITEMS_PER_REQUEST);
+    if (action === 'add') {
+      const { items } = data;
+      const limitedItems = items;
 
       const existing = await redisClient.get(`user:${userId}:flagged`) || [];
       const newItems = limitedItems.map((item, index) => ({
@@ -97,16 +94,17 @@ export async function POST(request) {
     }
 
     // Update single item status (e.g., mark as disputed)
-    if (action === 'update' && itemId) {
+    if (action === 'update') {
+      const { itemId, updates } = data;
       const existing = await redisClient.get(`user:${userId}:flagged`) || [];
-      const updated = existing.map(item => 
-        item.id === itemId 
+      const updated = existing.map(item =>
+        item.id === itemId
           ? { ...item, ...updates, updatedAt: new Date().toISOString() }
           : item
       );
-      
+
       await redisClient.set(`user:${userId}:flagged`, updated);
-      
+
       if (updates.status === 'disputed') {
         await appendAuditLog(redisClient, userId, {
           action: 'flag_item',
@@ -115,21 +113,22 @@ export async function POST(request) {
           timestamp: new Date().toISOString(),
         });
       }
-      
+
       return NextResponse.json({ success: true, flaggedItems: updated });
     }
 
     // Dismiss item
-    if (action === 'dismiss' && itemId) {
+    if (action === 'dismiss') {
+      const { itemId } = data;
       const existing = await redisClient.get(`user:${userId}:flagged`) || [];
-      const updated = existing.map(item => 
-        item.id === itemId 
+      const updated = existing.map(item =>
+        item.id === itemId
           ? { ...item, status: 'dismissed', updatedAt: new Date().toISOString() }
           : item
       );
-      
+
       await redisClient.set(`user:${userId}:flagged`, updated);
-      
+
       return NextResponse.json({ success: true, flaggedItems: updated });
     }
 

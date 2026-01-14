@@ -93,6 +93,7 @@ const ADDON_GRANTS = {
 // ===========================================
 
 const IDEMPOTENCY_TTL_SECONDS = 90 * 24 * 60 * 60; // 90 days
+const FAILED_GRANT_TTL_SECONDS = 30 * 24 * 60 * 60; // 30 days for retry queue
 
 async function isEventProcessed(redisClient, eventId) {
   const key = `stripe:event:${eventId}`;
@@ -100,12 +101,123 @@ async function isEventProcessed(redisClient, eventId) {
   return !!exists;
 }
 
-async function markEventProcessed(redisClient, eventId, eventType) {
+async function markEventProcessed(redisClient, eventId, eventType, status = 'success') {
   const key = `stripe:event:${eventId}`;
   await redisClient.set(key, JSON.stringify({
     processedAt: new Date().toISOString(),
     eventType: eventType,
+    status: status,
   }), { ex: IDEMPOTENCY_TTL_SECONDS });
+}
+
+// ===========================================
+// FAILED GRANT RECOVERY SYSTEM
+// ===========================================
+
+/**
+ * Record a failed entitlement grant for later retry
+ * This ensures we never lose a paid purchase even if Redis/DB fails
+ */
+async function recordFailedGrant(redisClient, {
+  eventId,
+  eventType,
+  userId,
+  sessionId,
+  productType,
+  productId,
+  amountTotal,
+  error,
+  rawEventData,
+}) {
+  const failedGrant = {
+    eventId,
+    eventType,
+    userId,
+    sessionId,
+    productType,
+    productId,
+    amountTotal,
+    error: error?.message || String(error),
+    errorStack: error?.stack,
+    failedAt: new Date().toISOString(),
+    retryCount: 0,
+    status: 'pending',
+    rawEventData: JSON.stringify(rawEventData),
+  };
+
+  const key = `stripe:failed_grant:${eventId}`;
+
+  try {
+    // Store the failed grant
+    await redisClient.set(key, JSON.stringify(failedGrant), { ex: FAILED_GRANT_TTL_SECONDS });
+
+    // Add to failed grants queue for processing
+    await redisClient.lpush('stripe:failed_grants_queue', eventId);
+
+    // Also store by userId for easy lookup
+    if (userId) {
+      await redisClient.lpush(`stripe:failed_grants:user:${userId}`, eventId);
+    }
+
+    console.error(`[FAILED_GRANT] Recorded failed grant for event ${eventId}, user ${userId}, product ${productType}:${productId}`);
+
+    return true;
+  } catch (recordError) {
+    // Last resort: log everything to console for manual recovery
+    console.error('[CRITICAL] Failed to record failed grant:', {
+      originalError: error?.message,
+      recordError: recordError?.message,
+      failedGrant,
+    });
+    return false;
+  }
+}
+
+/**
+ * Get failed grant record
+ */
+async function getFailedGrant(redisClient, eventId) {
+  const key = `stripe:failed_grant:${eventId}`;
+  const data = await redisClient.get(key);
+  if (!data) return null;
+  return typeof data === 'string' ? JSON.parse(data) : data;
+}
+
+/**
+ * Mark a failed grant as resolved
+ */
+async function markFailedGrantResolved(redisClient, eventId, resolution) {
+  const key = `stripe:failed_grant:${eventId}`;
+  const existing = await getFailedGrant(redisClient, eventId);
+  if (!existing) return false;
+
+  existing.status = 'resolved';
+  existing.resolvedAt = new Date().toISOString();
+  existing.resolution = resolution;
+
+  await redisClient.set(key, JSON.stringify(existing), { ex: FAILED_GRANT_TTL_SECONDS });
+
+  // Remove from queue
+  await redisClient.lrem('stripe:failed_grants_queue', 0, eventId);
+
+  console.log(`[FAILED_GRANT] Marked ${eventId} as resolved: ${resolution}`);
+  return true;
+}
+
+/**
+ * Update retry count for a failed grant
+ */
+async function incrementFailedGrantRetry(redisClient, eventId) {
+  const existing = await getFailedGrant(redisClient, eventId);
+  if (!existing) return null;
+
+  existing.retryCount = (existing.retryCount || 0) + 1;
+  existing.lastRetryAt = new Date().toISOString();
+
+  const key = `stripe:failed_grant:${eventId}`;
+  await redisClient.set(key, JSON.stringify(existing), { ex: FAILED_GRANT_TTL_SECONDS });
+
+  return existing;
 }
 
 // ===========================================
@@ -395,13 +507,13 @@ export async function POST(request) {
       // ============================================
       case 'checkout.session.completed': {
         const session = event.data.object;
-        
+
         // CRITICAL: Only grant access if payment is confirmed
         if (session.payment_status !== 'paid') {
           console.log(`Session ${session.id} not paid yet (status: ${session.payment_status}), skipping`);
           break;
         }
-        
+
         const clerkUserId = session.metadata?.clerkUserId || session.client_reference_id;
         const productType = session.metadata?.productType;
         const productId = session.metadata?.productId;
@@ -413,6 +525,18 @@ export async function POST(request) {
 
         if (!clerkUserId) {
           console.error('Missing clerkUserId in checkout session');
+          // Record this as a failed grant - we have payment but can't identify user
+          await recordFailedGrant(redisClient, {
+            eventId: event.id,
+            eventType: event.type,
+            userId: null,
+            sessionId: session.id,
+            productType,
+            productId,
+            amountTotal: session.amount_total,
+            error: new Error('Missing clerkUserId in checkout session metadata'),
+            rawEventData: event.data.object,
+          });
           break;
         }
 
@@ -425,7 +549,7 @@ export async function POST(request) {
           // chargeId will be stored when we get charge events
         });
 
-        // Store purchase record
+        // Store purchase record (this is critical - do first)
         await storePurchaseRecord(redisClient, session.id, {
           userId: clerkUserId,
           customerId: session.customer,
@@ -438,140 +562,193 @@ export async function POST(request) {
           processedAt: new Date().toISOString(),
         });
 
+        // Process tier purchase with error recovery
         if (productType === 'tier' && productId) {
-          // GRANT IDEMPOTENCY: Check if already granted for this session
-          const alreadyGranted = await isAlreadyGranted(redisClient, clerkUserId, session.id);
-          if (alreadyGranted) {
-            console.log(`[SKIP] Tier already granted for user ${clerkUserId}, session ${session.id}`);
-            break;
-          }
-
-          const features = TIER_FEATURES[productId] || TIER_FEATURES.free;
-
-          let existingData = {};
           try {
-            const existing = await redisClient.get(`user:${clerkUserId}:tier`);
-            if (existing) {
-              existingData = typeof existing === 'string' ? JSON.parse(existing) : existing;
+            // GRANT IDEMPOTENCY: Check if already granted for this session
+            const alreadyGranted = await isAlreadyGranted(redisClient, clerkUserId, session.id);
+            if (alreadyGranted) {
+              console.log(`[SKIP] Tier already granted for user ${clerkUserId}, session ${session.id}`);
+              break;
             }
-          } catch (e) {
-            console.error('Error parsing existing tier data:', e);
-          }
 
-          let pdfAnalysesRemaining = features.pdfAnalyses;
-          if (isUpgrade && existingData.pdfAnalysesUsed) {
-            const used = existingData.pdfAnalysesUsed || 0;
-            
-            if (features.pdfAnalyses === -1) {
-              pdfAnalysesRemaining = -1;
-            } else {
-              pdfAnalysesRemaining = features.pdfAnalyses - used;
-              if (pdfAnalysesRemaining < 0) pdfAnalysesRemaining = 0;
+            const features = TIER_FEATURES[productId] || TIER_FEATURES.free;
+
+            let existingData = {};
+            try {
+              const existing = await redisClient.get(`user:${clerkUserId}:tier`);
+              if (existing) {
+                existingData = typeof existing === 'string' ? JSON.parse(existing) : existing;
+              }
+            } catch (e) {
+              console.error('Error parsing existing tier data:', e);
             }
-          }
 
-          const userTierData = {
-            tier: productId,
-            features: features,
-            purchasedAt: new Date().toISOString(),
-            stripeSessionId: session.id,
-            stripePaymentIntentId: session.payment_intent,
-            stripeCustomerId: session.customer,
-            amountPaid: session.amount_total,
-            disclaimerAccepted: disclaimerAccepted,
-            disclaimerVersion: disclaimerVersion,
-            disclaimerTimestamp: disclaimerTimestamp,
-            pdfAnalysesUsed: existingData.pdfAnalysesUsed || 0,
-            pdfAnalysesRemaining: pdfAnalysesRemaining,
-            aiCreditsUsed: existingData.aiCreditsUsed || 0,
-            aiCreditsRemaining: features.aiChat ? -1 : 0,
-            isUpgrade: isUpgrade,
-            upgradedFrom: upgradeFrom || null,
-            accessRevoked: false,
-            accessFrozen: false,
-            previousPurchases: [
-              ...(existingData.previousPurchases || []),
-              ...(isUpgrade ? [{
-                tier: upgradeFrom,
-                purchasedAt: existingData.purchasedAt,
-                amountPaid: existingData.amountPaid,
-              }] : []),
-            ],
-          };
+            let pdfAnalysesRemaining = features.pdfAnalyses;
+            if (isUpgrade && existingData.pdfAnalysesUsed) {
+              const used = existingData.pdfAnalysesUsed || 0;
 
-          await redisClient.set(`user:${clerkUserId}:tier`, JSON.stringify(userTierData));
+              if (features.pdfAnalyses === -1) {
+                pdfAnalysesRemaining = -1;
+              } else {
+                pdfAnalysesRemaining = features.pdfAnalyses - used;
+                if (pdfAnalysesRemaining < 0) pdfAnalysesRemaining = 0;
+              }
+            }
 
-          // Mark entitlement as granted (for idempotency)
-          await markEntitlementGranted(redisClient, clerkUserId, productId, session.id);
-
-          // Update profile
-          const existingProfile = await redisClient.get(`user:${clerkUserId}:profile`);
-          const profile = existingProfile 
-            ? (typeof existingProfile === 'string' ? JSON.parse(existingProfile) : existingProfile)
-            : {};
-          
-          await redisClient.set(`user:${clerkUserId}:profile`, JSON.stringify({
-            ...profile,
-            tier: productId,
-            tierPurchasedAt: new Date().toISOString(),
-            stripeCustomerId: session.customer,
-          }));
-
-          // Audit log
-          await addAuditEntry(redisClient, clerkUserId, {
-            type: 'purchase',
-            action: isUpgrade ? 'tier_upgrade' : 'tier_purchase',
-            details: {
+            const userTierData = {
               tier: productId,
-              amount: session.amount_total,
-              isUpgrade,
-              upgradeFrom,
-              stripeEventId: event.id,
-              stripeSessionId: session.id,
-            },
-          });
-
-          console.log(`[PURCHASE] User ${clerkUserId} ${isUpgrade ? 'upgraded to' : 'purchased'} ${productId} tier`);
-        }
-
-        if (productType === 'addon' && productId) {
-          const addonGrant = ADDON_GRANTS[productId];
-          
-          if (addonGrant) {
-            const existingTier = await redisClient.get(`user:${clerkUserId}:tier`);
-            const tierData = existingTier 
-              ? (typeof existingTier === 'string' ? JSON.parse(existingTier) : existingTier)
-              : {};
-
-            if (addonGrant.type === 'increment') {
-              const currentValue = tierData[addonGrant.field] || 0;
-              tierData[addonGrant.field] = currentValue === -1 ? -1 : currentValue + addonGrant.amount;
-            } else if (addonGrant.type === 'unlock') {
-              tierData.features = tierData.features || {};
-              tierData.features[addonGrant.field] = addonGrant.value;
-            }
-
-            tierData.addons = tierData.addons || [];
-            tierData.addons.push({
-              addonId: productId,
+              features: features,
               purchasedAt: new Date().toISOString(),
               stripeSessionId: session.id,
+              stripePaymentIntentId: session.payment_intent,
+              stripeCustomerId: session.customer,
               amountPaid: session.amount_total,
+              disclaimerAccepted: disclaimerAccepted,
+              disclaimerVersion: disclaimerVersion,
+              disclaimerTimestamp: disclaimerTimestamp,
+              pdfAnalysesUsed: existingData.pdfAnalysesUsed || 0,
+              pdfAnalysesRemaining: pdfAnalysesRemaining,
+              aiCreditsUsed: existingData.aiCreditsUsed || 0,
+              aiCreditsRemaining: features.aiChat ? -1 : 0,
+              isUpgrade: isUpgrade,
+              upgradedFrom: upgradeFrom || null,
+              accessRevoked: false,
+              accessFrozen: false,
+              previousPurchases: [
+                ...(existingData.previousPurchases || []),
+                ...(isUpgrade ? [{
+                  tier: upgradeFrom,
+                  purchasedAt: existingData.purchasedAt,
+                  amountPaid: existingData.amountPaid,
+                }] : []),
+              ],
+            };
+
+            // CRITICAL: Grant the tier entitlement
+            await redisClient.set(`user:${clerkUserId}:tier`, JSON.stringify(userTierData));
+
+            // Mark entitlement as granted (for idempotency)
+            await markEntitlementGranted(redisClient, clerkUserId, productId, session.id);
+
+            // Update profile (non-critical, but try)
+            try {
+              const existingProfile = await redisClient.get(`user:${clerkUserId}:profile`);
+              const profile = existingProfile
+                ? (typeof existingProfile === 'string' ? JSON.parse(existingProfile) : existingProfile)
+                : {};
+
+              await redisClient.set(`user:${clerkUserId}:profile`, JSON.stringify({
+                ...profile,
+                tier: productId,
+                tierPurchasedAt: new Date().toISOString(),
+                stripeCustomerId: session.customer,
+              }));
+            } catch (profileError) {
+              console.error('Non-critical: Failed to update profile:', profileError);
+            }
+
+            // Audit log (non-critical)
+            try {
+              await addAuditEntry(redisClient, clerkUserId, {
+                type: 'purchase',
+                action: isUpgrade ? 'tier_upgrade' : 'tier_purchase',
+                details: {
+                  tier: productId,
+                  amount: session.amount_total,
+                  isUpgrade,
+                  upgradeFrom,
+                  stripeEventId: event.id,
+                  stripeSessionId: session.id,
+                },
+              });
+            } catch (auditError) {
+              console.error('Non-critical: Failed to add audit entry:', auditError);
+            }
+
+            console.log(`[PURCHASE] User ${clerkUserId} ${isUpgrade ? 'upgraded to' : 'purchased'} ${productId} tier`);
+
+          } catch (grantError) {
+            // CRITICAL: Grant failed - record for retry
+            console.error(`[GRANT_FAILED] Tier grant failed for user ${clerkUserId}:`, grantError);
+            await recordFailedGrant(redisClient, {
+              eventId: event.id,
+              eventType: event.type,
+              userId: clerkUserId,
+              sessionId: session.id,
+              productType,
+              productId,
+              amountTotal: session.amount_total,
+              error: grantError,
+              rawEventData: event.data.object,
             });
+            // Update event status to failed
+            await markEventProcessed(redisClient, event.id, event.type, 'grant_failed');
+          }
+        }
 
-            await redisClient.set(`user:${clerkUserId}:tier`, JSON.stringify(tierData));
+        // Process addon purchase with error recovery
+        if (productType === 'addon' && productId) {
+          try {
+            const addonGrant = ADDON_GRANTS[productId];
 
-            await addAuditEntry(redisClient, clerkUserId, {
-              type: 'purchase',
-              action: 'addon_purchase',
-              details: {
-                addon: productId,
-                amount: session.amount_total,
-                stripeEventId: event.id,
-              },
+            if (addonGrant) {
+              const existingTier = await redisClient.get(`user:${clerkUserId}:tier`);
+              const tierData = existingTier
+                ? (typeof existingTier === 'string' ? JSON.parse(existingTier) : existingTier)
+                : {};
+
+              if (addonGrant.type === 'increment') {
+                const currentValue = tierData[addonGrant.field] || 0;
+                tierData[addonGrant.field] = currentValue === -1 ? -1 : currentValue + addonGrant.amount;
+              } else if (addonGrant.type === 'unlock') {
+                tierData.features = tierData.features || {};
+                tierData.features[addonGrant.field] = addonGrant.value;
+              }
+
+              tierData.addons = tierData.addons || [];
+              tierData.addons.push({
+                addonId: productId,
+                purchasedAt: new Date().toISOString(),
+                stripeSessionId: session.id,
+                amountPaid: session.amount_total,
+              });
+
+              await redisClient.set(`user:${clerkUserId}:tier`, JSON.stringify(tierData));
+
+              // Audit log (non-critical)
+              try {
+                await addAuditEntry(redisClient, clerkUserId, {
+                  type: 'purchase',
+                  action: 'addon_purchase',
+                  details: {
+                    addon: productId,
+                    amount: session.amount_total,
+                    stripeEventId: event.id,
+                  },
+                });
+              } catch (auditError) {
+                console.error('Non-critical: Failed to add addon audit entry:', auditError);
+              }
+
+              console.log(`[ADDON] User ${clerkUserId} purchased add-on: ${productId}`);
+            }
+          } catch (addonError) {
+            // CRITICAL: Addon grant failed - record for retry
+            console.error(`[GRANT_FAILED] Addon grant failed for user ${clerkUserId}:`, addonError);
+            await recordFailedGrant(redisClient, {
+              eventId: event.id,
+              eventType: event.type,
+              userId: clerkUserId,
+              sessionId: session.id,
+              productType,
+              productId,
+              amountTotal: session.amount_total,
+              error: addonError,
+              rawEventData: event.data.object,
             });
-
-            console.log(`[ADDON] User ${clerkUserId} purchased add-on: ${productId}`);
+            // Update event status to failed
+            await markEventProcessed(redisClient, event.id, event.type, 'grant_failed');
           }
         }
 

@@ -531,22 +531,13 @@ export default function TemplatesPage() {
                       </button>
                     </>
                   ) : (
-                    <>
-                      <button 
-                        style={{...styles.cardBtn, ...styles.cardBtnSecondary}}
-                        onClick={() => setSelectedTemplate(template)}
-                      >
-                        <Eye size={14} />
-                        Preview
-                      </button>
-                      <button 
-                        style={{...styles.cardBtn, ...styles.cardBtnSecondary, opacity: 0.6}}
-                        onClick={() => setShowUpgradeModal(true)}
-                      >
-                        <Lock size={14} />
-                        {!canDownload ? 'Upgrade' : 'Pro'}
-                      </button>
-                    </>
+                    <button
+                      style={{...styles.cardBtn, ...styles.cardBtnPrimary, flex: 1}}
+                      onClick={() => setShowUpgradeModal(true)}
+                    >
+                      <Lock size={14} />
+                      {!canDownload ? 'Upgrade to Access' : 'Unlock Template'}
+                    </button>
                   )}
                 </div>
               </div>
@@ -600,22 +591,82 @@ export default function TemplatesPage() {
                 <X size={20} />
               </button>
             </div>
-            
+
             <div style={styles.modalBody}>
-              <pre style={styles.templateContent}>{getLetterContent(selectedTemplate.id)}</pre>
+              {isTemplateAccessible(selectedTemplate) ? (
+                <pre style={styles.templateContent}>{getLetterContent(selectedTemplate.id)}</pre>
+              ) : (
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  minHeight: '300px',
+                  background: '#0a0a0b',
+                  border: '1px solid #1f1f23',
+                  borderRadius: '12px',
+                  padding: '40px 20px',
+                }}>
+                  <div style={{
+                    width: '80px',
+                    height: '80px',
+                    background: 'rgba(247, 208, 71, 0.1)',
+                    border: '1px solid rgba(247, 208, 71, 0.3)',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: '20px',
+                  }}>
+                    <Lock size={36} style={{ color: '#f7d047' }} />
+                  </div>
+                  <h3 style={{ fontSize: '20px', fontWeight: 600, marginBottom: '8px', color: '#e5e5e5' }}>
+                    Premium Template
+                  </h3>
+                  <p style={{ fontSize: '14px', color: '#737373', textAlign: 'center', maxWidth: '400px', marginBottom: '8px', lineHeight: 1.6 }}>
+                    This professionally-crafted letter template includes proper legal citations,
+                    formatting, and strategic language to maximize effectiveness.
+                  </p>
+                  <p style={{ fontSize: '13px', color: '#525252', textAlign: 'center', maxWidth: '400px', marginBottom: '24px' }}>
+                    {!canDownload
+                      ? 'Upgrade to the Dispute Toolkit to access letter templates'
+                      : 'Upgrade to the Advanced Suite to unlock all 62 templates'
+                    }
+                  </p>
+                  <button
+                    onClick={() => { setSelectedTemplate(null); setShowUpgradeModal(true); }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '14px 28px',
+                      background: 'linear-gradient(135deg, #f7d047 0%, #d4b840 100%)',
+                      border: 'none',
+                      borderRadius: '10px',
+                      color: '#09090b',
+                      fontSize: '15px',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <Lock size={18} />
+                    Upgrade to Unlock
+                  </button>
+                </div>
+              )}
             </div>
-            
+
             <div style={styles.modalFooter}>
               {isTemplateAccessible(selectedTemplate) ? (
                 <>
-                  <button 
+                  <button
                     style={{...styles.modalBtn, background: '#1a1a1c', color: '#a3a3a3'}}
                     onClick={handleCopy}
                   >
                     {copied ? <Check size={18} /> : <Copy size={18} />}
                     {copied ? 'Copied!' : 'Copy to Clipboard'}
                   </button>
-                  <button 
+                  <button
                     style={{...styles.modalBtn, background: 'linear-gradient(135deg, #f7d047 0%, #d4b840 100%)', color: '#09090b'}}
                     onClick={handleDownload}
                   >
@@ -625,14 +676,14 @@ export default function TemplatesPage() {
                 </>
               ) : (
                 <>
-                  <button 
+                  <button
                     style={{...styles.modalBtn, background: '#1a1a1c', color: '#52525b', cursor: 'not-allowed'}}
                     disabled
                   >
                     <Lock size={18} />
                     Copy Locked
                   </button>
-                  <button 
+                  <button
                     style={{...styles.modalBtn, background: 'linear-gradient(135deg, #f7d047 0%, #d4b840 100%)', color: '#09090b'}}
                     onClick={() => { setSelectedTemplate(null); setShowUpgradeModal(true); }}
                   >

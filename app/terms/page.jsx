@@ -160,7 +160,30 @@ export default function TermsOfService() {
           </section>
 
           <section style={{ marginBottom: '32px' }}>
-            <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fafafa', marginBottom: '16px' }}>5. Limitation of Liability</h2>
+            <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fafafa', marginBottom: '16px' }}>5. Payments and Refund Policy</h2>
+            
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#f7d047', marginBottom: '12px' }}>5.1 Pricing and Payment</h3>
+            <p style={{ marginBottom: '16px' }}>
+              The Service offers both free and paid tiers. Paid tiers require a one-time payment for a perpetual software license. All prices are listed in U.S. dollars and are subject to change without notice.
+            </p>
+
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#f7d047', marginBottom: '12px' }}>5.2 Refund Policy</h3>
+            <p style={{ marginBottom: '16px' }}>
+              <strong>ALL SALES ARE FINAL.</strong>
+            </p>
+            <p style={{ marginBottom: '16px' }}>
+              605b.ai provides immediate access to digital software tools, workflows, and downloadable content upon purchase. Because access is granted instantly and the software license is delivered immediately, we do not offer refunds.
+            </p>
+            <p style={{ marginBottom: '16px' }}>
+              Please review the features of each tier carefully before purchasing. A free tier is available to allow users to evaluate the platform prior to upgrading.
+            </p>
+            <p>
+              If you believe you were charged in error or experienced a technical billing issue, please contact support@9thwave.io.
+            </p>
+          </section>
+
+          <section style={{ marginBottom: '32px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fafafa', marginBottom: '16px' }}>6. Limitation of Liability</h2>
             <p style={{ marginBottom: '16px' }}>
               <strong>TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, NINTH WAVE ANALYTICS LLC, ITS OFFICERS, DIRECTORS, MEMBERS, EMPLOYEES, AGENTS, AND AFFILIATES SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING BUT NOT LIMITED TO:</strong>
             </p>
@@ -181,7 +204,7 @@ export default function TermsOfService() {
           </section>
 
           <section style={{ marginBottom: '32px' }}>
-            <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fafafa', marginBottom: '16px' }}>6. Disclaimer of Warranties</h2>
+            <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fafafa', marginBottom: '16px' }}>7. Disclaimer of Warranties</h2>
             <p style={{ marginBottom: '16px' }}>
               <strong>THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, OR COURSE OF PERFORMANCE.</strong>
             </p>
@@ -191,33 +214,33 @@ export default function TermsOfService() {
           </section>
 
           <section style={{ marginBottom: '32px' }}>
-            <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fafafa', marginBottom: '16px' }}>7. Indemnification</h2>
+            <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fafafa', marginBottom: '16px' }}>8. Indemnification</h2>
             <p>
               You agree to defend, indemnify, and hold harmless Ninth Wave Analytics LLC, its officers, directors, members, employees, agents, and affiliates from and against any and all claims, damages, obligations, losses, liabilities, costs, and expenses (including reasonable attorneys' fees) arising from: (a) your use of the Service; (b) your violation of these Terms; (c) your violation of any third-party rights, including intellectual property rights; (d) any dispute between you and a credit bureau, creditor, or debt collector; or (e) any false or misleading information you provide through the Service.
             </p>
           </section>
 
           <section style={{ marginBottom: '32px' }}>
-            <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fafafa', marginBottom: '16px' }}>8. Dispute Resolution and Arbitration</h2>
+            <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fafafa', marginBottom: '16px' }}>9. Dispute Resolution and Arbitration</h2>
             
-            <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#f7d047', marginBottom: '12px' }}>8.1 Binding Arbitration</h3>
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#f7d047', marginBottom: '12px' }}>9.1 Binding Arbitration</h3>
             <p style={{ marginBottom: '16px' }}>
               Any dispute, controversy, or claim arising out of or relating to these Terms or the Service shall be resolved by binding arbitration administered by the American Arbitration Association ("AAA") in accordance with its Consumer Arbitration Rules. The arbitration shall take place in Delaware or, at your election, may be conducted remotely.
             </p>
 
-            <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#f7d047', marginBottom: '12px' }}>8.2 Class Action Waiver</h3>
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#f7d047', marginBottom: '12px' }}>9.2 Class Action Waiver</h3>
             <p style={{ marginBottom: '16px' }}>
               <strong>YOU AGREE THAT ANY ARBITRATION OR PROCEEDING SHALL BE LIMITED TO THE DISPUTE BETWEEN US AND YOU INDIVIDUALLY. YOU WAIVE ANY RIGHT TO PARTICIPATE IN A CLASS ACTION LAWSUIT OR CLASS-WIDE ARBITRATION.</strong>
             </p>
 
-            <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#f7d047', marginBottom: '12px' }}>8.3 Small Claims Exception</h3>
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#f7d047', marginBottom: '12px' }}>9.3 Small Claims Exception</h3>
             <p>
               Notwithstanding the foregoing, either party may bring an individual action in small claims court for disputes within the court's jurisdictional limits.
             </p>
           </section>
 
           <section style={{ marginBottom: '32px' }}>
-            <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fafafa', marginBottom: '16px' }}>9. Governing Law</h2>
+            <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fafafa', marginBottom: '16px' }}>10. Governing Law</h2>
             <p style={{ marginBottom: '16px' }}>
               These Terms shall be governed by and construed in accordance with the laws of the State of Delaware, without regard to its conflict of law provisions. Any legal action or proceeding not subject to arbitration shall be brought exclusively in the state or federal courts located in Delaware.
             </p>
@@ -227,7 +250,7 @@ export default function TermsOfService() {
           </section>
 
           <section style={{ marginBottom: '32px' }}>
-            <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fafafa', marginBottom: '16px' }}>10. Termination</h2>
+            <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fafafa', marginBottom: '16px' }}>11. Termination</h2>
             <p style={{ marginBottom: '16px' }}>
               We may terminate or suspend your access to the Service immediately, without prior notice or liability, for any reason, including breach of these Terms.
             </p>
@@ -237,21 +260,21 @@ export default function TermsOfService() {
           </section>
 
           <section style={{ marginBottom: '32px' }}>
-            <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fafafa', marginBottom: '16px' }}>11. Severability</h2>
+            <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fafafa', marginBottom: '16px' }}>12. Severability</h2>
             <p>
               If any provision of these Terms is held to be unenforceable or invalid, such provision will be modified to the minimum extent necessary to make it enforceable, and the remaining provisions will continue in full force and effect.
             </p>
           </section>
 
           <section style={{ marginBottom: '32px' }}>
-            <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fafafa', marginBottom: '16px' }}>12. Entire Agreement</h2>
+            <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fafafa', marginBottom: '16px' }}>13. Entire Agreement</h2>
             <p>
               These Terms, together with our Privacy Policy, constitute the entire agreement between you and Ninth Wave Analytics LLC regarding the Service and supersede all prior agreements and understandings.
             </p>
           </section>
 
           <section style={{ marginBottom: '32px' }}>
-            <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fafafa', marginBottom: '16px' }}>13. Contact Information</h2>
+            <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#fafafa', marginBottom: '16px' }}>14. Contact Information</h2>
             <p style={{ marginBottom: '16px' }}>
               If you have any questions about these Terms, please contact us at:
             </p>

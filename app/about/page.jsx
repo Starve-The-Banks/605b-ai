@@ -4,10 +4,167 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { 
   Shield, Menu, X, ArrowRight, Eye, Lock, Send, 
-  FileText, Users, Target, Zap, Scale, CheckCircle2,
-  ExternalLink
+  FileText, Users, Target, Zap, Scale, CheckCircle2
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+
+// Triangle Particle Field Component
+function ParticleField() {
+  const canvasRef = useRef(null);
+  const mouseRef = useRef({ x: -1000, y: -1000 });
+  const particlesRef = useRef([]);
+  const animationRef = useRef(null);
+  const isMobileRef = useRef(false);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    let width = canvas.offsetWidth;
+    let height = canvas.offsetHeight;
+
+    const checkMobile = () => {
+      isMobileRef.current = window.innerWidth < 768;
+    };
+    checkMobile();
+
+    const setSize = () => {
+      checkMobile();
+      width = canvas.offsetWidth;
+      height = canvas.offsetHeight;
+      canvas.width = width * window.devicePixelRatio;
+      canvas.height = height * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      initParticles();
+    };
+
+    const initParticles = () => {
+      particlesRef.current = [];
+      const spacing = isMobileRef.current ? 45 : 35;
+      const cols = Math.ceil(width / spacing) + 1;
+      const rows = Math.ceil(height / spacing) + 1;
+
+      for (let i = 0; i < cols; i++) {
+        for (let j = 0; j < rows; j++) {
+          particlesRef.current.push({
+            x: i * spacing + (j % 2) * (spacing / 2),
+            y: j * spacing,
+            direction: (i + j) % 2 === 0 ? 1 : -1,
+          });
+        }
+      }
+    };
+
+    const drawTriangle = (x, y, size, direction, opacity) => {
+      ctx.beginPath();
+      if (direction === 1) {
+        ctx.moveTo(x - size * 0.5, y - size * 0.5);
+        ctx.lineTo(x + size * 0.5, y);
+        ctx.lineTo(x - size * 0.5, y + size * 0.5);
+      } else {
+        ctx.moveTo(x + size * 0.5, y - size * 0.5);
+        ctx.lineTo(x - size * 0.5, y);
+        ctx.moveTo(x + size * 0.5, y + size * 0.5);
+      }
+      ctx.closePath();
+      ctx.fillStyle = `rgba(247, 208, 71, ${opacity})`;
+      ctx.fill();
+    };
+
+    const animate = () => {
+      ctx.clearRect(0, 0, width, height);
+
+      const particles = particlesRef.current;
+      const isMobile = isMobileRef.current;
+      const maxDist = isMobile ? 180 : 250;
+      const minSize = 2;
+      const maxSize = isMobile ? 12 : 16;
+
+      particles.forEach((p) => {
+        const dx = mouseRef.current.x - p.x;
+        const dy = mouseRef.current.y - p.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        let size, opacity;
+        if (dist < maxDist) {
+          const proximity = 1 - (dist / maxDist);
+          size = minSize + (maxSize - minSize) * proximity;
+          opacity = 0.06 + 0.22 * proximity;
+        } else {
+          size = minSize;
+          opacity = 0.06;
+        }
+
+        drawTriangle(p.x, p.y, size, p.direction, opacity);
+      });
+
+      animationRef.current = requestAnimationFrame(animate);
+    };
+
+    const handleMouseMove = (e) => {
+      const rect = canvas.getBoundingClientRect();
+      mouseRef.current = {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      };
+    };
+
+    const handleMouseLeave = () => {
+      mouseRef.current = { x: -1000, y: -1000 };
+    };
+
+    const handleTouchMove = (e) => {
+      if (e.touches.length > 0) {
+        const rect = canvas.getBoundingClientRect();
+        const touch = e.touches[0];
+        mouseRef.current = {
+          x: touch.clientX - rect.left,
+          y: touch.clientY - rect.top,
+        };
+      }
+    };
+
+    const handleTouchEnd = () => {
+      mouseRef.current = { x: -1000, y: -1000 };
+    };
+
+    setSize();
+    animate();
+
+    window.addEventListener('resize', setSize);
+    canvas.addEventListener('mousemove', handleMouseMove);
+    canvas.addEventListener('mouseleave', handleMouseLeave);
+    canvas.addEventListener('touchmove', handleTouchMove, { passive: true });
+    canvas.addEventListener('touchend', handleTouchEnd);
+
+    return () => {
+      window.removeEventListener('resize', setSize);
+      canvas.removeEventListener('mousemove', handleMouseMove);
+      canvas.removeEventListener('mouseleave', handleMouseLeave);
+      canvas.removeEventListener('touchmove', handleTouchMove);
+      canvas.removeEventListener('touchend', handleTouchEnd);
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        pointerEvents: 'auto',
+        zIndex: 0,
+      }}
+    />
+  );
+}
 
 export default function AboutPage() {
   const { isSignedIn } = useAuth();
@@ -16,9 +173,7 @@ export default function AboutPage() {
   return (
     <>
       <style jsx global>{`
-        * {
-          box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
         
         .about-page {
           min-height: 100vh;
@@ -27,7 +182,6 @@ export default function AboutPage() {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
         
-        /* Navigation */
         .nav {
           position: fixed;
           top: 0;
@@ -50,9 +204,7 @@ export default function AboutPage() {
           text-decoration: none;
         }
         
-        .logo-accent {
-          color: #f7d047;
-        }
+        .logo-accent { color: #f7d047; }
         
         .nav-links {
           display: flex;
@@ -67,9 +219,7 @@ export default function AboutPage() {
           font-weight: 500;
         }
         
-        .nav-link:hover {
-          color: #fafafa;
-        }
+        .nav-link:hover { color: #fafafa; }
         
         .nav-button {
           padding: 8px 16px;
@@ -115,9 +265,7 @@ export default function AboutPage() {
           flex-direction: column;
         }
         
-        .mobile-menu.open {
-          display: flex;
-        }
+        .mobile-menu.open { display: flex; }
         
         .mobile-menu-header {
           display: flex;
@@ -186,11 +334,13 @@ export default function AboutPage() {
           border-color: #3f3f46;
         }
         
-        /* Page Header */
+        /* Hero Header */
         .page-header {
-          padding: 140px 24px 60px;
+          position: relative;
+          padding: 140px 24px 80px;
           text-align: center;
           background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(247, 208, 71, 0.06), transparent);
+          overflow: hidden;
         }
         
         .page-badge {
@@ -224,7 +374,7 @@ export default function AboutPage() {
           margin: 0 auto;
         }
         
-        /* Why Section - Primary */
+        /* Why Section */
         .why-section {
           padding: 80px 24px 100px;
           background: #09090b;
@@ -383,7 +533,7 @@ export default function AboutPage() {
           line-height: 1.7;
         }
         
-        /* What We're Not Section */
+        /* What We Are / Aren't */
         .contrast-section {
           padding: 100px 24px;
           background: #09090b;
@@ -427,13 +577,8 @@ export default function AboutPage() {
           gap: 8px;
         }
         
-        .contrast-card.negative .contrast-header {
-          color: #ef4444;
-        }
-        
-        .contrast-card.positive .contrast-header {
-          color: #22c55e;
-        }
+        .contrast-card.negative .contrast-header { color: #ef4444; }
+        .contrast-card.positive .contrast-header { color: #22c55e; }
         
         .contrast-list {
           list-style: none;
@@ -451,9 +596,7 @@ export default function AboutPage() {
           border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
         
-        .contrast-list li:last-child {
-          border-bottom: none;
-        }
+        .contrast-list li:last-child { border-bottom: none; }
         
         .contrast-card.negative .contrast-list li svg {
           color: #ef4444;
@@ -516,9 +659,7 @@ export default function AboutPage() {
           border-bottom: 1px solid #1c1c1f;
         }
         
-        .company-detail {
-          text-align: center;
-        }
+        .company-detail { text-align: center; }
         
         .company-detail-label {
           font-size: 12px;
@@ -533,9 +674,7 @@ export default function AboutPage() {
           color: #a1a1aa;
         }
         
-        .company-contact {
-          margin-top: 32px;
-        }
+        .company-contact { margin-top: 32px; }
         
         .company-contact p {
           font-size: 15px;
@@ -549,9 +688,7 @@ export default function AboutPage() {
           font-weight: 500;
         }
         
-        .company-contact a:hover {
-          text-decoration: underline;
-        }
+        .company-contact a:hover { text-decoration: underline; }
         
         /* CTA Section */
         .cta-section {
@@ -586,21 +723,26 @@ export default function AboutPage() {
         /* Footer */
         .footer {
           border-top: 1px solid #1c1c1f;
-          padding: 0 24px;
+          padding: 48px 24px 24px;
           background: #0c0c0e;
+        }
+        
+        .footer-content {
+          max-width: 1100px;
+          margin: 0 auto;
+          display: flex;
+          flex-direction: column;
+          gap: 32px;
         }
         
         .footer-main {
           display: flex;
-          flex-direction: column;
-          gap: 32px;
-          padding: 48px 0;
-          border-bottom: 1px solid #1c1c1f;
+          justify-content: space-between;
+          flex-wrap: wrap;
+          gap: 48px;
         }
         
-        .footer-brand {
-          max-width: 300px;
-        }
+        .footer-brand { max-width: 300px; }
         
         .footer-logo {
           font-size: 20px;
@@ -617,8 +759,8 @@ export default function AboutPage() {
         
         .footer-links {
           display: flex;
-          flex-wrap: wrap;
           gap: 48px;
+          flex-wrap: wrap;
         }
         
         .footer-column {
@@ -640,13 +782,11 @@ export default function AboutPage() {
           text-decoration: none;
         }
         
-        .footer-link:hover {
-          color: #f7d047;
-        }
+        .footer-link:hover { color: #f7d047; }
         
         .footer-disclaimer {
-          padding: 24px 0;
-          border-bottom: 1px solid #1c1c1f;
+          padding-top: 24px;
+          border-top: 1px solid #1c1c1f;
         }
         
         .disclaimer-text {
@@ -657,11 +797,14 @@ export default function AboutPage() {
         
         .footer-bottom {
           display: flex;
-          flex-direction: column;
-          gap: 12px;
-          padding: 24px 0;
+          justify-content: space-between;
+          align-items: center;
+          padding-top: 24px;
+          border-top: 1px solid #1c1c1f;
           font-size: 13px;
           color: #52525b;
+          flex-wrap: wrap;
+          gap: 16px;
         }
         
         .footer-bottom-links {
@@ -675,70 +818,33 @@ export default function AboutPage() {
           text-decoration: none;
         }
         
-        .footer-bottom-link:hover {
-          color: #f7d047;
-        }
+        .footer-bottom-link:hover { color: #f7d047; }
         
-        /* Mobile Responsive */
+        /* Mobile */
         @media (max-width: 768px) {
-          .nav-links {
-            display: none;
-          }
+          .nav-links { display: none; }
+          .mobile-menu-btn { display: block; }
           
-          .mobile-menu-btn {
-            display: block;
-          }
+          .page-header { padding: 100px 20px 60px; }
           
-          .page-header {
-            padding: 100px 20px 40px;
-          }
-          
-          .why-section {
-            padding: 60px 20px 80px;
-          }
-          
-          .why-content {
-            font-size: 16px;
-          }
-          
-          .why-highlight {
-            padding: 24px;
-            font-size: 15px;
-          }
-          
-          .why-closing {
-            font-size: 18px;
-          }
+          .why-section { padding: 60px 20px 80px; }
+          .why-content { font-size: 16px; }
+          .why-highlight { padding: 24px; font-size: 15px; }
+          .why-closing { font-size: 18px; }
           
           .principles-section,
           .contrast-section,
-          .company-section {
-            padding: 60px 20px;
-          }
+          .company-section { padding: 60px 20px; }
           
-          .principles-grid {
-            grid-template-columns: 1fr;
-          }
+          .principles-grid { grid-template-columns: 1fr; }
+          .principle-card { padding: 24px; }
           
-          .principle-card {
-            padding: 24px;
-          }
+          .contrast-grid { grid-template-columns: 1fr; }
+          .contrast-card { padding: 24px; }
           
-          .contrast-grid {
-            grid-template-columns: 1fr;
-          }
+          .company-details { gap: 24px; }
           
-          .contrast-card {
-            padding: 24px;
-          }
-          
-          .company-details {
-            gap: 24px;
-          }
-          
-          .cta-section {
-            padding: 60px 20px;
-          }
+          .cta-section { padding: 60px 20px; }
           
           .btn-primary, .btn-secondary {
             padding: 14px 24px;
@@ -748,26 +854,9 @@ export default function AboutPage() {
             min-height: 48px;
           }
           
-          .footer-main {
-            flex-direction: column;
-          }
-          
-          .footer-links {
-            gap: 32px;
-          }
-        }
-        
-        @media (min-width: 769px) {
-          .footer-main {
-            flex-direction: row;
-            justify-content: space-between;
-          }
-          
-          .footer-bottom {
-            flex-direction: row;
-            justify-content: space-between;
-            align-items: center;
-          }
+          .footer-main { flex-direction: column; }
+          .footer-links { gap: 32px; }
+          .footer-bottom { flex-direction: column; text-align: center; }
         }
       `}</style>
 
@@ -798,7 +887,7 @@ export default function AboutPage() {
         <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
           <div className="mobile-menu-header">
             <span className="logo">605b<span className="logo-accent">.ai</span></span>
-            <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(false)}>
+            <button className="mobile-menu-btn" style={{ display: 'block' }} onClick={() => setMobileMenuOpen(false)}>
               <X size={24} />
             </button>
           </div>
@@ -818,43 +907,45 @@ export default function AboutPage() {
           </div>
         </div>
 
-        {/* Page Header */}
+        {/* Page Header with Particle Effect */}
         <header className="page-header">
-          <div className="page-badge">
-            <Shield size={14} />
-            About Us
+          <ParticleField />
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <div className="page-badge">
+              <Shield size={14} />
+              About Us
+            </div>
+            <h1 className="page-title">Built Different</h1>
+            <p className="page-subtitle">
+              We're not a credit repair company. We build software that puts 
+              the process in your hands.
+            </p>
           </div>
-          <h1 className="page-title">Built Different</h1>
-          <p className="page-subtitle">
-            We're not a credit repair company. We build software that puts 
-            the process in your hands.
-          </p>
         </header>
 
-        {/* Why 605b.ai Exists - Primary Asset */}
+        {/* Why 605b.ai Exists - NEW CONTENT */}
         <section className="why-section">
           <div className="why-container">
             <div className="why-label">Our Philosophy</div>
             <h2 className="why-title">Why 605b.ai Exists</h2>
             <div className="why-content">
               <p>
-                <strong>The lawful credit dispute process isn't secret — it's fragmented.</strong>
+                <strong>Fixing credit report errors isn't a secret process — it's just fragmented and confusing.</strong>
               </p>
               <p>
-                Over time, that fragmentation gave rise to an industry built around acting as an 
-                intermediary between people and their own rights. Most services operate behind 
-                the scenes, charge ongoing fees, reuse generic templates, and keep the mechanics opaque.
+                Over time, that confusion created an industry that sits between people and their own rights. Many services work behind the scenes, charge ongoing fees, reuse generic letters, and don't clearly explain what they're doing.
               </p>
               <p>
-                <strong>We took the opposite approach.</strong>
+                <strong>We chose a different approach.</strong>
               </p>
               <p>
-                605b.ai compiles and structures the real dispute process into self-service software 
-                that keeps everything transparent and user-controlled. Nothing is sent on your behalf. 
-                Nothing is hidden. You generate the documents, review them, and send them yourself.
+                605b.ai compiles and organizes the real credit dispute process into simple, self-service software. Everything is transparent and under your control. Nothing is sent on your behalf. Nothing is hidden.
+              </p>
+              <p>
+                You generate the documents, review them, and send them yourself.
               </p>
               <div className="why-highlight">
-                In practice, this is a decentralization of a service model that depends on opacity and dependency.
+                In practical terms, this removes the middleman and puts the process back in your hands.
               </div>
               <p className="why-closing">
                 If you can follow directions and go to the post office, you can use this.
@@ -875,141 +966,91 @@ export default function AboutPage() {
             </div>
             <div className="principles-grid">
               <div className="principle-card">
-                <div className="principle-icon">
-                  <Eye size={26} />
-                </div>
+                <div className="principle-icon"><Eye size={26} /></div>
                 <h3 className="principle-title">Radical Transparency</h3>
                 <p className="principle-desc">
                   Every template, every workflow, every piece of guidance is visible to you. 
-                  We don't hide the process behind a service layer. You see exactly what gets sent.
+                  We don't hide the process behind a service layer.
                 </p>
               </div>
               <div className="principle-card">
-                <div className="principle-icon">
-                  <Lock size={26} />
-                </div>
+                <div className="principle-icon"><Lock size={26} /></div>
                 <h3 className="principle-title">User Control</h3>
                 <p className="principle-desc">
                   You generate the documents. You review them. You send them. We never act on 
-                  your behalf or contact anyone for you. Your data stays yours.
+                  your behalf or contact anyone for you.
                 </p>
               </div>
               <div className="principle-card">
-                <div className="principle-icon">
-                  <Target size={26} />
-                </div>
+                <div className="principle-icon"><Target size={26} /></div>
                 <h3 className="principle-title">No False Promises</h3>
                 <p className="principle-desc">
-                  We don't guarantee outcomes. Results depend on your specific situation, the 
-                  accuracy of information on your reports, and your follow-through.
+                  We don't guarantee outcomes. Results depend on your specific situation and 
+                  your follow-through.
                 </p>
               </div>
               <div className="principle-card">
-                <div className="principle-icon">
-                  <Zap size={26} />
-                </div>
+                <div className="principle-icon"><Zap size={26} /></div>
                 <h3 className="principle-title">One-Time Pricing</h3>
                 <p className="principle-desc">
                   No subscriptions. No monthly fees. Pay once, use until you're done. The 
-                  dispute process has an endpoint — your pricing should too.
+                  dispute process has an endpoint.
                 </p>
               </div>
               <div className="principle-card">
-                <div className="principle-icon">
-                  <Scale size={26} />
-                </div>
+                <div className="principle-icon"><Scale size={26} /></div>
                 <h3 className="principle-title">Statute-Driven Design</h3>
                 <p className="principle-desc">
                   Every template references real federal law. FCRA §605B, §611, FDCPA §809. 
-                  The workflows are built around the actual legal framework.
+                  Built around the actual legal framework.
                 </p>
               </div>
               <div className="principle-card">
-                <div className="principle-icon">
-                  <Shield size={26} />
-                </div>
+                <div className="principle-icon"><Shield size={26} /></div>
                 <h3 className="principle-title">Privacy First</h3>
                 <p className="principle-desc">
                   Uploaded PDFs are processed in-memory and immediately discarded. We don't 
-                  store your credit reports. Your sensitive data never touches our servers.
+                  store your credit reports.
                 </p>
               </div>
             </div>
           </div>
         </section>
 
-        {/* What We Are vs Aren't */}
+        {/* What We Are / Aren't */}
         <section className="contrast-section">
           <div className="contrast-container">
             <div className="section-header">
               <div className="section-label">Clear Positioning</div>
               <h2 className="section-title">What We Are (and Aren't)</h2>
-              <p className="section-subtitle">
-                Understanding the difference matters.
-              </p>
+              <p className="section-subtitle">Understanding the difference matters.</p>
             </div>
             <div className="contrast-grid">
               <div className="contrast-card negative">
-                <div className="contrast-header">
-                  <X size={18} />
-                  We Are Not
-                </div>
+                <div className="contrast-header"><X size={18} /> We Are Not</div>
                 <ul className="contrast-list">
-                  <li>
-                    <X size={16} />
-                    <span>A credit repair organization</span>
-                  </li>
-                  <li>
-                    <X size={16} />
-                    <span>A law firm or legal service</span>
-                  </li>
-                  <li>
-                    <X size={16} />
-                    <span>A service that acts on your behalf</span>
-                  </li>
-                  <li>
-                    <X size={16} />
-                    <span>A subscription-based monthly fee</span>
-                  </li>
-                  <li>
-                    <X size={16} />
-                    <span>A guarantee of any specific outcome</span>
-                  </li>
+                  <li><X size={16} /><span>A credit repair organization</span></li>
+                  <li><X size={16} /><span>A law firm or legal service</span></li>
+                  <li><X size={16} /><span>A service that acts on your behalf</span></li>
+                  <li><X size={16} /><span>A subscription-based monthly fee</span></li>
+                  <li><X size={16} /><span>A guarantee of any specific outcome</span></li>
                 </ul>
               </div>
               <div className="contrast-card positive">
-                <div className="contrast-header">
-                  <CheckCircle2 size={18} />
-                  We Are
-                </div>
+                <div className="contrast-header"><CheckCircle2 size={18} /> We Are</div>
                 <ul className="contrast-list">
-                  <li>
-                    <CheckCircle2 size={16} />
-                    <span>Self-service document software</span>
-                  </li>
-                  <li>
-                    <CheckCircle2 size={16} />
-                    <span>Educational guidance on your rights</span>
-                  </li>
-                  <li>
-                    <CheckCircle2 size={16} />
-                    <span>Tools you control completely</span>
-                  </li>
-                  <li>
-                    <CheckCircle2 size={16} />
-                    <span>One-time purchase, use until done</span>
-                  </li>
-                  <li>
-                    <CheckCircle2 size={16} />
-                    <span>A transparent workflow organizer</span>
-                  </li>
+                  <li><CheckCircle2 size={16} /><span>Self-service document software</span></li>
+                  <li><CheckCircle2 size={16} /><span>Educational guidance on your rights</span></li>
+                  <li><CheckCircle2 size={16} /><span>Tools you control completely</span></li>
+                  <li><CheckCircle2 size={16} /><span>One-time purchase, use until done</span></li>
+                  <li><CheckCircle2 size={16} /><span>A transparent workflow organizer</span></li>
                 </ul>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Company Info */}
+        {/* Company */}
         <section className="company-section">
           <div className="company-container">
             <div className="company-logo">9</div>
@@ -1055,47 +1096,46 @@ export default function AboutPage() {
 
         {/* Footer */}
         <footer className="footer">
-          <div className="footer-main">
-            <div className="footer-brand">
-              <div className="footer-logo">605b<span className="logo-accent">.ai</span></div>
-              <p className="footer-tagline">Self-service software for credit dispute organization.</p>
+          <div className="footer-content">
+            <div className="footer-main">
+              <div className="footer-brand">
+                <div className="footer-logo">605b<span className="logo-accent">.ai</span></div>
+                <p className="footer-tagline">Self-service software for credit dispute organization.</p>
+              </div>
+              <div className="footer-links">
+                <div className="footer-column">
+                  <div className="footer-column-title">Product</div>
+                  <Link href="/sign-up" className="footer-link">Get Started</Link>
+                  <Link href="/#features" className="footer-link">Features</Link>
+                  <Link href="/pricing" className="footer-link">Pricing</Link>
+                </div>
+                <div className="footer-column">
+                  <div className="footer-column-title">Company</div>
+                  <Link href="/about" className="footer-link">About</Link>
+                  <Link href="/terms" className="footer-link">Terms of Service</Link>
+                  <Link href="/privacy" className="footer-link">Privacy Policy</Link>
+                </div>
+                <div className="footer-column">
+                  <div className="footer-column-title">Contact</div>
+                  <a href="mailto:support@9thwave.io" className="footer-link">support@9thwave.io</a>
+                </div>
+              </div>
             </div>
-            <div className="footer-links">
-              <div className="footer-column">
-                <div className="footer-column-title">Product</div>
-                <Link href="/sign-up" className="footer-link">Get Started</Link>
-                <Link href="/#features" className="footer-link">Features</Link>
-                <Link href="/#how-it-works" className="footer-link">How It Works</Link>
-                <Link href="/pricing" className="footer-link">Pricing</Link>
-              </div>
-              <div className="footer-column">
-                <div className="footer-column-title">Company</div>
-                <Link href="/about" className="footer-link">About</Link>
-                <Link href="/terms" className="footer-link">Terms of Service</Link>
-                <Link href="/privacy" className="footer-link">Privacy Policy</Link>
-              </div>
-              <div className="footer-column">
-                <div className="footer-column-title">Contact</div>
-                <a href="mailto:support@9thwave.io" className="footer-link">support@9thwave.io</a>
-              </div>
+            
+            <div className="footer-disclaimer">
+              <p className="disclaimer-text">
+                <strong>Important Disclaimer:</strong> 605b.ai provides software tools and educational guidance only. 
+                We are not a law firm, credit repair organization, or credit counseling service. We do not provide 
+                legal advice, credit repair services, or guarantees of any outcomes.
+              </p>
             </div>
-          </div>
-          
-          <div className="footer-disclaimer">
-            <p className="disclaimer-text">
-              <strong>Important Disclaimer:</strong> 605b.ai provides software tools and educational guidance only. 
-              We are not a law firm, credit repair organization, or credit counseling service. We do not provide 
-              legal advice, credit repair services, or guarantees of any outcomes. The information provided is 
-              for educational purposes and should not be construed as legal advice. Results depend entirely on 
-              individual circumstances. Consult with a qualified attorney for legal advice specific to your situation.
-            </p>
-          </div>
 
-          <div className="footer-bottom">
-            <div>© {new Date().getFullYear()} Ninth Wave Analytics LLC · Delaware, USA</div>
-            <div className="footer-bottom-links">
-              <Link href="/terms" className="footer-bottom-link">Terms</Link>
-              <Link href="/privacy" className="footer-bottom-link">Privacy</Link>
+            <div className="footer-bottom">
+              <div>© {new Date().getFullYear()} Ninth Wave Analytics LLC · Delaware, USA</div>
+              <div className="footer-bottom-links">
+                <Link href="/terms" className="footer-bottom-link">Terms</Link>
+                <Link href="/privacy" className="footer-bottom-link">Privacy</Link>
+              </div>
             </div>
           </div>
         </footer>

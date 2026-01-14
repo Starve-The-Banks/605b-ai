@@ -73,7 +73,7 @@ export default function SettingsPage() {
   );
 
   return (
-    <div style={{ maxWidth: '700px' }}>
+    <div style={{ width: '100%' }}>
       <div style={{ marginBottom: isMobile ? '24px' : '32px' }}>
         <h1 style={{ fontSize: isMobile ? '20px' : '24px', fontWeight: 600, marginBottom: '4px' }}>Settings</h1>
         <p style={{ fontSize: '14px', color: '#71717a' }}>

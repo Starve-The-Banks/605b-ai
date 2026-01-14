@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth, useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import {
@@ -9,6 +9,163 @@ import {
   ChevronDown, ChevronUp, HelpCircle, Eye, Sparkles,
   FileSearch, Lock, Plus, Menu
 } from 'lucide-react';
+
+// Triangle Particle Field Component
+function ParticleField() {
+  const canvasRef = useRef(null);
+  const mouseRef = useRef({ x: -1000, y: -1000 });
+  const particlesRef = useRef([]);
+  const animationRef = useRef(null);
+  const isMobileRef = useRef(false);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    let width = canvas.offsetWidth;
+    let height = canvas.offsetHeight;
+
+    const checkMobile = () => {
+      isMobileRef.current = window.innerWidth < 768;
+    };
+    checkMobile();
+
+    const setSize = () => {
+      checkMobile();
+      width = canvas.offsetWidth;
+      height = canvas.offsetHeight;
+      canvas.width = width * window.devicePixelRatio;
+      canvas.height = height * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      initParticles();
+    };
+
+    const initParticles = () => {
+      particlesRef.current = [];
+      const spacing = isMobileRef.current ? 45 : 35;
+      const cols = Math.ceil(width / spacing) + 1;
+      const rows = Math.ceil(height / spacing) + 1;
+
+      for (let i = 0; i < cols; i++) {
+        for (let j = 0; j < rows; j++) {
+          particlesRef.current.push({
+            x: i * spacing + (j % 2) * (spacing / 2),
+            y: j * spacing,
+            direction: (i + j) % 2 === 0 ? 1 : -1,
+          });
+        }
+      }
+    };
+
+    const drawTriangle = (x, y, size, direction, opacity) => {
+      ctx.beginPath();
+      if (direction === 1) {
+        ctx.moveTo(x - size * 0.5, y - size * 0.5);
+        ctx.lineTo(x + size * 0.5, y);
+        ctx.lineTo(x - size * 0.5, y + size * 0.5);
+      } else {
+        ctx.moveTo(x + size * 0.5, y - size * 0.5);
+        ctx.lineTo(x - size * 0.5, y);
+        ctx.lineTo(x + size * 0.5, y + size * 0.5);
+      }
+      ctx.closePath();
+      ctx.fillStyle = `rgba(247, 208, 71, ${opacity})`;
+      ctx.fill();
+    };
+
+    const animate = () => {
+      ctx.clearRect(0, 0, width, height);
+      const particles = particlesRef.current;
+      const isMobile = isMobileRef.current;
+      const maxDist = isMobile ? 180 : 250;
+      const minSize = 2;
+      const maxSize = isMobile ? 12 : 16;
+
+      particles.forEach((p) => {
+        const dx = mouseRef.current.x - p.x;
+        const dy = mouseRef.current.y - p.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        let size, opacity;
+        if (dist < maxDist) {
+          const proximity = 1 - (dist / maxDist);
+          size = minSize + (maxSize - minSize) * proximity;
+          opacity = 0.06 + 0.22 * proximity;
+        } else {
+          size = minSize;
+          opacity = 0.06;
+        }
+
+        drawTriangle(p.x, p.y, size, p.direction, opacity);
+      });
+
+      animationRef.current = requestAnimationFrame(animate);
+    };
+
+    const handleMouseMove = (e) => {
+      const rect = canvas.getBoundingClientRect();
+      mouseRef.current = {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      };
+    };
+
+    const handleMouseLeave = () => {
+      mouseRef.current = { x: -1000, y: -1000 };
+    };
+
+    const handleTouchMove = (e) => {
+      if (e.touches.length > 0) {
+        const rect = canvas.getBoundingClientRect();
+        const touch = e.touches[0];
+        mouseRef.current = {
+          x: touch.clientX - rect.left,
+          y: touch.clientY - rect.top,
+        };
+      }
+    };
+
+    const handleTouchEnd = () => {
+      mouseRef.current = { x: -1000, y: -1000 };
+    };
+
+    setSize();
+    animate();
+
+    window.addEventListener('resize', setSize);
+    canvas.addEventListener('mousemove', handleMouseMove);
+    canvas.addEventListener('mouseleave', handleMouseLeave);
+    canvas.addEventListener('touchmove', handleTouchMove, { passive: true });
+    canvas.addEventListener('touchend', handleTouchEnd);
+
+    return () => {
+      window.removeEventListener('resize', setSize);
+      canvas.removeEventListener('mousemove', handleMouseMove);
+      canvas.removeEventListener('mouseleave', handleMouseLeave);
+      canvas.removeEventListener('touchmove', handleTouchMove);
+      canvas.removeEventListener('touchend', handleTouchEnd);
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        pointerEvents: 'auto',
+        zIndex: 0,
+      }}
+    />
+  );
+}
 
 const TIERS = [
   {
@@ -122,6 +279,10 @@ const FAQS = [
   {
     q: 'Is this a subscription?',
     a: 'No. This is a one-time software license purchase. Pay once, use until your disputes are resolved. No recurring charges, no monthly fees.',
+  },
+  {
+    q: 'Do you offer refunds?',
+    a: 'No. All purchases are final. Because 605b.ai provides immediate access to digital software tools and documentation, refunds are not available once access is granted. We encourage users to review each tier carefully and use the free tier before purchasing.',
   },
   {
     q: 'What if I need more than my tier includes?',
@@ -1083,18 +1244,21 @@ export default function PricingPage() {
         </div>
 
         {/* Hero */}
-        <section className="hero">
-          <div className="hero-badge">
-            <Scale size={14} />
-            Software License · One-Time Purchase
+        <section className="hero" style={{ position: 'relative', overflow: 'hidden' }}>
+          <ParticleField />
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <div className="hero-badge">
+              <Scale size={14} />
+              Software License · One-Time Purchase
+            </div>
+            <h1 className="hero-title">Simple, transparent pricing</h1>
+            <p className="hero-subtitle">
+              One payment. Use until you're done. No subscriptions, no recurring fees, no surprises.
+            </p>
+            <p className="hero-note">
+              Start free to see your analysis. Upgrade when you're ready to act.
+            </p>
           </div>
-          <h1 className="hero-title">Simple, transparent pricing</h1>
-          <p className="hero-subtitle">
-            One payment. Use until you're done. No subscriptions, no recurring fees, no surprises.
-          </p>
-          <p className="hero-note">
-            Start free to see your analysis. Upgrade when you're ready to act.
-          </p>
         </section>
 
         {/* Important Disclosure - MOVED UP */}
@@ -1126,6 +1290,9 @@ export default function PricingPage() {
                 I understand this is self-service software, not a credit repair service.
               </span>
             </label>
+            <div style={{ marginTop: '12px', padding: '10px 14px', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '8px', fontSize: '13px', color: '#fca5a5' }}>
+              <strong>All sales are final.</strong> Access to digital software tools is granted immediately upon purchase.
+            </div>
             {showDisclaimerError && !disclaimerAccepted && (
               <div className="disclaimer-error">
                 <AlertTriangle size={14} />

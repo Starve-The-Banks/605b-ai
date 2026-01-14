@@ -66,7 +66,7 @@ export default function ProgressPage() {
   };
 
   return (
-    <div style={{ maxWidth: '1000px' }}>
+    <div style={{ width: '100%' }}>
       {/* Header */}
       <div style={{ marginBottom: isMobile ? '24px' : '32px' }}>
         <h1 style={{ fontSize: isMobile ? '20px' : '24px', fontWeight: 600, marginBottom: '4px' }}>

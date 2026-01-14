@@ -159,6 +159,12 @@ async function recordFailedGrant(redisClient, {
       await redisClient.lpush(`stripe:failed_grants:user:${userId}`, eventId);
     }
 
+    // Increment daily failure counter for observability
+    const today = new Date().toISOString().slice(0, 10);
+    const counterKey = `stripe:failed_grants:${today}`;
+    await redisClient.incr(counterKey);
+    await redisClient.expire(counterKey, 90 * 24 * 60 * 60); // 90 days TTL
+
     console.error(`[FAILED_GRANT] Recorded failed grant for event ${eventId}, user ${userId}, product ${productType}:${productId}`);
 
     return true;

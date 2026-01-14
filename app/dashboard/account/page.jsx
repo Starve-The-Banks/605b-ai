@@ -127,7 +127,7 @@ export default function AccountPage() {
   }
 
   return (
-    <div style={{ maxWidth: '800px' }}>
+    <div style={{ width: '100%' }}>
       <div style={{ marginBottom: '24px' }}>
         <h1 style={{ fontSize: '24px', fontWeight: 600, marginBottom: '4px' }}>Account & Plan</h1>
         <p style={{ fontSize: '14px', color: '#737373' }}>Manage your subscription and view usage</p>

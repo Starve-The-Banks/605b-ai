@@ -2,6 +2,11 @@ import Anthropic from "@anthropic-ai/sdk";
 import { auth } from '@clerk/nextjs/server';
 import { rateLimit, LIMITS } from '@/lib/rateLimit';
 
+// File upload limits
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB per file
+const MAX_FILES = 3;
+const ALLOWED_MIME_TYPES = ['application/pdf'];
+
 export async function POST(req) {
   try {
     // Require authentication
@@ -37,6 +42,37 @@ export async function POST(req) {
         status: 400,
         headers: { 'Content-Type': 'application/json' }
       });
+    }
+
+    // Validate file count
+    if (files.length > MAX_FILES) {
+      return new Response(JSON.stringify({ error: `Maximum ${MAX_FILES} files allowed per analysis` }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Validate each file
+    for (const file of files) {
+      // Check file size
+      if (file.size > MAX_FILE_SIZE) {
+        return new Response(JSON.stringify({
+          error: `File "${file.name}" exceeds maximum size of ${MAX_FILE_SIZE / (1024 * 1024)}MB`
+        }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      // Check MIME type
+      if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+        return new Response(JSON.stringify({
+          error: `File "${file.name}" is not a valid PDF. Only PDF files are accepted.`
+        }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
     }
 
     if (!process.env.ANTHROPIC_API_KEY) {

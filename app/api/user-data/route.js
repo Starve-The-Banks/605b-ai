@@ -12,6 +12,11 @@ function getRedis() {
   return redis;
 }
 
+// Limits to prevent abuse
+const MAX_DISPUTES = 100;
+const MAX_AUDIT_LOG = 1000;
+const MAX_FLAGGED_ITEMS = 500;
+
 // Get user data
 export async function GET() {
   try {
@@ -30,7 +35,6 @@ export async function GET() {
       flaggedItems: data?.flaggedItems || []
     });
   } catch (error) {
-    console.error('Error fetching user data:', error);
     return NextResponse.json({ error: 'Failed to fetch data' }, { status: 500 });
   }
 }
@@ -46,18 +50,27 @@ export async function POST(request) {
 
     const redisClient = getRedis();
     const body = await request.json();
-    const { disputes, auditLog, flaggedItems } = body;
+    let { disputes, auditLog, flaggedItems } = body;
+
+    // Validate and truncate arrays to prevent abuse
+    if (!Array.isArray(disputes)) disputes = [];
+    if (!Array.isArray(auditLog)) auditLog = [];
+    if (!Array.isArray(flaggedItems)) flaggedItems = [];
+
+    // Enforce limits (keep most recent)
+    disputes = disputes.slice(-MAX_DISPUTES);
+    auditLog = auditLog.slice(-MAX_AUDIT_LOG);
+    flaggedItems = flaggedItems.slice(-MAX_FLAGGED_ITEMS);
 
     await redisClient.set(`user:${userId}:data`, {
-      disputes: disputes || [],
-      auditLog: auditLog || [],
-      flaggedItems: flaggedItems || [],
+      disputes,
+      auditLog,
+      flaggedItems,
       updatedAt: new Date().toISOString()
     });
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error saving user data:', error);
     return NextResponse.json({ error: 'Failed to save data' }, { status: 500 });
   }
 }

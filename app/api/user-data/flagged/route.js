@@ -12,6 +12,10 @@ function getRedis() {
   return redis;
 }
 
+// Limits to prevent abuse
+const MAX_FLAGGED_ITEMS = 500;
+const MAX_ITEMS_PER_REQUEST = 100;
+
 // Get flagged items
 export async function GET() {
   try {
@@ -24,7 +28,6 @@ export async function GET() {
     const flaggedItems = await redisClient.get(`user:${userId}:flagged`) || [];
     return NextResponse.json({ flaggedItems });
   } catch (error) {
-    console.error('Error fetching flagged items:', error);
     return NextResponse.json({ error: 'Failed to fetch flagged items' }, { status: 500 });
   }
 }
@@ -42,14 +45,22 @@ export async function POST(request) {
 
     // Save findings from PDF analysis (replace all)
     if (action === 'save' && items) {
-      const flaggedItems = items.map((item, index) => ({
+      // Validate items is an array and limit size
+      if (!Array.isArray(items)) {
+        return NextResponse.json({ error: 'Items must be an array' }, { status: 400 });
+      }
+
+      // Limit items to prevent abuse
+      const limitedItems = items.slice(0, MAX_ITEMS_PER_REQUEST);
+
+      const flaggedItems = limitedItems.map((item, index) => ({
         ...item,
         id: item.id || `flagged-${Date.now()}-${index}`,
         status: 'pending',
         createdAt: new Date().toISOString(),
       }));
-      
-      await redisClient.set(`user:${userId}:flagged`, flaggedItems);
+
+      await redisClient.set(`user:${userId}:flagged`, flaggedItems.slice(0, MAX_FLAGGED_ITEMS));
       
       await appendAuditLog(redisClient, userId, {
         action: 'upload_report',
@@ -62,15 +73,24 @@ export async function POST(request) {
 
     // Add new findings (append)
     if (action === 'add' && items) {
+      // Validate items is an array and limit size
+      if (!Array.isArray(items)) {
+        return NextResponse.json({ error: 'Items must be an array' }, { status: 400 });
+      }
+
+      // Limit items to prevent abuse
+      const limitedItems = items.slice(0, MAX_ITEMS_PER_REQUEST);
+
       const existing = await redisClient.get(`user:${userId}:flagged`) || [];
-      const newItems = items.map((item, index) => ({
+      const newItems = limitedItems.map((item, index) => ({
         ...item,
         id: item.id || `flagged-${Date.now()}-${index}`,
         status: 'pending',
         createdAt: new Date().toISOString(),
       }));
-      
-      const updated = [...existing, ...newItems];
+
+      // Enforce max limit
+      const updated = [...existing, ...newItems].slice(-MAX_FLAGGED_ITEMS);
       await redisClient.set(`user:${userId}:flagged`, updated);
       
       return NextResponse.json({ success: true, flaggedItems: updated });
@@ -121,7 +141,6 @@ export async function POST(request) {
 
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
   } catch (error) {
-    console.error('Error managing flagged items:', error);
     return NextResponse.json({ error: 'Failed to manage flagged items' }, { status: 500 });
   }
 }

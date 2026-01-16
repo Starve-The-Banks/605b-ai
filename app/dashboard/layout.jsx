@@ -8,6 +8,7 @@ import {
   Search, Sparkles, FileText, Clock, Flag, FileCheck,
   ChevronLeft, ChevronRight, LogOut, Settings, User, ChevronUp, TrendingUp, Bell, Menu, X, Lock, Crown
 } from 'lucide-react';
+import Image from 'next/image';
 import OnboardingWizard from './components/OnboardingWizard';
 import { useUserTier, AccessRestrictionBanner } from '@/lib/useUserTier';
 
@@ -152,19 +153,12 @@ export default function DashboardLayout({ children }) {
     <>
       <div style={{ padding: '20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{
-            width: '32px',
-            height: '32px',
-            background: 'var(--orange)',
-            borderRadius: '8px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontFamily: "'JetBrains Mono', monospace",
-            fontSize: '10px',
-            fontWeight: 700,
-            color: 'white',
-          }}>605B</div>
+          <Image
+            src="/logos/secondary/605b-chevron-cursor.svg"
+            alt="605b"
+            width={24}
+            height={24}
+          />
           <span style={{ fontSize: '16px', fontWeight: 600 }}>605b.ai</span>
         </div>
         {isMobile && (
@@ -453,19 +447,12 @@ export default function DashboardLayout({ children }) {
               <Menu size={24} />
             </button>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{
-                width: '24px',
-                height: '24px',
-                background: 'var(--orange)',
-                borderRadius: '6px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontFamily: "'JetBrains Mono', monospace",
-                fontSize: '8px',
-                fontWeight: 700,
-                color: 'white',
-              }}>605B</div>
+              <Image
+                src="/logos/secondary/605b-chevron-cursor.svg"
+                alt="605b"
+                width={24}
+                height={24}
+              />
               <span style={{ fontSize: '16px', fontWeight: 600 }}>605b.ai</span>
             </div>
             <div style={{ width: '40px' }} />

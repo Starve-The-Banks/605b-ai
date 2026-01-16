@@ -319,9 +319,9 @@ export default function LandingPage() {
         .nav-link {
           color: var(--text-secondary);
           text-decoration: none;
-          font-size: 14px;
+          font-size: 15px;
           font-weight: 500;
-          padding: 8px 16px;
+          padding: 10px 18px;
           border-radius: 6px;
           transition: all 0.2s;
           position: relative;

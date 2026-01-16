@@ -1,0 +1,20 @@
+{
+  "name": "605b.ai",
+  "short_name": "605b.ai",
+  "description": "Credit and identity theft remediation assistant",
+  "icons": [
+    {
+      "src": "/logos/favicons/favicon-32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/logos/favicons/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "theme_color": "#FF6B35",
+  "background_color": "#0C0C0C",
+  "display": "standalone"
+}

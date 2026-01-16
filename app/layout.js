@@ -10,6 +10,15 @@ export const metadata = {
     description: 'Generate compliant documentation, track statutory timelines, and maintain a complete audit trail.',
     type: 'website',
   },
+  icons: {
+    icon: [
+      { url: '/logos/favicons/favicon.svg', type: 'image/svg+xml' },
+      { url: '/logos/favicons/favicon-32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/logos/favicons/favicon-16.png', sizes: '16x16', type: 'image/png' },
+    ],
+    apple: '/logos/favicons/favicon.svg',
+  },
+  manifest: '/site.webmanifest',
 };
 
 export const viewport = {

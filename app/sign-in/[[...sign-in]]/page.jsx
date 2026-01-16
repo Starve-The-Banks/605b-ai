@@ -2,6 +2,7 @@
 
 import { SignIn } from "@clerk/nextjs";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function SignInPage() {
   return (
@@ -134,8 +135,13 @@ export default function SignInPage() {
 
         <nav className="auth-nav">
           <Link href="/" className="auth-logo">
-            <div className="auth-logo-mark">605B</div>
-            <span className="auth-logo-text">605b.ai</span>
+            <Image
+              src="/logos/primary/605b-bracket-box.svg"
+              alt="605b.ai"
+              width={120}
+              height={32}
+              priority
+            />
           </Link>
           <Link href="/sign-up" className="auth-nav-link">Sign Up</Link>
         </nav>

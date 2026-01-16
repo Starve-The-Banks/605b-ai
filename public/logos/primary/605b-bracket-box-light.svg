@@ -1,0 +1,6 @@
+<svg width="120" height="32" viewBox="0 0 120 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="1" y="1" width="30" height="30" rx="4" stroke="#FF6B35" stroke-width="2.5" fill="none"/>
+  <text x="16" y="22" font-family="JetBrains Mono, monospace" font-size="14" font-weight="700" fill="#FF6B35" text-anchor="middle">&#167;</text>
+  <text x="40" y="22" font-family="IBM Plex Sans, sans-serif" font-size="18" font-weight="600" fill="#0C0C0C" letter-spacing="-0.5">605b</text>
+  <text x="89" y="22" font-family="IBM Plex Sans, sans-serif" font-size="18" font-weight="600" fill="#FF6B35" letter-spacing="-0.5">.ai</text>
+</svg>

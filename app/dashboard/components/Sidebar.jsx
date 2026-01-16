@@ -1,6 +1,7 @@
 "use client";
 
 import { X } from 'lucide-react';
+import Image from 'next/image';
 
 export default function Sidebar({ 
   tabs, 
@@ -348,6 +349,12 @@ export default function Sidebar({
       <aside className={`sidebar ${mobileOpen ? 'open' : ''}`}>
         <div className="logo-area">
           <div className="logo">
+            <Image
+              src="/logos/secondary/605b-chevron-cursor.svg"
+              alt="605b"
+              width={24}
+              height={24}
+            />
             <span className="logo-text">605b</span>
             <span className="logo-accent">.ai</span>
             <span className="logo-badge">BETA</span>

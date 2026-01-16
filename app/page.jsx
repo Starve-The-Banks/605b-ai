@@ -1,6 +1,7 @@
 "use client";
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAuth } from '@clerk/nextjs';
 import { useState, useEffect, useRef } from 'react';
 
@@ -1063,8 +1064,13 @@ export default function LandingPage() {
         {/* Navigation */}
         <nav>
           <Link href="/" className="logo">
-            <div className="logo-mark">605B</div>
-            <span className="logo-text">605b.ai</span>
+            <Image
+              src="/logos/primary/605b-bracket-box.svg"
+              alt="605b.ai"
+              width={120}
+              height={32}
+              priority
+            />
           </Link>
 
           <div className="nav-center">
@@ -1098,8 +1104,12 @@ export default function LandingPage() {
         <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
           <div className="mobile-menu-header">
             <Link href="/" className="logo">
-              <div className="logo-mark">605B</div>
-              <span className="logo-text">605b.ai</span>
+              <Image
+                src="/logos/primary/605b-bracket-box.svg"
+                alt="605b.ai"
+                width={120}
+                height={32}
+              />
             </Link>
             <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(false)}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -1236,8 +1246,12 @@ export default function LandingPage() {
         <footer>
           <div className="footer-inner">
             <Link href="/" className="logo">
-              <div className="logo-mark">605B</div>
-              <span className="logo-text">605b.ai</span>
+              <Image
+                src="/logos/primary/605b-bracket-box.svg"
+                alt="605b.ai"
+                width={120}
+                height={32}
+              />
             </Link>
 
             <div className="footer-links">

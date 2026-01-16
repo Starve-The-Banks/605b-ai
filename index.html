@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>605b.ai Brand Assets</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            background: #0C0C0C;
+            color: #FAFAFA;
+            padding: 60px 40px;
+            min-height: 100vh;
+        }
+        
+        h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 48px;
+        }
+        
+        h2 {
+            font-size: 13px;
+            font-weight: 600;
+            color: #FF6B35;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin: 48px 0 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #2A2A2A;
+        }
+        
+        h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #A0A0A0;
+            margin: 32px 0 16px;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        .card {
+            background: #141414;
+            border: 1px solid #2A2A2A;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .card-display {
+            padding: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100px;
+        }
+        
+        .card-display.dark {
+            background: #0C0C0C;
+        }
+        
+        .card-display.light {
+            background: #FAFAFA;
+        }
+        
+        .card-display.checker {
+            background: repeating-conic-gradient(#2A2A2A 0% 25%, #1A1A1A 0% 50%) 50% / 16px 16px;
+        }
+        
+        .card-info {
+            padding: 16px;
+            border-top: 1px solid #2A2A2A;
+        }
+        
+        .card-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #FAFAFA;
+        }
+        
+        .card-file {
+            font-size: 11px;
+            font-family: 'JetBrains Mono', monospace;
+            color: #666;
+            margin-top: 4px;
+        }
+        
+        .usage-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+        }
+        
+        .usage-table th,
+        .usage-table td {
+            text-align: left;
+            padding: 12px 16px;
+            border-bottom: 1px solid #2A2A2A;
+        }
+        
+        .usage-table th {
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .usage-table td {
+            font-size: 14px;
+        }
+        
+        .usage-table code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            background: #1A1A1A;
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: #FF6B35;
+        }
+        
+        .color-swatch {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .color-box {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            border: 1px solid #2A2A2A;
+        }
+        
+        .folder-tree {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            background: #141414;
+            border: 1px solid #2A2A2A;
+            border-radius: 8px;
+            padding: 20px 24px;
+            line-height: 1.8;
+            color: #A0A0A0;
+        }
+        
+        .folder-tree .folder {
+            color: #FF6B35;
+        }
+        
+        .folder-tree .file {
+            color: #666;
+        }
+        
+        .favicons-row {
+            display: flex;
+            align-items: end;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+        
+        .favicon-item {
+            text-align: center;
+        }
+        
+        .favicon-item img {
+            display: block;
+            margin-bottom: 8px;
+        }
+        
+        .favicon-item .size {
+            font-size: 11px;
+            font-family: 'JetBrains Mono', monospace;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>605b.ai Brand Assets</h1>
+    <p class="subtitle">Official logo package for production use</p>
+
+    <!-- USAGE RULES -->
+    <h2>Usage Rules</h2>
+    <table class="usage-table">
+        <tr>
+            <th>Context</th>
+            <th>Logo</th>
+            <th>File</th>
+        </tr>
+        <tr>
+            <td>Marketing site header</td>
+            <td>Primary — Bracket Box</td>
+            <td><code>primary/svg/logo-navbar.svg</code></td>
+        </tr>
+        <tr>
+            <td>Dashboard / Product UI</td>
+            <td>Secondary — Chevron Cursor</td>
+            <td><code>secondary/svg/logo-navbar.svg</code></td>
+        </tr>
+        <tr>
+            <td>Documents / PDFs / Exports</td>
+            <td>Primary full or icon-only</td>
+            <td><code>primary/svg/logo-full.svg</code></td>
+        </tr>
+        <tr>
+            <td>Favicon</td>
+            <td>Primary icon-only</td>
+            <td><code>favicons/favicon.svg</code></td>
+        </tr>
+        <tr>
+            <td>App Icon / PWA</td>
+            <td>Primary square</td>
+            <td><code>primary/svg/icon-square.svg</code></td>
+        </tr>
+    </table>
+
+    <!-- PRIMARY LOGO -->
+    <h2>Primary Logo — Bracket Box</h2>
+    <p style="color: #A0A0A0; margin-bottom: 24px;">Use on marketing site, documents, and external communications.</p>
+    
+    <h3>Full Logo</h3>
+    <div class="grid">
+        <div class="card">
+            <div class="card-display dark">
+                <svg width="160" height="48" viewBox="0 0 160 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2" y="8" width="36" height="32" rx="4" fill="none" stroke="#FF6B35" stroke-width="2.5"/>
+                    <text x="20" y="30" font-family="JetBrains Mono, monospace" font-size="16" font-weight="700" fill="#FF6B35" text-anchor="middle">§</text>
+                    <text x="50" y="32" font-family="IBM Plex Sans, sans-serif" font-size="24" font-weight="600" fill="#FAFAFA" letter-spacing="-0.5">605b</text>
+                    <text x="114" y="32" font-family="IBM Plex Sans, sans-serif" font-size="24" font-weight="600" fill="#FF6B35" letter-spacing="-0.5">.ai</text>
+                </svg>
+            </div>
+            <div class="card-info">
+                <div class="card-name">Dark Background</div>
+                <div class="card-file">logo-full-dark-bg.svg</div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-display light">
+                <svg width="160" height="48" viewBox="0 0 160 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2" y="8" width="36" height="32" rx="4" fill="none" stroke="#FF6B35" stroke-width="2.5"/>
+                    <text x="20" y="30" font-family="JetBrains Mono, monospace" font-size="16" font-weight="700" fill="#FF6B35" text-anchor="middle">§</text>
+                    <text x="50" y="32" font-family="IBM Plex Sans, sans-serif" font-size="24" font-weight="600" fill="#0C0C0C" letter-spacing="-0.5">605b</text>
+                    <text x="114" y="32" font-family="IBM Plex Sans, sans-serif" font-size="24" font-weight="600" fill="#FF6B35" letter-spacing="-0.5">.ai</text>
+                </svg>
+            </div>
+            <div class="card-info">
+                <div class="card-name">Light Background</div>
+                <div class="card-file">logo-full-light-bg.svg</div>
+            </div>
+        </div>
+    </div>
+
+    <h3>Monochrome</h3>
+    <div class="grid">
+        <div class="card">
+            <div class="card-display dark">
+                <svg width="160" height="48" viewBox="0 0 160 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2" y="8" width="36" height="32" rx="4" fill="none" stroke="#FFFFFF" stroke-width="2.5"/>
+                    <text x="20" y="30" font-family="JetBrains Mono, monospace" font-size="16" font-weight="700" fill="#FFFFFF" text-anchor="middle">§</text>
+                    <text x="50" y="32" font-family="IBM Plex Sans, sans-serif" font-size="24" font-weight="600" fill="#FFFFFF" letter-spacing="-0.5">605b</text>
+                    <text x="114" y="32" font-family="IBM Plex Sans, sans-serif" font-size="24" font-weight="600" fill="#FFFFFF" letter-spacing="-0.5">.ai</text>
+                </svg>
+            </div>
+            <div class="card-info">
+                <div class="card-name">Mono White</div>
+                <div class="card-file">logo-mono-white.svg</div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-display light">
+                <svg width="160" height="48" viewBox="0 0 160 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2" y="8" width="36" height="32" rx="4" fill="none" stroke="#0C0C0C" stroke-width="2.5"/>
+                    <text x="20" y="30" font-family="JetBrains Mono, monospace" font-size="16" font-weight="700" fill="#0C0C0C" text-anchor="middle">§</text>
+                    <text x="50" y="32" font-family="IBM Plex Sans, sans-serif" font-size="24" font-weight="600" fill="#0C0C0C" letter-spacing="-0.5">605b</text>
+                    <text x="114" y="32" font-family="IBM Plex Sans, sans-serif" font-size="24" font-weight="600" fill="#0C0C0C" letter-spacing="-0.5">.ai</text>
+                </svg>
+            </div>
+            <div class="card-info">
+                <div class="card-name">Mono Black</div>
+                <div class="card-file">logo-mono-black.svg</div>
+            </div>
+        </div>
+    </div>
+
+    <h3>Icon Only</h3>
+    <div class="grid">
+        <div class="card">
+            <div class="card-display checker">
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2" y="2" width="36" height="36" rx="4" fill="none" stroke="#FF6B35" stroke-width="2.5"/>
+                    <text x="20" y="26" font-family="JetBrains Mono, monospace" font-size="16" font-weight="700" fill="#FF6B35" text-anchor="middle">§</text>
+                </svg>
+            </div>
+            <div class="card-info">
+                <div class="card-name">Icon Only</div>
+                <div class="card-file">icon-only.svg</div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-display dark">
+                <svg width="80" height="80" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="512" height="512" fill="#0C0C0C"/>
+                    <rect x="106" y="106" width="300" height="300" rx="32" fill="none" stroke="#FF6B35" stroke-width="20"/>
+                    <text x="256" y="285" font-family="JetBrains Mono, monospace" font-size="140" font-weight="700" fill="#FF6B35" text-anchor="middle">§</text>
+                </svg>
+            </div>
+            <div class="card-info">
+                <div class="card-name">Square (App/PWA)</div>
+                <div class="card-file">icon-square.svg</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECONDARY LOGO -->
+    <h2>Secondary Logo — Chevron Cursor</h2>
+    <p style="color: #A0A0A0; margin-bottom: 24px;">Use in dashboard, product UI, and authenticated areas.</p>
+    
+    <h3>Full Logo</h3>
+    <div class="grid">
+        <div class="card">
+            <div class="card-display dark">
+                <svg width="150" height="48" viewBox="0 0 150 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <text x="0" y="33" font-family="JetBrains Mono, monospace" font-size="26" font-weight="700" fill="#FF6B35">&gt;</text>
+                    <text x="22" y="33" font-family="IBM Plex Sans, sans-serif" font-size="26" font-weight="600" fill="#FAFAFA" letter-spacing="-0.5">605b</text>
+                    <text x="92" y="33" font-family="IBM Plex Sans, sans-serif" font-size="26" font-weight="600" fill="#FF6B35" letter-spacing="-0.5">.ai</text>
+                </svg>
+            </div>
+            <div class="card-info">
+                <div class="card-name">Dark Background</div>
+                <div class="card-file">logo-full-dark-bg.svg</div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-display light">
+                <svg width="150" height="48" viewBox="0 0 150 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <text x="0" y="33" font-family="JetBrains Mono, monospace" font-size="26" font-weight="700" fill="#FF6B35">&gt;</text>
+                    <text x="22" y="33" font-family="IBM Plex Sans, sans-serif" font-size="26" font-weight="600" fill="#0C0C0C" letter-spacing="-0.5">605b</text>
+                    <text x="92" y="33" font-family="IBM Plex Sans, sans-serif" font-size="26" font-weight="600" fill="#FF6B35" letter-spacing="-0.5">.ai</text>
+                </svg>
+            </div>
+            <div class="card-info">
+                <div class="card-name">Light Background</div>
+                <div class="card-file">logo-full-light-bg.svg</div>
+            </div>
+        </div>
+    </div>
+
+    <h3>Monochrome</h3>
+    <div class="grid">
+        <div class="card">
+            <div class="card-display dark">
+                <svg width="150" height="48" viewBox="0 0 150 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <text x="0" y="33" font-family="JetBrains Mono, monospace" font-size="26" font-weight="700" fill="#FFFFFF">&gt;</text>
+                    <text x="22" y="33" font-family="IBM Plex Sans, sans-serif" font-size="26" font-weight="600" fill="#FFFFFF" letter-spacing="-0.5">605b</text>
+                    <text x="92" y="33" font-family="IBM Plex Sans, sans-serif" font-size="26" font-weight="600" fill="#FFFFFF" letter-spacing="-0.5">.ai</text>
+                </svg>
+            </div>
+            <div class="card-info">
+                <div class="card-name">Mono White</div>
+                <div class="card-file">logo-mono-white.svg</div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-display light">
+                <svg width="150" height="48" viewBox="0 0 150 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <text x="0" y="33" font-family="JetBrains Mono, monospace" font-size="26" font-weight="700" fill="#0C0C0C">&gt;</text>
+                    <text x="22" y="33" font-family="IBM Plex Sans, sans-serif" font-size="26" font-weight="600" fill="#0C0C0C" letter-spacing="-0.5">605b</text>
+                    <text x="92" y="33" font-family="IBM Plex Sans, sans-serif" font-size="26" font-weight="600" fill="#0C0C0C" letter-spacing="-0.5">.ai</text>
+                </svg>
+            </div>
+            <div class="card-info">
+                <div class="card-name">Mono Black</div>
+                <div class="card-file">logo-mono-black.svg</div>
+            </div>
+        </div>
+    </div>
+
+    <h3>Icon Only</h3>
+    <div class="grid">
+        <div class="card">
+            <div class="card-display checker">
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <text x="20" y="28" font-family="JetBrains Mono, monospace" font-size="28" font-weight="700" fill="#FF6B35" text-anchor="middle">&gt;</text>
+                </svg>
+            </div>
+            <div class="card-info">
+                <div class="card-name">Icon Only</div>
+                <div class="card-file">icon-only.svg</div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-display dark">
+                <svg width="80" height="80" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="512" height="512" rx="64" fill="#0C0C0C"/>
+                    <text x="256" y="310" font-family="JetBrains Mono, monospace" font-size="200" font-weight="700" fill="#FF6B35" text-anchor="middle">&gt;</text>
+                </svg>
+            </div>
+            <div class="card-info">
+                <div class="card-name">Square (Dashboard)</div>
+                <div class="card-file">icon-square.svg</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAVICONS -->
+    <h2>Favicons</h2>
+    <div class="card" style="padding: 32px;">
+        <div class="favicons-row">
+            <div class="favicon-item">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="16" height="16" rx="2" fill="#0C0C0C"/>
+                    <rect x="2" y="2" width="12" height="12" rx="1.5" fill="none" stroke="#FF6B35" stroke-width="1.5"/>
+                    <text x="8" y="11" font-family="sans-serif" font-size="7" font-weight="700" fill="#FF6B35" text-anchor="middle">§</text>
+                </svg>
+                <div class="size">16×16</div>
+            </div>
+            <div class="favicon-item">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="32" height="32" rx="4" fill="#0C0C0C"/>
+                    <rect x="4" y="4" width="24" height="24" rx="3" fill="none" stroke="#FF6B35" stroke-width="2"/>
+                    <text x="16" y="21" font-family="sans-serif" font-size="12" font-weight="700" fill="#FF6B35" text-anchor="middle">§</text>
+                </svg>
+                <div class="size">32×32</div>
+            </div>
+            <div class="favicon-item">
+                <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="48" height="48" rx="6" fill="#0C0C0C"/>
+                    <rect x="6" y="6" width="36" height="36" rx="4" fill="none" stroke="#FF6B35" stroke-width="2.5"/>
+                    <text x="24" y="30" font-family="sans-serif" font-size="16" font-weight="700" fill="#FF6B35" text-anchor="middle">§</text>
+                </svg>
+                <div class="size">48×48</div>
+            </div>
+            <div class="favicon-item">
+                <svg width="64" height="64" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="180" height="180" rx="40" fill="#0C0C0C"/>
+                    <rect x="30" y="30" width="120" height="120" rx="12" fill="none" stroke="#FF6B35" stroke-width="8"/>
+                    <text x="90" y="105" font-family="sans-serif" font-size="50" font-weight="700" fill="#FF6B35" text-anchor="middle">§</text>
+                </svg>
+                <div class="size">Apple Touch</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BRAND COLORS -->
+    <h2>Brand Colors</h2>
+    <table class="usage-table">
+        <tr>
+            <th>Name</th>
+            <th>Hex</th>
+            <th>Usage</th>
+        </tr>
+        <tr>
+            <td><span class="color-swatch"><span class="color-box" style="background: #FF6B35;"></span> Orange</span></td>
+            <td><code>#FF6B35</code></td>
+            <td>Primary accent, CTAs, logo elements</td>
+        </tr>
+        <tr>
+            <td><span class="color-swatch"><span class="color-box" style="background: #0C0C0C;"></span> Background</span></td>
+            <td><code>#0C0C0C</code></td>
+            <td>Primary background</td>
+        </tr>
+        <tr>
+            <td><span class="color-swatch"><span class="color-box" style="background: #FAFAFA;"></span> Text</span></td>
+            <td><code>#FAFAFA</code></td>
+            <td>Primary text on dark</td>
+        </tr>
+        <tr>
+            <td><span class="color-swatch"><span class="color-box" style="background: #A0A0A0;"></span> Secondary</span></td>
+            <td><code>#A0A0A0</code></td>
+            <td>Secondary text</td>
+        </tr>
+    </table>
+
+    <!-- FOLDER STRUCTURE -->
+    <h2>Folder Structure</h2>
+    <div class="folder-tree">
+<span class="folder">brand-assets/</span>
+├── <span class="folder">primary/</span>
+│   ├── <span class="folder">svg/</span>
+│   │   ├── <span class="file">logo-full.svg</span>
+│   │   ├── <span class="file">logo-full-dark-bg.svg</span>
+│   │   ├── <span class="file">logo-full-light-bg.svg</span>
+│   │   ├── <span class="file">logo-mono-white.svg</span>
+│   │   ├── <span class="file">logo-mono-black.svg</span>
+│   │   ├── <span class="file">logo-navbar.svg</span>
+│   │   ├── <span class="file">icon-only.svg</span>
+│   │   ├── <span class="file">icon-square.svg</span>
+│   │   ├── <span class="file">icon-mono-white.svg</span>
+│   │   └── <span class="file">icon-mono-black.svg</span>
+│   └── <span class="folder">png/</span>
+│       └── <span class="file">[all variants @1x, @2x, @3x]</span>
+├── <span class="folder">secondary/</span>
+│   ├── <span class="folder">svg/</span>
+│   │   └── <span class="file">[same structure as primary]</span>
+│   └── <span class="folder">png/</span>
+│       └── <span class="file">[all variants @1x, @2x, @3x]</span>
+└── <span class="folder">favicons/</span>
+    ├── <span class="file">favicon.svg</span>
+    ├── <span class="file">favicon-16.svg / .png</span>
+    ├── <span class="file">favicon-32.svg / .png</span>
+    ├── <span class="file">favicon-48.svg / .png</span>
+    ├── <span class="file">apple-touch-icon.svg / .png</span>
+    ├── <span class="file">android-chrome-192.svg / .png</span>
+    └── <span class="file">android-chrome-512.svg / .png</span>
+    </div>
+
+</body>
+</html>

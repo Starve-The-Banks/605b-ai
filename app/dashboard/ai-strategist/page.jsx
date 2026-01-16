@@ -55,7 +55,7 @@ export default function AIStrategistPage() {
   if (tierLoading) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '400px' }}>
-        <Loader2 size={24} style={{ animation: 'spin 1s linear infinite', color: '#f7d047' }} />
+        <Loader2 size={24} style={{ animation: 'spin 1s linear infinite', color: 'var(--orange)' }} />
       </div>
     );
   }
@@ -408,10 +408,10 @@ export default function AIStrategistPage() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'linear-gradient(135deg, rgba(247, 208, 71, 0.2) 0%, rgba(247, 208, 71, 0.05) 100%)',
-      border: '1px solid rgba(247, 208, 71, 0.3)',
+      background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.2) 0%, rgba(255, 107, 53, 0.05) 100%)',
+      border: '1px solid rgba(255, 107, 53, 0.3)',
       borderRadius: isMobile ? '12px' : '16px',
-      color: '#f7d047',
+      color: 'var(--orange)',
       flexShrink: 0,
     },
     introTitle: {
@@ -422,13 +422,13 @@ export default function AIStrategistPage() {
     },
     introSubtitle: {
       fontSize: isMobile ? '11px' : '13px',
-      color: '#71717a',
+      color: 'var(--text-muted)',
       letterSpacing: '0.02em',
     },
     introText: {
       fontSize: isMobile ? '14px' : '15px',
       lineHeight: 1.8,
-      color: '#a1a1aa',
+      color: 'var(--text-secondary)',
       whiteSpace: 'pre-wrap',
     },
     quickStarts: {
@@ -443,9 +443,9 @@ export default function AIStrategistPage() {
       gap: '12px',
       padding: isMobile ? '12px 14px' : '14px 16px',
       background: 'rgba(24, 24, 27, 0.8)',
-      border: '1px solid #27272a',
+      border: '1px solid var(--border)',
       borderRadius: '12px',
-      color: '#a1a1aa',
+      color: 'var(--text-secondary)',
       fontSize: isMobile ? '13px' : '14px',
       cursor: 'pointer',
       textAlign: 'left',
@@ -457,7 +457,7 @@ export default function AIStrategistPage() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: '#27272a',
+      background: 'var(--border)',
       borderRadius: '10px',
       flexShrink: 0,
     },
@@ -480,8 +480,8 @@ export default function AIStrategistPage() {
       fontSize: isMobile ? '14px' : '15px',
       lineHeight: 1.7,
       whiteSpace: 'pre-wrap',
-      background: 'linear-gradient(135deg, #f7d047 0%, #d4b840 100%)',
-      color: '#09090b',
+      background: 'var(--orange)',
+      color: 'white',
       borderBottomRightRadius: '4px',
     },
     assistantMsgContent: {
@@ -491,7 +491,7 @@ export default function AIStrategistPage() {
       lineHeight: 1.7,
       whiteSpace: 'pre-wrap',
       background: '#18181b',
-      border: '1px solid #27272a',
+      border: '1px solid var(--border)',
       color: '#e4e4e7',
       borderBottomLeftRadius: '4px',
     },
@@ -519,7 +519,7 @@ export default function AIStrategistPage() {
       alignItems: 'flex-end',
       gap: '8px',
       background: 'linear-gradient(135deg, rgba(24, 24, 27, 0.9) 0%, rgba(24, 24, 27, 0.7) 100%)',
-      border: '1px solid #27272a',
+      border: '1px solid var(--border)',
       borderRadius: isMobile ? '12px' : '16px',
       padding: isMobile ? '10px 12px' : '14px 18px',
     },
@@ -548,16 +548,16 @@ export default function AIStrategistPage() {
       transition: 'all 0.2s',
     },
     sendBtn: {
-      background: 'linear-gradient(135deg, #f7d047 0%, #d4b840 100%)',
-      color: '#09090b',
+      background: 'var(--orange)',
+      color: 'white',
     },
     micBtn: {
-      background: '#27272a',
-      color: '#a1a1aa',
+      background: 'var(--border)',
+      color: 'var(--text-secondary)',
     },
     voiceBtn: {
-      background: '#27272a',
-      color: '#a1a1aa',
+      background: 'var(--border)',
+      color: 'var(--text-secondary)',
     },
     inputHint: {
       display: isMobile ? 'none' : 'flex',
@@ -583,8 +583,8 @@ export default function AIStrategistPage() {
       width: isMobile ? '160px' : '200px',
       height: isMobile ? '160px' : '200px',
       borderRadius: '50%',
-      background: 'linear-gradient(135deg, rgba(247, 208, 71, 0.2) 0%, rgba(247, 208, 71, 0.05) 100%)',
-      border: '2px solid rgba(247, 208, 71, 0.3)',
+      background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.2) 0%, rgba(255, 107, 53, 0.05) 100%)',
+      border: '2px solid rgba(255, 107, 53, 0.3)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -598,7 +598,7 @@ export default function AIStrategistPage() {
     },
     voiceTranscript: {
       fontSize: isMobile ? '14px' : '15px',
-      color: '#a1a1aa',
+      color: 'var(--text-secondary)',
       maxWidth: isMobile ? '90%' : '400px',
       textAlign: 'center',
       minHeight: '24px',
@@ -628,7 +628,7 @@ export default function AIStrategistPage() {
     typingDot: {
       width: '8px',
       height: '8px',
-      background: '#f7d047',
+      background: 'var(--orange)',
       borderRadius: '50%',
       animation: 'typingBounce 1.4s ease-in-out infinite',
     },
@@ -643,20 +643,20 @@ export default function AIStrategistPage() {
             background: isListening
               ? 'linear-gradient(135deg, rgba(34, 197, 94, 0.3) 0%, rgba(34, 197, 94, 0.1) 100%)'
               : isSpeaking
-              ? 'linear-gradient(135deg, rgba(247, 208, 71, 0.3) 0%, rgba(247, 208, 71, 0.1) 100%)'
+              ? 'linear-gradient(135deg, rgba(255, 107, 53, 0.3) 0%, rgba(255, 107, 53, 0.1) 100%)'
               : isLoading
               ? 'linear-gradient(135deg, rgba(245, 158, 11, 0.3) 0%, rgba(245, 158, 11, 0.1) 100%)'
               : styles.voiceOrb.background,
-            borderColor: isListening ? 'rgba(34, 197, 94, 0.5)' : isSpeaking ? 'rgba(247, 208, 71, 0.5)' : isLoading ? 'rgba(245, 158, 11, 0.5)' : 'rgba(247, 208, 71, 0.3)',
+            borderColor: isListening ? 'rgba(34, 197, 94, 0.5)' : isSpeaking ? 'rgba(255, 107, 53, 0.5)' : isLoading ? 'rgba(245, 158, 11, 0.5)' : 'rgba(255, 107, 53, 0.3)',
           }}>
             {isListening ? (
               <Mic size={isMobile ? 48 : 64} color="#22c55e" />
             ) : isSpeaking ? (
-              <AudioLines size={isMobile ? 48 : 64} color="#f7d047" />
+              <AudioLines size={isMobile ? 48 : 64} color="var(--orange)" />
             ) : isLoading ? (
               <Loader2 size={isMobile ? 48 : 64} color="#f59e0b" style={{ animation: 'spin 1s linear infinite' }} />
             ) : (
-              <AudioLines size={isMobile ? 48 : 64} color="#f7d047" />
+              <AudioLines size={isMobile ? 48 : 64} color="var(--orange)" />
             )}
           </div>
 
@@ -666,7 +666,7 @@ export default function AIStrategistPage() {
           {usingBrowserTTS && isSpeaking && (
             <div style={{
               fontSize: '11px',
-              color: '#71717a',
+              color: 'var(--text-muted)',
               marginTop: '-4px',
               marginBottom: '8px',
             }}>
@@ -682,8 +682,8 @@ export default function AIStrategistPage() {
             <button
               style={{
                 ...styles.voiceControlBtn,
-                background: !audioEnabled ? 'rgba(239, 68, 68, 0.2)' : '#27272a',
-                color: !audioEnabled ? '#ef4444' : '#a1a1aa',
+                background: !audioEnabled ? 'rgba(239, 68, 68, 0.2)' : 'var(--border)',
+                color: !audioEnabled ? '#ef4444' : 'var(--text-secondary)',
               }}
               onClick={() => {
                 if (isSpeaking) stopSpeaking();
@@ -766,7 +766,7 @@ export default function AIStrategistPage() {
         <div style={styles.inputArea}>
           <div style={{
             ...styles.inputWrapper,
-            borderColor: isListening ? 'rgba(34, 197, 94, 0.5)' : '#27272a',
+            borderColor: isListening ? 'rgba(34, 197, 94, 0.5)' : 'var(--border)',
             boxShadow: isListening ? '0 0 0 3px rgba(34, 197, 94, 0.15)' : 'none',
           }}>
             <textarea
@@ -785,8 +785,8 @@ export default function AIStrategistPage() {
                 style={{
                   ...styles.btnIcon,
                   ...styles.voiceBtn,
-                  background: voiceMode ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' : '#27272a',
-                  color: voiceMode ? '#09090b' : '#a1a1aa',
+                  background: voiceMode ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' : 'var(--border)',
+                  color: voiceMode ? 'white' : 'var(--text-secondary)',
                 }}
                 onClick={toggleVoiceMode}
                 title={voiceMode ? 'Exit voice mode' : 'Voice mode'}
@@ -800,8 +800,8 @@ export default function AIStrategistPage() {
                 style={{
                   ...styles.btnIcon,
                   ...styles.micBtn,
-                  background: isListening ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' : '#27272a',
-                  color: isListening ? '#09090b' : '#a1a1aa',
+                  background: isListening ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' : 'var(--border)',
+                  color: isListening ? 'white' : 'var(--text-secondary)',
                 }}
                 onClick={isListening ? stopListening : startListening}
                 disabled={isLoading}

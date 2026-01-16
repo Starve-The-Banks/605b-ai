@@ -101,7 +101,7 @@ export default function FlaggedPage() {
   if (loading) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '400px' }}>
-        <RefreshCw size={24} style={{ animation: 'spin 1s linear infinite', color: '#f7d047' }} />
+        <RefreshCw size={24} style={{ animation: 'spin 1s linear infinite', color: 'var(--orange)' }} />
       </div>
     );
   }
@@ -121,7 +121,7 @@ export default function FlaggedPage() {
           <h1 style={{ fontSize: isMobile ? '20px' : '24px', fontWeight: 600, marginBottom: '4px' }}>
             Flagged Items
           </h1>
-          <p style={{ fontSize: '14px', color: '#737373' }}>
+          <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>
             Items requiring attention from your credit report analysis
           </p>
         </div>
@@ -134,9 +134,9 @@ export default function FlaggedPage() {
               gap: '8px',
               padding: '10px 16px',
               background: 'transparent',
-              border: '1px solid #27272a',
+              border: '1px solid var(--border)',
               borderRadius: '8px',
-              color: '#71717a',
+              color: 'var(--text-muted)',
               fontSize: '14px',
               cursor: 'pointer',
             }}
@@ -156,19 +156,19 @@ export default function FlaggedPage() {
           marginBottom: '24px',
         }}>
           {[
-            { label: 'Total Found', value: stats.total, icon: Flag, color: '#f7d047' },
+            { label: 'Total Found', value: stats.total, icon: Flag, color: 'var(--orange)' },
             { label: 'Pending', value: stats.pending, icon: Clock, color: '#3b82f6' },
             { label: 'Disputed', value: stats.disputed, icon: Check, color: '#22c55e' },
             { label: 'High Priority', value: stats.high, icon: AlertCircle, color: '#ef4444' },
           ].map((stat, i) => (
             <div key={i} style={{
-              background: '#121214',
-              border: '1px solid #1f1f23',
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border)',
               borderRadius: '12px',
               padding: isMobile ? '16px' : '20px',
             }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span style={{ fontSize: '12px', color: '#737373' }}>{stat.label}</span>
+                <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{stat.label}</span>
                 <stat.icon size={16} style={{ color: stat.color }} />
               </div>
               <div style={{ fontSize: isMobile ? '24px' : '28px', fontWeight: 600 }}>{stat.value}</div>
@@ -180,14 +180,14 @@ export default function FlaggedPage() {
       {/* Pending Items */}
       {pendingItems.length > 0 ? (
         <div style={{
-          background: '#121214',
-          border: '1px solid #1f1f23',
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border)',
           borderRadius: '12px',
           overflow: 'hidden',
         }}>
           <div style={{
             padding: '16px 20px',
-            borderBottom: '1px solid #1f1f23',
+            borderBottom: '1px solid var(--border)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -196,7 +196,7 @@ export default function FlaggedPage() {
               Items to Review ({pendingItems.length})
             </h2>
             {syncing && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#71717a' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--text-muted)' }}>
                 <RefreshCw size={12} style={{ animation: 'spin 1s linear infinite' }} />
                 Syncing...
               </div>
@@ -205,14 +205,14 @@ export default function FlaggedPage() {
 
           {pendingItems.map((item) => {
             const IconComponent = TYPE_ICONS[item.type] || Flag;
-            const severityColor = SEVERITY_COLORS[item.severity] || '#71717a';
+            const severityColor = SEVERITY_COLORS[item.severity] || 'var(--text-muted)';
 
             return (
               <div
                 key={item.id}
                 style={{
                   padding: isMobile ? '16px' : '20px',
-                  borderBottom: '1px solid #1f1f23',
+                  borderBottom: '1px solid var(--border)',
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
@@ -245,8 +245,8 @@ export default function FlaggedPage() {
                       </span>
                       <span style={{
                         padding: '2px 8px',
-                        background: '#27272a',
-                        color: '#a1a1aa',
+                        background: 'var(--border)',
+                        color: 'var(--text-secondary)',
                         fontSize: '11px',
                         borderRadius: '4px',
                       }}>
@@ -254,11 +254,11 @@ export default function FlaggedPage() {
                       </span>
                     </div>
 
-                    <p style={{ fontSize: '13px', color: '#a1a1aa', marginBottom: '8px', lineHeight: 1.5 }}>
+                    <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '8px', lineHeight: 1.5 }}>
                       {item.issue}
                     </p>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '12px', color: '#71717a', marginBottom: '12px', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '12px', flexWrap: 'wrap' }}>
                       {item.statute && (
                         <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                           <Scale size={12} />
@@ -267,7 +267,7 @@ export default function FlaggedPage() {
                       )}
                       {item.successLikelihood && (
                         <span style={{
-                          color: item.successLikelihood === 'High' ? '#22c55e' : item.successLikelihood === 'Medium' ? '#f59e0b' : '#71717a',
+                          color: item.successLikelihood === 'High' ? '#22c55e' : item.successLikelihood === 'Medium' ? '#f59e0b' : 'var(--text-muted)',
                         }}>
                           {item.successLikelihood} success likelihood
                         </span>
@@ -277,11 +277,11 @@ export default function FlaggedPage() {
                     {item.recommendation && (
                       <div style={{
                         padding: '12px',
-                        background: '#1a1a1c',
+                        background: 'var(--bg-secondary)',
                         borderRadius: '8px',
                         marginBottom: '12px',
                       }}>
-                        <div style={{ fontSize: '11px', color: '#71717a', marginBottom: '4px' }}>Recommendation</div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px' }}>Recommendation</div>
                         <div style={{ fontSize: '13px', color: '#e5e5e5' }}>{item.recommendation}</div>
                       </div>
                     )}
@@ -295,10 +295,10 @@ export default function FlaggedPage() {
                           alignItems: 'center',
                           gap: '6px',
                           padding: '8px 16px',
-                          background: 'linear-gradient(135deg, #f7d047 0%, #d4b840 100%)',
+                          background: 'var(--orange)',
                           border: 'none',
                           borderRadius: '8px',
-                          color: '#09090b',
+                          color: 'white',
                           fontSize: '13px',
                           fontWeight: 600,
                           cursor: creatingDispute === item.id ? 'not-allowed' : 'pointer',
@@ -325,9 +325,9 @@ export default function FlaggedPage() {
                           gap: '6px',
                           padding: '8px 16px',
                           background: 'transparent',
-                          border: '1px solid #27272a',
+                          border: '1px solid var(--border)',
                           borderRadius: '8px',
-                          color: '#71717a',
+                          color: 'var(--text-muted)',
                           fontSize: '13px',
                           cursor: 'pointer',
                         }}
@@ -345,8 +345,8 @@ export default function FlaggedPage() {
       ) : (
         /* Empty State */
         <div style={{
-          background: '#121214',
-          border: '1px solid #1f1f23',
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border)',
           borderRadius: '12px',
           padding: isMobile ? '40px 20px' : '60px 24px',
           textAlign: 'center'
@@ -354,18 +354,18 @@ export default function FlaggedPage() {
           <div style={{
             width: '64px',
             height: '64px',
-            background: 'rgba(247, 208, 71, 0.1)',
+            background: 'var(--orange-dim)',
             borderRadius: '16px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             margin: '0 auto 20px',
-            color: '#f7d047'
+            color: 'var(--orange)'
           }}>
             <Flag size={32} />
           </div>
           <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '8px' }}>No Flagged Items</h2>
-          <p style={{ fontSize: '14px', color: '#737373', maxWidth: '400px', margin: '0 auto 24px', lineHeight: 1.6 }}>
+          <p style={{ fontSize: '14px', color: 'var(--text-muted)', maxWidth: '400px', margin: '0 auto 24px', lineHeight: 1.6 }}>
             Upload your credit reports to have our AI analyze them for potential issues,
             identity theft markers, and disputable items.
           </p>
@@ -376,10 +376,10 @@ export default function FlaggedPage() {
               alignItems: 'center',
               gap: '8px',
               padding: '12px 24px',
-              background: 'rgba(247, 208, 71, 0.1)',
-              border: '1px solid rgba(247, 208, 71, 0.3)',
+              background: 'var(--orange-dim)',
+              border: '1px solid rgba(255, 107, 53, 0.3)',
               borderRadius: '8px',
-              color: '#f7d047',
+              color: 'var(--orange)',
               fontSize: '14px',
               fontWeight: 500,
               textDecoration: 'none',
@@ -394,15 +394,15 @@ export default function FlaggedPage() {
       {/* Already Disputed Items */}
       {disputedItems.length > 0 && (
         <div style={{
-          background: '#121214',
-          border: '1px solid #1f1f23',
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border)',
           borderRadius: '12px',
           overflow: 'hidden',
           marginTop: '24px',
         }}>
           <div style={{
             padding: '16px 20px',
-            borderBottom: '1px solid #1f1f23',
+            borderBottom: '1px solid var(--border)',
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
@@ -418,7 +418,7 @@ export default function FlaggedPage() {
               key={item.id}
               style={{
                 padding: '14px 20px',
-                borderBottom: '1px solid #1f1f23',
+                borderBottom: '1px solid var(--border)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
@@ -427,7 +427,7 @@ export default function FlaggedPage() {
             >
               <div>
                 <div style={{ fontSize: '14px', fontWeight: 500 }}>{item.account || 'Unknown Account'}</div>
-                <div style={{ fontSize: '12px', color: '#71717a' }}>{TYPE_LABELS[item.type] || item.type}</div>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{TYPE_LABELS[item.type] || item.type}</div>
               </div>
               <a
                 href="/dashboard/tracker"
@@ -436,7 +436,7 @@ export default function FlaggedPage() {
                   alignItems: 'center',
                   gap: '4px',
                   fontSize: '13px',
-                  color: '#f7d047',
+                  color: 'var(--orange)',
                   textDecoration: 'none',
                 }}
               >

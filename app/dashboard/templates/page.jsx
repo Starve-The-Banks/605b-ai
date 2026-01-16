@@ -246,15 +246,15 @@ export default function TemplatesPage() {
     },
     subtitle: {
       fontSize: '14px',
-      color: '#737373',
+      color: 'var(--text-muted)',
     },
     searchBar: {
       display: 'flex',
       alignItems: 'center',
       gap: '12px',
       padding: '14px 18px',
-      background: '#121214',
-      border: '1px solid #1f1f23',
+      background: 'var(--bg-card)',
+      border: '1px solid var(--border)',
       borderRadius: '12px',
       marginBottom: '24px',
     },
@@ -277,8 +277,8 @@ export default function TemplatesPage() {
       alignItems: 'center',
       gap: '8px',
       padding: '8px 14px',
-      background: '#121214',
-      border: '1px solid #1f1f23',
+      background: 'var(--bg-card)',
+      border: '1px solid var(--border)',
       borderRadius: '20px',
       fontSize: '12px',
       fontWeight: 500,
@@ -287,24 +287,24 @@ export default function TemplatesPage() {
       transition: 'all 0.15s',
     },
     filterPillActive: {
-      background: 'rgba(247, 208, 71, 0.1)',
-      borderColor: 'rgba(247, 208, 71, 0.3)',
-      color: '#f7d047',
+      background: 'var(--orange-dim)',
+      borderColor: 'rgba(255, 107, 53, 0.3)',
+      color: 'var(--orange)',
     },
     filterCount: {
       padding: '2px 6px',
-      background: '#1a1a1c',
+      background: 'var(--bg-secondary)',
       borderRadius: '10px',
       fontSize: '10px',
     },
     filterCountActive: {
-      background: '#f7d047',
-      color: '#09090b',
+      background: 'var(--orange)',
+      color: 'white',
       fontWeight: 600,
     },
     resultsInfo: {
       fontSize: '13px',
-      color: '#737373',
+      color: 'var(--text-muted)',
       marginBottom: '16px',
     },
     grid: {
@@ -313,8 +313,8 @@ export default function TemplatesPage() {
       gap: '16px',
     },
     card: {
-      background: '#121214',
-      border: '1px solid #1f1f23',
+      background: 'var(--bg-card)',
+      border: '1px solid var(--border)',
       borderRadius: '12px',
       padding: '20px',
       cursor: 'pointer',
@@ -332,10 +332,10 @@ export default function TemplatesPage() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'rgba(247, 208, 71, 0.1)',
-      border: '1px solid rgba(247, 208, 71, 0.2)',
+      background: 'var(--orange-dim)',
+      border: '1px solid rgba(255, 107, 53, 0.2)',
       borderRadius: '10px',
-      color: '#f7d047',
+      color: 'var(--orange)',
       flexShrink: 0,
     },
     cardMeta: {
@@ -351,7 +351,7 @@ export default function TemplatesPage() {
     },
     cardSubtitle: {
       fontSize: '11px',
-      color: '#737373',
+      color: 'var(--text-muted)',
     },
     cardDesc: {
       fontSize: '13px',
@@ -367,7 +367,7 @@ export default function TemplatesPage() {
     },
     deadline: {
       fontSize: '11px',
-      color: '#737373',
+      color: 'var(--text-muted)',
       display: 'flex',
       alignItems: 'center',
       gap: '4px',
@@ -383,7 +383,7 @@ export default function TemplatesPage() {
       display: 'flex',
       gap: '8px',
       paddingTop: '12px',
-      borderTop: '1px solid #1f1f23',
+      borderTop: '1px solid var(--border)',
     },
     cardBtn: {
       display: 'flex',
@@ -400,12 +400,12 @@ export default function TemplatesPage() {
       border: 'none',
     },
     cardBtnPrimary: {
-      background: 'linear-gradient(135deg, #f7d047 0%, #d4b840 100%)',
-      color: '#09090b',
+      background: 'var(--orange)',
+      color: 'white',
     },
     cardBtnSecondary: {
-      background: '#1a1a1c',
-      border: '1px solid #27272a',
+      background: 'var(--bg-secondary)',
+      border: '1px solid var(--border)',
       color: '#a3a3a3',
     },
     modal: {
@@ -420,7 +420,7 @@ export default function TemplatesPage() {
     },
     modalContent: {
       background: '#0d0d0f',
-      border: '1px solid #1f1f23',
+      border: '1px solid var(--border)',
       borderRadius: '16px',
       width: '100%',
       maxWidth: '900px',
@@ -431,7 +431,7 @@ export default function TemplatesPage() {
     },
     modalHeader: {
       padding: '20px 24px',
-      borderBottom: '1px solid #1f1f23',
+      borderBottom: '1px solid var(--border)',
       display: 'flex',
       alignItems: 'flex-start',
       justifyContent: 'space-between',
@@ -444,7 +444,7 @@ export default function TemplatesPage() {
     },
     modalSubtitle: {
       fontSize: '13px',
-      color: '#737373',
+      color: 'var(--text-muted)',
     },
     modalClose: {
       width: '36px',
@@ -452,10 +452,10 @@ export default function TemplatesPage() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: '#1a1a1c',
+      background: 'var(--bg-secondary)',
       border: 'none',
       borderRadius: '8px',
-      color: '#737373',
+      color: 'var(--text-muted)',
       cursor: 'pointer',
     },
     modalBody: {
@@ -465,7 +465,7 @@ export default function TemplatesPage() {
     },
     templateContent: {
       background: '#0a0a0b',
-      border: '1px solid #1f1f23',
+      border: '1px solid var(--border)',
       borderRadius: '12px',
       padding: '20px',
       fontSize: '12px',
@@ -478,7 +478,7 @@ export default function TemplatesPage() {
     },
     modalFooter: {
       padding: '16px 24px',
-      borderTop: '1px solid #1f1f23',
+      borderTop: '1px solid var(--border)',
       display: 'flex',
       gap: '12px',
       justifyContent: 'flex-end',
@@ -497,7 +497,7 @@ export default function TemplatesPage() {
     emptyState: {
       textAlign: 'center',
       padding: '60px 20px',
-      color: '#737373',
+      color: 'var(--text-muted)',
     },
   };
 
@@ -520,7 +520,7 @@ export default function TemplatesPage() {
         {searchQuery && (
           <button 
             onClick={() => setSearchQuery('')}
-            style={{ background: 'none', border: 'none', color: '#737373', cursor: 'pointer' }}
+            style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
           >
             <X size={18} />
           </button>
@@ -562,11 +562,11 @@ export default function TemplatesPage() {
                 key={template.id} 
                 style={styles.card}
                 onMouseOver={(e) => {
-                  e.currentTarget.style.borderColor = 'rgba(247, 208, 71, 0.3)';
+                  e.currentTarget.style.borderColor = 'rgba(255, 107, 53, 0.3)';
                   e.currentTarget.style.transform = 'translateY(-2px)';
                 }}
                 onMouseOut={(e) => {
-                  e.currentTarget.style.borderColor = '#1f1f23';
+                  e.currentTarget.style.borderColor = 'var(--border)';
                   e.currentTarget.style.transform = 'translateY(0)';
                 }}
               >
@@ -712,28 +712,28 @@ export default function TemplatesPage() {
                   justifyContent: 'center',
                   minHeight: '300px',
                   background: '#0a0a0b',
-                  border: '1px solid #1f1f23',
+                  border: '1px solid var(--border)',
                   borderRadius: '12px',
                   padding: '40px 20px',
                 }}>
                   <div style={{
                     width: '80px',
                     height: '80px',
-                    background: 'rgba(247, 208, 71, 0.1)',
-                    border: '1px solid rgba(247, 208, 71, 0.3)',
+                    background: 'var(--orange-dim)',
+                    border: '1px solid rgba(255, 107, 53, 0.3)',
                     borderRadius: '50%',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     marginBottom: '20px',
                   }}>
-                    <Lock size={36} style={{ color: '#f7d047' }} />
+                    <Lock size={36} style={{ color: 'var(--orange)' }} />
                   </div>
                   <h3 style={{ fontSize: '20px', fontWeight: 600, marginBottom: '8px', color: '#e5e5e5' }}>
                     {getRequiredTier(selectedTemplate) === 'identity-theft' ? '605B Template' :
                      getRequiredTier(selectedTemplate) === 'advanced' ? 'Advanced Template' : 'Premium Template'}
                   </h3>
-                  <p style={{ fontSize: '14px', color: '#737373', textAlign: 'center', maxWidth: '400px', marginBottom: '8px', lineHeight: 1.6 }}>
+                  <p style={{ fontSize: '14px', color: 'var(--text-muted)', textAlign: 'center', maxWidth: '400px', marginBottom: '8px', lineHeight: 1.6 }}>
                     This professionally-crafted letter template includes proper legal citations,
                     formatting, and strategic language to maximize effectiveness.
                   </p>
@@ -752,10 +752,10 @@ export default function TemplatesPage() {
                       alignItems: 'center',
                       gap: '8px',
                       padding: '14px 28px',
-                      background: 'linear-gradient(135deg, #f7d047 0%, #d4b840 100%)',
+                      background: 'var(--orange)',
                       border: 'none',
                       borderRadius: '10px',
-                      color: '#09090b',
+                      color: 'white',
                       fontSize: '15px',
                       fontWeight: 600,
                       cursor: 'pointer',
@@ -772,14 +772,14 @@ export default function TemplatesPage() {
               {isTemplateAccessible(selectedTemplate) ? (
                 <>
                   <button
-                    style={{...styles.modalBtn, background: '#1a1a1c', color: '#a3a3a3'}}
+                    style={{...styles.modalBtn, background: 'var(--bg-secondary)', color: '#a3a3a3'}}
                     onClick={handleCopy}
                   >
                     {copied ? <Check size={18} /> : <Copy size={18} />}
                     {copied ? 'Copied!' : 'Copy to Clipboard'}
                   </button>
                   <button
-                    style={{...styles.modalBtn, background: 'linear-gradient(135deg, #f7d047 0%, #d4b840 100%)', color: '#09090b'}}
+                    style={{...styles.modalBtn, background: 'var(--orange)', color: 'white'}}
                     onClick={handleDownload}
                   >
                     <Download size={18} />
@@ -789,14 +789,14 @@ export default function TemplatesPage() {
               ) : (
                 <>
                   <button
-                    style={{...styles.modalBtn, background: '#1a1a1c', color: '#52525b', cursor: 'not-allowed'}}
+                    style={{...styles.modalBtn, background: 'var(--bg-secondary)', color: '#52525b', cursor: 'not-allowed'}}
                     disabled
                   >
                     <Lock size={18} />
                     Copy Locked
                   </button>
                   <button
-                    style={{...styles.modalBtn, background: 'linear-gradient(135deg, #f7d047 0%, #d4b840 100%)', color: '#09090b'}}
+                    style={{...styles.modalBtn, background: 'var(--orange)', color: 'white'}}
                     onClick={() => { setSelectedTemplate(null); setShowUpgradeModal(true); }}
                   >
                     <Lock size={18} />

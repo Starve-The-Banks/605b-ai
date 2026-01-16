@@ -51,7 +51,7 @@ export default function SettingsPage() {
         width: '44px',
         height: '24px',
         borderRadius: '12px',
-        background: enabled ? '#f7d047' : '#27272a',
+        background: enabled ? 'var(--orange)' : 'var(--border)',
         border: 'none',
         cursor: 'pointer',
         position: 'relative',
@@ -63,7 +63,7 @@ export default function SettingsPage() {
         width: '18px',
         height: '18px',
         borderRadius: '50%',
-        background: enabled ? '#09090b' : '#71717a',
+        background: enabled ? 'white' : 'var(--text-muted)',
         position: 'absolute',
         top: '3px',
         left: enabled ? '23px' : '3px',
@@ -76,15 +76,15 @@ export default function SettingsPage() {
     <div style={{ width: '100%' }}>
       <div style={{ marginBottom: isMobile ? '24px' : '32px' }}>
         <h1 style={{ fontSize: isMobile ? '20px' : '24px', fontWeight: 600, marginBottom: '4px' }}>Settings</h1>
-        <p style={{ fontSize: '14px', color: '#71717a' }}>
+        <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>
           Manage your preferences
         </p>
       </div>
 
       {/* Account Info */}
       <div style={{
-        background: '#121214',
-        border: '1px solid #1f1f23',
+        background: 'var(--bg-card)',
+        border: '1px solid var(--border)',
         borderRadius: '12px',
         padding: isMobile ? '16px' : '20px 24px',
         marginBottom: '16px',
@@ -93,13 +93,13 @@ export default function SettingsPage() {
           <div style={{
             width: isMobile ? '40px' : '48px',
             height: isMobile ? '40px' : '48px',
-            background: 'linear-gradient(135deg, #f7d047 0%, #d4b840 100%)',
+            background: 'var(--orange)',
             borderRadius: '12px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             fontWeight: 600,
-            color: '#09090b',
+            color: 'white',
             fontSize: isMobile ? '16px' : '18px',
             flexShrink: 0,
           }}>
@@ -109,7 +109,7 @@ export default function SettingsPage() {
             <div style={{ fontSize: isMobile ? '14px' : '16px', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {user?.firstName} {user?.lastName}
             </div>
-            <div style={{ fontSize: isMobile ? '12px' : '13px', color: '#71717a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <div style={{ fontSize: isMobile ? '12px' : '13px', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {user?.primaryEmailAddress?.emailAddress}
             </div>
           </div>
@@ -119,37 +119,37 @@ export default function SettingsPage() {
 
       {/* Notification Settings */}
       <div style={{
-        background: '#121214',
-        border: '1px solid #1f1f23',
+        background: 'var(--bg-card)',
+        border: '1px solid var(--border)',
         borderRadius: '12px',
         overflow: 'hidden',
         marginBottom: '16px',
       }}>
         <div style={{
           padding: isMobile ? '14px 16px' : '16px 24px',
-          borderBottom: '1px solid #1f1f23',
+          borderBottom: '1px solid var(--border)',
           display: 'flex',
           alignItems: 'center',
           gap: '12px',
         }}>
-          <Bell size={18} style={{ color: '#f7d047' }} />
+          <Bell size={18} style={{ color: 'var(--orange)' }} />
           <span style={{ fontSize: '15px', fontWeight: 600 }}>Notifications</span>
         </div>
 
         {/* Email Notifications */}
         <div style={{
           padding: isMobile ? '14px 16px' : '16px 24px',
-          borderBottom: '1px solid #1f1f23',
+          borderBottom: '1px solid var(--border)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           gap: '12px',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
-            <Mail size={18} style={{ color: '#71717a', flexShrink: 0 }} />
+            <Mail size={18} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
             <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: '14px', fontWeight: 500 }}>Email Notifications</div>
-              <div style={{ fontSize: '12px', color: '#71717a' }}>
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
                 Receive deadline reminders via email
               </div>
             </div>
@@ -163,17 +163,17 @@ export default function SettingsPage() {
         {/* Deadline Reminders */}
         <div style={{
           padding: isMobile ? '14px 16px' : '16px 24px',
-          borderBottom: '1px solid #1f1f23',
+          borderBottom: '1px solid var(--border)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           gap: '12px',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
-            <Clock size={18} style={{ color: '#71717a', flexShrink: 0 }} />
+            <Clock size={18} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
             <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: '14px', fontWeight: 500 }}>Deadline Reminders</div>
-              <div style={{ fontSize: '12px', color: '#71717a' }}>
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
                 Get notified before deadlines
               </div>
             </div>
@@ -188,7 +188,7 @@ export default function SettingsPage() {
         {settings.deadlineReminders && (
           <div style={{
             padding: isMobile ? '14px 16px' : '16px 24px',
-            borderBottom: '1px solid #1f1f23',
+            borderBottom: '1px solid var(--border)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -196,7 +196,7 @@ export default function SettingsPage() {
           }}>
             <div style={{ marginLeft: isMobile ? '0' : '30px' }}>
               <div style={{ fontSize: '14px', fontWeight: 500 }}>Remind me</div>
-              <div style={{ fontSize: '12px', color: '#71717a' }}>
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
                 Days before deadline
               </div>
             </div>
@@ -205,8 +205,8 @@ export default function SettingsPage() {
               onChange={(e) => updateSetting('reminderDaysBefore', Number(e.target.value))}
               style={{
                 padding: '8px 12px',
-                background: '#1a1a1c',
-                border: '1px solid #27272a',
+                background: 'var(--bg-secondary)',
+                border: '1px solid var(--border)',
                 borderRadius: '8px',
                 color: '#fafafa',
                 fontSize: '14px',
@@ -230,10 +230,10 @@ export default function SettingsPage() {
           gap: '12px',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
-            <Smartphone size={18} style={{ color: '#71717a', flexShrink: 0 }} />
+            <Smartphone size={18} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
             <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: '14px', fontWeight: 500 }}>Site Notifications</div>
-              <div style={{ fontSize: '12px', color: '#71717a' }}>
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
                 Show badges in the app
               </div>
             </div>
@@ -247,26 +247,26 @@ export default function SettingsPage() {
 
       {/* Voice Settings */}
       <div style={{
-        background: '#121214',
-        border: '1px solid #1f1f23',
+        background: 'var(--bg-card)',
+        border: '1px solid var(--border)',
         borderRadius: '12px',
         overflow: 'hidden',
         marginBottom: '24px',
       }}>
         <div style={{
           padding: isMobile ? '14px 16px' : '16px 24px',
-          borderBottom: '1px solid #1f1f23',
+          borderBottom: '1px solid var(--border)',
           display: 'flex',
           alignItems: 'center',
           gap: '12px',
         }}>
-          <Volume2 size={18} style={{ color: '#f7d047' }} />
+          <Volume2 size={18} style={{ color: 'var(--orange)' }} />
           <span style={{ fontSize: '15px', fontWeight: 600 }}>Voice & Audio</span>
         </div>
 
         <div style={{
           padding: isMobile ? '14px 16px' : '16px 24px',
-          borderBottom: '1px solid #1f1f23',
+          borderBottom: '1px solid var(--border)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -274,7 +274,7 @@ export default function SettingsPage() {
         }}>
           <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: '14px', fontWeight: 500 }}>Voice Mode</div>
-            <div style={{ fontSize: '12px', color: '#71717a' }}>
+            <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
               Voice conversations with AI
             </div>
           </div>
@@ -294,7 +294,7 @@ export default function SettingsPage() {
           }}>
             <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: '14px', fontWeight: 500 }}>Voice Speed</div>
-              <div style={{ fontSize: '12px', color: '#71717a' }}>
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
                 AI voice playback speed
               </div>
             </div>
@@ -303,8 +303,8 @@ export default function SettingsPage() {
               onChange={(e) => updateSetting('voiceSpeed', Number(e.target.value))}
               style={{
                 padding: '8px 12px',
-                background: '#1a1a1c',
-                border: '1px solid #27272a',
+                background: 'var(--bg-secondary)',
+                border: '1px solid var(--border)',
                 borderRadius: '8px',
                 color: '#fafafa',
                 fontSize: '14px',
@@ -333,7 +333,7 @@ export default function SettingsPage() {
           background: saved ? '#22c55e' : 'linear-gradient(135deg, #f7d047 0%, #d4b840 100%)',
           border: 'none',
           borderRadius: '10px',
-          color: '#09090b',
+          color: 'white',
           fontSize: '15px',
           fontWeight: 600,
           cursor: 'pointer',

@@ -49,7 +49,7 @@ export default function ProgressPage() {
   ];
 
   const quickActions = [
-    { title: 'Talk to AI Strategist', description: 'Get personalized guidance', icon: Sparkles, href: '/dashboard/ai-strategist', color: '#f7d047' },
+    { title: 'Talk to AI Strategist', description: 'Get personalized guidance', icon: Sparkles, href: '/dashboard/ai-strategist', color: 'var(--orange)' },
     { title: 'Upload Credit Report', description: 'Analyze your latest report', icon: FileText, href: '/dashboard', color: '#3b82f6' },
     { title: 'View Templates', description: 'Browse dispute letters', icon: Shield, href: '/dashboard/templates', color: '#22c55e' },
   ];
@@ -72,7 +72,7 @@ export default function ProgressPage() {
         <h1 style={{ fontSize: isMobile ? '20px' : '24px', fontWeight: 600, marginBottom: '4px' }}>
           Welcome back, {user?.firstName || 'there'}!
         </h1>
-        <p style={{ fontSize: '14px', color: '#71717a' }}>
+        <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>
           {getSituationLabel() ? `Your ${getSituationLabel()} journey` : 'Track your credit repair progress'}
         </p>
       </div>
@@ -85,14 +85,14 @@ export default function ProgressPage() {
         marginBottom: '24px',
       }}>
         {[
-          { label: 'Disputes Sent', value: stats.disputesSent, icon: FileText, color: '#f7d047' },
+          { label: 'Disputes Sent', value: stats.disputesSent, icon: FileText, color: 'var(--orange)' },
           { label: 'Pending', value: stats.pendingResponses, icon: Clock, color: '#3b82f6' },
           { label: 'Removals', value: stats.successfulRemovals, icon: CheckCircle, color: '#22c55e' },
           { label: 'Days Active', value: stats.daysActive, icon: Calendar, color: '#a855f7' },
         ].map((stat, i) => (
           <div key={i} style={{
-            background: '#121214',
-            border: '1px solid #1f1f23',
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border)',
             borderRadius: '12px',
             padding: isMobile ? '16px' : '20px',
           }}>
@@ -102,7 +102,7 @@ export default function ProgressPage() {
               justifyContent: 'space-between',
               marginBottom: isMobile ? '8px' : '12px',
             }}>
-              <span style={{ fontSize: isMobile ? '11px' : '13px', color: '#71717a' }}>{stat.label}</span>
+              <span style={{ fontSize: isMobile ? '11px' : '13px', color: 'var(--text-muted)' }}>{stat.label}</span>
               <div style={{
                 width: isMobile ? '28px' : '32px',
                 height: isMobile ? '28px' : '32px',
@@ -127,8 +127,8 @@ export default function ProgressPage() {
       }}>
         {/* Journey Progress */}
         <div style={{
-          background: '#121214',
-          border: '1px solid #1f1f23',
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border)',
           borderRadius: '12px',
           padding: isMobile ? '16px' : '24px',
         }}>
@@ -142,7 +142,7 @@ export default function ProgressPage() {
               <div style={{
                 width: '40px',
                 height: '40px',
-                background: 'linear-gradient(135deg, rgba(247, 208, 71, 0.2) 0%, rgba(247, 208, 71, 0.05) 100%)',
+                background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.2) 0%, rgba(255, 107, 53, 0.05) 100%)',
                 borderRadius: '10px',
                 display: 'flex',
                 alignItems: 'center',
@@ -152,7 +152,7 @@ export default function ProgressPage() {
               </div>
               <div>
                 <h2 style={{ fontSize: '16px', fontWeight: 600 }}>Your Journey</h2>
-                <p style={{ fontSize: '12px', color: '#71717a' }}>Step-by-step path</p>
+                <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Step-by-step path</p>
               </div>
             </div>
           </div>
@@ -165,7 +165,7 @@ export default function ProgressPage() {
                 top: '40px',
                 bottom: '40px',
                 width: '2px',
-                background: '#27272a',
+                background: 'var(--border)',
               }} />
             )}
 
@@ -179,8 +179,8 @@ export default function ProgressPage() {
                   gap: isMobile ? '12px' : '16px',
                   padding: isMobile ? '12px' : '16px',
                   marginBottom: '8px',
-                  background: '#1a1a1c',
-                  border: '1px solid #27272a',
+                  background: 'var(--bg-secondary)',
+                  border: '1px solid var(--border)',
                   borderRadius: '10px',
                   textDecoration: 'none',
                   color: 'inherit',
@@ -210,11 +210,11 @@ export default function ProgressPage() {
                   <div style={{ fontSize: isMobile ? '13px' : '14px', fontWeight: 600, marginBottom: '2px' }}>
                     {step.title}
                   </div>
-                  <div style={{ fontSize: isMobile ? '11px' : '12px', color: '#71717a' }}>
+                  <div style={{ fontSize: isMobile ? '11px' : '12px', color: 'var(--text-muted)' }}>
                     {step.description}
                   </div>
                 </div>
-                <ChevronRight size={18} style={{ color: '#52525b', flexShrink: 0 }} />
+                <ChevronRight size={18} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
               </Link>
             ))}
           </div>
@@ -223,8 +223,8 @@ export default function ProgressPage() {
         {/* Quick Actions */}
         <div>
           <div style={{
-            background: '#121214',
-            border: '1px solid #1f1f23',
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border)',
             borderRadius: '12px',
             padding: isMobile ? '16px' : '24px',
             marginBottom: '16px',
@@ -239,8 +239,8 @@ export default function ProgressPage() {
                   alignItems: 'center',
                   gap: '12px',
                   padding: isMobile ? '12px' : '14px',
-                  background: '#1a1a1c',
-                  border: '1px solid #27272a',
+                  background: 'var(--bg-secondary)',
+                  border: '1px solid var(--border)',
                   borderRadius: '10px',
                   marginBottom: '10px',
                   textDecoration: 'none',
@@ -262,17 +262,17 @@ export default function ProgressPage() {
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: '13px', fontWeight: 600 }}>{action.title}</div>
-                  <div style={{ fontSize: '11px', color: '#71717a' }}>{action.description}</div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{action.description}</div>
                 </div>
-                <ArrowRight size={16} style={{ color: '#52525b', flexShrink: 0 }} />
+                <ArrowRight size={16} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
               </Link>
             ))}
           </div>
 
           {/* Pro Tip Card */}
           <div style={{
-            background: 'linear-gradient(135deg, rgba(247, 208, 71, 0.1) 0%, rgba(247, 208, 71, 0.02) 100%)',
-            border: '1px solid rgba(247, 208, 71, 0.2)',
+            background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(255, 107, 53, 0.02) 100%)',
+            border: '1px solid rgba(255, 107, 53, 0.2)',
             borderRadius: '12px',
             padding: isMobile ? '16px' : '20px',
           }}>
@@ -283,9 +283,9 @@ export default function ProgressPage() {
               marginBottom: '12px',
             }}>
               <Award size={20} color="#f7d047" />
-              <span style={{ fontSize: '14px', fontWeight: 600, color: '#f7d047' }}>Pro Tip</span>
+              <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--orange)' }}>Pro Tip</span>
             </div>
-            <p style={{ fontSize: '13px', color: '#a1a1aa', lineHeight: 1.6 }}>
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
               Credit bureaus must respond within 30 days. Track deadlines carefully - missed deadlines give you leverage under FCRA.
             </p>
           </div>

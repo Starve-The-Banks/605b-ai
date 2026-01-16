@@ -187,7 +187,7 @@ export default function TrackerPage() {
   if (tierLoading) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '400px' }}>
-        <Loader2 size={24} style={{ animation: 'spin 1s linear infinite', color: '#f7d047' }} />
+        <Loader2 size={24} style={{ animation: 'spin 1s linear infinite', color: 'var(--orange)' }} />
       </div>
     );
   }
@@ -240,12 +240,12 @@ export default function TrackerPage() {
                   : 'Upcoming Deadlines'}
               </div>
               {notifications.slice(0, 3).map((notif) => (
-                <div key={notif.id} style={{ fontSize: '13px', color: '#a1a1aa', marginBottom: '4px', wordBreak: 'break-word' }}>
+                <div key={notif.id} style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '4px', wordBreak: 'break-word' }}>
                   • {notif.message}
                 </div>
               ))}
               {notifications.length > 3 && (
-                <div style={{ fontSize: '12px', color: '#71717a', marginTop: '8px' }}>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '8px' }}>
                   +{notifications.length - 3} more notification{notifications.length - 3 > 1 ? 's' : ''}
                 </div>
               )}
@@ -265,7 +265,7 @@ export default function TrackerPage() {
       }}>
         <div>
           <h1 style={{ fontSize: isMobile ? '20px' : '24px', fontWeight: 600, marginBottom: '4px' }}>Dispute Tracker</h1>
-          <p style={{ fontSize: '14px', color: '#737373' }}>Track deadlines and responses</p>
+          <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>Track deadlines and responses</p>
         </div>
         <button
           onClick={() => setShowAddModal(true)}
@@ -275,10 +275,10 @@ export default function TrackerPage() {
             justifyContent: 'center',
             gap: '8px',
             padding: '10px 18px',
-            background: 'linear-gradient(135deg, #f7d047 0%, #d4b840 100%)',
+            background: 'var(--orange)',
             border: 'none',
             borderRadius: '8px',
-            color: '#0a0a0b',
+            color: 'white',
             fontSize: '14px',
             fontWeight: 600,
             cursor: 'pointer',
@@ -298,19 +298,19 @@ export default function TrackerPage() {
         marginBottom: '24px'
       }}>
         {[
-          { label: 'Active', value: stats.active, icon: Hourglass, color: '#f7d047' },
+          { label: 'Active', value: stats.active, icon: Hourglass, color: 'var(--orange)' },
           { label: 'Pending', value: stats.pendingResponse, icon: Clock, color: '#3b82f6' },
           { label: 'Resolved', value: stats.resolved, icon: CheckCircle, color: '#22c55e' },
           { label: 'Escalated', value: stats.escalated, icon: AlertCircle, color: '#ef4444' },
         ].map((stat, i) => (
           <div key={i} style={{
-            background: '#121214',
-            border: '1px solid #1f1f23',
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border)',
             borderRadius: '12px',
             padding: isMobile ? '16px' : '20px'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <span style={{ fontSize: '12px', color: '#737373' }}>{stat.label}</span>
+              <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{stat.label}</span>
               <stat.icon size={16} style={{ color: stat.color }} />
             </div>
             <div style={{ fontSize: isMobile ? '24px' : '28px', fontWeight: 600 }}>{stat.value}</div>
@@ -321,8 +321,8 @@ export default function TrackerPage() {
       {/* Disputes List */}
       {disputes.length > 0 ? (
         <div style={{
-          background: '#121214',
-          border: '1px solid #1f1f23',
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border)',
           borderRadius: '12px',
           overflow: 'hidden',
         }}>
@@ -332,10 +332,10 @@ export default function TrackerPage() {
               display: 'grid',
               gridTemplateColumns: '2fr 1fr 1fr 1fr 120px',
               padding: '14px 20px',
-              borderBottom: '1px solid #1f1f23',
+              borderBottom: '1px solid var(--border)',
               fontSize: '12px',
               fontWeight: 600,
-              color: '#71717a',
+              color: 'var(--text-muted)',
               textTransform: 'uppercase',
               letterSpacing: '0.05em',
             }}>
@@ -358,13 +358,13 @@ export default function TrackerPage() {
                   key={dispute.id}
                   style={{
                     padding: '16px',
-                    borderBottom: '1px solid #1f1f23',
+                    borderBottom: '1px solid var(--border)',
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontWeight: 500, marginBottom: '4px', wordBreak: 'break-word' }}>{dispute.creditor}</div>
-                      <div style={{ fontSize: '12px', color: '#71717a' }}>{dispute.type}</div>
+                      <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{dispute.type}</div>
                     </div>
                     <div style={{
                       display: 'inline-flex',
@@ -391,7 +391,7 @@ export default function TrackerPage() {
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '16px', fontSize: '13px', color: '#a1a1aa', marginBottom: '12px', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', gap: '16px', fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '12px', flexWrap: 'wrap' }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                       <Building2 size={12} /> {dispute.bureau}
                     </span>
@@ -405,8 +405,8 @@ export default function TrackerPage() {
                       style={{
                         flex: 1,
                         padding: '8px 12px',
-                        background: '#1a1a1c',
-                        border: '1px solid #27272a',
+                        background: 'var(--bg-secondary)',
+                        border: '1px solid var(--border)',
                         borderRadius: '6px',
                         color: '#fafafa',
                         fontSize: '13px',
@@ -422,9 +422,9 @@ export default function TrackerPage() {
                       style={{
                         padding: '8px 12px',
                         background: 'transparent',
-                        border: '1px solid #27272a',
+                        border: '1px solid var(--border)',
                         borderRadius: '6px',
-                        color: '#71717a',
+                        color: 'var(--text-muted)',
                         cursor: 'pointer',
                       }}
                     >
@@ -443,19 +443,19 @@ export default function TrackerPage() {
                   display: 'grid',
                   gridTemplateColumns: '2fr 1fr 1fr 1fr 120px',
                   padding: '16px 20px',
-                  borderBottom: '1px solid #1f1f23',
+                  borderBottom: '1px solid var(--border)',
                   alignItems: 'center',
                 }}
               >
                 <div>
                   <div style={{ fontWeight: 500, marginBottom: '4px' }}>{dispute.creditor}</div>
-                  <div style={{ fontSize: '12px', color: '#71717a' }}>{dispute.type}</div>
+                  <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{dispute.type}</div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}>
-                  <Building2 size={14} style={{ color: '#71717a' }} />
+                  <Building2 size={14} style={{ color: 'var(--text-muted)' }} />
                   {dispute.bureau}
                 </div>
-                <div style={{ fontSize: '14px', color: '#a1a1aa' }}>
+                <div style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>
                   {new Date(dispute.dateSent).toLocaleDateString()}
                 </div>
                 <div>
@@ -487,8 +487,8 @@ export default function TrackerPage() {
                     onChange={(e) => updateDisputeStatus(dispute.id, e.target.value)}
                     style={{
                       padding: '6px 8px',
-                      background: '#1a1a1c',
-                      border: '1px solid #27272a',
+                      background: 'var(--bg-secondary)',
+                      border: '1px solid var(--border)',
                       borderRadius: '6px',
                       color: '#fafafa',
                       fontSize: '12px',
@@ -504,9 +504,9 @@ export default function TrackerPage() {
                     style={{
                       padding: '6px',
                       background: 'transparent',
-                      border: '1px solid #27272a',
+                      border: '1px solid var(--border)',
                       borderRadius: '6px',
-                      color: '#71717a',
+                      color: 'var(--text-muted)',
                       cursor: 'pointer',
                     }}
                   >
@@ -520,8 +520,8 @@ export default function TrackerPage() {
       ) : (
         // Empty State
         <div style={{
-          background: '#121214',
-          border: '1px solid #1f1f23',
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border)',
           borderRadius: '12px',
           padding: isMobile ? '40px 20px' : '60px 24px',
           textAlign: 'center'
@@ -529,18 +529,18 @@ export default function TrackerPage() {
           <div style={{
             width: '64px',
             height: '64px',
-            background: 'rgba(247, 208, 71, 0.1)',
+            background: 'var(--orange-dim)',
             borderRadius: '16px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             margin: '0 auto 20px',
-            color: '#f7d047'
+            color: 'var(--orange)'
           }}>
             <Clock size={32} />
           </div>
           <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '8px' }}>No Active Disputes</h2>
-          <p style={{ fontSize: '14px', color: '#737373', maxWidth: '400px', margin: '0 auto 24px', lineHeight: 1.6 }}>
+          <p style={{ fontSize: '14px', color: 'var(--text-muted)', maxWidth: '400px', margin: '0 auto 24px', lineHeight: 1.6 }}>
             Start tracking your disputes to monitor deadlines and bureau responses.
           </p>
           <button
@@ -550,10 +550,10 @@ export default function TrackerPage() {
               alignItems: 'center',
               gap: '8px',
               padding: '12px 24px',
-              background: 'rgba(247, 208, 71, 0.1)',
-              border: '1px solid rgba(247, 208, 71, 0.3)',
+              background: 'var(--orange-dim)',
+              border: '1px solid rgba(255, 107, 53, 0.3)',
               borderRadius: '8px',
-              color: '#f7d047',
+              color: 'var(--orange)',
               fontSize: '14px',
               fontWeight: 500,
               cursor: 'pointer'
@@ -604,8 +604,8 @@ function AddDisputeModal({ onClose, onAdd, isMobile }) {
       padding: isMobile ? '0' : '20px',
     }}>
       <div style={{
-        background: '#121214',
-        border: '1px solid #27272a',
+        background: 'var(--bg-card)',
+        border: '1px solid var(--border)',
         borderRadius: isMobile ? '16px 16px 0 0' : '16px',
         width: '100%',
         maxWidth: isMobile ? '100%' : '500px',
@@ -617,10 +617,10 @@ function AddDisputeModal({ onClose, onAdd, isMobile }) {
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: '20px 24px',
-          borderBottom: '1px solid #1f1f23',
+          borderBottom: '1px solid var(--border)',
           position: 'sticky',
           top: 0,
-          background: '#121214',
+          background: 'var(--bg-card)',
           zIndex: 1,
         }}>
           <h2 style={{ fontSize: '18px', fontWeight: 600 }}>Add New Dispute</h2>
@@ -629,7 +629,7 @@ function AddDisputeModal({ onClose, onAdd, isMobile }) {
             style={{
               background: 'transparent',
               border: 'none',
-              color: '#71717a',
+              color: 'var(--text-muted)',
               cursor: 'pointer',
               padding: '4px',
             }}
@@ -645,7 +645,7 @@ function AddDisputeModal({ onClose, onAdd, isMobile }) {
               fontSize: '13px',
               fontWeight: 500,
               marginBottom: '8px',
-              color: '#a1a1aa',
+              color: 'var(--text-secondary)',
             }}>
               Creditor / Account Name *
             </label>
@@ -658,8 +658,8 @@ function AddDisputeModal({ onClose, onAdd, isMobile }) {
               style={{
                 width: '100%',
                 padding: '12px 14px',
-                background: '#1a1a1c',
-                border: '1px solid #27272a',
+                background: 'var(--bg-secondary)',
+                border: '1px solid var(--border)',
                 borderRadius: '8px',
                 color: '#fafafa',
                 fontSize: '14px',
@@ -674,7 +674,7 @@ function AddDisputeModal({ onClose, onAdd, isMobile }) {
                 fontSize: '13px',
                 fontWeight: 500,
                 marginBottom: '8px',
-                color: '#a1a1aa',
+                color: 'var(--text-secondary)',
               }}>
                 Credit Bureau
               </label>
@@ -684,8 +684,8 @@ function AddDisputeModal({ onClose, onAdd, isMobile }) {
                 style={{
                   width: '100%',
                   padding: '12px 14px',
-                  background: '#1a1a1c',
-                  border: '1px solid #27272a',
+                  background: 'var(--bg-secondary)',
+                  border: '1px solid var(--border)',
                   borderRadius: '8px',
                   color: '#fafafa',
                   fontSize: '14px',
@@ -704,7 +704,7 @@ function AddDisputeModal({ onClose, onAdd, isMobile }) {
                 fontSize: '13px',
                 fontWeight: 500,
                 marginBottom: '8px',
-                color: '#a1a1aa',
+                color: 'var(--text-secondary)',
               }}>
                 Dispute Type
               </label>
@@ -714,8 +714,8 @@ function AddDisputeModal({ onClose, onAdd, isMobile }) {
                 style={{
                   width: '100%',
                   padding: '12px 14px',
-                  background: '#1a1a1c',
-                  border: '1px solid #27272a',
+                  background: 'var(--bg-secondary)',
+                  border: '1px solid var(--border)',
                   borderRadius: '8px',
                   color: '#fafafa',
                   fontSize: '14px',
@@ -735,7 +735,7 @@ function AddDisputeModal({ onClose, onAdd, isMobile }) {
               fontSize: '13px',
               fontWeight: 500,
               marginBottom: '8px',
-              color: '#a1a1aa',
+              color: 'var(--text-secondary)',
             }}>
               Date Sent *
             </label>
@@ -747,14 +747,14 @@ function AddDisputeModal({ onClose, onAdd, isMobile }) {
               style={{
                 width: '100%',
                 padding: '12px 14px',
-                background: '#1a1a1c',
-                border: '1px solid #27272a',
+                background: 'var(--bg-secondary)',
+                border: '1px solid var(--border)',
                 borderRadius: '8px',
                 color: '#fafafa',
                 fontSize: '14px',
               }}
             />
-            <p style={{ fontSize: '11px', color: '#71717a', marginTop: '6px' }}>
+            <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '6px' }}>
               30-day deadline will be calculated automatically
             </p>
           </div>
@@ -765,7 +765,7 @@ function AddDisputeModal({ onClose, onAdd, isMobile }) {
               fontSize: '13px',
               fontWeight: 500,
               marginBottom: '8px',
-              color: '#a1a1aa',
+              color: 'var(--text-secondary)',
             }}>
               Notes (optional)
             </label>
@@ -777,8 +777,8 @@ function AddDisputeModal({ onClose, onAdd, isMobile }) {
               style={{
                 width: '100%',
                 padding: '12px 14px',
-                background: '#1a1a1c',
-                border: '1px solid #27272a',
+                background: 'var(--bg-secondary)',
+                border: '1px solid var(--border)',
                 borderRadius: '8px',
                 color: '#fafafa',
                 fontSize: '14px',
@@ -795,9 +795,9 @@ function AddDisputeModal({ onClose, onAdd, isMobile }) {
                 flex: 1,
                 padding: '12px',
                 background: 'transparent',
-                border: '1px solid #27272a',
+                border: '1px solid var(--border)',
                 borderRadius: '8px',
-                color: '#a1a1aa',
+                color: 'var(--text-secondary)',
                 fontSize: '14px',
                 fontWeight: 500,
                 cursor: 'pointer',
@@ -810,10 +810,10 @@ function AddDisputeModal({ onClose, onAdd, isMobile }) {
               style={{
                 flex: 1,
                 padding: '12px',
-                background: 'linear-gradient(135deg, #f7d047 0%, #d4b840 100%)',
+                background: 'var(--orange)',
                 border: 'none',
                 borderRadius: '8px',
-                color: '#09090b',
+                color: 'white',
                 fontSize: '14px',
                 fontWeight: 600,
                 cursor: 'pointer',

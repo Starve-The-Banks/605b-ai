@@ -45,7 +45,7 @@ const TIERS = [
     price: 89,
     description: 'Full dispute capabilities',
     icon: Zap,
-    color: '#f7d047',
+    color: 'var(--orange)',
     features: [
       'Everything in Toolkit',
       'Full template library (62 letters)',
@@ -121,7 +121,7 @@ export default function AccountPage() {
   if (tierLoading) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '400px' }}>
-        <Loader2 size={24} style={{ animation: 'spin 1s linear infinite', color: '#f7d047' }} />
+        <Loader2 size={24} style={{ animation: 'spin 1s linear infinite', color: 'var(--orange)' }} />
       </div>
     );
   }
@@ -130,12 +130,12 @@ export default function AccountPage() {
     <div style={{ width: '100%' }}>
       <div style={{ marginBottom: '24px' }}>
         <h1 style={{ fontSize: '24px', fontWeight: 600, marginBottom: '4px' }}>Account & Plan</h1>
-        <p style={{ fontSize: '14px', color: '#737373' }}>Manage your subscription and view usage</p>
+        <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>Manage your subscription and view usage</p>
       </div>
 
       {/* Current Plan */}
       <div style={{
-        background: '#121214',
+        background: 'var(--bg-card)',
         border: `2px solid ${tierColor}40`,
         borderRadius: '16px',
         padding: '24px',
@@ -174,7 +174,7 @@ export default function AccountPage() {
                 Current Plan
               </div>
               <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '4px' }}>{tierName}</h2>
-              <p style={{ fontSize: '14px', color: '#737373' }}>{currentTierInfo?.description}</p>
+              <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>{currentTierInfo?.description}</p>
             </div>
           </div>
           
@@ -186,9 +186,9 @@ export default function AccountPage() {
                 alignItems: 'center',
                 gap: '6px',
                 padding: '10px 16px',
-                background: 'linear-gradient(135deg, #f7d047 0%, #d4b840 100%)',
+                background: 'var(--orange)',
                 borderRadius: '8px',
-                color: '#09090b',
+                color: 'white',
                 fontSize: '14px',
                 fontWeight: 600,
                 textDecoration: 'none',
@@ -207,30 +207,30 @@ export default function AccountPage() {
           gap: '12px',
           marginTop: '20px',
           paddingTop: '20px',
-          borderTop: '1px solid #27272a',
+          borderTop: '1px solid var(--border)',
         }}>
-          <div style={{ padding: '12px 16px', background: '#1a1a1c', borderRadius: '10px' }}>
-            <div style={{ fontSize: '12px', color: '#737373', marginBottom: '4px' }}>PDF Analyses</div>
+          <div style={{ padding: '12px 16px', background: 'var(--bg-secondary)', borderRadius: '10px' }}>
+            <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>PDF Analyses</div>
             <div style={{ fontSize: '20px', fontWeight: 600 }}>
               {usageStats.pdfAnalyses?.isUnlimited ? (
                 <span style={{ color: '#22c55e' }}>Unlimited</span>
               ) : (
                 <>
                   {usageStats.pdfAnalyses?.used || 0}
-                  <span style={{ color: '#737373', fontSize: '14px' }}> / {usageStats.pdfAnalyses?.total || 0}</span>
+                  <span style={{ color: 'var(--text-muted)', fontSize: '14px' }}> / {usageStats.pdfAnalyses?.total || 0}</span>
                 </>
               )}
             </div>
           </div>
-          <div style={{ padding: '12px 16px', background: '#1a1a1c', borderRadius: '10px' }}>
-            <div style={{ fontSize: '12px', color: '#737373', marginBottom: '4px' }}>AI Credits</div>
+          <div style={{ padding: '12px 16px', background: 'var(--bg-secondary)', borderRadius: '10px' }}>
+            <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>AI Credits</div>
             <div style={{ fontSize: '20px', fontWeight: 600 }}>
               {usageStats.aiCredits?.isUnlimited ? (
                 <span style={{ color: '#22c55e' }}>Unlimited</span>
               ) : (
                 <>
                   {usageStats.aiCredits?.remaining || 0}
-                  <span style={{ color: '#737373', fontSize: '14px' }}> remaining</span>
+                  <span style={{ color: 'var(--text-muted)', fontSize: '14px' }}> remaining</span>
                 </>
               )}
             </div>
@@ -238,11 +238,11 @@ export default function AccountPage() {
         </div>
 
         {/* Features */}
-        <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid #27272a' }}>
-          <div style={{ fontSize: '13px', fontWeight: 600, color: '#a1a1aa', marginBottom: '12px' }}>Included Features</div>
+        <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid var(--border)' }}>
+          <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '12px' }}>Included Features</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px' }}>
             {currentTierInfo?.features.map((feature, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#a1a1aa' }}>
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'var(--text-secondary)' }}>
                 <Check size={14} style={{ color: '#22c55e', flexShrink: 0 }} />
                 {feature}
               </div>
@@ -256,25 +256,25 @@ export default function AccountPage() {
         <>
           <div id="upgrades" style={{ marginBottom: '16px', paddingTop: '8px' }}>
             <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '4px' }}>Upgrade Your Plan</h3>
-            <p style={{ fontSize: '14px', color: '#737373' }}>Unlock more features with a one-time purchase</p>
+            <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>Unlock more features with a one-time purchase</p>
           </div>
 
           {/* Disclaimer */}
           <div 
             id="upgrade-disclaimer"
             style={{
-              background: '#121214',
+              background: 'var(--bg-card)',
               border: showDisclaimerError && !disclaimerAccepted ? '2px solid #ef4444' : '1px solid #27272a',
               borderRadius: '12px',
               padding: '16px',
               marginBottom: '16px',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: '#f7d047', fontSize: '14px', fontWeight: 600 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: 'var(--orange)', fontSize: '14px', fontWeight: 600 }}>
               <AlertTriangle size={16} />
               Before Upgrading
             </div>
-            <p style={{ fontSize: '13px', color: '#a1a1aa', marginBottom: '12px', lineHeight: 1.6 }}>
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '12px', lineHeight: 1.6 }}>
               This is self-service software. We do not send letters on your behalf, contact bureaus for you, or guarantee outcomes.
             </p>
             <label style={{
@@ -282,8 +282,8 @@ export default function AccountPage() {
               alignItems: 'center',
               gap: '10px',
               padding: '10px 12px',
-              background: 'rgba(247, 208, 71, 0.05)',
-              border: '1px solid rgba(247, 208, 71, 0.2)',
+              background: 'rgba(255, 107, 53, 0.05)',
+              border: '1px solid rgba(255, 107, 53, 0.2)',
               borderRadius: '8px',
               cursor: 'pointer',
               fontSize: '13px',
@@ -295,7 +295,7 @@ export default function AccountPage() {
                   setDisclaimerAccepted(e.target.checked);
                   if (e.target.checked) setShowDisclaimerError(false);
                 }}
-                style={{ width: '18px', height: '18px', accentColor: '#f7d047' }}
+                style={{ width: '18px', height: '18px', accentColor: '#FF6B35' }}
               />
               <span style={{ color: '#e5e5e5' }}>I understand this is self-service software</span>
             </label>
@@ -313,8 +313,8 @@ export default function AccountPage() {
               <div
                 key={upgradeTier.id}
                 style={{
-                  background: '#121214',
-                  border: '1px solid #27272a',
+                  background: 'var(--bg-card)',
+                  border: '1px solid var(--border)',
                   borderRadius: '12px',
                   padding: '20px',
                   display: 'flex',
@@ -340,17 +340,17 @@ export default function AccountPage() {
                   </div>
                   <div>
                     <h4 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '2px' }}>{upgradeTier.name}</h4>
-                    <p style={{ fontSize: '13px', color: '#737373' }}>{upgradeTier.description}</p>
+                    <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>{upgradeTier.description}</p>
                   </div>
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                   <div style={{ textAlign: 'right' }}>
                     <div style={{ fontSize: '24px', fontWeight: 700 }}>
-                      <span style={{ color: '#737373', fontSize: '14px' }}>$</span>
+                      <span style={{ color: 'var(--text-muted)', fontSize: '14px' }}>$</span>
                       {upgradeTier.price}
                     </div>
-                    <div style={{ fontSize: '11px', color: '#737373' }}>one-time</div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>one-time</div>
                   </div>
                   <button
                     onClick={() => handleUpgrade(upgradeTier)}
@@ -360,10 +360,10 @@ export default function AccountPage() {
                       alignItems: 'center',
                       gap: '6px',
                       padding: '12px 20px',
-                      background: upgradeTier.id === 'identity-theft' ? '#22c55e' : (upgradeTier.id === 'advanced' ? '#f7d047' : '#3b82f6'),
+                      background: upgradeTier.id === 'identity-theft' ? '#22c55e' : (upgradeTier.id === 'advanced' ? '#FF6B35' : '#3b82f6'),
                       border: 'none',
                       borderRadius: '8px',
-                      color: upgradeTier.id === 'identity-theft' ? '#fff' : '#09090b',
+                      color: upgradeTier.id === 'identity-theft' ? '#fff' : 'white',
                       fontSize: '14px',
                       fontWeight: 600,
                       cursor: upgradeLoading === upgradeTier.id ? 'not-allowed' : 'pointer',
@@ -387,7 +387,7 @@ export default function AccountPage() {
           </div>
 
           {/* Note */}
-          <p style={{ fontSize: '12px', color: '#52525b', marginTop: '16px', textAlign: 'center' }}>
+          <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '16px', textAlign: 'center' }}>
             Upgrades are one-time purchases. Your new features unlock immediately after payment.
           </p>
         </>
@@ -404,7 +404,7 @@ export default function AccountPage() {
         }}>
           <Crown size={24} style={{ color: '#22c55e', marginBottom: '8px' }} />
           <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '4px' }}>You have the top tier!</h3>
-          <p style={{ fontSize: '13px', color: '#737373' }}>
+          <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
             You have access to all features including 605B workflows and attorney-ready documentation.
           </p>
         </div>
@@ -412,25 +412,25 @@ export default function AccountPage() {
 
       {/* Account Info */}
       <div style={{
-        background: '#121214',
-        border: '1px solid #27272a',
+        background: 'var(--bg-card)',
+        border: '1px solid var(--border)',
         borderRadius: '12px',
         padding: '20px',
         marginTop: '24px',
       }}>
         <h3 style={{ fontSize: '15px', fontWeight: 600, marginBottom: '16px' }}>Account Information</h3>
         <div style={{ display: 'grid', gap: '12px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid #27272a' }}>
-            <span style={{ fontSize: '13px', color: '#737373' }}>Email</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
+            <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Email</span>
             <span style={{ fontSize: '13px' }}>{user?.primaryEmailAddress?.emailAddress}</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid #27272a' }}>
-            <span style={{ fontSize: '13px', color: '#737373' }}>Name</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
+            <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Name</span>
             <span style={{ fontSize: '13px' }}>{user?.firstName} {user?.lastName}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0' }}>
-            <span style={{ fontSize: '13px', color: '#737373' }}>Support</span>
-            <a href="mailto:support@9thwave.io" style={{ fontSize: '13px', color: '#f7d047' }}>support@9thwave.io</a>
+            <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Support</span>
+            <a href="mailto:support@9thwave.io" style={{ fontSize: '13px', color: 'var(--orange)' }}>support@9thwave.io</a>
           </div>
         </div>
       </div>

@@ -936,8 +936,8 @@ export default function AboutPage() {
                 <div className="principle-icon"><Shield size={26} /></div>
                 <h3 className="principle-title">Privacy First</h3>
                 <p className="principle-desc">
-                  Uploaded PDFs are processed in-memory and immediately discarded. We don't 
-                  store your credit reports.
+                  We do not store your uploaded credit report PDFs as retrievable files. They are
+                  processed for analysis and not retained as documents.
                 </p>
               </div>
             </div>

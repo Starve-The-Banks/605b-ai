@@ -223,7 +223,7 @@ export default function LandingPage() {
   ];
 
   const steps = [
-    { num: '01', title: 'Upload', desc: 'Upload credit reports from all three bureaus. Processed in-memory for privacy.' },
+    { num: '01', title: 'Upload', desc: 'Upload credit reports from all three bureaus. We do not store your uploaded PDFs as retrievable files.' },
     { num: '02', title: 'Analyze', desc: 'System parses tradelines, identifies discrepancies, and flags items with applicable statutes.' },
     { num: '03', title: 'Dispute', desc: 'Generate structured correspondence with proper statute citations and deadline tracking.' },
     { num: '04', title: 'Document', desc: 'Log responses, monitor deadlines, maintain complete audit trail.' },
@@ -655,7 +655,7 @@ export default function LandingPage() {
 
         .stats-grid {
           display: grid;
-          grid-template-columns: repeat(4, 1fr);
+          grid-template-columns: repeat(3, 1fr);
           gap: 32px;
         }
 
@@ -1068,7 +1068,7 @@ export default function LandingPage() {
           </Link>
 
           <div className="nav-center">
-            <a href="#features" className="nav-link">Features</a>
+            <a href="#features" className="nav-link">Tools</a>
             <a href="#steps" className="nav-link">How It Works</a>
             <Link href="/about" className="nav-link">About</Link>
             <Link href="/pricing" className="nav-link">Pricing</Link>
@@ -1109,7 +1109,7 @@ export default function LandingPage() {
             </button>
           </div>
           <div className="mobile-menu-links">
-            <a href="#features" className="mobile-menu-link" onClick={() => setMobileMenuOpen(false)}>Features</a>
+            <a href="#features" className="mobile-menu-link" onClick={() => setMobileMenuOpen(false)}>Tools</a>
             <a href="#steps" className="mobile-menu-link" onClick={() => setMobileMenuOpen(false)}>How It Works</a>
             <Link href="/about" className="mobile-menu-link" onClick={() => setMobileMenuOpen(false)}>About</Link>
             <Link href="/pricing" className="mobile-menu-link" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
@@ -1169,10 +1169,6 @@ export default function LandingPage() {
               <div className="stat-label">Statute-Specific Templates</div>
             </div>
             <div className="stat-item">
-              <div className="stat-value">1 in 5</div>
-              <div className="stat-label">Reports Contain Errors*</div>
-            </div>
-            <div className="stat-item">
               <div className="stat-value">30</div>
               <div className="stat-label">Day Response Window</div>
             </div>
@@ -1181,7 +1177,6 @@ export default function LandingPage() {
               <div className="stat-label">Federal Statutes Covered</div>
             </div>
           </div>
-          <p className="stats-source">*FTC Study, 2012</p>
         </section>
 
         {/* Features */}

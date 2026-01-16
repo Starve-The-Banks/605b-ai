@@ -142,7 +142,7 @@ const FAQS = [
   },
   {
     q: 'Is my data secure?',
-    a: 'Yes. Uploaded PDFs are processed in-memory and immediately discarded—never stored on our servers. Your dispute data is encrypted and only accessible to you.',
+    a: 'Yes. We do not store your uploaded credit report PDFs as retrievable files. They are processed for analysis and not retained as documents; only the analysis results you choose to save are stored to your account. Your dispute data is encrypted and only accessible to you.',
   },
   {
     q: 'What\'s the difference between this and a credit repair company?',
@@ -1237,7 +1237,7 @@ export default function PricingPage() {
                   <div className="recommended-badge">Most Popular</div>
                 )}
                 {tier.isFree && (
-                  <div className="free-badge">Free Forever</div>
+                  <div className="free-badge">Free Analyzer (Read-Only)</div>
                 )}
 
                 <div className="tier-header">
@@ -1297,7 +1297,7 @@ export default function PricingPage() {
                     'Processing...'
                   ) : tier.isFree ? (
                     <>
-                      Start Free Analysis
+                      Start Report Analysis
                       <ArrowRight size={16} />
                     </>
                   ) : (
@@ -1492,7 +1492,7 @@ export default function PricingPage() {
             Start free. Analyze your report. See what's possible.
           </p>
           <Link href="/sign-up" className="cta-button">
-            Start Free Analysis
+            Start Report Analysis
             <ArrowRight size={18} />
           </Link>
         </section>

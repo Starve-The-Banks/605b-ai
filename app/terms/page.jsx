@@ -176,7 +176,7 @@ export default function TermsOfService() {
             YOUR PRIVACY IS PROTECTED
           </div>
           <p style={{ fontSize: '15px', color: 'var(--text)', lineHeight: 1.6, marginBottom: '0' }}>
-            <strong>We do NOT store your credit report PDF files.</strong> Your uploaded documents are processed in-memory, analyzed, and immediately discarded. We never retain copies of your actual credit report files on our servers. Only the analysis results (flagged items) are saved to your account—and you can delete those anytime.
+            <strong>We do not store your uploaded credit report PDFs as retrievable files.</strong> They are processed for analysis and not retained as documents; only the analysis results you choose to save are stored to your account. You can delete your saved analysis results anytime.
           </p>
         </div>
 
@@ -235,7 +235,7 @@ export default function TermsOfService() {
 
             <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--orange)', marginBottom: '12px' }}>2.5 Credit Report Processing — No File Storage</h3>
             <p style={{ marginBottom: '16px' }}>
-              <strong>WE DO NOT STORE YOUR CREDIT REPORT PDF FILES.</strong> When you upload a credit report for analysis, the file is processed in-memory, analyzed by our AI system, and immediately discarded. We retain only the analysis results (flagged items, identified issues) in your account—never the original credit report content or PDF files. See our Privacy Policy for complete details on data handling.
+              <strong>WE DO NOT STORE YOUR UPLOADED CREDIT REPORT PDFS AS RETRIEVABLE FILES.</strong> They are processed for analysis and not retained as documents; only the analysis results you choose to save are stored to your account. We retain only the analysis results (flagged items, identified issues) in your account—never the original credit report content or PDF files. See our Privacy Policy for complete details on data handling.
             </p>
 
             <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--orange)', marginBottom: '12px' }}>2.6 No Guarantee of Results</h3>

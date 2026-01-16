@@ -176,7 +176,7 @@ export default function PrivacyPolicy() {
             YOUR PRIVACY IS PROTECTED
           </div>
           <p style={{ fontSize: '15px', color: 'var(--text)', lineHeight: 1.6, marginBottom: '0' }}>
-            <strong>We do NOT store your credit report PDF files.</strong> Your uploaded documents are processed in-memory, analyzed, and immediately discarded. We never retain copies of your actual credit report files on our servers. Only the analysis results (flagged items) are saved to your account—and you can delete those anytime.
+            <strong>We do not store your uploaded credit report PDFs as retrievable files.</strong> They are processed for analysis and not retained as documents; only the analysis results you choose to save are stored to your account. You can delete your saved analysis results anytime.
           </p>
         </div>
 
@@ -287,22 +287,22 @@ export default function PrivacyPolicy() {
             </p>
 
             <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--orange)', marginBottom: '12px' }}>5.2 Credit Report Processing — NO PDF STORAGE</h3>
-            <p style={{ 
-              marginBottom: '16px', 
-              padding: '16px', 
-              background: 'rgba(34, 197, 94, 0.1)', 
+            <p style={{
+              marginBottom: '16px',
+              padding: '16px',
+              background: 'rgba(34, 197, 94, 0.1)',
               border: '1px solid rgba(34, 197, 94, 0.3)',
               borderRadius: '8px',
             }}>
-              <strong>Important Privacy Protection:</strong> We do NOT store your credit report PDF files. Your uploaded documents are processed in-memory, analyzed, and immediately discarded. We never retain copies of your actual credit report files on our servers.
+              <strong>Important Privacy Protection:</strong> We do not store your uploaded credit report PDFs as retrievable files. They are processed for analysis and not retained as documents; only the analysis results you choose to save are stored to your account.
             </p>
             <p style={{ marginBottom: '16px' }}>
               When you upload a credit report for analysis:
             </p>
             <ul style={{ marginBottom: '16px', paddingLeft: '24px' }}>
-              <li style={{ marginBottom: '8px' }}><strong>PDF files are NOT stored</strong> — Files are processed in-memory and immediately discarded after analysis</li>
-              <li style={{ marginBottom: '8px' }}><strong>Text is extracted temporarily</strong> — Report content is extracted, sent to our AI for analysis, then deleted</li>
-              <li style={{ marginBottom: '8px' }}><strong>Only findings are saved</strong> — We store only the analysis results (flagged items, issues found) in your account, not the original report content</li>
+              <li style={{ marginBottom: '8px' }}><strong>PDF files are not retained</strong> — We do not store your uploaded credit report PDFs as retrievable files</li>
+              <li style={{ marginBottom: '8px' }}><strong>Text is extracted temporarily</strong> — Report content is extracted, sent to our AI for analysis, then not retained as a document</li>
+              <li style={{ marginBottom: '8px' }}><strong>Only findings are saved</strong> — We store only the analysis results (flagged items, issues found) you choose to save in your account</li>
               <li style={{ marginBottom: '8px' }}><strong>AI provider does not retain data</strong> — Our AI provider (Anthropic) processes your data in real-time and does not store it after the request completes</li>
               <li style={{ marginBottom: '8px' }}><strong>You control your data</strong> — You can delete your flagged items and analysis results at any time</li>
             </ul>

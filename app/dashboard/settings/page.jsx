@@ -330,7 +330,7 @@ export default function SettingsPage() {
           gap: '8px',
           width: '100%',
           padding: isMobile ? '12px 20px' : '14px 24px',
-          background: saved ? '#22c55e' : 'linear-gradient(135deg, #f7d047 0%, #d4b840 100%)',
+          background: saved ? '#22c55e' : 'var(--orange)',
           border: 'none',
           borderRadius: '10px',
           color: 'white',

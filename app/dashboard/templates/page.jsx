@@ -746,7 +746,10 @@ export default function TemplatesPage() {
                     }
                   </p>
                   <button
-                    onClick={() => setShowUpgradeModal(true)}
+                    onClick={() => {
+                      const tier = getRequiredTier(selectedTemplate);
+                      window.location.href = `/pricing?highlight=${tier}`;
+                    }}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -797,7 +800,10 @@ export default function TemplatesPage() {
                   </button>
                   <button
                     style={{...styles.modalBtn, background: 'var(--orange)', color: 'white'}}
-                    onClick={() => { setSelectedTemplate(null); setShowUpgradeModal(true); }}
+                    onClick={() => {
+                      const tier = getRequiredTier(selectedTemplate);
+                      window.location.href = `/pricing?highlight=${tier}`;
+                    }}
                   >
                     <Lock size={18} />
                     Upgrade to Download

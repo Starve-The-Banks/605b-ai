@@ -148,7 +148,7 @@ export default function ProgressPage() {
                 alignItems: 'center',
                 justifyContent: 'center',
               }}>
-                <Target size={20} color="#f7d047" />
+                <Target size={20} color="var(--orange)" />
               </div>
               <div>
                 <h2 style={{ fontSize: '16px', fontWeight: 600 }}>Your Journey</h2>
@@ -203,7 +203,7 @@ export default function ProgressPage() {
                   {step.status === 'completed' ? (
                     <CheckCircle size={isMobile ? 16 : 20} color="white" />
                   ) : (
-                    <step.icon size={isMobile ? 16 : 20} style={{ color: step.status === 'locked' ? '#52525b' : '#f7d047' }} />
+                    <step.icon size={isMobile ? 16 : 20} style={{ color: step.status === 'locked' ? '#52525b' : 'var(--orange)' }} />
                   )}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -282,7 +282,7 @@ export default function ProgressPage() {
               gap: '10px',
               marginBottom: '12px',
             }}>
-              <Award size={20} color="#f7d047" />
+              <Award size={20} color="var(--orange)" />
               <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--orange)' }}>Pro Tip</span>
             </div>
             <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>

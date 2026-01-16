@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discrepancies | 605B.ai</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #0C0C0C;
+            --bg-secondary: #141414;
+            --bg-card: #1A1A1A;
+            --border: #2A2A2A;
+            --border-hover: #3A3A3A;
+            --text: #FAFAFA;
+            --text-secondary: #A0A0A0;
+            --text-muted: #666666;
+            --orange: #FF6B35;
+            --orange-dim: rgba(255, 107, 53, 0.1);
+            --green: #27C93F;
+            --yellow: #FFBD2E;
+            --red: #FF5F56;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .app-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 240px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .logo-mark {
+            width: 32px;
+            height: 32px;
+            background: var(--orange);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .logo-text {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 16px 12px;
+        }
+
+        .nav-section {
+            margin-bottom: 24px;
+        }
+
+        .nav-section-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 8px 12px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-card);
+            color: var(--text);
+        }
+
+        .nav-item.active {
+            background: var(--orange-dim);
+            color: var(--orange);
+        }
+
+        .nav-item svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.5;
+        }
+
+        .nav-item .badge {
+            margin-left: auto;
+            background: var(--orange);
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .sidebar-footer {
+            padding: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: var(--border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .user-details {
+            flex: 1;
+        }
+
+        .user-name {
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .user-email {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* Main */
+        .main-content {
+            flex: 1;
+            margin-left: 240px;
+        }
+
+        .main-header {
+            padding: 20px 32px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .main-header h1 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .page-content {
+            padding: 32px;
+        }
+
+        /* Filters */
+        .filters {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 500;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--border-hover);
+            color: var(--text);
+        }
+
+        .filter-btn.active {
+            background: var(--orange-dim);
+            border-color: var(--orange);
+            color: var(--orange);
+        }
+
+        /* Discrepancy Table */
+        .discrepancy-table {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .table-header {
+            display: grid;
+            grid-template-columns: 40px 1fr 140px 120px 100px 80px;
+            gap: 16px;
+            padding: 12px 20px;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .table-row {
+            display: grid;
+            grid-template-columns: 40px 1fr 140px 120px 100px 80px;
+            gap: 16px;
+            padding: 16px 20px;
+            align-items: center;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+
+        .table-row:hover {
+            background: var(--bg-card);
+        }
+
+        .table-row + .table-row {
+            border-top: 1px solid var(--border);
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .status-dot.pending { background: var(--yellow); }
+        .status-dot.sent { background: var(--orange); }
+        .status-dot.responded { background: #42a5f5; }
+        .status-dot.resolved { background: var(--green); }
+
+        .creditor-cell {
+            min-width: 0;
+        }
+
+        .creditor-name {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .creditor-issue {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .bureau-badge {
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 4px;
+            background: var(--bg-card);
+            color: var(--text-secondary);
+        }
+
+        .statute-code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--orange);
+            background: var(--orange-dim);
+            padding: 4px 10px;
+            border-radius: 4px;
+        }
+
+        .status-label {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-label.pending { color: var(--yellow); }
+        .status-label.sent { color: var(--orange); }
+        .status-label.responded { color: #42a5f5; }
+        .status-label.resolved { color: var(--green); }
+
+        .row-action {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .row-action svg {
+            width: 18px;
+            height: 18px;
+            stroke: var(--text-muted);
+            fill: none;
+            stroke-width: 1.5;
+            transition: stroke 0.2s;
+        }
+
+        .table-row:hover .row-action svg {
+            stroke: var(--orange);
+        }
+
+        /* Legend */
+        .legend {
+            display: flex;
+            gap: 24px;
+            margin-top: 20px;
+            padding: 16px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 1200px) {
+            .table-header,
+            .table-row {
+                grid-template-columns: 40px 1fr 120px 100px;
+            }
+            .table-header > *:nth-child(4),
+            .table-row > *:nth-child(4),
+            .table-header > *:nth-child(6),
+            .table-row > *:nth-child(6) {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="/" class="logo">
+                    <div class="logo-mark">605B</div>
+                    <span class="logo-text">CreditClear</span>
+                </a>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <a href="/dashboard" class="nav-item">
+                        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+                        Dashboard
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Workflow</div>
+                    <a href="/reports" class="nav-item">
+                        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+                        Reports
+                    </a>
+                    <a href="/discrepancies" class="nav-item active">
+                        <svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+                        Discrepancies
+                        <span class="badge">3</span>
+                    </a>
+                    <a href="/letters" class="nav-item">
+                        <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        Letters
+                    </a>
+                    <a href="/tracker" class="nav-item">
+                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        Tracker
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Records</div>
+                    <a href="/audit" class="nav-item">
+                        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+                        Audit Trail
+                    </a>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar">JD</div>
+                    <div class="user-details">
+                        <div class="user-name">John Doe</div>
+                        <div class="user-email">john@example.com</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main -->
+        <main class="main-content">
+            <header class="main-header">
+                <h1>Discrepancy Queue</h1>
+            </header>
+
+            <div class="page-content">
+                <!-- Filters -->
+                <div class="filters">
+                    <button class="filter-btn active">All (3)</button>
+                    <button class="filter-btn">Pending (2)</button>
+                    <button class="filter-btn">Sent (1)</button>
+                    <button class="filter-btn">Responded (0)</button>
+                    <button class="filter-btn">Resolved (0)</button>
+                </div>
+
+                <!-- Table -->
+                <div class="discrepancy-table">
+                    <div class="table-header">
+                        <span></span>
+                        <span>Creditor / Issue</span>
+                        <span>Bureau</span>
+                        <span>Statute</span>
+                        <span>Status</span>
+                        <span></span>
+                    </div>
+
+                    <div class="table-row">
+                        <div class="status-dot pending"></div>
+                        <div class="creditor-cell">
+                            <div class="creditor-name">Capital One</div>
+                            <div class="creditor-issue">Date inconsistency — reported late payment date differs from statement</div>
+                        </div>
+                        <span class="bureau-badge">Equifax</span>
+                        <span class="statute-code">FCRA §611</span>
+                        <span class="status-label pending">Pending</span>
+                        <div class="row-action">
+                            <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                        </div>
+                    </div>
+
+                    <div class="table-row">
+                        <div class="status-dot sent"></div>
+                        <div class="creditor-cell">
+                            <div class="creditor-name">Midland MCM</div>
+                            <div class="creditor-issue">Unverified account — no original creditor documentation</div>
+                        </div>
+                        <span class="bureau-badge">TransUnion</span>
+                        <span class="statute-code">FDCPA §809</span>
+                        <span class="status-label sent">Sent</span>
+                        <div class="row-action">
+                            <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                        </div>
+                    </div>
+
+                    <div class="table-row">
+                        <div class="status-dot pending"></div>
+                        <div class="creditor-cell">
+                            <div class="creditor-name">AT&T</div>
+                            <div class="creditor-issue">Balance mismatch — reported balance differs from final statement</div>
+                        </div>
+                        <span class="bureau-badge">Experian</span>
+                        <span class="statute-code">FCRA §623</span>
+                        <span class="status-label pending">Pending</span>
+                        <div class="row-action">
+                            <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Legend -->
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="status-dot pending"></div>
+                        <span>Pending — Draft letter not yet generated</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="status-dot sent"></div>
+                        <span>Sent — Letter mailed, awaiting response</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="status-dot responded"></div>
+                        <span>Responded — Response received</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="status-dot resolved"></div>
+                        <span>Resolved — Issue addressed</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

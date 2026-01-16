@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>605b.ai | Statute-Driven Credit Reinvestigation Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #0C0C0C;
+            --bg-secondary: #141414;
+            --bg-card: #1A1A1A;
+            --border: #2A2A2A;
+            --border-hover: #3A3A3A;
+            --text: #FAFAFA;
+            --text-secondary: #A0A0A0;
+            --text-muted: #666666;
+            --orange: #FF6B35;
+            --orange-dim: rgba(255, 107, 53, 0.1);
+            --orange-glow: rgba(255, 107, 53, 0.4);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        /* Grid background */
+        .bg-grid {
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255, 107, 53, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 107, 53, 0.03) 1px, transparent 1px);
+            background-size: 80px 80px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Mouse-follow gradient */
+        .bg-glow {
+            position: fixed;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(255, 107, 53, 0.07) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+            transform: translate(-50%, -50%);
+            transition: opacity 0.3s;
+            opacity: 0;
+        }
+
+        .bg-glow.visible {
+            opacity: 1;
+        }
+
+        /* Nav */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 0 32px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(12, 12, 12, 0.8);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            transform: translateY(-100%);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .logo-mark {
+            width: 32px;
+            height: 32px;
+            background: var(--orange);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            font-weight: 700;
+            color: white;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .logo:hover .logo-mark {
+            transform: scale(1.1) rotate(-5deg);
+        }
+
+        .logo-text {
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .nav-center {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 16px;
+            right: 16px;
+            height: 1px;
+            background: var(--orange);
+            transform: scaleX(0);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .nav-link:hover {
+            color: var(--text);
+        }
+
+        .nav-link:hover::after {
+            transform: scaleX(1);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn {
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-secondary);
+        }
+
+        .btn-ghost:hover {
+            color: var(--text);
+            background: var(--bg-card);
+        }
+
+        .btn-primary {
+            background: var(--text);
+            color: var(--bg);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-orange {
+            background: var(--orange);
+            color: white;
+        }
+
+        .btn-orange:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px var(--orange-glow);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--orange);
+            color: var(--orange);
+        }
+
+        .btn-lg {
+            padding: 12px 24px;
+            font-size: 15px;
+        }
+
+        /* Hero */
+        .hero {
+            position: relative;
+            z-index: 10;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 140px 32px 100px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .hero-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--orange);
+            margin-bottom: 20px;
+            opacity: 0;
+        }
+
+        .hero-eyebrow::before {
+            content: '';
+            width: 20px;
+            height: 2px;
+            background: var(--orange);
+        }
+
+        .hero h1 {
+            font-size: clamp(44px, 7vw, 72px);
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            line-height: 1.05;
+            margin-bottom: 24px;
+            opacity: 0;
+        }
+
+        .hero h1 .highlight {
+            color: var(--orange);
+            position: relative;
+            display: inline-block;
+        }
+
+        .hero-desc {
+            font-size: 18px;
+            color: var(--text-secondary);
+            max-width: 540px;
+            line-height: 1.7;
+            margin-bottom: 36px;
+            opacity: 0;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            opacity: 0;
+        }
+
+        .hero-disclaimer {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 60px;
+            max-width: 540px;
+        }
+
+        /* Terminal */
+        .terminal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            max-width: 650px;
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+            opacity: 0;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s;
+        }
+
+        .terminal:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 32px 64px rgba(0, 0, 0, 0.5);
+        }
+
+        .terminal-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 16px;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .terminal-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            transition: transform 0.2s;
+        }
+
+        .terminal:hover .terminal-dot {
+            transform: scale(1.2);
+        }
+
+        .terminal-dot.r { background: #FF5F56; }
+        .terminal-dot.y { background: #FFBD2E; }
+        .terminal-dot.g { background: #27C93F; }
+
+        .terminal-title {
+            margin-left: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .terminal-body {
+            padding: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            line-height: 1.9;
+            min-height: 280px;
+            max-height: 280px;
+            overflow-y: auto;
+        }
+
+        .terminal-body::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .terminal-body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .terminal-body::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        .t-line {
+            display: flex;
+            gap: 10px;
+            opacity: 0;
+        }
+
+        .t-cmd::after {
+            content: '▋';
+            animation: blink 1s step-end infinite;
+            margin-left: 2px;
+            opacity: 0.7;
+        }
+
+        .t-cmd.done::after {
+            display: none;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        .t-prompt {
+            color: var(--orange);
+            user-select: none;
+        }
+
+        .t-cmd {
+            color: var(--text);
+        }
+
+        .t-out {
+            color: var(--text-muted);
+            padding-left: 18px;
+            opacity: 0;
+        }
+
+        .t-success {
+            color: #27C93F;
+        }
+
+        .t-error {
+            color: #FF5F56;
+        }
+
+        /* Logos strip */
+        .logos {
+            position: relative;
+            z-index: 10;
+            padding: 60px 32px;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-secondary);
+            overflow: hidden;
+        }
+
+        .logos-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .logos-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .logos-grid {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 48px;
+            flex-wrap: wrap;
+        }
+
+        .logo-item {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-muted);
+            opacity: 0.4;
+            transition: all 0.3s;
+            cursor: default;
+        }
+
+        .logo-item:hover {
+            opacity: 1;
+            color: var(--orange);
+            transform: translateY(-2px);
+        }
+
+        /* Features */
+        .features {
+            position: relative;
+            z-index: 10;
+            padding: 120px 32px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 64px;
+        }
+
+        .section-eyebrow {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--orange);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: clamp(32px, 4vw, 44px);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 16px;
+        }
+
+        .section-desc {
+            font-size: 17px;
+            color: var(--text-secondary);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .feature-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 28px;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--orange), transparent);
+            transform: scaleX(0);
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .feature-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-8px);
+        }
+
+        .feature-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--orange-dim);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: scale(1.1) rotate(-5deg);
+            background: var(--orange);
+        }
+
+        .feature-card:hover .feature-icon svg {
+            stroke: white;
+        }
+
+        .feature-icon svg {
+            width: 20px;
+            height: 20px;
+            stroke: var(--orange);
+            transition: stroke 0.3s;
+        }
+
+        .feature-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .feature-desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Steps */
+        .steps {
+            position: relative;
+            z-index: 10;
+            padding: 120px 32px;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .steps-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 32px;
+        }
+
+        .step-card {
+            text-align: center;
+            padding: 24px;
+            position: relative;
+        }
+
+        .step-card::after {
+            content: '';
+            position: absolute;
+            top: 50px;
+            right: -16px;
+            width: 32px;
+            height: 2px;
+            background: var(--border);
+        }
+
+        .step-card:last-child::after {
+            display: none;
+        }
+
+        .step-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 48px;
+            font-weight: 700;
+            color: var(--orange);
+            opacity: 0.2;
+            margin-bottom: 16px;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .step-card:hover .step-num {
+            opacity: 0.6;
+            transform: scale(1.1);
+        }
+
+        .step-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .step-desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Stats */
+        .stats {
+            position: relative;
+            z-index: 10;
+            padding: 80px 32px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 32px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 24px;
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+
+        .stat-item:hover {
+            background: var(--bg-secondary);
+        }
+
+        .stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 44px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 4px;
+            transition: all 0.3s;
+        }
+
+        .stat-item:hover .stat-value {
+            color: var(--orange);
+            transform: scale(1.05);
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .stats-source {
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 24px;
+            opacity: 0.6;
+        }
+
+        /* CTA */
+        .cta {
+            position: relative;
+            z-index: 10;
+            padding: 120px 32px;
+            text-align: center;
+        }
+
+        .cta-inner {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .cta h2 {
+            font-size: clamp(32px, 5vw, 48px);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 16px;
+        }
+
+        .cta p {
+            font-size: 17px;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .cta-disclaimer {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 24px;
+        }
+
+        /* Footer */
+        footer {
+            position: relative;
+            z-index: 10;
+            padding: 32px;
+            border-top: 1px solid var(--border);
+        }
+
+        .footer-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 24px;
+        }
+
+        .footer-links a {
+            font-size: 14px;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: var(--orange);
+        }
+
+        .footer-copy {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* Scroll reveal animations */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        /* Magnetic button effect */
+        .magnetic {
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .features-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .steps-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .step-card::after {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                padding: 0 20px;
+            }
+            .nav-center {
+                display: none;
+            }
+            .hero, .features, .stats, .cta {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+            .features-grid,
+            .steps-grid {
+                grid-template-columns: 1fr;
+            }
+            .hero-buttons,
+            .cta-buttons {
+                flex-direction: column;
+            }
+            .hero-disclaimer {
+                margin-top: 16px;
+                margin-bottom: 48px;
+            }
+            .footer-inner {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+            .bg-glow {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="bg-glow" id="bgGlow"></div>
+
+    <nav id="nav">
+        <a href="/" class="logo">
+            <div class="logo-mark">605B</div>
+            <span class="logo-text">605b.ai</span>
+        </a>
+
+        <div class="nav-center">
+            <a href="#features" class="nav-link">Features</a>
+            <a href="#steps" class="nav-link">How It Works</a>
+            <a href="https://www.cfpb.gov" target="_blank" class="nav-link">Resources</a>
+            <a href="#" class="nav-link">Docs</a>
+        </div>
+
+        <div class="nav-right">
+            <a href="/sign-in" class="btn btn-ghost">Sign In</a>
+            <a href="/sign-up" class="btn btn-primary magnetic">Get Started</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-eyebrow">Statute-Driven Credit Reinvestigation Platform</div>
+        <h1>Credit Reinvestigation,<br><span class="highlight">Structured Under Federal Law</span></h1>
+        <p class="hero-desc">
+            Generate compliant documentation, track statutory timelines, and maintain
+            a complete audit trail — clearly, deliberately, and without shortcuts.
+        </p>
+        <div class="hero-buttons">
+            <a href="/sign-up" class="btn btn-orange btn-lg magnetic">Start Report Analysis →</a>
+            <a href="#steps" class="btn btn-outline btn-lg magnetic">How It Works</a>
+        </div>
+        <p class="hero-disclaimer">Software tools only. No guarantees. Not legal advice.</p>
+
+        <div class="terminal" id="terminal">
+            <div class="terminal-bar">
+                <span class="terminal-dot r"></span>
+                <span class="terminal-dot y"></span>
+                <span class="terminal-dot g"></span>
+                <span class="terminal-title">605b.ai — reinvestigation</span>
+            </div>
+            <div class="terminal-body" id="terminalBody">
+                <!-- Dynamic content inserted by JS -->
+            </div>
+        </div>
+    </section>
+
+    <section class="logos">
+        <div class="logos-inner">
+            <div class="logos-label reveal">Structured Around Federal Consumer Protection Statutes</div>
+            <div class="logos-grid">
+                <span class="logo-item reveal">FCRA</span>
+                <span class="logo-item reveal">FDCPA</span>
+                <span class="logo-item reveal">FCBA</span>
+                <span class="logo-item reveal">TILA</span>
+                <span class="logo-item reveal">ECOA</span>
+                <span class="logo-item reveal">RESPA</span>
+                <span class="logo-item reveal">EFTA</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="stats">
+        <div class="stats-grid">
+            <div class="stat-item reveal">
+                <div class="stat-value" data-target="62">0</div>
+                <div class="stat-label">Statute-Specific Templates</div>
+            </div>
+            <div class="stat-item reveal">
+                <div class="stat-value">1 in 5</div>
+                <div class="stat-label">Reports Contain Errors*</div>
+            </div>
+            <div class="stat-item reveal">
+                <div class="stat-value" data-target="30">0</div>
+                <div class="stat-label">Day Response Window</div>
+            </div>
+            <div class="stat-item reveal">
+                <div class="stat-value" data-target="7">0</div>
+                <div class="stat-label">Federal Statutes Covered</div>
+            </div>
+        </div>
+        <p class="stats-source reveal">*FTC Study, 2012</p>
+    </section>
+
+    <section class="features" id="features">
+        <div class="section-header">
+            <div class="section-eyebrow reveal">Platform</div>
+            <h2 class="section-title reveal">Core reinvestigation tools</h2>
+            <p class="section-desc reveal">Six tools designed for structured documentation, deadlines, and audit-ready recordkeeping.</p>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card reveal">
+                <div class="feature-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <path d="M14 2v6h6"/>
+                    </svg>
+                </div>
+                <h3 class="feature-title">Report Parser</h3>
+                <p class="feature-desc">Upload PDF reports from all three bureaus. Extract tradelines and flag discrepancies.</p>
+            </div>
+            <div class="feature-card reveal">
+                <div class="feature-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 16v-4"/><path d="M12 8h.01"/>
+                    </svg>
+                </div>
+                <h3 class="feature-title">Statute Guidance Engine</h3>
+                <p class="feature-desc">Context-aware assistance for selecting applicable statutes and structuring correspondence.</p>
+            </div>
+            <div class="feature-card reveal">
+                <div class="feature-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <path d="M3 9h18"/><path d="M9 21V9"/>
+                    </svg>
+                </div>
+                <h3 class="feature-title">Letter Templates</h3>
+                <p class="feature-desc">62 professionally-structured templates covering FCRA, FDCPA, FCBA, and related statutes.</p>
+            </div>
+            <div class="feature-card reveal">
+                <div class="feature-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                    </svg>
+                </div>
+                <h3 class="feature-title">Response & Deadline Tracker</h3>
+                <p class="feature-desc">Monitor correspondence status with automated deadline calculations and response logging.</p>
+            </div>
+            <div class="feature-card reveal">
+                <div class="feature-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
+                        <line x1="4" y1="22" x2="4" y2="15"/>
+                    </svg>
+                </div>
+                <h3 class="feature-title">Discrepancy Queue</h3>
+                <p class="feature-desc">Review flagged items with reason codes and applicable statute references.</p>
+            </div>
+            <div class="feature-card reveal">
+                <div class="feature-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 20h9"/>
+                        <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                    </svg>
+                </div>
+                <h3 class="feature-title">Audit Trail</h3>
+                <p class="feature-desc">Complete timestamped history of all actions, exportable for documentation purposes.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="steps" id="steps">
+        <div class="steps-inner">
+            <div class="section-header">
+                <div class="section-eyebrow reveal">Process</div>
+                <h2 class="section-title reveal">From discrepancy to documentation</h2>
+                <p class="section-desc reveal">Four structured steps for statute-compliant reinvestigation requests.</p>
+            </div>
+
+            <div class="steps-grid">
+                <div class="step-card reveal">
+                    <div class="step-num">01</div>
+                    <h3 class="step-title">Upload</h3>
+                    <p class="step-desc">Upload credit reports from all three bureaus. Processed in-memory for privacy.</p>
+                </div>
+                <div class="step-card reveal">
+                    <div class="step-num">02</div>
+                    <h3 class="step-title">Analyze</h3>
+                    <p class="step-desc">System parses tradelines, identifies discrepancies, and flags items with applicable statutes.</p>
+                </div>
+                <div class="step-card reveal">
+                    <div class="step-num">03</div>
+                    <h3 class="step-title">Dispute</h3>
+                    <p class="step-desc">Generate structured correspondence with proper statute citations and deadline tracking.</p>
+                </div>
+                <div class="step-card reveal">
+                    <div class="step-num">04</div>
+                    <h3 class="step-title">Document</h3>
+                    <p class="step-desc">Log responses, monitor deadlines, maintain complete audit trail.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta">
+        <div class="cta-inner">
+            <h2 class="reveal">Ready to structure your reinvestigation?</h2>
+            <p class="reveal">Start with a report analysis. Identify discrepancies, generate documentation, and track statutory timelines.</p>
+            <div class="cta-buttons reveal">
+                <a href="/sign-up" class="btn btn-orange btn-lg magnetic">Start Report Analysis →</a>
+                <a href="https://www.annualcreditreport.com" target="_blank" class="btn btn-outline btn-lg magnetic">Get Free Reports</a>
+            </div>
+            <p class="cta-disclaimer reveal">Software tools only. No guarantees. Not legal advice.</p>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-inner">
+            <a href="/" class="logo">
+                <div class="logo-mark">605B</div>
+                <span class="logo-text">605b.ai</span>
+            </a>
+
+            <div class="footer-links">
+                <a href="https://www.annualcreditreport.com" target="_blank">Annual Credit Report</a>
+                <a href="https://www.cfpb.gov" target="_blank">CFPB</a>
+                <a href="https://www.ftc.gov" target="_blank">FTC</a>
+                <a href="/privacy">Privacy</a>
+                <a href="/terms">Terms</a>
+            </div>
+
+            <div class="footer-copy">© 2025 Ninth Wave Analytics LLC. Software tools only.</div>
+        </div>
+    </footer>
+
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+
+        // ========================================
+        // Mouse-follow background glow
+        // ========================================
+        const bgGlow = document.getElementById('bgGlow');
+        let mouseX = 0, mouseY = 0;
+        let glowX = 0, glowY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            bgGlow.classList.add('visible');
+        });
+
+        document.addEventListener('mouseleave', () => {
+            bgGlow.classList.remove('visible');
+        });
+
+        // Smooth follow
+        function animateGlow() {
+            glowX += (mouseX - glowX) * 0.08;
+            glowY += (mouseY - glowY) * 0.08;
+            bgGlow.style.left = glowX + 'px';
+            bgGlow.style.top = glowY + 'px';
+            requestAnimationFrame(animateGlow);
+        }
+        animateGlow();
+
+        // ========================================
+        // Magnetic button effect
+        // ========================================
+        document.querySelectorAll('.magnetic').forEach(btn => {
+            btn.addEventListener('mousemove', (e) => {
+                const rect = btn.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                btn.style.transform = `translate(${x * 0.2}px, ${y * 0.2}px)`;
+            });
+
+            btn.addEventListener('mouseleave', () => {
+                btn.style.transform = 'translate(0, 0)';
+            });
+        });
+
+        // ========================================
+        // Hero entrance animation
+        // ========================================
+        const heroTL = gsap.timeline({ delay: 0.3 });
+
+        heroTL
+            .to('nav', { y: 0, duration: 0.6, ease: 'power3.out' })
+            .to('.hero-eyebrow', { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }, '-=0.3')
+            .to('.hero h1', { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }, '-=0.4')
+            .to('.hero-desc', { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }, '-=0.4')
+            .to('.hero-buttons', { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }, '-=0.4')
+            .to('.terminal', { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }, '-=0.4');
+
+        // Terminal typing effect - starts after hero animation
+        heroTL.add(() => {
+            startTerminalLoop();
+        }, '-=0.4');
+
+        // ========================================
+        // Looping Terminal Animation
+        // ========================================
+        const terminalScenes = [
+            // Scene 1: Upload and Parse
+            {
+                lines: [
+                    { type: 'cmd', text: '605b parse --report equifax.pdf', delay: 0 },
+                    { type: 'out', text: 'Parsing credit report...', delay: 800 },
+                    { type: 'out', text: 'Extracted 47 tradelines', delay: 400 },
+                    { type: 'out', text: 'Scanning for discrepancies...', delay: 300 },
+                    { type: 'error', text: '→ 3 discrepancies flagged for review', delay: 600 },
+                    { type: 'out', text: '  Capital One: Date inconsistency (FCRA §611)', delay: 150 },
+                    { type: 'out', text: '  Midland MCM: Unverified account (FDCPA §809)', delay: 150 },
+                    { type: 'out', text: '  AT&T: Balance mismatch (FCRA §623)', delay: 150 },
+                ],
+                pause: 2500
+            },
+            // Scene 2: Generate Letters
+            {
+                lines: [
+                    { type: 'cmd', text: '605b generate --all-discrepancies', delay: 0 },
+                    { type: 'out', text: 'Selecting applicable statutes...', delay: 600 },
+                    { type: 'out', text: 'Building reinvestigation requests...', delay: 500 },
+                    { type: 'success', text: '✓ Letter 1: Equifax — FCRA §611 dispute', delay: 400 },
+                    { type: 'success', text: '✓ Letter 2: TransUnion — FDCPA §809 validation', delay: 200 },
+                    { type: 'success', text: '✓ Letter 3: Experian — FCRA §623 direct dispute', delay: 200 },
+                    { type: 'out', text: 'Letters saved to /documents', delay: 400 },
+                ],
+                pause: 2500
+            },
+            // Scene 3: Track & Monitor
+            {
+                lines: [
+                    { type: 'cmd', text: '605b tracker --status', delay: 0 },
+                    { type: 'out', text: 'Fetching dispute status...', delay: 500 },
+                    { type: 'out', text: '', delay: 200 },
+                    { type: 'out', text: '  Equifax      Sent Jan 8     ⏳ 22 days remaining', delay: 150 },
+                    { type: 'out', text: '  TransUnion   Sent Jan 10    ⏳ 24 days remaining', delay: 150 },
+                    { type: 'success', text: '  Experian     RESPONSE RECEIVED', delay: 150 },
+                    { type: 'out', text: '', delay: 300 },
+                    { type: 'success', text: '3 of 3 responses received', delay: 400 },
+                ],
+                pause: 2500
+            },
+            // Scene 4: Response Received
+            {
+                lines: [
+                    { type: 'cmd', text: '605b inbox --check', delay: 0 },
+                    { type: 'out', text: 'Checking for bureau responses...', delay: 600 },
+                    { type: 'success', text: '✓ New response from Equifax', delay: 500 },
+                    { type: 'out', text: '  Status: Investigation complete', delay: 200 },
+                    { type: 'out', text: '  Result: Item verified as accurate', delay: 200 },
+                    { type: 'out', text: '', delay: 300 },
+                    { type: 'cmd', text: '605b escalate --method-of-verification', delay: 800 },
+                    { type: 'out', text: 'Generating MOV request under FCRA §611(a)(7)...', delay: 500 },
+                    { type: 'success', text: '✓ Follow-up letter ready for review', delay: 400 },
+                ],
+                pause: 2500
+            },
+            // Scene 5: Audit Export
+            {
+                lines: [
+                    { type: 'cmd', text: '605b audit --export', delay: 0 },
+                    { type: 'out', text: 'Compiling documentation trail...', delay: 500 },
+                    { type: 'out', text: '  12 letters generated', delay: 200 },
+                    { type: 'out', text: '  8 responses logged', delay: 150 },
+                    { type: 'out', text: '  47 timestamps recorded', delay: 150 },
+                    { type: 'success', text: '✓ Exported to audit_trail_2025.pdf', delay: 400 },
+                    { type: 'out', text: '', delay: 300 },
+                    { type: 'success', text: 'Complete record ready for documentation', delay: 300 },
+                ],
+                pause: 3000
+            },
+        ];
+
+        let currentScene = 0;
+        const terminalBody = document.getElementById('terminalBody');
+
+        function typeText(element, text, speed = 30) {
+            return new Promise(resolve => {
+                let i = 0;
+                element.textContent = '';
+                if (text === '') {
+                    resolve();
+                    return;
+                }
+                const typing = setInterval(() => {
+                    element.textContent += text[i];
+                    i++;
+                    if (i >= text.length) {
+                        clearInterval(typing);
+                        resolve();
+                    }
+                }, speed);
+            });
+        }
+
+        function createLine(type) {
+            const div = document.createElement('div');
+            if (type === 'cmd') {
+                div.className = 't-line';
+                div.innerHTML = '<span class="t-prompt">$</span> <span class="t-cmd"></span>';
+            } else {
+                div.className = 't-out';
+                if (type === 'success') div.classList.add('t-success');
+                if (type === 'error') div.classList.add('t-error');
+            }
+            div.style.opacity = '0';
+            return div;
+        }
+
+        async function playScene(scene) {
+            // Clear terminal
+            terminalBody.innerHTML = '';
+
+            for (const line of scene.lines) {
+                await new Promise(r => setTimeout(r, line.delay));
+
+                const lineEl = createLine(line.type);
+                terminalBody.appendChild(lineEl);
+
+                // Fade in
+                gsap.to(lineEl, { opacity: 1, duration: 0.15 });
+
+                if (line.type === 'cmd') {
+                    // Type command character by character
+                    const cmdSpan = lineEl.querySelector('.t-cmd');
+                    await typeText(cmdSpan, line.text, 25);
+                    // Hide cursor after typing
+                    cmdSpan.classList.add('done');
+                } else {
+                    // Output appears instantly after fade
+                    lineEl.textContent = line.text;
+                }
+
+                // Scroll to bottom
+                terminalBody.scrollTop = terminalBody.scrollHeight;
+            }
+
+            // Pause before next scene
+            await new Promise(r => setTimeout(r, scene.pause));
+        }
+
+        async function startTerminalLoop() {
+            while (true) {
+                await playScene(terminalScenes[currentScene]);
+                currentScene = (currentScene + 1) % terminalScenes.length;
+            }
+        }
+
+        // ========================================
+        // Scroll reveal animations
+        // ========================================
+        gsap.utils.toArray('.reveal').forEach((el, i) => {
+            gsap.fromTo(el,
+                { opacity: 0, y: 30 },
+                {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.8,
+                    ease: 'power3.out',
+                    scrollTrigger: {
+                        trigger: el,
+                        start: 'top 85%',
+                        once: true
+                    }
+                }
+            );
+        });
+
+        // ========================================
+        // Stat counter animation
+        // ========================================
+        document.querySelectorAll('.stat-value[data-target]').forEach(stat => {
+            const target = parseInt(stat.dataset.target);
+
+            ScrollTrigger.create({
+                trigger: stat,
+                start: 'top 85%',
+                once: true,
+                onEnter: () => {
+                    gsap.to(stat, {
+                        innerHTML: target,
+                        duration: 1.5,
+                        ease: 'power2.out',
+                        snap: { innerHTML: 1 },
+                        onUpdate: function() {
+                            stat.innerHTML = Math.round(this.targets()[0].innerHTML);
+                        }
+                    });
+                }
+            });
+        });
+
+        // ========================================
+        // Feature cards stagger on scroll
+        // ========================================
+        ScrollTrigger.create({
+            trigger: '.features-grid',
+            start: 'top 80%',
+            once: true,
+            onEnter: () => {
+                gsap.fromTo('.feature-card',
+                    { opacity: 0, y: 40 },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.6,
+                        stagger: 0.1,
+                        ease: 'power3.out'
+                    }
+                );
+            }
+        });
+
+        // ========================================
+        // Steps stagger on scroll
+        // ========================================
+        ScrollTrigger.create({
+            trigger: '.steps-grid',
+            start: 'top 80%',
+            once: true,
+            onEnter: () => {
+                gsap.fromTo('.step-card',
+                    { opacity: 0, y: 40 },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.6,
+                        stagger: 0.15,
+                        ease: 'power3.out'
+                    }
+                );
+            }
+        });
+
+        // ========================================
+        // Logo items stagger
+        // ========================================
+        ScrollTrigger.create({
+            trigger: '.logos-grid',
+            start: 'top 85%',
+            once: true,
+            onEnter: () => {
+                gsap.fromTo('.logo-item',
+                    { opacity: 0, y: 20 },
+                    {
+                        opacity: 0.4,
+                        y: 0,
+                        duration: 0.5,
+                        stagger: 0.08,
+                        ease: 'power2.out'
+                    }
+                );
+            }
+        });
+
+        console.log('605b.ai — Loaded');
+    </script>
+</body>
+</html>

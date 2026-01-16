@@ -6,165 +6,8 @@ import {
   Shield, Menu, X, ArrowRight, Eye, Lock, Send, 
   FileText, Users, Target, Zap, Scale, CheckCircle2
 } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 
-// Triangle Particle Field Component
-function ParticleField() {
-  const canvasRef = useRef(null);
-  const mouseRef = useRef({ x: -1000, y: -1000 });
-  const particlesRef = useRef([]);
-  const animationRef = useRef(null);
-  const isMobileRef = useRef(false);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    let width = canvas.offsetWidth;
-    let height = canvas.offsetHeight;
-
-    const checkMobile = () => {
-      isMobileRef.current = window.innerWidth < 768;
-    };
-    checkMobile();
-
-    const setSize = () => {
-      checkMobile();
-      width = canvas.offsetWidth;
-      height = canvas.offsetHeight;
-      canvas.width = width * window.devicePixelRatio;
-      canvas.height = height * window.devicePixelRatio;
-      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-      initParticles();
-    };
-
-    const initParticles = () => {
-      particlesRef.current = [];
-      const spacing = isMobileRef.current ? 45 : 35;
-      const cols = Math.ceil(width / spacing) + 1;
-      const rows = Math.ceil(height / spacing) + 1;
-
-      for (let i = 0; i < cols; i++) {
-        for (let j = 0; j < rows; j++) {
-          particlesRef.current.push({
-            x: i * spacing + (j % 2) * (spacing / 2),
-            y: j * spacing,
-            direction: (i + j) % 2 === 0 ? 1 : -1,
-          });
-        }
-      }
-    };
-
-    const drawTriangle = (x, y, size, direction, opacity) => {
-      ctx.beginPath();
-      if (direction === 1) {
-        ctx.moveTo(x - size * 0.5, y - size * 0.5);
-        ctx.lineTo(x + size * 0.5, y);
-        ctx.lineTo(x - size * 0.5, y + size * 0.5);
-      } else {
-        ctx.moveTo(x + size * 0.5, y - size * 0.5);
-        ctx.lineTo(x - size * 0.5, y);
-        ctx.moveTo(x + size * 0.5, y + size * 0.5);
-      }
-      ctx.closePath();
-      ctx.fillStyle = `rgba(247, 208, 71, ${opacity})`;
-      ctx.fill();
-    };
-
-    const animate = () => {
-      ctx.clearRect(0, 0, width, height);
-
-      const particles = particlesRef.current;
-      const isMobile = isMobileRef.current;
-      const maxDist = isMobile ? 180 : 250;
-      const minSize = 2;
-      const maxSize = isMobile ? 12 : 16;
-
-      particles.forEach((p) => {
-        const dx = mouseRef.current.x - p.x;
-        const dy = mouseRef.current.y - p.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-
-        let size, opacity;
-        if (dist < maxDist) {
-          const proximity = 1 - (dist / maxDist);
-          size = minSize + (maxSize - minSize) * proximity;
-          opacity = 0.06 + 0.22 * proximity;
-        } else {
-          size = minSize;
-          opacity = 0.06;
-        }
-
-        drawTriangle(p.x, p.y, size, p.direction, opacity);
-      });
-
-      animationRef.current = requestAnimationFrame(animate);
-    };
-
-    const handleMouseMove = (e) => {
-      const rect = canvas.getBoundingClientRect();
-      mouseRef.current = {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
-      };
-    };
-
-    const handleMouseLeave = () => {
-      mouseRef.current = { x: -1000, y: -1000 };
-    };
-
-    const handleTouchMove = (e) => {
-      if (e.touches.length > 0) {
-        const rect = canvas.getBoundingClientRect();
-        const touch = e.touches[0];
-        mouseRef.current = {
-          x: touch.clientX - rect.left,
-          y: touch.clientY - rect.top,
-        };
-      }
-    };
-
-    const handleTouchEnd = () => {
-      mouseRef.current = { x: -1000, y: -1000 };
-    };
-
-    setSize();
-    animate();
-
-    window.addEventListener('resize', setSize);
-    canvas.addEventListener('mousemove', handleMouseMove);
-    canvas.addEventListener('mouseleave', handleMouseLeave);
-    canvas.addEventListener('touchmove', handleTouchMove, { passive: true });
-    canvas.addEventListener('touchend', handleTouchEnd);
-
-    return () => {
-      window.removeEventListener('resize', setSize);
-      canvas.removeEventListener('mousemove', handleMouseMove);
-      canvas.removeEventListener('mouseleave', handleMouseLeave);
-      canvas.removeEventListener('touchmove', handleTouchMove);
-      canvas.removeEventListener('touchend', handleTouchEnd);
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
-    };
-  }, []);
-
-  return (
-    <canvas
-      ref={canvasRef}
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        pointerEvents: 'auto',
-        zIndex: 0,
-      }}
-    />
-  );
-}
 
 export default function AboutPage() {
   const { isSignedIn } = useAuth();
@@ -174,84 +17,127 @@ export default function AboutPage() {
     <>
       <style jsx global>{`
         * { box-sizing: border-box; }
-        
+
         .about-page {
           min-height: 100vh;
-          background: #09090b;
-          color: #fafafa;
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          background: var(--bg);
+          color: var(--text);
+          font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
         }
-        
+
+        .bg-grid {
+          position: fixed;
+          inset: 0;
+          background-image:
+            linear-gradient(rgba(255, 107, 53, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 107, 53, 0.03) 1px, transparent 1px);
+          background-size: 80px 80px;
+          pointer-events: none;
+          z-index: 0;
+        }
+
         .nav {
           position: fixed;
           top: 0;
           left: 0;
           right: 0;
           z-index: 100;
-          padding: 16px 24px;
+          padding: 0 32px;
+          height: 64px;
           display: flex;
           justify-content: space-between;
           align-items: center;
-          background: rgba(9, 9, 11, 0.95);
+          background: rgba(12, 12, 12, 0.95);
           backdrop-filter: blur(20px);
-          border-bottom: 1px solid rgba(255,255,255,0.05);
+          border-bottom: 1px solid var(--border);
         }
-        
+
         .logo {
-          font-size: 22px;
-          font-weight: 700;
-          color: #fafafa;
+          display: flex;
+          align-items: center;
+          gap: 12px;
           text-decoration: none;
+          color: var(--text);
         }
-        
-        .logo-accent { color: #f7d047; }
-        
+
+        .logo-mark {
+          width: 32px;
+          height: 32px;
+          background: var(--orange);
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 10px;
+          font-weight: 700;
+          color: white;
+        }
+
+        .logo-text {
+          font-size: 16px;
+          font-weight: 600;
+          letter-spacing: -0.01em;
+        }
+
         .nav-links {
           display: flex;
           gap: 24px;
           align-items: center;
         }
-        
+
         .nav-link {
-          color: #a1a1aa;
+          color: var(--text-secondary);
           text-decoration: none;
           font-size: 14px;
           font-weight: 500;
+          transition: color 0.2s;
         }
-        
-        .nav-link:hover { color: #fafafa; }
-        
+
+        .nav-link:hover { color: var(--text); }
+
         .nav-button {
           padding: 8px 16px;
           background: transparent;
-          border: 1px solid #27272a;
+          border: 1px solid var(--border);
           border-radius: 8px;
-          color: #fafafa;
+          color: var(--text);
           font-size: 14px;
           font-weight: 500;
           text-decoration: none;
+          transition: all 0.2s;
         }
-        
+
+        .nav-button:hover {
+          border-color: var(--border-hover);
+          background: rgba(255, 255, 255, 0.02);
+        }
+
         .nav-button-primary {
           padding: 8px 16px;
-          background: #f7d047;
+          background: var(--orange);
           border: none;
           border-radius: 8px;
-          color: #09090b;
+          color: white;
           font-size: 14px;
           font-weight: 600;
           text-decoration: none;
+          transition: all 0.2s;
         }
-        
+
+        .nav-button-primary:hover {
+          background: #E55A2B;
+        }
+
         .mobile-menu-btn {
           display: none;
           background: none;
           border: none;
-          color: #fafafa;
+          color: var(--text);
           cursor: pointer;
           padding: 8px;
         }
-        
+
         .mobile-menu {
           display: none;
           position: fixed;
@@ -259,105 +145,106 @@ export default function AboutPage() {
           left: 0;
           right: 0;
           bottom: 0;
-          background: #09090b;
+          background: var(--bg);
           z-index: 200;
           padding: 24px;
           flex-direction: column;
         }
-        
+
         .mobile-menu.open { display: flex; }
-        
+
         .mobile-menu-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
           margin-bottom: 48px;
         }
-        
+
         .mobile-menu-links {
           display: flex;
           flex-direction: column;
           gap: 24px;
         }
-        
+
         .mobile-menu-link {
-          color: #fafafa;
+          color: var(--text);
           text-decoration: none;
           font-size: 24px;
           font-weight: 600;
         }
-        
+
         .mobile-menu-buttons {
           margin-top: auto;
           display: flex;
           flex-direction: column;
           gap: 12px;
         }
-        
+
         .btn-primary {
           display: inline-flex;
           align-items: center;
           gap: 8px;
           padding: 16px 28px;
-          background: #f7d047;
+          background: var(--orange);
           border: none;
           border-radius: 10px;
-          color: #09090b;
+          color: white;
           font-size: 16px;
           font-weight: 600;
           text-decoration: none;
           transition: all 0.2s;
         }
-        
+
         .btn-primary:hover {
-          background: #e5c33f;
+          background: #E55A2B;
           transform: translateY(-2px);
+          box-shadow: 0 8px 24px var(--orange-glow);
         }
-        
+
         .btn-secondary {
           display: inline-flex;
           align-items: center;
           gap: 8px;
           padding: 16px 28px;
           background: transparent;
-          border: 1px solid #27272a;
+          border: 1px solid var(--border);
           border-radius: 10px;
-          color: #fafafa;
+          color: var(--text);
           font-size: 16px;
           font-weight: 500;
           text-decoration: none;
           transition: all 0.2s;
         }
-        
+
         .btn-secondary:hover {
           background: rgba(255, 255, 255, 0.05);
-          border-color: #3f3f46;
+          border-color: var(--border-hover);
         }
-        
+
         /* Hero Header */
         .page-header {
           position: relative;
           padding: 140px 24px 80px;
           text-align: center;
-          background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(247, 208, 71, 0.06), transparent);
           overflow: hidden;
+          z-index: 10;
         }
-        
+
         .page-badge {
           display: inline-flex;
           align-items: center;
           gap: 8px;
           padding: 10px 18px;
-          background: rgba(247, 208, 71, 0.08);
-          border: 1px solid rgba(247, 208, 71, 0.15);
+          background: var(--orange-dim);
+          border: 1px solid rgba(255, 107, 53, 0.15);
           border-radius: 100px;
           font-size: 13px;
           font-weight: 500;
-          color: #f7d047;
+          color: var(--orange);
           margin-bottom: 24px;
           letter-spacing: 0.02em;
         }
-        
+
         .page-title {
           font-size: clamp(36px, 8vw, 56px);
           font-weight: 700;
@@ -365,30 +252,32 @@ export default function AboutPage() {
           letter-spacing: -0.035em;
           margin-bottom: 20px;
         }
-        
+
         .page-subtitle {
           font-size: clamp(17px, 2.5vw, 20px);
           line-height: 1.6;
-          color: #a1a1aa;
+          color: var(--text-secondary);
           max-width: 600px;
           margin: 0 auto;
         }
-        
+
         /* Why Section */
         .why-section {
           padding: 80px 24px 100px;
-          background: #09090b;
+          background: var(--bg);
+          position: relative;
+          z-index: 10;
         }
-        
+
         .why-container {
           max-width: 760px;
           margin: 0 auto;
         }
-        
+
         .why-label {
           font-size: 12px;
           font-weight: 600;
-          color: #f7d047;
+          color: var(--orange);
           text-transform: uppercase;
           letter-spacing: 0.15em;
           margin-bottom: 20px;
@@ -396,14 +285,14 @@ export default function AboutPage() {
           align-items: center;
           gap: 10px;
         }
-        
+
         .why-label::after {
           content: '';
           flex: 1;
           height: 1px;
-          background: linear-gradient(90deg, rgba(247, 208, 71, 0.3), transparent);
+          background: linear-gradient(90deg, rgba(255, 107, 53, 0.3), transparent);
         }
-        
+
         .why-title {
           font-size: clamp(32px, 5vw, 44px);
           font-weight: 700;
@@ -411,27 +300,27 @@ export default function AboutPage() {
           margin-bottom: 40px;
           line-height: 1.15;
         }
-        
+
         .why-content {
           font-size: 18px;
           line-height: 1.85;
-          color: #a1a1aa;
+          color: var(--text-secondary);
         }
-        
+
         .why-content p {
           margin-bottom: 28px;
         }
-        
+
         .why-content strong {
-          color: #fafafa;
+          color: var(--text);
           font-weight: 600;
         }
-        
+
         .why-highlight {
           position: relative;
           padding: 28px 32px;
-          background: linear-gradient(135deg, rgba(247, 208, 71, 0.08) 0%, rgba(247, 208, 71, 0.03) 100%);
-          border-left: 3px solid #f7d047;
+          background: linear-gradient(135deg, var(--orange-dim) 0%, rgba(255, 107, 53, 0.03) 100%);
+          border-left: 3px solid var(--orange);
           border-radius: 0 16px 16px 0;
           margin: 40px 0;
           font-size: 17px;
@@ -439,133 +328,137 @@ export default function AboutPage() {
           font-style: italic;
           line-height: 1.7;
         }
-        
+
         .why-closing {
           font-size: 20px;
-          color: #fafafa;
+          color: var(--text);
           font-weight: 600;
           padding-top: 24px;
-          border-top: 1px solid rgba(255, 255, 255, 0.08);
+          border-top: 1px solid var(--border);
           margin-top: 40px;
           letter-spacing: -0.01em;
         }
-        
+
         /* Principles Section */
         .principles-section {
           padding: 100px 24px;
-          background: #0c0c0e;
+          background: var(--bg-secondary);
+          position: relative;
+          z-index: 10;
         }
-        
+
         .principles-container {
           max-width: 1100px;
           margin: 0 auto;
         }
-        
+
         .section-header {
           text-align: center;
           margin-bottom: 60px;
         }
-        
+
         .section-label {
           font-size: 12px;
           font-weight: 600;
-          color: #f7d047;
+          color: var(--orange);
           text-transform: uppercase;
           letter-spacing: 0.15em;
           margin-bottom: 16px;
         }
-        
+
         .section-title {
           font-size: clamp(28px, 5vw, 36px);
           font-weight: 700;
           letter-spacing: -0.02em;
           margin-bottom: 16px;
         }
-        
+
         .section-subtitle {
           font-size: 17px;
-          color: #71717a;
+          color: var(--text-muted);
           max-width: 500px;
           margin: 0 auto;
         }
-        
+
         .principles-grid {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
           gap: 20px;
         }
-        
+
         .principle-card {
           padding: 32px;
-          background: #111113;
-          border: 1px solid #1c1c1f;
+          background: var(--bg-card);
+          border: 1px solid var(--border);
           border-radius: 16px;
           transition: all 0.3s ease;
         }
-        
+
         .principle-card:hover {
-          border-color: rgba(247, 208, 71, 0.2);
+          border-color: rgba(255, 107, 53, 0.2);
           transform: translateY(-4px);
         }
-        
+
         .principle-icon {
           width: 52px;
           height: 52px;
           display: flex;
           align-items: center;
           justify-content: center;
-          background: rgba(247, 208, 71, 0.1);
+          background: var(--orange-dim);
           border-radius: 12px;
-          color: #f7d047;
+          color: var(--orange);
           margin-bottom: 20px;
         }
-        
+
         .principle-title {
           font-size: 18px;
           font-weight: 600;
           margin-bottom: 12px;
-          color: #fafafa;
+          color: var(--text);
         }
-        
+
         .principle-desc {
           font-size: 15px;
-          color: #a1a1aa;
+          color: var(--text-secondary);
           line-height: 1.7;
         }
-        
+
         /* What We Are / Aren't */
         .contrast-section {
           padding: 100px 24px;
-          background: #09090b;
+          background: var(--bg);
+          position: relative;
+          z-index: 10;
         }
-        
+
         .contrast-container {
           max-width: 900px;
           margin: 0 auto;
         }
-        
+
         .contrast-grid {
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 24px;
           margin-top: 48px;
         }
-        
+
         .contrast-card {
           padding: 32px;
           border-radius: 16px;
         }
-        
+
         .contrast-card.negative {
           background: rgba(239, 68, 68, 0.05);
           border: 1px solid rgba(239, 68, 68, 0.15);
         }
-        
+
         .contrast-card.positive {
           background: rgba(34, 197, 94, 0.05);
           border: 1px solid rgba(34, 197, 94, 0.15);
         }
-        
+
         .contrast-header {
           font-size: 14px;
           font-weight: 600;
@@ -576,57 +469,59 @@ export default function AboutPage() {
           align-items: center;
           gap: 8px;
         }
-        
+
         .contrast-card.negative .contrast-header { color: #ef4444; }
         .contrast-card.positive .contrast-header { color: #22c55e; }
-        
+
         .contrast-list {
           list-style: none;
           padding: 0;
           margin: 0;
         }
-        
+
         .contrast-list li {
           display: flex;
           align-items: flex-start;
           gap: 12px;
           padding: 12px 0;
           font-size: 15px;
-          color: #a1a1aa;
+          color: var(--text-secondary);
           border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
-        
+
         .contrast-list li:last-child { border-bottom: none; }
-        
+
         .contrast-card.negative .contrast-list li svg {
           color: #ef4444;
           flex-shrink: 0;
           margin-top: 2px;
         }
-        
+
         .contrast-card.positive .contrast-list li svg {
           color: #22c55e;
           flex-shrink: 0;
           margin-top: 2px;
         }
-        
+
         /* Company Section */
         .company-section {
           padding: 100px 24px;
-          background: #0c0c0e;
+          background: var(--bg-secondary);
+          position: relative;
+          z-index: 10;
         }
-        
+
         .company-container {
           max-width: 800px;
           margin: 0 auto;
           text-align: center;
         }
-        
+
         .company-logo {
           width: 80px;
           height: 80px;
-          background: linear-gradient(135deg, rgba(247, 208, 71, 0.15) 0%, rgba(247, 208, 71, 0.05) 100%);
-          border: 1px solid rgba(247, 208, 71, 0.2);
+          background: linear-gradient(135deg, var(--orange-dim) 0%, rgba(255, 107, 53, 0.05) 100%);
+          border: 1px solid rgba(255, 107, 53, 0.2);
           border-radius: 20px;
           display: flex;
           align-items: center;
@@ -634,99 +529,103 @@ export default function AboutPage() {
           margin: 0 auto 24px;
           font-size: 28px;
           font-weight: 700;
-          color: #f7d047;
+          color: var(--orange);
         }
-        
+
         .company-name {
           font-size: 24px;
           font-weight: 700;
           margin-bottom: 8px;
         }
-        
+
         .company-tagline {
           font-size: 16px;
-          color: #71717a;
+          color: var(--text-muted);
           margin-bottom: 32px;
         }
-        
+
         .company-details {
           display: flex;
           justify-content: center;
           gap: 48px;
           flex-wrap: wrap;
           padding: 32px 0;
-          border-top: 1px solid #1c1c1f;
-          border-bottom: 1px solid #1c1c1f;
+          border-top: 1px solid var(--border);
+          border-bottom: 1px solid var(--border);
         }
-        
+
         .company-detail { text-align: center; }
-        
+
         .company-detail-label {
           font-size: 12px;
-          color: #52525b;
+          color: var(--text-muted);
           text-transform: uppercase;
           letter-spacing: 0.1em;
           margin-bottom: 6px;
         }
-        
+
         .company-detail-value {
           font-size: 15px;
-          color: #a1a1aa;
+          color: var(--text-secondary);
         }
-        
+
         .company-contact { margin-top: 32px; }
-        
+
         .company-contact p {
           font-size: 15px;
-          color: #71717a;
+          color: var(--text-muted);
           margin-bottom: 12px;
         }
-        
+
         .company-contact a {
-          color: #f7d047;
+          color: var(--orange);
           text-decoration: none;
           font-weight: 500;
         }
-        
+
         .company-contact a:hover { text-decoration: underline; }
-        
+
         /* CTA Section */
         .cta-section {
           padding: 100px 24px;
           text-align: center;
-          background: linear-gradient(180deg, #09090b 0%, #0c0c0e 100%);
+          background: var(--bg);
+          position: relative;
+          z-index: 10;
         }
-        
+
         .cta-title {
           font-size: clamp(28px, 5vw, 40px);
           font-weight: 700;
           margin-bottom: 16px;
           letter-spacing: -0.02em;
         }
-        
+
         .cta-subtitle {
           font-size: 17px;
-          color: #a1a1aa;
+          color: var(--text-secondary);
           margin-bottom: 32px;
           max-width: 500px;
           margin-left: auto;
           margin-right: auto;
         }
-        
+
         .cta-buttons {
           display: flex;
           gap: 12px;
           justify-content: center;
           flex-wrap: wrap;
         }
-        
+
         /* Footer */
         .footer {
-          border-top: 1px solid #1c1c1f;
+          border-top: 1px solid var(--border);
           padding: 48px 24px 24px;
-          background: #0c0c0e;
+          background: var(--bg-secondary);
+          position: relative;
+          z-index: 10;
         }
-        
+
         .footer-content {
           max-width: 1100px;
           margin: 0 auto;
@@ -734,118 +633,141 @@ export default function AboutPage() {
           flex-direction: column;
           gap: 32px;
         }
-        
+
         .footer-main {
           display: flex;
           justify-content: space-between;
           flex-wrap: wrap;
           gap: 48px;
         }
-        
+
         .footer-brand { max-width: 300px; }
-        
+
         .footer-logo {
-          font-size: 20px;
-          font-weight: 700;
+          display: flex;
+          align-items: center;
+          gap: 12px;
           margin-bottom: 12px;
-          color: #fafafa;
         }
-        
+
+        .footer-logo-mark {
+          width: 32px;
+          height: 32px;
+          background: var(--orange);
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 10px;
+          font-weight: 700;
+          color: white;
+        }
+
+        .footer-logo-text {
+          font-size: 16px;
+          font-weight: 600;
+          color: var(--text);
+        }
+
         .footer-tagline {
           font-size: 14px;
-          color: #71717a;
+          color: var(--text-muted);
           line-height: 1.6;
         }
-        
+
         .footer-links {
           display: flex;
           gap: 48px;
           flex-wrap: wrap;
         }
-        
+
         .footer-column {
           display: flex;
           flex-direction: column;
           gap: 12px;
         }
-        
+
         .footer-column-title {
           font-size: 13px;
           font-weight: 600;
-          color: #fafafa;
+          color: var(--text);
           margin-bottom: 4px;
         }
-        
+
         .footer-link {
           font-size: 14px;
-          color: #71717a;
+          color: var(--text-muted);
           text-decoration: none;
+          transition: color 0.2s;
         }
-        
-        .footer-link:hover { color: #f7d047; }
-        
+
+        .footer-link:hover { color: var(--orange); }
+
         .footer-disclaimer {
           padding-top: 24px;
-          border-top: 1px solid #1c1c1f;
+          border-top: 1px solid var(--border);
         }
-        
+
         .disclaimer-text {
           font-size: 12px;
-          color: #52525b;
+          color: var(--text-muted);
           line-height: 1.7;
         }
-        
+
         .footer-bottom {
           display: flex;
           justify-content: space-between;
           align-items: center;
           padding-top: 24px;
-          border-top: 1px solid #1c1c1f;
+          border-top: 1px solid var(--border);
           font-size: 13px;
-          color: #52525b;
+          color: var(--text-muted);
           flex-wrap: wrap;
           gap: 16px;
         }
-        
+
         .footer-bottom-links {
           display: flex;
           gap: 24px;
         }
-        
+
         .footer-bottom-link {
           font-size: 13px;
-          color: #52525b;
+          color: var(--text-muted);
           text-decoration: none;
+          transition: color 0.2s;
         }
-        
-        .footer-bottom-link:hover { color: #f7d047; }
-        
+
+        .footer-bottom-link:hover { color: var(--orange); }
+
         /* Mobile */
         @media (max-width: 768px) {
+          .nav { padding: 0 20px; }
           .nav-links { display: none; }
           .mobile-menu-btn { display: block; }
-          
+
           .page-header { padding: 100px 20px 60px; }
-          
+
           .why-section { padding: 60px 20px 80px; }
           .why-content { font-size: 16px; }
           .why-highlight { padding: 24px; font-size: 15px; }
           .why-closing { font-size: 18px; }
-          
+
           .principles-section,
           .contrast-section,
           .company-section { padding: 60px 20px; }
-          
+
           .principles-grid { grid-template-columns: 1fr; }
           .principle-card { padding: 24px; }
-          
+
           .contrast-grid { grid-template-columns: 1fr; }
           .contrast-card { padding: 24px; }
-          
+
           .company-details { gap: 24px; }
-          
+
           .cta-section { padding: 60px 20px; }
-          
+
           .btn-primary, .btn-secondary {
             padding: 14px 24px;
             font-size: 15px;
@@ -853,7 +775,7 @@ export default function AboutPage() {
             justify-content: center;
             min-height: 48px;
           }
-          
+
           .footer-main { flex-direction: column; }
           .footer-links { gap: 32px; }
           .footer-bottom { flex-direction: column; text-align: center; }
@@ -861,10 +783,13 @@ export default function AboutPage() {
       `}</style>
 
       <div className="about-page">
+        <div className="bg-grid"></div>
+
         {/* Navigation */}
         <nav className="nav">
           <Link href="/" className="logo">
-            605b<span className="logo-accent">.ai</span>
+            <div className="logo-mark">605B</div>
+            <span className="logo-text">605b.ai</span>
           </Link>
           <div className="nav-links">
             <Link href="/" className="nav-link">Home</Link>
@@ -886,7 +811,10 @@ export default function AboutPage() {
         {/* Mobile Menu */}
         <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
           <div className="mobile-menu-header">
-            <span className="logo">605b<span className="logo-accent">.ai</span></span>
+            <span className="logo">
+              <div className="logo-mark">605B</div>
+              <span className="logo-text">605b.ai</span>
+            </span>
             <button className="mobile-menu-btn" style={{ display: 'block' }} onClick={() => setMobileMenuOpen(false)}>
               <X size={24} />
             </button>
@@ -907,9 +835,8 @@ export default function AboutPage() {
           </div>
         </div>
 
-        {/* Page Header with Particle Effect */}
+        {/* Page Header */}
         <header className="page-header">
-          <ParticleField />
           <div style={{ position: 'relative', zIndex: 1 }}>
             <div className="page-badge">
               <Shield size={14} />
@@ -1099,7 +1026,10 @@ export default function AboutPage() {
           <div className="footer-content">
             <div className="footer-main">
               <div className="footer-brand">
-                <div className="footer-logo">605b<span className="logo-accent">.ai</span></div>
+                <div className="footer-logo">
+                  <div className="footer-logo-mark">605B</div>
+                  <span className="footer-logo-text">605b.ai</span>
+                </div>
                 <p className="footer-tagline">Self-service software for credit dispute organization.</p>
               </div>
               <div className="footer-links">

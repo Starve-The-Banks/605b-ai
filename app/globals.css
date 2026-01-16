@@ -3,36 +3,53 @@
 @tailwind utilities;
 
 :root {
-  /* Background layers */
-  --bg-deep: #0d0d0f;
-  --bg-primary: #121214;
-  --bg-elevated: #1a1a1c;
-  --bg-card: #1d1d1f;
-  --bg-card-hover: #242426;
-  
+  /* Background layers - Redesign palette */
+  --bg: #0C0C0C;
+  --bg-secondary: #141414;
+  --bg-card: #1A1A1A;
+  --bg-elevated: #1A1A1A;
+
+  /* Legacy aliases for compatibility */
+  --bg-deep: #0C0C0C;
+  --bg-primary: #141414;
+  --bg-card-hover: #222222;
+
   /* Borders */
-  --border-subtle: #2a2a2c;
-  --border-default: #333335;
-  --border-accent: #4a4530;
-  
+  --border: #2A2A2A;
+  --border-hover: #3A3A3A;
+  --border-subtle: #2A2A2A;
+  --border-default: #2A2A2A;
+  --border-accent: #3A3A3A;
+
   /* Text */
-  --text-primary: #f5f5f5;
-  --text-secondary: #a8a8a8;
-  --text-muted: #6b6b6b;
-  
-  /* Gold palette */
-  --accent: #f7d047;
-  --accent-bright: #fde047;
-  --accent-muted: #c1be8c;
-  --accent-dim: rgba(247, 208, 71, 0.12);
-  --accent-glow: rgba(247, 208, 71, 0.3);
-  --accent-subtle: rgba(247, 208, 71, 0.06);
-  
-  /* Semantic */
-  --success: #4ade80;
-  --warning: #fb923c;
-  --danger: #f87171;
-  --info: #60a5fa;
+  --text: #FAFAFA;
+  --text-secondary: #A0A0A0;
+  --text-muted: #666666;
+  --text-primary: #FAFAFA;
+
+  /* Orange accent - Redesign primary */
+  --orange: #FF6B35;
+  --orange-dim: rgba(255, 107, 53, 0.1);
+  --orange-glow: rgba(255, 107, 53, 0.4);
+
+  /* Legacy accent aliases for compatibility */
+  --accent: #FF6B35;
+  --accent-bright: #FF7D4D;
+  --accent-muted: #CC5629;
+  --accent-dim: rgba(255, 107, 53, 0.1);
+  --accent-glow: rgba(255, 107, 53, 0.4);
+  --accent-subtle: rgba(255, 107, 53, 0.06);
+
+  /* Semantic - Redesign palette */
+  --success: #27C93F;
+  --warning: #FFBD2E;
+  --danger: #FF5F56;
+  --info: #42a5f5;
+
+  /* Status colors */
+  --green: #27C93F;
+  --yellow: #FFBD2E;
+  --red: #FF5F56;
 }
 
 * {
@@ -48,10 +65,11 @@ html {
 }
 
 body {
-  background: var(--bg-deep);
-  color: var(--text-primary);
+  background: var(--bg);
+  color: var(--text);
   min-height: 100vh;
   line-height: 1.5;
+  overflow-x: hidden;
 }
 
 /* Custom Scrollbar */
@@ -168,10 +186,21 @@ code {
   to { transform: rotate(360deg); }
 }
 
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+@keyframes bounceDown {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(8px); }
+  60% { transform: translateY(4px); }
+}
+
 .animate-fade-in { animation: fadeIn 0.2s ease; }
 .animate-slide-up { animation: slideUp 0.3s ease; }
 .animate-pulse { animation: pulse 2s infinite; }
 .animate-spin { animation: spin 1s linear infinite; }
+.animate-blink { animation: blink 1s step-end infinite; }
 
 /* Clerk overrides for dark theme */
 .cl-rootBox {

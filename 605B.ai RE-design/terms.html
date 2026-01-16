@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms of Service | 605B.ai</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #0C0C0C;
+            --bg-secondary: #141414;
+            --bg-card: #1A1A1A;
+            --border: #2A2A2A;
+            --text: #FAFAFA;
+            --text-secondary: #A0A0A0;
+            --text-muted: #666666;
+            --orange: #FF6B35;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .bg-grid {
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255, 107, 53, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 107, 53, 0.03) 1px, transparent 1px);
+            background-size: 80px 80px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        nav {
+            position: relative;
+            z-index: 100;
+            padding: 0 32px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .logo-mark {
+            width: 32px;
+            height: 32px;
+            background: var(--orange);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .logo-text {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 24px;
+        }
+
+        .nav-link {
+            font-size: 14px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .nav-link:hover {
+            color: var(--text);
+        }
+
+        main {
+            position: relative;
+            z-index: 10;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 80px 32px 120px;
+        }
+
+        .page-header {
+            margin-bottom: 48px;
+            padding-bottom: 32px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .page-header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 12px;
+        }
+
+        .page-header .meta {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .content h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-top: 40px;
+            margin-bottom: 16px;
+            color: var(--text);
+        }
+
+        .content p {
+            font-size: 15px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        .content ul {
+            margin-bottom: 16px;
+            padding-left: 24px;
+        }
+
+        .content li {
+            font-size: 15px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .content a {
+            color: var(--orange);
+            text-decoration: none;
+        }
+
+        .content a:hover {
+            text-decoration: underline;
+        }
+
+        .highlight-box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--orange);
+            border-radius: 8px;
+            padding: 20px 24px;
+            margin: 24px 0;
+        }
+
+        .highlight-box p {
+            margin-bottom: 0;
+        }
+
+        .warning-box {
+            background: rgba(255, 107, 53, 0.05);
+            border: 1px solid rgba(255, 107, 53, 0.2);
+            border-radius: 8px;
+            padding: 20px 24px;
+            margin: 24px 0;
+        }
+
+        .warning-box p {
+            margin-bottom: 0;
+            color: var(--text);
+        }
+
+        footer {
+            position: relative;
+            z-index: 10;
+            padding: 32px;
+            border-top: 1px solid var(--border);
+        }
+
+        .footer-inner {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 24px;
+        }
+
+        .footer-links a {
+            font-size: 13px;
+            color: var(--text-muted);
+            text-decoration: none;
+        }
+
+        .footer-links a:hover {
+            color: var(--orange);
+        }
+
+        .footer-copy {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        @media (max-width: 640px) {
+            nav, main, footer {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+            .footer-inner {
+                flex-direction: column;
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+
+    <nav>
+        <a href="/" class="logo">
+            <div class="logo-mark">605B</div>
+            <span class="logo-text">CreditClear</span>
+        </a>
+        <div class="nav-links">
+            <a href="/privacy" class="nav-link">Privacy</a>
+            <a href="/sign-in" class="nav-link">Sign In</a>
+        </div>
+    </nav>
+
+    <main>
+        <div class="page-header">
+            <h1>Terms of Service</h1>
+            <p class="meta">Last updated: January 2025</p>
+        </div>
+
+        <div class="content">
+            <div class="warning-box">
+                <p><strong>Important:</strong> 605B.ai is software tooling only. We are not a credit repair organization. We do not provide legal advice. No outcomes are guaranteed. You are solely responsible for any documents you send and any disputes you initiate.</p>
+            </div>
+
+            <h2>1. Acceptance of Terms</h2>
+            <p>By accessing or using 605B.ai ("Service"), you agree to be bound by these Terms of Service. If you do not agree, do not use the Service.</p>
+
+            <h2>2. Description of Service</h2>
+            <p>605B.ai provides software tools for:</p>
+            <ul>
+                <li>Parsing and analyzing credit report data</li>
+                <li>Identifying potential discrepancies in credit reports</li>
+                <li>Generating dispute letter templates based on federal statutes</li>
+                <li>Tracking correspondence and deadlines</li>
+                <li>Maintaining audit trails of user actions</li>
+            </ul>
+
+            <div class="highlight-box">
+                <p>The Service generates documentation templates. You are responsible for reviewing, modifying, and approving all documents before use. We do not send documents on your behalf unless you explicitly authorize such action.</p>
+            </div>
+
+            <h2>3. What We Are NOT</h2>
+            <p>605B.ai is expressly NOT:</p>
+            <ul>
+                <li>A credit repair organization as defined under the Credit Repair Organizations Act (CROA)</li>
+                <li>A law firm or provider of legal advice</li>
+                <li>A financial advisor or credit counseling service</li>
+                <li>A guarantor of any specific outcome regarding your credit reports or scores</li>
+            </ul>
+
+            <h2>4. User Responsibilities</h2>
+            <p>By using the Service, you agree that:</p>
+            <ul>
+                <li>You will review all generated documents before sending them</li>
+                <li>You will ensure the accuracy of information you provide</li>
+                <li>You will only dispute items you believe in good faith to be inaccurate</li>
+                <li>You understand that dispute outcomes depend on many factors outside our control</li>
+                <li>You will not use the Service for fraudulent purposes</li>
+            </ul>
+
+            <h2>5. No Guarantees</h2>
+            <p>We make no guarantees regarding:</p>
+            <ul>
+                <li>The outcome of any dispute you initiate</li>
+                <li>Changes to your credit score or credit report</li>
+                <li>Responses from credit bureaus, creditors, or collection agencies</li>
+                <li>The legal effectiveness of generated documents in your specific situation</li>
+            </ul>
+
+            <h2>6. Limitation of Liability</h2>
+            <p>To the maximum extent permitted by law, Ninth Wave Analytics LLC and its officers, directors, employees, and agents shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of the Service.</p>
+
+            <h2>7. Indemnification</h2>
+            <p>You agree to indemnify and hold harmless Ninth Wave Analytics LLC from any claims, damages, or expenses arising from your use of the Service, your violation of these Terms, or your violation of any rights of a third party.</p>
+
+            <h2>8. Intellectual Property</h2>
+            <p>The Service, including its design, features, and content, is owned by Ninth Wave Analytics LLC. You may use generated documents for your personal dispute purposes. You may not resell, redistribute, or commercialize the Service or its outputs without written permission.</p>
+
+            <h2>9. Account Termination</h2>
+            <p>We reserve the right to suspend or terminate your account if you violate these Terms or use the Service in a manner we deem harmful or inappropriate.</p>
+
+            <h2>10. Modifications</h2>
+            <p>We may modify these Terms at any time. Continued use of the Service after changes constitutes acceptance of the modified Terms.</p>
+
+            <h2>11. Governing Law</h2>
+            <p>These Terms are governed by the laws of the State of [State], without regard to conflict of law principles.</p>
+
+            <h2>12. Contact</h2>
+            <p>For questions about these Terms, contact us at: <a href="mailto:legal@605b.ai">legal@605b.ai</a></p>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-inner">
+            <div class="footer-links">
+                <a href="/">Home</a>
+                <a href="/privacy">Privacy</a>
+                <a href="mailto:legal@605b.ai">Contact</a>
+            </div>
+            <div class="footer-copy">© 2025 Ninth Wave Analytics LLC</div>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit Trail | 605B.ai</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #0C0C0C;
+            --bg-secondary: #141414;
+            --bg-card: #1A1A1A;
+            --border: #2A2A2A;
+            --border-hover: #3A3A3A;
+            --text: #FAFAFA;
+            --text-secondary: #A0A0A0;
+            --text-muted: #666666;
+            --orange: #FF6B35;
+            --orange-dim: rgba(255, 107, 53, 0.1);
+            --green: #27C93F;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .app-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 240px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .logo-mark {
+            width: 32px;
+            height: 32px;
+            background: var(--orange);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .logo-text {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 16px 12px;
+        }
+
+        .nav-section {
+            margin-bottom: 24px;
+        }
+
+        .nav-section-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 8px 12px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-card);
+            color: var(--text);
+        }
+
+        .nav-item.active {
+            background: var(--orange-dim);
+            color: var(--orange);
+        }
+
+        .nav-item svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.5;
+        }
+
+        .nav-item .badge {
+            margin-left: auto;
+            background: var(--orange);
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .sidebar-footer {
+            padding: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: var(--border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .user-details {
+            flex: 1;
+        }
+
+        .user-name {
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .user-email {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* Main */
+        .main-content {
+            flex: 1;
+            margin-left: 240px;
+        }
+
+        .main-header {
+            padding: 20px 32px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .main-header h1 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--border-hover);
+        }
+
+        .btn svg {
+            width: 16px;
+            height: 16px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .page-content {
+            padding: 32px;
+        }
+
+        /* Info Banner */
+        .info-banner {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 32px;
+        }
+
+        .info-banner-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(39, 201, 63, 0.1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .info-banner-icon svg {
+            width: 20px;
+            height: 20px;
+            stroke: var(--green);
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .info-banner-content h2 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .info-banner-content p {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Audit Log */
+        .audit-log {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .audit-header {
+            display: grid;
+            grid-template-columns: 180px 1fr 140px;
+            gap: 16px;
+            padding: 12px 20px;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .audit-row {
+            display: grid;
+            grid-template-columns: 180px 1fr 140px;
+            gap: 16px;
+            padding: 16px 20px;
+            align-items: center;
+            transition: background 0.2s;
+        }
+
+        .audit-row:hover {
+            background: var(--bg-card);
+        }
+
+        .audit-row + .audit-row {
+            border-top: 1px solid var(--border);
+        }
+
+        .audit-timestamp {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .audit-event {
+            font-size: 14px;
+        }
+
+        .audit-event strong {
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .audit-event span {
+            color: var(--text-secondary);
+        }
+
+        .audit-type {
+            font-size: 11px;
+            font-weight: 500;
+            padding: 4px 10px;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .audit-type.upload {
+            background: rgba(66, 165, 245, 0.1);
+            color: #42a5f5;
+        }
+
+        .audit-type.analysis {
+            background: rgba(171, 71, 188, 0.1);
+            color: #ab47bc;
+        }
+
+        .audit-type.letter {
+            background: var(--orange-dim);
+            color: var(--orange);
+        }
+
+        .audit-type.sent {
+            background: rgba(39, 201, 63, 0.1);
+            color: var(--green);
+        }
+
+        .audit-type.system {
+            background: var(--bg-card);
+            color: var(--text-muted);
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .pagination-info {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .pagination-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .page-btn {
+            padding: 8px 12px;
+            font-family: inherit;
+            font-size: 13px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .page-btn:hover {
+            border-color: var(--border-hover);
+            color: var(--text);
+        }
+
+        .page-btn.active {
+            background: var(--orange);
+            border-color: var(--orange);
+            color: white;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 1024px) {
+            .audit-header,
+            .audit-row {
+                grid-template-columns: 140px 1fr 100px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .audit-header,
+            .audit-row {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            .audit-header > *:not(:first-child) {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="/" class="logo">
+                    <div class="logo-mark">605B</div>
+                    <span class="logo-text">CreditClear</span>
+                </a>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <a href="/dashboard" class="nav-item">
+                        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+                        Dashboard
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Workflow</div>
+                    <a href="/reports" class="nav-item">
+                        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+                        Reports
+                    </a>
+                    <a href="/discrepancies" class="nav-item">
+                        <svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+                        Discrepancies
+                        <span class="badge">3</span>
+                    </a>
+                    <a href="/letters" class="nav-item">
+                        <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        Letters
+                    </a>
+                    <a href="/tracker" class="nav-item">
+                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        Tracker
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Records</div>
+                    <a href="/audit" class="nav-item active">
+                        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+                        Audit Trail
+                    </a>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar">JD</div>
+                    <div class="user-details">
+                        <div class="user-name">John Doe</div>
+                        <div class="user-email">john@example.com</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main -->
+        <main class="main-content">
+            <header class="main-header">
+                <h1>Audit Trail</h1>
+                <div class="header-actions">
+                    <button class="btn btn-secondary">
+                        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        Export CSV
+                    </button>
+                    <button class="btn btn-secondary">
+                        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+                        Export PDF
+                    </button>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <!-- Info Banner -->
+                <div class="info-banner">
+                    <div class="info-banner-icon">
+                        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    </div>
+                    <div class="info-banner-content">
+                        <h2>Complete Documentation Record</h2>
+                        <p>Every action in your account is logged with timestamps. This immutable record can be exported for your documentation purposes. Entries cannot be modified or deleted.</p>
+                    </div>
+                </div>
+
+                <!-- Audit Log -->
+                <div class="audit-log">
+                    <div class="audit-header">
+                        <span>Timestamp</span>
+                        <span>Event</span>
+                        <span>Type</span>
+                    </div>
+
+                    <div class="audit-row">
+                        <div class="audit-timestamp">2025-01-12 14:32:18</div>
+                        <div class="audit-event">
+                            <strong>Report uploaded</strong>
+                            <span> — equifax_report.pdf (2.4 MB)</span>
+                        </div>
+                        <span class="audit-type upload">Upload</span>
+                    </div>
+
+                    <div class="audit-row">
+                        <div class="audit-timestamp">2025-01-12 14:32:24</div>
+                        <div class="audit-event">
+                            <strong>Analysis complete</strong>
+                            <span> — 47 tradelines extracted, 2 discrepancies flagged</span>
+                        </div>
+                        <span class="audit-type analysis">Analysis</span>
+                    </div>
+
+                    <div class="audit-row">
+                        <div class="audit-timestamp">2025-01-12 14:35:41</div>
+                        <div class="audit-event">
+                            <strong>Discrepancy created</strong>
+                            <span> — Capital One, Date inconsistency (FCRA §611)</span>
+                        </div>
+                        <span class="audit-type analysis">Analysis</span>
+                    </div>
+
+                    <div class="audit-row">
+                        <div class="audit-timestamp">2025-01-12 14:35:41</div>
+                        <div class="audit-event">
+                            <strong>Discrepancy created</strong>
+                            <span> — AT&T, Balance mismatch (FCRA §623)</span>
+                        </div>
+                        <span class="audit-type analysis">Analysis</span>
+                    </div>
+
+                    <div class="audit-row">
+                        <div class="audit-timestamp">2025-01-08 10:15:33</div>
+                        <div class="audit-event">
+                            <strong>Report uploaded</strong>
+                            <span> — transunion_report.pdf (1.8 MB)</span>
+                        </div>
+                        <span class="audit-type upload">Upload</span>
+                    </div>
+
+                    <div class="audit-row">
+                        <div class="audit-timestamp">2025-01-08 10:15:40</div>
+                        <div class="audit-event">
+                            <strong>Analysis complete</strong>
+                            <span> — 42 tradelines extracted, 1 discrepancy flagged</span>
+                        </div>
+                        <span class="audit-type analysis">Analysis</span>
+                    </div>
+
+                    <div class="audit-row">
+                        <div class="audit-timestamp">2025-01-08 10:22:07</div>
+                        <div class="audit-event">
+                            <strong>Letter generated</strong>
+                            <span> — Reinvestigation request for Midland MCM (FDCPA §809)</span>
+                        </div>
+                        <span class="audit-type letter">Letter</span>
+                    </div>
+
+                    <div class="audit-row">
+                        <div class="audit-timestamp">2025-01-08 11:45:00</div>
+                        <div class="audit-event">
+                            <strong>Letter marked as sent</strong>
+                            <span> — Midland MCM, Tracking: 9400111899223...</span>
+                        </div>
+                        <span class="audit-type sent">Sent</span>
+                    </div>
+
+                    <div class="audit-row">
+                        <div class="audit-timestamp">2025-01-08 11:45:00</div>
+                        <div class="audit-event">
+                            <strong>Deadline set</strong>
+                            <span> — Response window: 30 days (Feb 7, 2025)</span>
+                        </div>
+                        <span class="audit-type system">System</span>
+                    </div>
+
+                    <div class="audit-row">
+                        <div class="audit-timestamp">2025-01-05 09:00:00</div>
+                        <div class="audit-event">
+                            <strong>Account created</strong>
+                            <span> — john@example.com</span>
+                        </div>
+                        <span class="audit-type system">System</span>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="pagination">
+                        <div class="pagination-info">Showing 1-10 of 10 entries</div>
+                        <div class="pagination-controls">
+                            <button class="page-btn" disabled>← Previous</button>
+                            <button class="page-btn active">1</button>
+                            <button class="page-btn" disabled>Next →</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

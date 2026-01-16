@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { useAuth, useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import {
@@ -10,162 +10,6 @@ import {
   FileSearch, Lock, Plus, Menu
 } from 'lucide-react';
 
-// Triangle Particle Field Component
-function ParticleField() {
-  const canvasRef = useRef(null);
-  const mouseRef = useRef({ x: -1000, y: -1000 });
-  const particlesRef = useRef([]);
-  const animationRef = useRef(null);
-  const isMobileRef = useRef(false);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    let width = canvas.offsetWidth;
-    let height = canvas.offsetHeight;
-
-    const checkMobile = () => {
-      isMobileRef.current = window.innerWidth < 768;
-    };
-    checkMobile();
-
-    const setSize = () => {
-      checkMobile();
-      width = canvas.offsetWidth;
-      height = canvas.offsetHeight;
-      canvas.width = width * window.devicePixelRatio;
-      canvas.height = height * window.devicePixelRatio;
-      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-      initParticles();
-    };
-
-    const initParticles = () => {
-      particlesRef.current = [];
-      const spacing = isMobileRef.current ? 45 : 35;
-      const cols = Math.ceil(width / spacing) + 1;
-      const rows = Math.ceil(height / spacing) + 1;
-
-      for (let i = 0; i < cols; i++) {
-        for (let j = 0; j < rows; j++) {
-          particlesRef.current.push({
-            x: i * spacing + (j % 2) * (spacing / 2),
-            y: j * spacing,
-            direction: (i + j) % 2 === 0 ? 1 : -1,
-          });
-        }
-      }
-    };
-
-    const drawTriangle = (x, y, size, direction, opacity) => {
-      ctx.beginPath();
-      if (direction === 1) {
-        ctx.moveTo(x - size * 0.5, y - size * 0.5);
-        ctx.lineTo(x + size * 0.5, y);
-        ctx.lineTo(x - size * 0.5, y + size * 0.5);
-      } else {
-        ctx.moveTo(x + size * 0.5, y - size * 0.5);
-        ctx.lineTo(x - size * 0.5, y);
-        ctx.lineTo(x + size * 0.5, y + size * 0.5);
-      }
-      ctx.closePath();
-      ctx.fillStyle = `rgba(247, 208, 71, ${opacity})`;
-      ctx.fill();
-    };
-
-    const animate = () => {
-      ctx.clearRect(0, 0, width, height);
-      const particles = particlesRef.current;
-      const isMobile = isMobileRef.current;
-      const maxDist = isMobile ? 180 : 250;
-      const minSize = 2;
-      const maxSize = isMobile ? 12 : 16;
-
-      particles.forEach((p) => {
-        const dx = mouseRef.current.x - p.x;
-        const dy = mouseRef.current.y - p.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-
-        let size, opacity;
-        if (dist < maxDist) {
-          const proximity = 1 - (dist / maxDist);
-          size = minSize + (maxSize - minSize) * proximity;
-          opacity = 0.06 + 0.22 * proximity;
-        } else {
-          size = minSize;
-          opacity = 0.06;
-        }
-
-        drawTriangle(p.x, p.y, size, p.direction, opacity);
-      });
-
-      animationRef.current = requestAnimationFrame(animate);
-    };
-
-    const handleMouseMove = (e) => {
-      const rect = canvas.getBoundingClientRect();
-      mouseRef.current = {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
-      };
-    };
-
-    const handleMouseLeave = () => {
-      mouseRef.current = { x: -1000, y: -1000 };
-    };
-
-    const handleTouchMove = (e) => {
-      if (e.touches.length > 0) {
-        const rect = canvas.getBoundingClientRect();
-        const touch = e.touches[0];
-        mouseRef.current = {
-          x: touch.clientX - rect.left,
-          y: touch.clientY - rect.top,
-        };
-      }
-    };
-
-    const handleTouchEnd = () => {
-      mouseRef.current = { x: -1000, y: -1000 };
-    };
-
-    setSize();
-    animate();
-
-    window.addEventListener('resize', setSize);
-    canvas.addEventListener('mousemove', handleMouseMove);
-    canvas.addEventListener('mouseleave', handleMouseLeave);
-    canvas.addEventListener('touchmove', handleTouchMove, { passive: true });
-    canvas.addEventListener('touchend', handleTouchEnd);
-
-    return () => {
-      window.removeEventListener('resize', setSize);
-      canvas.removeEventListener('mousemove', handleMouseMove);
-      canvas.removeEventListener('mouseleave', handleMouseLeave);
-      canvas.removeEventListener('touchmove', handleTouchMove);
-      canvas.removeEventListener('touchend', handleTouchEnd);
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
-    };
-  }, []);
-
-  return (
-    <canvas
-      ref={canvasRef}
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        pointerEvents: 'auto',
-        zIndex: 0,
-      }}
-    />
-  );
-}
 
 const TIERS = [
   {
@@ -217,7 +61,7 @@ const TIERS = [
     price: 89,
     description: 'Full dispute capabilities',
     icon: Zap,
-    color: '#f7d047',
+    color: '#FF6B35',
     recommended: true,
     features: [
       { text: 'Everything in Dispute Toolkit', included: true },
@@ -396,8 +240,20 @@ export default function PricingPage() {
       <style jsx global>{`
         .pricing-page {
           min-height: 100vh;
-          background: #09090b;
-          color: #fafafa;
+          background: var(--bg);
+          color: var(--text);
+          font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        .bg-grid {
+          position: fixed;
+          inset: 0;
+          background-image:
+            linear-gradient(rgba(255, 107, 53, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 107, 53, 0.03) 1px, transparent 1px);
+          background-size: 80px 80px;
+          pointer-events: none;
+          z-index: 0;
         }
 
         .nav {
@@ -406,23 +262,43 @@ export default function PricingPage() {
           left: 0;
           right: 0;
           z-index: 100;
-          padding: 16px 24px;
+          padding: 0 32px;
+          height: 64px;
           display: flex;
           justify-content: space-between;
           align-items: center;
-          background: rgba(9, 9, 11, 0.95);
+          background: rgba(12, 12, 12, 0.95);
           backdrop-filter: blur(20px);
-          border-bottom: 1px solid rgba(255,255,255,0.05);
+          border-bottom: 1px solid var(--border);
         }
 
         .logo {
-          font-size: 22px;
-          font-weight: 700;
-          color: #fafafa;
+          display: flex;
+          align-items: center;
+          gap: 12px;
           text-decoration: none;
+          color: var(--text);
         }
 
-        .logo-accent { color: #f7d047; }
+        .logo-mark {
+          width: 32px;
+          height: 32px;
+          background: var(--orange);
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 10px;
+          font-weight: 700;
+          color: white;
+        }
+
+        .logo-text {
+          font-size: 16px;
+          font-weight: 600;
+          letter-spacing: -0.01em;
+        }
 
         .nav-links {
           display: flex;
@@ -433,27 +309,40 @@ export default function PricingPage() {
         .nav-link {
           padding: 8px 16px;
           background: transparent;
-          border: 1px solid #27272a;
+          border: 1px solid var(--border);
           border-radius: 8px;
-          color: #fafafa;
+          color: var(--text);
           font-size: 14px;
           text-decoration: none;
+          transition: all 0.2s;
+        }
+
+        .nav-link:hover {
+          border-color: var(--border-hover);
+          background: rgba(255, 255, 255, 0.02);
         }
 
         .nav-link-primary {
           padding: 8px 16px;
-          background: #f7d047;
+          background: var(--orange);
           border: none;
           border-radius: 8px;
-          color: #09090b;
+          color: white;
           font-size: 14px;
           font-weight: 600;
           text-decoration: none;
+          transition: all 0.2s;
+        }
+
+        .nav-link-primary:hover {
+          background: #E55A2B;
         }
 
         .hero {
           padding: 140px 24px 60px;
           text-align: center;
+          position: relative;
+          z-index: 10;
         }
 
         .hero-badge {
@@ -461,11 +350,11 @@ export default function PricingPage() {
           align-items: center;
           gap: 8px;
           padding: 8px 16px;
-          background: rgba(247, 208, 71, 0.1);
-          border: 1px solid rgba(247, 208, 71, 0.2);
+          background: var(--orange-dim);
+          border: 1px solid rgba(255, 107, 53, 0.2);
           border-radius: 100px;
           font-size: 13px;
-          color: #f7d047;
+          color: var(--orange);
           margin-bottom: 24px;
         }
 
@@ -478,7 +367,7 @@ export default function PricingPage() {
 
         .hero-subtitle {
           font-size: 16px;
-          color: #a1a1aa;
+          color: var(--text-secondary);
           max-width: 500px;
           margin: 0 auto 16px;
           line-height: 1.6;
@@ -486,11 +375,13 @@ export default function PricingPage() {
 
         .hero-note {
           font-size: 14px;
-          color: #52525b;
+          color: var(--text-muted);
         }
 
         .pricing-section {
           padding: 0 24px 40px;
+          position: relative;
+          z-index: 10;
         }
 
         .pricing-grid {
@@ -502,8 +393,8 @@ export default function PricingPage() {
         }
 
         .pricing-card {
-          background: #111113;
-          border: 2px solid #1c1c1f;
+          background: var(--bg-card);
+          border: 2px solid var(--border);
           border-radius: 16px;
           padding: 24px;
           position: relative;
@@ -513,18 +404,18 @@ export default function PricingPage() {
         }
 
         .pricing-card:hover {
-          border-color: #27272a;
+          border-color: var(--border-hover);
           transform: translateY(-2px);
         }
 
         .pricing-card.recommended {
-          border-color: #f7d047;
-          background: linear-gradient(180deg, rgba(247, 208, 71, 0.08) 0%, #111113 100%);
+          border-color: var(--orange);
+          background: linear-gradient(180deg, var(--orange-dim) 0%, var(--bg-card) 100%);
         }
 
         .pricing-card.free {
           border-style: dashed;
-          background: linear-gradient(180deg, rgba(107, 114, 128, 0.05) 0%, #111113 100%);
+          background: linear-gradient(180deg, rgba(107, 114, 128, 0.05) 0%, var(--bg-card) 100%);
         }
 
         .recommended-badge {
@@ -533,8 +424,8 @@ export default function PricingPage() {
           left: 50%;
           transform: translateX(-50%);
           padding: 6px 16px;
-          background: #f7d047;
-          color: #09090b;
+          background: var(--orange);
+          color: white;
           font-size: 12px;
           font-weight: 700;
           border-radius: 100px;
@@ -548,8 +439,8 @@ export default function PricingPage() {
           left: 50%;
           transform: translateX(-50%);
           padding: 6px 16px;
-          background: #27272a;
-          color: #a1a1aa;
+          background: var(--border);
+          color: var(--text-secondary);
           font-size: 12px;
           font-weight: 600;
           border-radius: 100px;
@@ -582,7 +473,7 @@ export default function PricingPage() {
 
         .tier-desc {
           font-size: 13px;
-          color: #71717a;
+          color: var(--text-muted);
         }
 
         .tier-price {
@@ -602,13 +493,13 @@ export default function PricingPage() {
 
         .price-currency {
           font-size: 20px;
-          color: #71717a;
+          color: var(--text-muted);
           vertical-align: top;
         }
 
         .price-label {
           font-size: 13px;
-          color: #52525b;
+          color: var(--text-muted);
           margin-top: 4px;
         }
 
@@ -617,12 +508,12 @@ export default function PricingPage() {
           background: rgba(255,255,255,0.03);
           border-radius: 8px;
           font-size: 12px;
-          color: #a1a1aa;
+          color: var(--text-secondary);
           margin-bottom: 16px;
         }
 
         .tier-best-for strong {
-          color: #fafafa;
+          color: var(--text);
         }
 
         .tier-note {
@@ -666,15 +557,15 @@ export default function PricingPage() {
 
         .feature-icon.excluded {
           background: rgba(113, 113, 122, 0.15);
-          color: #52525b;
+          color: var(--text-muted);
         }
 
         .feature-text {
-          color: #a1a1aa;
+          color: var(--text-secondary);
         }
 
         .feature-text.excluded {
-          color: #52525b;
+          color: var(--text-muted);
         }
 
         .buy-button {
@@ -693,35 +584,36 @@ export default function PricingPage() {
         }
 
         .buy-button.primary {
-          background: #f7d047;
-          color: #09090b;
+          background: var(--orange);
+          color: white;
         }
 
         .buy-button.primary:hover {
-          background: #e5c33f;
+          background: #E55A2B;
           transform: translateY(-1px);
+          box-shadow: 0 8px 24px var(--orange-glow);
         }
 
         .buy-button.secondary {
           background: transparent;
-          border: 1px solid #27272a;
-          color: #fafafa;
+          border: 1px solid var(--border);
+          color: var(--text);
         }
 
         .buy-button.secondary:hover {
           background: rgba(255,255,255,0.05);
-          border-color: #3f3f46;
+          border-color: var(--border-hover);
         }
 
         .buy-button.free-btn {
           background: transparent;
-          border: 1px solid #3f3f46;
-          color: #a1a1aa;
+          border: 1px solid var(--border-hover);
+          color: var(--text-secondary);
         }
 
         .buy-button.free-btn:hover {
           background: rgba(255,255,255,0.03);
-          color: #fafafa;
+          color: var(--text);
         }
 
         .buy-button:disabled {
@@ -735,11 +627,13 @@ export default function PricingPage() {
           max-width: 800px;
           margin: 0 auto 40px;
           padding: 0 24px;
+          position: relative;
+          z-index: 10;
         }
 
         .disclaimer-box {
-          background: #111113;
-          border: 2px solid #1c1c1f;
+          background: var(--bg-card);
+          border: 2px solid var(--border);
           border-radius: 12px;
           padding: 24px;
         }
@@ -759,7 +653,7 @@ export default function PricingPage() {
           font-size: 15px;
           font-weight: 700;
           margin-bottom: 12px;
-          color: #f7d047;
+          color: var(--orange);
           display: flex;
           align-items: center;
           gap: 8px;
@@ -767,7 +661,7 @@ export default function PricingPage() {
 
         .disclaimer-text {
           font-size: 13px;
-          color: #a1a1aa;
+          color: var(--text-secondary);
           line-height: 1.7;
           margin-bottom: 16px;
         }
@@ -777,8 +671,8 @@ export default function PricingPage() {
           align-items: flex-start;
           gap: 12px;
           padding: 12px 16px;
-          background: rgba(247, 208, 71, 0.05);
-          border: 1px solid rgba(247, 208, 71, 0.2);
+          background: var(--orange-dim);
+          border: 1px solid rgba(255, 107, 53, 0.2);
           border-radius: 8px;
           cursor: pointer;
         }
@@ -787,7 +681,7 @@ export default function PricingPage() {
           display: none;
           background: none;
           border: none;
-          color: #fafafa;
+          color: var(--text);
           cursor: pointer;
           padding: 8px;
         }
@@ -799,7 +693,7 @@ export default function PricingPage() {
           left: 0;
           right: 0;
           bottom: 0;
-          background: #09090b;
+          background: var(--bg);
           z-index: 200;
           padding: 20px;
           flex-direction: column;
@@ -827,9 +721,9 @@ export default function PricingPage() {
           padding: 14px 0;
           font-size: 18px;
           font-weight: 600;
-          color: #fafafa;
+          color: var(--text);
           text-decoration: none;
-          border-bottom: 1px solid #27272a;
+          border-bottom: 1px solid var(--border);
         }
 
         .mobile-menu-buttons {
@@ -845,10 +739,10 @@ export default function PricingPage() {
           justify-content: center;
           gap: 8px;
           padding: 14px 24px;
-          background: #f7d047;
+          background: var(--orange);
           border: none;
           border-radius: 10px;
-          color: #09090b;
+          color: white;
           font-size: 16px;
           font-weight: 600;
           text-decoration: none;
@@ -861,23 +755,23 @@ export default function PricingPage() {
           gap: 8px;
           padding: 14px 24px;
           background: transparent;
-          border: 1px solid #27272a;
+          border: 1px solid var(--border);
           border-radius: 10px;
-          color: #fafafa;
+          color: var(--text);
           font-size: 16px;
           font-weight: 500;
           text-decoration: none;
         }
 
         .disclaimer-checkbox:hover {
-          background: rgba(247, 208, 71, 0.08);
+          background: rgba(255, 107, 53, 0.08);
         }
 
         .disclaimer-checkbox input {
           width: 20px;
           height: 20px;
           margin-top: 2px;
-          accent-color: #f7d047;
+          accent-color: var(--orange);
           cursor: pointer;
         }
 
@@ -901,6 +795,8 @@ export default function PricingPage() {
           max-width: 800px;
           margin: 0 auto 60px;
           padding: 0 24px;
+          position: relative;
+          z-index: 10;
         }
 
         .addons-title {
@@ -912,7 +808,7 @@ export default function PricingPage() {
 
         .addons-subtitle {
           font-size: 14px;
-          color: #71717a;
+          color: var(--text-muted);
           text-align: center;
           margin-bottom: 24px;
         }
@@ -924,8 +820,8 @@ export default function PricingPage() {
         }
 
         .addon-card {
-          background: #111113;
-          border: 1px solid #1c1c1f;
+          background: var(--bg-card);
+          border: 1px solid var(--border);
           border-radius: 10px;
           padding: 16px;
           display: flex;
@@ -942,32 +838,33 @@ export default function PricingPage() {
 
         .addon-info p {
           font-size: 12px;
-          color: #71717a;
+          color: var(--text-muted);
         }
 
         .addon-price {
           font-size: 18px;
           font-weight: 700;
-          color: #f7d047;
+          color: var(--orange);
           white-space: nowrap;
         }
 
         .addon-button {
           padding: 8px 12px;
           background: transparent;
-          border: 1px solid #27272a;
+          border: 1px solid var(--border);
           border-radius: 6px;
-          color: #a1a1aa;
+          color: var(--text-secondary);
           font-size: 12px;
           cursor: pointer;
           display: flex;
           align-items: center;
           gap: 4px;
+          transition: all 0.2s;
         }
 
         .addon-button:hover {
           background: rgba(255,255,255,0.05);
-          color: #fafafa;
+          color: var(--text);
         }
 
         /* Comparison Section */
@@ -975,6 +872,8 @@ export default function PricingPage() {
           max-width: 1100px;
           margin: 0 auto 60px;
           padding: 0 24px;
+          position: relative;
+          z-index: 10;
         }
 
         .comparison-toggle {
@@ -984,43 +883,49 @@ export default function PricingPage() {
           gap: 8px;
           padding: 12px 24px;
           background: transparent;
-          border: 1px solid #27272a;
+          border: 1px solid var(--border);
           border-radius: 10px;
-          color: #a1a1aa;
+          color: var(--text-secondary);
           font-size: 14px;
           cursor: pointer;
           margin: 0 auto 24px;
+          transition: all 0.2s;
+        }
+
+        .comparison-toggle:hover {
+          border-color: var(--border-hover);
+          color: var(--text);
         }
 
         .comparison-table {
           width: 100%;
           border-collapse: collapse;
-          background: #111113;
+          background: var(--bg-card);
           border-radius: 12px;
           overflow: hidden;
-          border: 1px solid #1c1c1f;
+          border: 1px solid var(--border);
         }
 
         .comparison-table th,
         .comparison-table td {
           padding: 14px 16px;
           text-align: left;
-          border-bottom: 1px solid #1c1c1f;
+          border-bottom: 1px solid var(--border);
         }
 
         .comparison-table th {
-          background: #0c0c0e;
+          background: var(--bg-secondary);
           font-weight: 600;
           font-size: 13px;
         }
 
         .comparison-table td {
           font-size: 13px;
-          color: #a1a1aa;
+          color: var(--text-secondary);
         }
 
         .comparison-table td:first-child {
-          color: #fafafa;
+          color: var(--text);
         }
 
         /* Legal Section */
@@ -1028,7 +933,9 @@ export default function PricingPage() {
           max-width: 800px;
           margin: 0 auto;
           padding: 40px 24px;
-          border-top: 1px solid #1c1c1f;
+          border-top: 1px solid var(--border);
+          position: relative;
+          z-index: 10;
         }
 
         .legal-badge {
@@ -1052,7 +959,7 @@ export default function PricingPage() {
 
         .legal-text {
           font-size: 14px;
-          color: #71717a;
+          color: var(--text-muted);
           line-height: 1.7;
         }
 
@@ -1061,6 +968,8 @@ export default function PricingPage() {
           max-width: 700px;
           margin: 0 auto;
           padding: 60px 24px;
+          position: relative;
+          z-index: 10;
         }
 
         .faq-title {
@@ -1071,7 +980,7 @@ export default function PricingPage() {
         }
 
         .faq-item {
-          border: 1px solid #1c1c1f;
+          border: 1px solid var(--border);
           border-radius: 12px;
           margin-bottom: 12px;
           overflow: hidden;
@@ -1083,9 +992,9 @@ export default function PricingPage() {
           align-items: center;
           justify-content: space-between;
           padding: 18px 20px;
-          background: #111113;
+          background: var(--bg-card);
           border: none;
-          color: #fafafa;
+          color: var(--text);
           font-size: 15px;
           font-weight: 500;
           text-align: left;
@@ -1094,9 +1003,9 @@ export default function PricingPage() {
 
         .faq-answer {
           padding: 0 20px 18px;
-          background: #111113;
+          background: var(--bg-card);
           font-size: 14px;
-          color: #a1a1aa;
+          color: var(--text-secondary);
           line-height: 1.7;
         }
 
@@ -1104,7 +1013,9 @@ export default function PricingPage() {
         .cta-section {
           text-align: center;
           padding: 60px 24px 80px;
-          background: #0c0c0e;
+          background: var(--bg-secondary);
+          position: relative;
+          z-index: 10;
         }
 
         .cta-title {
@@ -1115,7 +1026,7 @@ export default function PricingPage() {
 
         .cta-text {
           font-size: 16px;
-          color: #71717a;
+          color: var(--text-muted);
           margin-bottom: 24px;
         }
 
@@ -1124,14 +1035,21 @@ export default function PricingPage() {
           align-items: center;
           gap: 8px;
           padding: 14px 28px;
-          background: #f7d047;
+          background: var(--orange);
           border: none;
           border-radius: 10px;
-          color: #09090b;
+          color: white;
           font-size: 16px;
           font-weight: 600;
           text-decoration: none;
           cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .cta-button:hover {
+          background: #E55A2B;
+          transform: translateY(-2px);
+          box-shadow: 0 8px 24px var(--orange-glow);
         }
 
         @media (max-width: 768px) {
@@ -1189,10 +1107,13 @@ export default function PricingPage() {
       `}</style>
 
       <div className="pricing-page">
+        <div className="bg-grid"></div>
+
         {/* Nav */}
         <nav className="nav">
           <Link href="/" className="logo">
-            605b<span className="logo-accent">.ai</span>
+            <div className="logo-mark">605B</div>
+            <span className="logo-text">605b.ai</span>
           </Link>
           <div className="nav-links">
             <Link href="/about" className="nav-link" style={{ border: 'none', padding: '8px 12px' }}>About</Link>
@@ -1215,7 +1136,10 @@ export default function PricingPage() {
         {/* Mobile Menu */}
         <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
           <div className="mobile-menu-header">
-            <span className="logo">605b<span className="logo-accent">.ai</span></span>
+            <span className="logo">
+              <div className="logo-mark">605B</div>
+              <span className="logo-text">605b.ai</span>
+            </span>
             <button className="mobile-menu-btn" style={{ display: 'block' }} onClick={() => setMobileMenuOpen(false)}>
               <X size={24} />
             </button>
@@ -1244,9 +1168,8 @@ export default function PricingPage() {
         </div>
 
         {/* Hero */}
-        <section className="hero" style={{ position: 'relative', overflow: 'hidden' }}>
-          <ParticleField />
-          <div style={{ position: 'relative', zIndex: 1 }}>
+        <section className="hero">
+          <div>
             <div className="hero-badge">
               <Scale size={14} />
               Software License · One-Time Purchase

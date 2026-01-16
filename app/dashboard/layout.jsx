@@ -150,22 +150,37 @@ export default function DashboardLayout({ children }) {
 
   const SidebarContent = () => (
     <>
-      <div style={{ padding: '20px', fontSize: '20px', fontWeight: 700, borderBottom: '1px solid #1a1a1c', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span>605b<span style={{ color: '#f7d047' }}>.ai</span></span>
+      <div style={{ padding: '20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{
+            width: '32px',
+            height: '32px',
+            background: 'var(--orange)',
+            borderRadius: '8px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: '10px',
+            fontWeight: 700,
+            color: 'white',
+          }}>605B</div>
+          <span style={{ fontSize: '16px', fontWeight: 600 }}>605b.ai</span>
+        </div>
         {isMobile && (
           <button
             onClick={() => setMobileSidebarOpen(false)}
-            style={{ background: 'none', border: 'none', color: '#737373', cursor: 'pointer', padding: '4px' }}
+            style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px' }}
           >
             <X size={24} />
           </button>
         )}
       </div>
 
-      <nav style={{ flex: 1, padding: '8px', overflowY: 'auto' }}>
+      <nav style={{ flex: 1, padding: '12px', overflowY: 'auto' }}>
         {['CORE', 'MANAGE'].map(section => (
           <div key={section}>
-            <div style={{ padding: '16px 12px 8px', fontSize: '11px', fontWeight: 600, color: '#525252', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{section}</div>
+            <div style={{ padding: '16px 12px 8px', fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{section}</div>
             {sidebarItems.filter(item => item.section === section).map(item => {
               const isActive = pathname === item.href || (item.href === '/dashboard' && pathname === '/dashboard');
               const isLocked = item.requiresTier && !hasTierAccess(item.requiresTier);
@@ -179,14 +194,14 @@ export default function DashboardLayout({ children }) {
                     gap: '10px',
                     padding: '10px 12px',
                     borderRadius: '8px',
-                    color: isLocked ? '#52525b' : (isActive ? '#f7d047' : '#a3a3a3'),
-                    background: isActive ? 'rgba(247, 208, 71, 0.1)' : 'transparent',
+                    color: isLocked ? 'var(--text-muted)' : (isActive ? 'var(--orange)' : 'var(--text-secondary)'),
+                    background: isActive ? 'var(--orange-dim)' : 'transparent',
                     fontSize: '14px',
                     cursor: 'pointer',
                     marginBottom: '2px',
                     textDecoration: 'none',
                     transition: 'all 0.15s ease',
-                    borderLeft: isActive ? '2px solid #f7d047' : '2px solid transparent',
+                    borderLeft: isActive ? '2px solid var(--orange)' : '2px solid transparent',
                     position: 'relative',
                     opacity: isLocked ? 0.7 : 1,
                   }}
@@ -194,14 +209,14 @@ export default function DashboardLayout({ children }) {
                   <item.icon size={18} />
                   <span style={{ flex: 1 }}>{item.label}</span>
                   {isLocked && (
-                    <Lock size={12} style={{ color: '#52525b' }} />
+                    <Lock size={12} style={{ color: 'var(--text-muted)' }} />
                   )}
                   {item.id === 'tracker' && !isLocked && notifications.length > 0 && (
                     <span style={{
                       minWidth: '18px',
                       height: '18px',
                       padding: '0 5px',
-                      background: notifications.some(n => n.type === 'urgent') ? '#ef4444' : '#f59e0b',
+                      background: notifications.some(n => n.type === 'urgent') ? 'var(--red)' : 'var(--yellow)',
                       borderRadius: '9px',
                       fontSize: '10px',
                       fontWeight: 600,
@@ -230,18 +245,18 @@ export default function DashboardLayout({ children }) {
             left: '8px',
             right: '8px',
             marginBottom: '8px',
-            background: '#18181b',
-            border: '1px solid #27272a',
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border)',
             borderRadius: '12px',
             overflow: 'hidden',
             boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.4)',
             animation: 'slideUp 0.15s ease-out',
           }}>
-            <div style={{ padding: '12px 16px', borderBottom: '1px solid #27272a' }}>
-              <div style={{ fontSize: '13px', fontWeight: 600, color: '#fafafa' }}>
+            <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)' }}>
+              <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text)' }}>
                 {user?.firstName} {user?.lastName}
               </div>
-              <div style={{ fontSize: '11px', color: '#71717a', marginTop: '2px', wordBreak: 'break-all' }}>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px', wordBreak: 'break-all' }}>
                 {user?.primaryEmailAddress?.emailAddress}
               </div>
               {/* Tier Badge */}
@@ -275,10 +290,10 @@ export default function DashboardLayout({ children }) {
                     alignItems: 'center',
                     gap: '10px',
                     padding: '10px 12px',
-                    background: 'rgba(247, 208, 71, 0.1)',
-                    border: '1px solid rgba(247, 208, 71, 0.2)',
+                    background: 'var(--orange-dim)',
+                    border: '1px solid rgba(255, 107, 53, 0.2)',
                     borderRadius: '8px',
-                    color: '#f7d047',
+                    color: 'var(--orange)',
                     fontSize: '13px',
                     fontWeight: 500,
                     cursor: 'pointer',
@@ -304,7 +319,7 @@ export default function DashboardLayout({ children }) {
                   background: 'transparent',
                   border: 'none',
                   borderRadius: '8px',
-                  color: '#a1a1aa',
+                  color: 'var(--text-secondary)',
                   fontSize: '13px',
                   cursor: 'pointer',
                   textAlign: 'left',
@@ -327,7 +342,7 @@ export default function DashboardLayout({ children }) {
                     background: 'transparent',
                     border: 'none',
                     borderRadius: '8px',
-                    color: '#a1a1aa',
+                    color: 'var(--text-secondary)',
                     fontSize: '13px',
                     cursor: 'pointer',
                     textAlign: 'left',
@@ -347,11 +362,11 @@ export default function DashboardLayout({ children }) {
           style={{
             width: '100%',
             padding: '16px',
-            borderTop: '1px solid #1a1a1c',
+            borderTop: '1px solid var(--border)',
             display: 'flex',
             alignItems: 'center',
             gap: '10px',
-            background: userMenuOpen ? 'rgba(247, 208, 71, 0.05)' : 'transparent',
+            background: userMenuOpen ? 'var(--orange-dim)' : 'transparent',
             border: 'none',
             cursor: 'pointer',
             transition: 'all 0.15s',
@@ -360,25 +375,25 @@ export default function DashboardLayout({ children }) {
           <div style={{
             width: '32px',
             height: '32px',
-            background: 'linear-gradient(135deg, #f7d047 0%, #d4b840 100%)',
+            background: 'var(--orange)',
             borderRadius: '8px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             fontWeight: 600,
-            color: '#0a0a0b',
+            color: 'white',
             fontSize: '14px',
             flexShrink: 0,
           }}>
             {user?.firstName?.[0] || 'U'}
           </div>
           <div style={{ flex: 1, textAlign: 'left', minWidth: 0 }}>
-            <div style={{ fontSize: '13px', fontWeight: 500, color: '#e5e5e5', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.firstName || 'User'}</div>
-            <div style={{ fontSize: '11px', color: '#22c55e', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.firstName || 'User'}</div>
+            <div style={{ fontSize: '11px', color: 'var(--green)', display: 'flex', alignItems: 'center', gap: '4px' }}>
               <span style={{
                 width: '6px',
                 height: '6px',
-                background: '#22c55e',
+                background: 'var(--green)',
                 borderRadius: '50%',
                 display: 'inline-block',
                 animation: 'pulseGlow 2s ease-in-out infinite'
@@ -389,7 +404,7 @@ export default function DashboardLayout({ children }) {
           <ChevronUp
             size={16}
             style={{
-              color: '#71717a',
+              color: 'var(--text-muted)',
               transform: userMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)',
               transition: 'transform 0.15s',
               flexShrink: 0,
@@ -411,9 +426,9 @@ export default function DashboardLayout({ children }) {
       <div style={{
         display: 'flex',
         minHeight: '100vh',
-        background: '#0a0a0b',
-        color: '#e5e5e5',
-        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+        background: 'var(--bg)',
+        color: 'var(--text)',
+        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
       }}>
         {/* MOBILE HEADER */}
         {isMobile && (
@@ -423,8 +438,8 @@ export default function DashboardLayout({ children }) {
             left: 0,
             right: 0,
             height: '56px',
-            background: '#0d0d0f',
-            borderBottom: '1px solid #1a1a1c',
+            background: 'var(--bg-secondary)',
+            borderBottom: '1px solid var(--border)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -433,13 +448,26 @@ export default function DashboardLayout({ children }) {
           }}>
             <button
               onClick={() => setMobileSidebarOpen(true)}
-              style={{ background: 'none', border: 'none', color: '#e5e5e5', cursor: 'pointer', padding: '8px' }}
+              style={{ background: 'none', border: 'none', color: 'var(--text)', cursor: 'pointer', padding: '8px' }}
             >
               <Menu size={24} />
             </button>
-            <span style={{ fontSize: '18px', fontWeight: 700 }}>
-              605b<span style={{ color: '#f7d047' }}>.ai</span>
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{
+                width: '24px',
+                height: '24px',
+                background: 'var(--orange)',
+                borderRadius: '6px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: '8px',
+                fontWeight: 700,
+                color: 'white',
+              }}>605B</div>
+              <span style={{ fontSize: '16px', fontWeight: 600 }}>605b.ai</span>
+            </div>
             <div style={{ width: '40px' }} />
           </header>
         )}
@@ -459,9 +487,9 @@ export default function DashboardLayout({ children }) {
 
         {/* LEFT SIDEBAR */}
         <aside style={{
-          width: isMobile ? '280px' : '200px',
-          background: '#0d0d0f',
-          borderRight: '1px solid #1a1a1c',
+          width: isMobile ? '280px' : '240px',
+          background: 'var(--bg-secondary)',
+          borderRight: '1px solid var(--border)',
           display: 'flex',
           flexDirection: 'column',
           position: 'fixed',
@@ -477,7 +505,7 @@ export default function DashboardLayout({ children }) {
         {/* MAIN CONTENT */}
         <main style={{
           flex: 1,
-          marginLeft: isMobile ? 0 : '200px',
+          marginLeft: isMobile ? 0 : '240px',
           marginRight: (!isMobile && rightSidebarOpen && !isAIStrategist) ? '340px' : '0px',
           padding: isMobile ? '72px 16px 16px' : '24px 32px',
           minHeight: '100vh',
@@ -502,11 +530,11 @@ export default function DashboardLayout({ children }) {
                   transform: 'translateY(-50%)',
                   width: '32px',
                   height: '64px',
-                  background: '#1a1a1c',
-                  border: '1px solid #262629',
+                  background: 'var(--bg-card)',
+                  border: '1px solid var(--border)',
                   borderRight: 'none',
                   borderRadius: '8px 0 0 8px',
-                  color: '#f7d047',
+                  color: 'var(--orange)',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
@@ -520,8 +548,8 @@ export default function DashboardLayout({ children }) {
 
             <aside style={{
               width: '340px',
-              background: '#0d0d0f',
-              borderLeft: '1px solid #1a1a1c',
+              background: 'var(--bg-secondary)',
+              borderLeft: '1px solid var(--border)',
               position: 'fixed',
               top: 0,
               right: rightSidebarOpen ? '0' : '-340px',
@@ -540,10 +568,10 @@ export default function DashboardLayout({ children }) {
                   transform: 'translateY(-50%)',
                   width: '32px',
                   height: '64px',
-                  background: '#1a1a1c',
-                  border: '1px solid #262629',
+                  background: 'var(--bg-card)',
+                  border: '1px solid var(--border)',
                   borderRadius: '8px 0 0 8px',
-                  color: '#737373',
+                  color: 'var(--text-muted)',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
@@ -554,22 +582,22 @@ export default function DashboardLayout({ children }) {
                 <ChevronRight size={20} />
               </button>
 
-              <div style={{ padding: '16px 20px', borderBottom: '1px solid #1a1a1c', display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <div style={{
                   width: '40px',
                   height: '40px',
-                  background: 'linear-gradient(135deg, #f7d047 0%, #d4b840 100%)',
+                  background: 'var(--orange)',
                   borderRadius: '10px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
                 }}>
-                  <Sparkles size={22} style={{ color: '#0a0a0b' }} />
+                  <Sparkles size={22} style={{ color: 'white' }} />
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: '15px', fontWeight: 600 }}>Quick AI Help</div>
-                  <div style={{ fontSize: '12px', color: '#737373' }}>
-                    <Link href="/dashboard/ai-strategist" style={{ color: '#f7d047', textDecoration: 'none' }}>
+                  <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                    <Link href="/dashboard/ai-strategist" style={{ color: 'var(--orange)', textDecoration: 'none' }}>
                       Open full chat →
                     </Link>
                   </div>
@@ -581,19 +609,19 @@ export default function DashboardLayout({ children }) {
                   <div style={{
                     width: '48px',
                     height: '48px',
-                    background: 'rgba(247, 208, 71, 0.1)',
+                    background: 'var(--orange-dim)',
                     borderRadius: '12px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     margin: '0 auto 16px',
-                    color: '#f7d047'
+                    color: 'var(--orange)'
                   }}>
                     <Sparkles size={24} />
                   </div>
                   <h4 style={{ fontSize: '15px', fontWeight: 600, marginBottom: '8px' }}>AI Strategist</h4>
-                  <p style={{ fontSize: '13px', color: '#737373', lineHeight: 1.5, marginBottom: '20px' }}>
-                    Get personalized credit repair guidance. Click below to start a full conversation.
+                  <p style={{ fontSize: '13px', color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: '20px' }}>
+                    Get personalized credit reinvestigation guidance. Click below to start a full conversation.
                   </p>
                   <Link
                     href="/dashboard/ai-strategist"
@@ -602,9 +630,9 @@ export default function DashboardLayout({ children }) {
                       alignItems: 'center',
                       gap: '8px',
                       padding: '12px 24px',
-                      background: 'linear-gradient(135deg, #f7d047 0%, #d4b840 100%)',
+                      background: 'var(--orange)',
                       borderRadius: '10px',
-                      color: '#09090b',
+                      color: 'white',
                       fontWeight: 600,
                       fontSize: '14px',
                       textDecoration: 'none',
@@ -625,11 +653,11 @@ export default function DashboardLayout({ children }) {
                       display: 'block',
                       width: '100%',
                       padding: '12px 16px',
-                      background: '#1a1a1c',
-                      border: '1px solid #262629',
+                      background: 'var(--bg-card)',
+                      border: '1px solid var(--border)',
                       borderRadius: '8px',
                       fontSize: '13px',
-                      color: '#a3a3a3',
+                      color: 'var(--text-secondary)',
                       textAlign: 'left',
                       marginBottom: '8px',
                       textDecoration: 'none',

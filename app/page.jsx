@@ -2,260 +2,959 @@
 
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
-import { ArrowRight, Shield, Clock, FileText, Scale, Upload, Flag, BarChart3, Menu, X, ChevronDown, Lock, Eye, Send } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 
-// Interactive particle field component
-function ParticleField() {
-  const canvasRef = useRef(null);
-  const mouseRef = useRef({ x: -1000, y: -1000 });
-  const particlesRef = useRef([]);
-  const animationRef = useRef(null);
-  const isMobileRef = useRef(false);
+// Terminal animation scenes
+const terminalScenes = [
+  {
+    lines: [
+      { type: 'cmd', text: '605b parse --report equifax.pdf', delay: 0 },
+      { type: 'out', text: 'Parsing credit report...', delay: 800 },
+      { type: 'out', text: 'Extracted 47 tradelines', delay: 400 },
+      { type: 'out', text: 'Scanning for discrepancies...', delay: 300 },
+      { type: 'error', text: '→ 3 discrepancies flagged for review', delay: 600 },
+      { type: 'out', text: '  Capital One: Date inconsistency (FCRA §611)', delay: 150 },
+      { type: 'out', text: '  Midland MCM: Unverified account (FDCPA §809)', delay: 150 },
+      { type: 'out', text: '  AT&T: Balance mismatch (FCRA §623)', delay: 150 },
+    ],
+    pause: 2500
+  },
+  {
+    lines: [
+      { type: 'cmd', text: '605b generate --all-discrepancies', delay: 0 },
+      { type: 'out', text: 'Selecting applicable statutes...', delay: 600 },
+      { type: 'out', text: 'Building reinvestigation requests...', delay: 500 },
+      { type: 'success', text: '✓ Letter 1: Equifax — FCRA §611 dispute', delay: 400 },
+      { type: 'success', text: '✓ Letter 2: TransUnion — FDCPA §809 validation', delay: 200 },
+      { type: 'success', text: '✓ Letter 3: Experian — FCRA §623 direct dispute', delay: 200 },
+      { type: 'out', text: 'Letters saved to /documents', delay: 400 },
+    ],
+    pause: 2500
+  },
+  {
+    lines: [
+      { type: 'cmd', text: '605b tracker --status', delay: 0 },
+      { type: 'out', text: 'Fetching dispute status...', delay: 500 },
+      { type: 'out', text: '', delay: 200 },
+      { type: 'out', text: '  Equifax      Sent Jan 8     ⏳ 22 days remaining', delay: 150 },
+      { type: 'out', text: '  TransUnion   Sent Jan 10    ⏳ 24 days remaining', delay: 150 },
+      { type: 'success', text: '  Experian     RESPONSE RECEIVED', delay: 150 },
+      { type: 'out', text: '', delay: 300 },
+      { type: 'success', text: '3 of 3 responses received', delay: 400 },
+    ],
+    pause: 2500
+  },
+  {
+    lines: [
+      { type: 'cmd', text: '605b inbox --check', delay: 0 },
+      { type: 'out', text: 'Checking for bureau responses...', delay: 600 },
+      { type: 'success', text: '✓ New response from Equifax', delay: 500 },
+      { type: 'out', text: '  Status: Investigation complete', delay: 200 },
+      { type: 'out', text: '  Result: Item verified as accurate', delay: 200 },
+      { type: 'out', text: '', delay: 300 },
+      { type: 'cmd', text: '605b escalate --method-of-verification', delay: 800 },
+      { type: 'out', text: 'Generating MOV request under FCRA §611(a)(7)...', delay: 500 },
+      { type: 'success', text: '✓ Follow-up letter ready for review', delay: 400 },
+    ],
+    pause: 2500
+  },
+  {
+    lines: [
+      { type: 'cmd', text: '605b audit --export', delay: 0 },
+      { type: 'out', text: 'Compiling documentation trail...', delay: 500 },
+      { type: 'out', text: '  12 letters generated', delay: 200 },
+      { type: 'out', text: '  8 responses logged', delay: 150 },
+      { type: 'out', text: '  47 timestamps recorded', delay: 150 },
+      { type: 'success', text: '✓ Exported to audit_trail_2025.pdf', delay: 400 },
+      { type: 'out', text: '', delay: 300 },
+      { type: 'success', text: 'Complete record ready for documentation', delay: 300 },
+    ],
+    pause: 3000
+  },
+];
+
+// Terminal component with typing animation
+function Terminal() {
+  const terminalBodyRef = useRef(null);
+  const [lines, setLines] = useState([]);
+  const sceneIndexRef = useRef(0);
+  const isRunningRef = useRef(false);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (isRunningRef.current) return;
+    isRunningRef.current = true;
 
-    const ctx = canvas.getContext('2d');
-    let width = canvas.offsetWidth;
-    let height = canvas.offsetHeight;
-
-    const checkMobile = () => {
-      isMobileRef.current = window.innerWidth < 768;
-    };
-    checkMobile();
-
-    const setSize = () => {
-      checkMobile();
-      width = canvas.offsetWidth;
-      height = canvas.offsetHeight;
-      canvas.width = width * window.devicePixelRatio;
-      canvas.height = height * window.devicePixelRatio;
-      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-      initParticles();
+    const typeText = async (text, onChar) => {
+      for (let i = 0; i <= text.length; i++) {
+        onChar(text.slice(0, i));
+        await new Promise(r => setTimeout(r, 25));
+      }
     };
 
-    const initParticles = () => {
-      particlesRef.current = [];
-      const spacing = isMobileRef.current ? 45 : 35;
-      const cols = Math.ceil(width / spacing) + 1;
-      const rows = Math.ceil(height / spacing) + 1;
+    const playScene = async (scene) => {
+      setLines([]);
+      const currentLines = [];
 
-      for (let i = 0; i < cols; i++) {
-        for (let j = 0; j < rows; j++) {
-          particlesRef.current.push({
-            x: i * spacing + (j % 2) * (spacing / 2),
-            y: j * spacing,
-            direction: (i + j) % 2 === 0 ? 1 : -1,
+      for (const line of scene.lines) {
+        await new Promise(r => setTimeout(r, line.delay));
+
+        if (line.type === 'cmd') {
+          const lineId = Date.now();
+          currentLines.push({ id: lineId, type: 'cmd', text: '', typing: true });
+          setLines([...currentLines]);
+
+          await typeText(line.text, (partial) => {
+            const updated = currentLines.map(l =>
+              l.id === lineId ? { ...l, text: partial } : l
+            );
+            setLines([...updated]);
           });
-        }
-      }
-    };
 
-    const drawTriangle = (x, y, size, direction, opacity) => {
-      ctx.beginPath();
-      if (direction === 1) {
-        ctx.moveTo(x - size * 0.5, y - size * 0.5);
-        ctx.lineTo(x + size * 0.5, y);
-        ctx.lineTo(x - size * 0.5, y + size * 0.5);
-      } else {
-        ctx.moveTo(x + size * 0.5, y - size * 0.5);
-        ctx.lineTo(x - size * 0.5, y);
-        ctx.lineTo(x + size * 0.5, y + size * 0.5);
-      }
-      ctx.closePath();
-      ctx.fillStyle = `rgba(247, 208, 71, ${opacity})`;
-      ctx.fill();
-    };
-
-    const animate = () => {
-      ctx.clearRect(0, 0, width, height);
-
-      const particles = particlesRef.current;
-      const isMobile = isMobileRef.current;
-      const maxDist = isMobile ? 180 : 250;
-      const minSize = 2;
-      const maxSize = isMobile ? 12 : 16;
-
-      particles.forEach((p) => {
-        const dx = mouseRef.current.x - p.x;
-        const dy = mouseRef.current.y - p.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-
-        let size, opacity;
-        if (dist < maxDist) {
-          const proximity = 1 - (dist / maxDist);
-          size = minSize + (maxSize - minSize) * proximity;
-          opacity = 0.06 + 0.22 * proximity;
+          currentLines[currentLines.length - 1].typing = false;
+          setLines([...currentLines]);
         } else {
-          size = minSize;
-          opacity = 0.06;
+          currentLines.push({ id: Date.now(), type: line.type, text: line.text, typing: false });
+          setLines([...currentLines]);
         }
 
-        drawTriangle(p.x, p.y, size, p.direction, opacity);
-      });
+        if (terminalBodyRef.current) {
+          terminalBodyRef.current.scrollTop = terminalBodyRef.current.scrollHeight;
+        }
+      }
 
-      animationRef.current = requestAnimationFrame(animate);
+      await new Promise(r => setTimeout(r, scene.pause));
     };
 
-    const handleMouseMove = (e) => {
-      const rect = canvas.getBoundingClientRect();
-      mouseRef.current = {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
-      };
-    };
-
-    const handleMouseLeave = () => {
-      mouseRef.current = { x: -1000, y: -1000 };
-    };
-
-    const handleTouchMove = (e) => {
-      if (e.touches.length > 0) {
-        const rect = canvas.getBoundingClientRect();
-        const touch = e.touches[0];
-        mouseRef.current = {
-          x: touch.clientX - rect.left,
-          y: touch.clientY - rect.top,
-        };
+    const runLoop = async () => {
+      while (true) {
+        await playScene(terminalScenes[sceneIndexRef.current]);
+        sceneIndexRef.current = (sceneIndexRef.current + 1) % terminalScenes.length;
       }
     };
 
-    const handleTouchEnd = () => {
-      mouseRef.current = { x: -1000, y: -1000 };
-    };
+    const timer = setTimeout(() => {
+      runLoop();
+    }, 1000);
 
-    setSize();
-    animate();
-
-    window.addEventListener('resize', setSize);
-    canvas.addEventListener('mousemove', handleMouseMove);
-    canvas.addEventListener('mouseleave', handleMouseLeave);
-    canvas.addEventListener('touchmove', handleTouchMove, { passive: true });
-    canvas.addEventListener('touchend', handleTouchEnd);
-
-    return () => {
-      window.removeEventListener('resize', setSize);
-      canvas.removeEventListener('mousemove', handleMouseMove);
-      canvas.removeEventListener('mouseleave', handleMouseLeave);
-      canvas.removeEventListener('touchmove', handleTouchMove);
-      canvas.removeEventListener('touchend', handleTouchEnd);
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
-    };
+    return () => clearTimeout(timer);
   }, []);
 
   return (
-    <canvas
-      ref={canvasRef}
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        pointerEvents: 'auto',
-        zIndex: 0,
-      }}
-    />
+    <div className="terminal">
+      <div className="terminal-bar">
+        <span className="terminal-dot r"></span>
+        <span className="terminal-dot y"></span>
+        <span className="terminal-dot g"></span>
+        <span className="terminal-title">605b.ai — reinvestigation</span>
+      </div>
+      <div className="terminal-body" ref={terminalBodyRef}>
+        {lines.map((line) => (
+          <div key={line.id} className={`t-line ${line.type === 'cmd' ? '' : 't-out'} ${line.type === 'success' ? 't-success' : ''} ${line.type === 'error' ? 't-error' : ''}`}>
+            {line.type === 'cmd' ? (
+              <>
+                <span className="t-prompt">$</span>
+                <span className={`t-cmd ${line.typing ? '' : 'done'}`}>{line.text}</span>
+              </>
+            ) : (
+              line.text
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
+
+// Feature icons as inline SVGs
+const icons = {
+  file: (
+    <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+      <path d="M14 2v6h6"/>
+    </svg>
+  ),
+  info: (
+    <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M12 16v-4"/><path d="M12 8h.01"/>
+    </svg>
+  ),
+  grid: (
+    <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="2"/>
+      <path d="M3 9h18"/><path d="M9 21V9"/>
+    </svg>
+  ),
+  activity: (
+    <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+    </svg>
+  ),
+  flag: (
+    <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
+      <line x1="4" y1="22" x2="4" y2="15"/>
+    </svg>
+  ),
+  edit: (
+    <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 20h9"/>
+      <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+    </svg>
+  ),
+};
 
 export default function LandingPage() {
   const { isSignedIn } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const features = [
+    { icon: 'file', title: 'Report Parser', desc: 'Upload PDF reports from all three bureaus. Extract tradelines and flag discrepancies.' },
+    { icon: 'info', title: 'Statute Guidance Engine', desc: 'Context-aware assistance for selecting applicable statutes and structuring correspondence.' },
+    { icon: 'grid', title: 'Letter Templates', desc: '62 professionally-structured templates covering FCRA, FDCPA, FCBA, and related statutes.' },
+    { icon: 'activity', title: 'Response & Deadline Tracker', desc: 'Monitor correspondence status with automated deadline calculations and response logging.' },
+    { icon: 'flag', title: 'Discrepancy Queue', desc: 'Review flagged items with reason codes and applicable statute references.' },
+    { icon: 'edit', title: 'Audit Trail', desc: 'Complete timestamped history of all actions, exportable for documentation purposes.' },
+  ];
+
+  const steps = [
+    { num: '01', title: 'Upload', desc: 'Upload credit reports from all three bureaus. Processed in-memory for privacy.' },
+    { num: '02', title: 'Analyze', desc: 'System parses tradelines, identifies discrepancies, and flags items with applicable statutes.' },
+    { num: '03', title: 'Dispute', desc: 'Generate structured correspondence with proper statute citations and deadline tracking.' },
+    { num: '04', title: 'Document', desc: 'Log responses, monitor deadlines, maintain complete audit trail.' },
+  ];
+
+  const statutes = ['FCRA', 'FDCPA', 'FCBA', 'TILA', 'ECOA', 'RESPA', 'EFTA'];
 
   return (
     <>
       <style jsx global>{`
-        * {
-          box-sizing: border-box;
-        }
-        
         .landing-page {
+          font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+          background: var(--bg);
+          color: var(--text);
           min-height: 100vh;
-          background: #09090b;
-          color: #fafafa;
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
-        
+
+        /* Grid background */
+        .bg-grid {
+          position: fixed;
+          inset: 0;
+          background-image:
+            linear-gradient(rgba(255, 107, 53, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 107, 53, 0.03) 1px, transparent 1px);
+          background-size: 80px 80px;
+          pointer-events: none;
+          z-index: 0;
+        }
+
         /* Navigation */
-        .nav {
+        nav {
           position: fixed;
           top: 0;
           left: 0;
           right: 0;
-          z-index: 100;
-          padding: 16px 24px;
+          z-index: 1000;
+          padding: 0 32px;
+          height: 64px;
           display: flex;
+          align-items: center;
           justify-content: space-between;
-          align-items: center;
-          background: rgba(9, 9, 11, 0.95);
-          backdrop-filter: blur(20px);
-          border-bottom: 1px solid rgba(255,255,255,0.05);
+          background: rgba(12, 12, 12, 0.8);
+          backdrop-filter: blur(16px);
+          border-bottom: 1px solid var(--border);
+          animation: slideDown 0.6s ease forwards;
         }
-        
+
+        @keyframes slideDown {
+          from { transform: translateY(-100%); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
+
         .logo {
-          font-size: 22px;
-          font-weight: 700;
-          color: #fafafa;
-          text-decoration: none;
-        }
-        
-        .logo-accent {
-          color: #f7d047;
-        }
-        
-        .nav-links {
           display: flex;
-          gap: 24px;
           align-items: center;
-        }
-        
-        .nav-link {
-          color: #a1a1aa;
+          gap: 12px;
           text-decoration: none;
-          font-size: 14px;
-          font-weight: 500;
+          color: var(--text);
         }
-        
-        .nav-link:hover {
-          color: #fafafa;
-        }
-        
-        .nav-button {
-          padding: 8px 16px;
-          background: transparent;
-          border: 1px solid #27272a;
+
+        .logo-mark {
+          width: 32px;
+          height: 32px;
+          background: var(--orange);
           border-radius: 8px;
-          color: #fafafa;
-          font-size: 14px;
-          font-weight: 500;
-          text-decoration: none;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 10px;
+          font-weight: 700;
+          color: white;
+          transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-        
-        .nav-button-primary {
-          padding: 8px 16px;
-          background: #f7d047;
-          border: none;
-          border-radius: 8px;
-          color: #09090b;
-          font-size: 14px;
+
+        .logo:hover .logo-mark {
+          transform: scale(1.1) rotate(-5deg);
+        }
+
+        .logo-text {
+          font-size: 16px;
           font-weight: 600;
-          text-decoration: none;
+          letter-spacing: -0.01em;
         }
-        
+
+        .nav-center {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .nav-link {
+          color: var(--text-secondary);
+          text-decoration: none;
+          font-size: 14px;
+          font-weight: 500;
+          padding: 8px 16px;
+          border-radius: 6px;
+          transition: all 0.2s;
+          position: relative;
+        }
+
+        .nav-link::after {
+          content: '';
+          position: absolute;
+          bottom: 4px;
+          left: 16px;
+          right: 16px;
+          height: 1px;
+          background: var(--orange);
+          transform: scaleX(0);
+          transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .nav-link:hover {
+          color: var(--text);
+        }
+
+        .nav-link:hover::after {
+          transform: scaleX(1);
+        }
+
+        .nav-right {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .btn {
+          font-family: inherit;
+          font-size: 14px;
+          font-weight: 500;
+          padding: 8px 16px;
+          border-radius: 8px;
+          border: none;
+          cursor: pointer;
+          transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+          text-decoration: none;
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .btn-ghost {
+          background: transparent;
+          color: var(--text-secondary);
+        }
+
+        .btn-ghost:hover {
+          color: var(--text);
+          background: var(--bg-card);
+        }
+
+        .btn-primary {
+          background: var(--text);
+          color: var(--bg);
+        }
+
+        .btn-primary:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-orange {
+          background: var(--orange);
+          color: white;
+        }
+
+        .btn-orange:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 24px var(--orange-glow);
+        }
+
+        .btn-outline {
+          background: transparent;
+          color: var(--text);
+          border: 1px solid var(--border);
+        }
+
+        .btn-outline:hover {
+          border-color: var(--orange);
+          color: var(--orange);
+        }
+
+        .btn-lg {
+          padding: 12px 24px;
+          font-size: 15px;
+        }
+
+        /* Mobile menu button */
         .mobile-menu-btn {
           display: none;
           background: none;
           border: none;
-          color: #fafafa;
+          color: var(--text);
           cursor: pointer;
           padding: 8px;
         }
-        
+
+        /* Hero */
+        .hero {
+          position: relative;
+          z-index: 10;
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          padding: 140px 32px 100px;
+          max-width: 1200px;
+          margin: 0 auto;
+        }
+
+        .hero-eyebrow {
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          font-size: 14px;
+          font-weight: 500;
+          color: var(--orange);
+          margin-bottom: 20px;
+          opacity: 0;
+          animation: fadeInUp 0.6s ease 0.3s forwards;
+        }
+
+        .hero-eyebrow::before {
+          content: '';
+          width: 20px;
+          height: 2px;
+          background: var(--orange);
+        }
+
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero h1 {
+          font-size: clamp(44px, 7vw, 72px);
+          font-weight: 700;
+          letter-spacing: -0.03em;
+          line-height: 1.05;
+          margin-bottom: 24px;
+          opacity: 0;
+          animation: fadeInUp 0.6s ease 0.4s forwards;
+        }
+
+        .hero h1 .highlight {
+          color: var(--orange);
+        }
+
+        .hero-desc {
+          font-size: 18px;
+          color: var(--text-secondary);
+          max-width: 540px;
+          line-height: 1.7;
+          margin-bottom: 36px;
+          opacity: 0;
+          animation: fadeInUp 0.6s ease 0.5s forwards;
+        }
+
+        .hero-buttons {
+          display: flex;
+          gap: 12px;
+          margin-bottom: 20px;
+          opacity: 0;
+          animation: fadeInUp 0.6s ease 0.6s forwards;
+        }
+
+        .hero-disclaimer {
+          font-size: 13px;
+          color: var(--text-muted);
+          margin-bottom: 60px;
+        }
+
+        /* Terminal */
+        .terminal {
+          background: var(--bg-secondary);
+          border: 1px solid var(--border);
+          border-radius: 12px;
+          overflow: hidden;
+          max-width: 650px;
+          box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+          opacity: 0;
+          animation: fadeInUp 0.8s ease 0.7s forwards;
+          transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s;
+        }
+
+        .terminal:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 32px 64px rgba(0, 0, 0, 0.5);
+        }
+
+        .terminal-bar {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 14px 16px;
+          background: var(--bg-card);
+          border-bottom: 1px solid var(--border);
+        }
+
+        .terminal-dot {
+          width: 12px;
+          height: 12px;
+          border-radius: 50%;
+          transition: transform 0.2s;
+        }
+
+        .terminal:hover .terminal-dot {
+          transform: scale(1.2);
+        }
+
+        .terminal-dot.r { background: #FF5F56; }
+        .terminal-dot.y { background: #FFBD2E; }
+        .terminal-dot.g { background: #27C93F; }
+
+        .terminal-title {
+          margin-left: 12px;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 12px;
+          color: var(--text-muted);
+        }
+
+        .terminal-body {
+          padding: 20px;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 13px;
+          line-height: 1.9;
+          min-height: 280px;
+          max-height: 280px;
+          overflow-y: auto;
+        }
+
+        .t-line {
+          display: flex;
+          gap: 10px;
+          animation: fadeIn 0.15s ease;
+        }
+
+        .t-cmd::after {
+          content: '▋';
+          animation: blink 1s step-end infinite;
+          margin-left: 2px;
+          opacity: 0.7;
+        }
+
+        .t-cmd.done::after {
+          display: none;
+        }
+
+        .t-prompt {
+          color: var(--orange);
+          user-select: none;
+        }
+
+        .t-cmd {
+          color: var(--text);
+        }
+
+        .t-out {
+          color: var(--text-muted);
+          padding-left: 18px;
+        }
+
+        .t-success {
+          color: #27C93F;
+        }
+
+        .t-error {
+          color: var(--orange);
+        }
+
+        /* Logos strip */
+        .logos {
+          position: relative;
+          z-index: 10;
+          padding: 60px 32px;
+          border-top: 1px solid var(--border);
+          border-bottom: 1px solid var(--border);
+          background: var(--bg-secondary);
+        }
+
+        .logos-inner {
+          max-width: 1200px;
+          margin: 0 auto;
+          text-align: center;
+        }
+
+        .logos-label {
+          font-size: 13px;
+          font-weight: 500;
+          color: var(--text-muted);
+          margin-bottom: 24px;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+
+        .logos-grid {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 48px;
+          flex-wrap: wrap;
+        }
+
+        .logo-item {
+          font-size: 18px;
+          font-weight: 600;
+          color: var(--text-muted);
+          opacity: 0.4;
+          transition: all 0.3s;
+          cursor: default;
+        }
+
+        .logo-item:hover {
+          opacity: 1;
+          color: var(--orange);
+          transform: translateY(-2px);
+        }
+
+        /* Stats */
+        .stats {
+          position: relative;
+          z-index: 10;
+          padding: 80px 32px;
+          max-width: 1200px;
+          margin: 0 auto;
+        }
+
+        .stats-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 32px;
+        }
+
+        .stat-item {
+          text-align: center;
+          padding: 24px;
+          border-radius: 12px;
+          transition: all 0.3s;
+        }
+
+        .stat-item:hover {
+          background: var(--bg-secondary);
+        }
+
+        .stat-value {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 44px;
+          font-weight: 700;
+          color: var(--text);
+          margin-bottom: 4px;
+          transition: all 0.3s;
+        }
+
+        .stat-item:hover .stat-value {
+          color: var(--orange);
+          transform: scale(1.05);
+        }
+
+        .stat-label {
+          font-size: 14px;
+          color: var(--text-muted);
+        }
+
+        .stats-source {
+          text-align: center;
+          font-size: 12px;
+          color: var(--text-muted);
+          margin-top: 24px;
+          opacity: 0.6;
+        }
+
+        /* Features */
+        .features {
+          position: relative;
+          z-index: 10;
+          padding: 120px 32px;
+          max-width: 1200px;
+          margin: 0 auto;
+        }
+
+        .section-header {
+          text-align: center;
+          margin-bottom: 64px;
+        }
+
+        .section-eyebrow {
+          font-size: 13px;
+          font-weight: 600;
+          color: var(--orange);
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          margin-bottom: 16px;
+        }
+
+        .section-title {
+          font-size: clamp(32px, 4vw, 44px);
+          font-weight: 700;
+          letter-spacing: -0.02em;
+          margin-bottom: 16px;
+        }
+
+        .section-desc {
+          font-size: 17px;
+          color: var(--text-secondary);
+          max-width: 500px;
+          margin: 0 auto;
+        }
+
+        .features-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 20px;
+        }
+
+        .feature-card {
+          background: var(--bg-secondary);
+          border: 1px solid var(--border);
+          border-radius: 12px;
+          padding: 28px;
+          transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+          position: relative;
+          overflow: hidden;
+        }
+
+        .feature-card::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 2px;
+          background: linear-gradient(90deg, transparent, var(--orange), transparent);
+          transform: scaleX(0);
+          transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .feature-card:hover {
+          border-color: var(--border-hover);
+          transform: translateY(-8px);
+        }
+
+        .feature-card:hover::before {
+          transform: scaleX(1);
+        }
+
+        .feature-icon {
+          width: 40px;
+          height: 40px;
+          background: var(--orange-dim);
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 16px;
+          transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .feature-card:hover .feature-icon {
+          transform: scale(1.1) rotate(-5deg);
+          background: var(--orange);
+        }
+
+        .feature-card:hover .feature-icon svg {
+          stroke: white;
+        }
+
+        .feature-icon svg {
+          width: 20px;
+          height: 20px;
+          stroke: var(--orange);
+          transition: stroke 0.3s;
+        }
+
+        .feature-title {
+          font-size: 16px;
+          font-weight: 600;
+          margin-bottom: 8px;
+        }
+
+        .feature-desc {
+          font-size: 14px;
+          color: var(--text-secondary);
+          line-height: 1.6;
+        }
+
+        /* Steps */
+        .steps {
+          position: relative;
+          z-index: 10;
+          padding: 120px 32px;
+          background: var(--bg-secondary);
+          border-top: 1px solid var(--border);
+          border-bottom: 1px solid var(--border);
+        }
+
+        .steps-inner {
+          max-width: 1200px;
+          margin: 0 auto;
+        }
+
+        .steps-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 32px;
+        }
+
+        .step-card {
+          text-align: center;
+          padding: 24px;
+          position: relative;
+        }
+
+        .step-card::after {
+          content: '';
+          position: absolute;
+          top: 50px;
+          right: -16px;
+          width: 32px;
+          height: 2px;
+          background: var(--border);
+        }
+
+        .step-card:last-child::after {
+          display: none;
+        }
+
+        .step-num {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 48px;
+          font-weight: 700;
+          color: var(--orange);
+          opacity: 0.2;
+          margin-bottom: 16px;
+          transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .step-card:hover .step-num {
+          opacity: 0.6;
+          transform: scale(1.1);
+        }
+
+        .step-title {
+          font-size: 18px;
+          font-weight: 600;
+          margin-bottom: 8px;
+        }
+
+        .step-desc {
+          font-size: 14px;
+          color: var(--text-secondary);
+          line-height: 1.6;
+        }
+
+        /* CTA */
+        .cta {
+          position: relative;
+          z-index: 10;
+          padding: 120px 32px;
+          text-align: center;
+        }
+
+        .cta-inner {
+          max-width: 600px;
+          margin: 0 auto;
+        }
+
+        .cta h2 {
+          font-size: clamp(32px, 5vw, 48px);
+          font-weight: 700;
+          letter-spacing: -0.02em;
+          margin-bottom: 16px;
+        }
+
+        .cta p {
+          font-size: 17px;
+          color: var(--text-secondary);
+          margin-bottom: 32px;
+        }
+
+        .cta-buttons {
+          display: flex;
+          gap: 12px;
+          justify-content: center;
+        }
+
+        .cta-disclaimer {
+          font-size: 13px;
+          color: var(--text-muted);
+          margin-top: 24px;
+        }
+
+        /* Footer */
+        footer {
+          position: relative;
+          z-index: 10;
+          padding: 32px;
+          border-top: 1px solid var(--border);
+        }
+
+        .footer-inner {
+          max-width: 1200px;
+          margin: 0 auto;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .footer-links {
+          display: flex;
+          gap: 24px;
+        }
+
+        .footer-links a {
+          font-size: 14px;
+          color: var(--text-muted);
+          text-decoration: none;
+          transition: all 0.2s;
+        }
+
+        .footer-links a:hover {
+          color: var(--orange);
+        }
+
+        .footer-copy {
+          font-size: 13px;
+          color: var(--text-muted);
+        }
+
+        /* Mobile menu */
         .mobile-menu {
           display: none;
           position: fixed;
@@ -263,849 +962,260 @@ export default function LandingPage() {
           left: 0;
           right: 0;
           bottom: 0;
-          background: #09090b;
-          z-index: 200;
+          background: var(--bg);
+          z-index: 2000;
           padding: 24px;
           flex-direction: column;
         }
-        
+
         .mobile-menu.open {
           display: flex;
         }
-        
+
         .mobile-menu-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
           margin-bottom: 48px;
         }
-        
+
         .mobile-menu-links {
           display: flex;
           flex-direction: column;
           gap: 24px;
         }
-        
+
         .mobile-menu-link {
-          color: #fafafa;
+          color: var(--text);
           text-decoration: none;
           font-size: 24px;
           font-weight: 600;
         }
-        
+
         .mobile-menu-buttons {
           margin-top: auto;
           display: flex;
           flex-direction: column;
           gap: 12px;
         }
-        
-        /* Hero - New Design */
-        .hero {
-          min-height: 100vh;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-          text-align: center;
-          padding: 120px 24px 80px;
-          position: relative;
-          background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(247, 208, 71, 0.08), transparent);
-          overflow: hidden;
-        }
-        
-        .hero-badge {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          padding: 10px 18px;
-          background: rgba(247, 208, 71, 0.08);
-          border: 1px solid rgba(247, 208, 71, 0.15);
-          border-radius: 100px;
-          font-size: 13px;
-          font-weight: 500;
-          color: #f7d047;
-          margin-bottom: 32px;
-          letter-spacing: 0.02em;
-        }
-        
-        .hero-title {
-          font-size: clamp(36px, 9vw, 72px);
-          font-weight: 700;
-          line-height: 1.05;
-          letter-spacing: -0.035em;
-          margin-bottom: 24px;
-          max-width: 900px;
-        }
-        
-        .hero-title-accent {
-          color: #f7d047;
-        }
-        
-        .hero-subtitle {
-          font-size: clamp(17px, 2.5vw, 20px);
-          line-height: 1.6;
-          color: #a1a1aa;
-          max-width: 640px;
-          margin-bottom: 12px;
-        }
-        
-        .hero-note {
-          font-size: 14px;
-          color: #52525b;
-          margin-bottom: 40px;
-          font-style: italic;
-        }
-        
-        .hero-cta {
-          display: flex;
-          gap: 12px;
-          flex-wrap: wrap;
-          justify-content: center;
-          margin-bottom: 48px;
-        }
-        
-        .btn-primary {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          padding: 16px 28px;
-          background: #f7d047;
-          border: none;
-          border-radius: 10px;
-          color: #09090b;
-          font-size: 16px;
-          font-weight: 600;
-          text-decoration: none;
-          transition: all 0.2s;
-        }
-        
-        .btn-primary:hover {
-          background: #e5c33f;
-          transform: translateY(-2px);
-        }
-        
-        .btn-secondary {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          padding: 16px 28px;
-          background: transparent;
-          border: 1px solid #27272a;
-          border-radius: 10px;
-          color: #fafafa;
-          font-size: 16px;
-          font-weight: 500;
-          text-decoration: none;
-          transition: all 0.2s;
-        }
-        
-        .btn-secondary:hover {
-          background: rgba(255, 255, 255, 0.05);
-          border-color: #3f3f46;
-        }
-        
-        .hero-trust {
-          display: flex;
-          gap: 32px;
-          flex-wrap: wrap;
-          justify-content: center;
-          padding-top: 32px;
-          border-top: 1px solid rgba(255, 255, 255, 0.06);
-        }
-        
-        .hero-trust-item {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          font-size: 13px;
-          color: #71717a;
-        }
-        
-        .hero-trust-icon {
-          width: 32px;
-          height: 32px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: rgba(247, 208, 71, 0.08);
-          border-radius: 8px;
-          color: #f7d047;
-        }
-        
-        .scroll-indicator {
-          position: absolute;
-          bottom: 32px;
-          left: 50%;
-          transform: translateX(-50%);
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 8px;
-          color: #52525b;
-          font-size: 12px;
-          font-weight: 500;
-          letter-spacing: 0.05em;
-          text-transform: uppercase;
-          cursor: pointer;
-          transition: color 0.2s;
-        }
-        
-        .scroll-indicator:hover {
-          color: #f7d047;
-        }
-        
-        .scroll-indicator svg {
-          animation: bounceDown 2s ease-in-out infinite;
-        }
-        
-        @keyframes bounceDown {
-          0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-          40% { transform: translateY(8px); }
-          60% { transform: translateY(4px); }
-        }
-        
-        /* Why Section - Primary Asset */
-        .why-section {
-          padding: 100px 24px;
-          background: #09090b;
-          border-top: 1px solid rgba(255, 255, 255, 0.04);
-        }
-        
-        .why-container {
-          max-width: 720px;
-          margin: 0 auto;
-        }
-        
-        .why-label {
-          font-size: 12px;
-          font-weight: 600;
-          color: #f7d047;
-          text-transform: uppercase;
-          letter-spacing: 0.15em;
-          margin-bottom: 16px;
-        }
-        
-        .why-title {
-          font-size: clamp(28px, 5vw, 40px);
-          font-weight: 700;
-          letter-spacing: -0.02em;
-          margin-bottom: 32px;
-          line-height: 1.2;
-        }
-        
-        .why-content {
-          font-size: 17px;
-          line-height: 1.8;
-          color: #a1a1aa;
-        }
-        
-        .why-content p {
-          margin-bottom: 24px;
-        }
-        
-        .why-content strong {
-          color: #fafafa;
-          font-weight: 500;
-        }
-        
-        .why-highlight {
-          padding: 24px 28px;
-          background: rgba(247, 208, 71, 0.06);
-          border-left: 3px solid #f7d047;
-          border-radius: 0 12px 12px 0;
-          margin: 32px 0;
-          font-size: 16px;
-          color: #e5e5e5;
-          font-style: italic;
-        }
-        
-        .why-closing {
-          font-size: 18px;
-          color: #fafafa;
-          font-weight: 500;
-          padding-top: 16px;
-          border-top: 1px solid rgba(255, 255, 255, 0.06);
-          margin-top: 32px;
-        }
-        
-        /* Sections */
-        .section {
-          padding: 80px 24px;
-        }
-        
-        .section-dark {
-          background: #0c0c0e;
-        }
-        
-        .container {
-          max-width: 1100px;
-          margin: 0 auto;
-        }
-        
-        .section-label {
-          font-size: 12px;
-          font-weight: 600;
-          color: #f7d047;
-          text-transform: uppercase;
-          letter-spacing: 0.15em;
-          margin-bottom: 12px;
-        }
-        
-        .section-title {
-          font-size: clamp(24px, 5vw, 32px);
-          font-weight: 700;
-          letter-spacing: -0.02em;
-          margin-bottom: 12px;
-        }
-        
-        .section-subtitle {
-          font-size: 15px;
-          color: #a1a1aa;
-          margin-bottom: 40px;
-          max-width: 500px;
-        }
-        
-        /* Steps */
-        .steps-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-          gap: 16px;
-        }
-        
-        .step-card {
-          padding: 24px;
-          background: #111113;
-          border: 1px solid #1c1c1f;
-          border-radius: 12px;
-          transition: all 0.2s;
-        }
-        
-        .step-card:hover {
-          border-color: #27272a;
-          transform: translateY(-2px);
-        }
-        
-        .step-icon {
-          width: 48px;
-          height: 48px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: rgba(247, 208, 71, 0.1);
-          border-radius: 10px;
-          color: #f7d047;
-          margin-bottom: 16px;
-        }
-        
-        .step-number {
-          font-size: 13px;
-          font-weight: 600;
-          color: #52525b;
-          margin-bottom: 8px;
-        }
-        
-        .step-title {
-          font-size: 16px;
-          font-weight: 600;
-          margin-bottom: 8px;
-          color: #fafafa;
-        }
-        
-        .step-desc {
-          font-size: 14px;
-          color: #a1a1aa;
-          line-height: 1.6;
-        }
-        
-        /* Features */
-        .features-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-          gap: 16px;
-        }
-        
-        .feature-card {
-          padding: 24px;
-          background: #0f0f11;
-          border: 1px solid #1c1c1f;
-          border-radius: 12px;
-          transition: all 0.2s;
-        }
-        
-        .feature-card:hover {
-          border-color: #27272a;
-        }
-        
-        .feature-icon {
-          width: 44px;
-          height: 44px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: rgba(247, 208, 71, 0.1);
-          border-radius: 10px;
-          margin-bottom: 16px;
-          color: #f7d047;
-        }
-        
-        .feature-title {
-          font-size: 16px;
-          font-weight: 600;
-          margin-bottom: 8px;
-          color: #fafafa;
-        }
-        
-        .feature-desc {
-          font-size: 14px;
-          line-height: 1.6;
-          color: #a1a1aa;
-        }
-        
-        /* Statutes */
-        .statute-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-          gap: 16px;
-        }
-        
-        .statute-card {
-          padding: 28px;
-          background: #111113;
-          border: 1px solid #1c1c1f;
-          border-radius: 12px;
-          transition: all 0.2s;
-        }
-        
-        .statute-card:hover {
-          border-color: rgba(247, 208, 71, 0.3);
-        }
-        
-        .statute-number {
-          font-size: 28px;
-          font-weight: 700;
-          color: #f7d047;
-          margin-bottom: 8px;
-        }
-        
-        .statute-name {
-          font-size: 16px;
-          font-weight: 600;
-          margin-bottom: 12px;
-          color: #fafafa;
-        }
-        
-        .statute-desc {
-          font-size: 14px;
-          color: #a1a1aa;
-          line-height: 1.6;
-        }
-        
-        /* CTA */
-        .cta-section {
-          padding: 100px 24px;
-          text-align: center;
-          background: linear-gradient(180deg, #09090b 0%, #0c0c0e 100%);
-        }
-        
-        .cta-title {
-          font-size: clamp(28px, 5vw, 40px);
-          font-weight: 700;
-          margin-bottom: 16px;
-          letter-spacing: -0.02em;
-        }
-        
-        .cta-subtitle {
-          font-size: 17px;
-          color: #a1a1aa;
-          margin-bottom: 32px;
-          max-width: 500px;
-          margin-left: auto;
-          margin-right: auto;
-        }
-        
-        .cta-disclaimer {
-          font-size: 13px;
-          color: #52525b;
-          margin-top: 20px;
-        }
-        
-        /* Footer */
-        .footer {
-          border-top: 1px solid #1c1c1f;
-          padding: 0 24px;
-          background: #0c0c0e;
-        }
-        
-        .footer-main {
-          display: flex;
-          flex-direction: column;
-          gap: 32px;
-          padding: 48px 0;
-          border-bottom: 1px solid #1c1c1f;
-        }
-        
-        .footer-brand {
-          max-width: 300px;
-        }
-        
-        .footer-logo {
-          font-size: 20px;
-          font-weight: 700;
-          margin-bottom: 12px;
-          color: #fafafa;
-        }
-        
-        .footer-tagline {
-          font-size: 14px;
-          color: #71717a;
-          line-height: 1.6;
-        }
-        
-        .footer-links {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 48px;
-        }
-        
-        .footer-column {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-        }
-        
-        .footer-column-title {
-          font-size: 13px;
-          font-weight: 600;
-          color: #fafafa;
-          margin-bottom: 4px;
-        }
-        
-        .footer-link {
-          font-size: 14px;
-          color: #71717a;
-          text-decoration: none;
-        }
-        
-        .footer-link:hover {
-          color: #f7d047;
-        }
-        
-        .footer-disclaimer {
-          padding: 24px 0;
-          border-bottom: 1px solid #1c1c1f;
-        }
-        
-        .disclaimer-text {
-          font-size: 12px;
-          color: #52525b;
-          line-height: 1.7;
-        }
-        
-        .footer-bottom {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-          padding: 24px 0;
-          font-size: 13px;
-          color: #52525b;
-        }
-        
-        .footer-bottom-links {
-          display: flex;
-          gap: 24px;
-        }
-        
-        .footer-bottom-link {
-          font-size: 13px;
-          color: #52525b;
-          text-decoration: none;
-        }
-        
-        .footer-bottom-link:hover {
-          color: #f7d047;
-        }
-        
-        /* Mobile Responsive */
-        @media (max-width: 768px) {
-          .nav-links {
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+          .features-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+          .steps-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+          .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+          .step-card::after {
             display: none;
           }
-          
+        }
+
+        @media (max-width: 768px) {
+          nav {
+            padding: 0 20px;
+          }
+          .nav-center {
+            display: none;
+          }
+          .nav-right {
+            display: none;
+          }
           .mobile-menu-btn {
             display: block;
-            min-width: 44px;
-            min-height: 44px;
           }
-          
-          .hero {
-            padding: 100px 20px 60px;
-            min-height: auto;
+          .hero, .features, .stats, .cta {
+            padding-left: 20px;
+            padding-right: 20px;
           }
-          
-          .hero-badge {
-            font-size: 12px;
-            padding: 8px 14px;
-          }
-          
-          .hero-subtitle {
-            font-size: 16px;
-          }
-          
-          .hero-note {
-            font-size: 13px;
-          }
-          
-          .hero-cta {
-            width: 100%;
-            max-width: 320px;
-          }
-          
-          .btn-primary, .btn-secondary {
-            padding: 14px 24px;
-            font-size: 15px;
-            width: 100%;
-            justify-content: center;
-            min-height: 48px;
-          }
-          
-          .hero-trust {
-            gap: 20px;
-            padding-top: 24px;
-          }
-          
-          .hero-trust-item {
-            font-size: 12px;
-          }
-          
-          .scroll-indicator {
-            display: none;
-          }
-          
-          .why-section {
-            padding: 60px 20px;
-          }
-          
-          .why-content {
-            font-size: 16px;
-          }
-          
-          .why-highlight {
-            padding: 20px 24px;
-            font-size: 15px;
-          }
-          
-          .section {
-            padding: 60px 20px;
-          }
-          
-          .section-subtitle {
-            margin-bottom: 32px;
-          }
-          
-          .steps-grid {
+          .features-grid,
+          .steps-grid,
+          .stats-grid {
             grid-template-columns: 1fr;
           }
-          
-          .features-grid {
-            grid-template-columns: 1fr;
-          }
-          
-          .statute-grid {
-            grid-template-columns: 1fr;
-          }
-          
-          .cta-section .btn-primary {
-            max-width: 320px;
-          }
-          
-          .footer-main {
+          .hero-buttons,
+          .cta-buttons {
             flex-direction: column;
           }
-          
-          .footer-links {
-            gap: 32px;
+          .hero-buttons .btn,
+          .cta-buttons .btn {
+            width: 100%;
+            justify-content: center;
           }
-          
-          .mobile-menu-link {
-            min-height: 44px;
-            display: flex;
-            align-items: center;
+          .footer-inner {
+            flex-direction: column;
+            gap: 20px;
+            text-align: center;
           }
-        }
-        
-        @media (min-width: 769px) {
-          .footer-main {
-            flex-direction: row;
-            justify-content: space-between;
-          }
-          
-          .footer-bottom {
-            flex-direction: row;
-            justify-content: space-between;
-            align-items: center;
+          .logos-grid {
+            gap: 24px;
           }
         }
       `}</style>
 
       <div className="landing-page">
+        <div className="bg-grid"></div>
+
         {/* Navigation */}
-        <nav className="nav">
+        <nav>
           <Link href="/" className="logo">
-            605b<span className="logo-accent">.ai</span>
+            <div className="logo-mark">605B</div>
+            <span className="logo-text">605b.ai</span>
           </Link>
-          <div className="nav-links">
-            <a href="#why" className="nav-link">Why</a>
-            <a href="#how-it-works" className="nav-link">How It Works</a>
+
+          <div className="nav-center">
+            <a href="#features" className="nav-link">Features</a>
+            <a href="#steps" className="nav-link">How It Works</a>
             <Link href="/about" className="nav-link">About</Link>
             <Link href="/pricing" className="nav-link">Pricing</Link>
-            {isSignedIn ? (
-              <Link href="/dashboard" className="nav-button-primary">Dashboard</Link>
+          </div>
+
+          <div className="nav-right">
+            {mounted && isSignedIn ? (
+              <Link href="/dashboard" className="btn btn-primary">Dashboard</Link>
             ) : (
               <>
-                <Link href="/sign-in" className="nav-button">Log In</Link>
-                <Link href="/sign-up" className="nav-button-primary">Get Started</Link>
+                <Link href="/sign-in" className="btn btn-ghost">Sign In</Link>
+                <Link href="/sign-up" className="btn btn-primary">Get Started</Link>
               </>
             )}
           </div>
+
           <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(true)}>
-            <Menu size={24} />
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
           </button>
         </nav>
 
         {/* Mobile Menu */}
         <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
           <div className="mobile-menu-header">
-            <span className="logo">605b<span className="logo-accent">.ai</span></span>
+            <Link href="/" className="logo">
+              <div className="logo-mark">605B</div>
+              <span className="logo-text">605b.ai</span>
+            </Link>
             <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(false)}>
-              <X size={24} />
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
             </button>
           </div>
           <div className="mobile-menu-links">
-            <a href="#why" className="mobile-menu-link" onClick={() => setMobileMenuOpen(false)}>Why</a>
-            <a href="#how-it-works" className="mobile-menu-link" onClick={() => setMobileMenuOpen(false)}>How It Works</a>
+            <a href="#features" className="mobile-menu-link" onClick={() => setMobileMenuOpen(false)}>Features</a>
+            <a href="#steps" className="mobile-menu-link" onClick={() => setMobileMenuOpen(false)}>How It Works</a>
             <Link href="/about" className="mobile-menu-link" onClick={() => setMobileMenuOpen(false)}>About</Link>
             <Link href="/pricing" className="mobile-menu-link" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
           </div>
           <div className="mobile-menu-buttons">
-            {isSignedIn ? (
-              <Link href="/dashboard" className="btn-primary" onClick={() => setMobileMenuOpen(false)}>Dashboard</Link>
+            {mounted && isSignedIn ? (
+              <Link href="/dashboard" className="btn btn-orange btn-lg" onClick={() => setMobileMenuOpen(false)}>Dashboard</Link>
             ) : (
               <>
-                <Link href="/sign-up" className="btn-primary" onClick={() => setMobileMenuOpen(false)}>Get Started</Link>
-                <Link href="/sign-in" className="btn-secondary" onClick={() => setMobileMenuOpen(false)}>Log In</Link>
+                <Link href="/sign-up" className="btn btn-orange btn-lg" onClick={() => setMobileMenuOpen(false)}>Get Started</Link>
+                <Link href="/sign-in" className="btn btn-outline btn-lg" onClick={() => setMobileMenuOpen(false)}>Sign In</Link>
               </>
             )}
           </div>
         </div>
 
-        {/* Hero - New Copy */}
+        {/* Hero */}
         <section className="hero">
-          <ParticleField />
-          <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <div className="hero-badge">
-              <Shield size={14} />
-              Self-Service Software
-            </div>
-            <h1 className="hero-title">
-              All the tools. One place.<br />
-              <span className="hero-title-accent">You stay in control.</span>
-            </h1>
-            <p className="hero-subtitle">
-              Self-service software that organizes the credit dispute and identity theft 
-              process into a clear, transparent workflow. No monthly fees. No promises. 
-              No one acting on your behalf.
-            </p>
-            <p className="hero-note">
-              If you can follow directions and mail certified letters, you can use this.
-            </p>
-            <div className="hero-cta">
-              {isSignedIn ? (
-                <Link href="/dashboard" className="btn-primary">
-                  Go to Dashboard <ArrowRight size={18} />
-                </Link>
-              ) : (
-                <>
-                  <Link href="/sign-up" className="btn-primary">
-                    Get Started Free <ArrowRight size={18} />
-                  </Link>
-                  <Link href="/pricing" className="btn-secondary">
-                    View Pricing
-                  </Link>
-                </>
-              )}
-            </div>
-            <div className="hero-trust">
-              <div className="hero-trust-item">
-                <div className="hero-trust-icon"><Eye size={16} /></div>
-                <span>Nothing hidden</span>
-              </div>
-              <div className="hero-trust-item">
-                <div className="hero-trust-icon"><Lock size={16} /></div>
-                <span>You control everything</span>
-              </div>
-              <div className="hero-trust-item">
-                <div className="hero-trust-icon"><Send size={16} /></div>
-                <span>You send it yourself</span>
-              </div>
-            </div>
+          <div className="hero-eyebrow">Statute-Driven Credit Reinvestigation Platform</div>
+          <h1>Credit Reinvestigation,<br /><span className="highlight">Structured Under Federal Law</span></h1>
+          <p className="hero-desc">
+            Generate compliant documentation, track statutory timelines, and maintain
+            a complete audit trail — clearly, deliberately, and without shortcuts.
+          </p>
+          <div className="hero-buttons">
+            {mounted && isSignedIn ? (
+              <Link href="/dashboard" className="btn btn-orange btn-lg">Go to Dashboard →</Link>
+            ) : (
+              <>
+                <Link href="/sign-up" className="btn btn-orange btn-lg">Start Report Analysis →</Link>
+                <a href="#steps" className="btn btn-outline btn-lg">How It Works</a>
+              </>
+            )}
           </div>
-          <a href="#why" className="scroll-indicator">
-            <span>Learn why</span>
-            <ChevronDown size={20} />
-          </a>
+          <p className="hero-disclaimer">Software tools only. No guarantees. Not legal advice.</p>
+
+          <Terminal />
         </section>
 
-        {/* Why 605b.ai Exists - Primary Asset */}
-        <section className="why-section" id="why">
-          <div className="why-container">
-            <div className="why-label">Our Philosophy</div>
-            <h2 className="why-title">Why 605b.ai Exists</h2>
-            <div className="why-content">
-              <p>
-                <strong>The lawful credit dispute process isn't secret — it's fragmented.</strong>
-              </p>
-              <p>
-                Over time, that fragmentation gave rise to an industry built around acting as an 
-                intermediary between people and their own rights. Most services operate behind 
-                the scenes, charge ongoing fees, reuse generic templates, and keep the mechanics opaque.
-              </p>
-              <p>
-                <strong>We took the opposite approach.</strong>
-              </p>
-              <p>
-                605b.ai compiles and structures the real dispute process into self-service software 
-                that keeps everything transparent and user-controlled. Nothing is sent on your behalf. 
-                Nothing is hidden. You generate the documents, review them, and send them yourself.
-              </p>
-              <div className="why-highlight">
-                In practice, this is a decentralization of a service model that depends on opacity and dependency.
-              </div>
-              <p className="why-closing">
-                If you can follow directions and go to the post office, you can use this.
-              </p>
+        {/* Logos/Statutes strip */}
+        <section className="logos">
+          <div className="logos-inner">
+            <div className="logos-label">Structured Around Federal Consumer Protection Statutes</div>
+            <div className="logos-grid">
+              {statutes.map((statute) => (
+                <span key={statute} className="logo-item">{statute}</span>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* How It Works */}
-        <section className="section section-dark" id="how-it-works">
-          <div className="container">
-            <div className="section-label">How It Works</div>
-            <h2 className="section-title">A systematic workflow</h2>
-            <p className="section-subtitle">
-              Organize your dispute process with software tools designed around FCRA procedures.
-            </p>
+        {/* Stats */}
+        <section className="stats">
+          <div className="stats-grid">
+            <div className="stat-item">
+              <div className="stat-value">62</div>
+              <div className="stat-label">Statute-Specific Templates</div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-value">1 in 5</div>
+              <div className="stat-label">Reports Contain Errors*</div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-value">30</div>
+              <div className="stat-label">Day Response Window</div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-value">7</div>
+              <div className="stat-label">Federal Statutes Covered</div>
+            </div>
+          </div>
+          <p className="stats-source">*FTC Study, 2012</p>
+        </section>
+
+        {/* Features */}
+        <section className="features" id="features">
+          <div className="section-header">
+            <div className="section-eyebrow">Platform</div>
+            <h2 className="section-title">Core reinvestigation tools</h2>
+            <p className="section-desc">Six tools designed for structured documentation, deadlines, and audit-ready recordkeeping.</p>
+          </div>
+
+          <div className="features-grid">
+            {features.map((feature, i) => (
+              <div key={i} className="feature-card">
+                <div className="feature-icon">{icons[feature.icon]}</div>
+                <h3 className="feature-title">{feature.title}</h3>
+                <p className="feature-desc">{feature.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Steps */}
+        <section className="steps" id="steps">
+          <div className="steps-inner">
+            <div className="section-header">
+              <div className="section-eyebrow">Process</div>
+              <h2 className="section-title">From discrepancy to documentation</h2>
+              <p className="section-desc">Four structured steps for statute-compliant reinvestigation requests.</p>
+            </div>
+
             <div className="steps-grid">
-              {[
-                { icon: Upload, num: '01', title: 'Upload & Identify', desc: 'Upload your credit reports. Our software helps you identify items you may want to review or dispute.' },
-                { icon: FileText, num: '02', title: 'Generate Documents', desc: 'Choose from 62+ letter templates based on FCRA sections. Customize with your specific information.' },
-                { icon: Flag, num: '03', title: 'Track Your Workflow', desc: 'Log sent correspondence, track statutory response windows, and maintain an organized timeline.' },
-                { icon: BarChart3, num: '04', title: 'Document Everything', desc: 'Maintain an audit trail of all actions. Export records for your personal documentation.' },
-              ].map((step, i) => (
+              {steps.map((step, i) => (
                 <div key={i} className="step-card">
-                  <div className="step-icon"><step.icon size={24} /></div>
-                  <div className="step-number">{step.num}</div>
+                  <div className="step-num">{step.num}</div>
                   <h3 className="step-title">{step.title}</h3>
                   <p className="step-desc">{step.desc}</p>
                 </div>
@@ -1114,116 +1224,36 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Features */}
-        <section className="section" id="features">
-          <div className="container">
-            <div className="section-label">Features</div>
-            <h2 className="section-title">Software tools for organization</h2>
-            <p className="section-subtitle">
-              Everything you need to manage your dispute documentation workflow.
-            </p>
-            <div className="features-grid">
-              {[
-                { icon: Upload, title: 'Report Analysis', desc: 'Upload credit report PDFs. Software identifies items and provides educational context about relevant FCRA sections.' },
-                { icon: Clock, title: 'Deadline Tracking', desc: 'Track statutory response windows. The software calculates timeframes based on FCRA requirements.' },
-                { icon: FileText, title: '62+ Letter Templates', desc: 'Access the full template library for dispute correspondence. Customize templates with your information.' },
-                { icon: Shield, title: 'AI Guidance', desc: 'AI assistant trained on consumer protection statutes provides educational information about your rights.' },
-                { icon: Flag, title: 'Item Flagging', desc: 'Flag items you want to address. Organize your workflow by priority and status.' },
-                { icon: Scale, title: 'Audit Trail', desc: 'Automatic logging of all actions. Export your complete documentation history.' },
-              ].map((feature, i) => (
-                <div key={i} className="feature-card">
-                  <div className="feature-icon"><feature.icon size={24} /></div>
-                  <h3 className="feature-title">{feature.title}</h3>
-                  <p className="feature-desc">{feature.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Statutes */}
-        <section className="section section-dark">
-          <div className="container">
-            <div className="section-label">Legal Framework</div>
-            <h2 className="section-title">Built around federal law</h2>
-            <p className="section-subtitle">
-              Our templates and workflows reference these federal consumer protection provisions.
-            </p>
-            <div className="statute-grid">
-              {[
-                { num: '§605B', name: 'Identity Theft Blocks', desc: 'Allows identity theft victims to request blocking of fraudulent information. Bureaus must respond within 4 business days.' },
-                { num: '§611', name: 'Dispute Procedures', desc: 'Establishes the right to dispute inaccurate information. Bureaus must investigate within 30 days.' },
-                { num: '§809', name: 'Debt Validation', desc: 'FDCPA provision requiring collectors to validate debts upon request within 30 days of initial contact.' },
-              ].map((statute, i) => (
-                <div key={i} className="statute-card">
-                  <div className="statute-number">{statute.num}</div>
-                  <div className="statute-name">{statute.name}</div>
-                  <p className="statute-desc">{statute.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* CTA */}
-        <section className="cta-section">
-          <h2 className="cta-title">Ready to take control?</h2>
-          <p className="cta-subtitle">
-            Start organizing your credit dispute process today. 
-            Free to analyze. Upgrade when you're ready to act.
-          </p>
-          <Link href="/sign-up" className="btn-primary">
-            Get Started Free <ArrowRight size={18} />
-          </Link>
-          <p className="cta-disclaimer">
-            No credit card required. Results vary based on individual circumstances.
-          </p>
+        <section className="cta">
+          <div className="cta-inner">
+            <h2>Ready to structure your reinvestigation?</h2>
+            <p>Start with a report analysis. Identify discrepancies, generate documentation, and track statutory timelines.</p>
+            <div className="cta-buttons">
+              <Link href="/sign-up" className="btn btn-orange btn-lg">Start Report Analysis →</Link>
+              <a href="https://www.annualcreditreport.com" target="_blank" rel="noopener noreferrer" className="btn btn-outline btn-lg">Get Free Reports</a>
+            </div>
+            <p className="cta-disclaimer">Software tools only. No guarantees. Not legal advice.</p>
+          </div>
         </section>
 
         {/* Footer */}
-        <footer className="footer">
-          <div className="footer-main">
-            <div className="footer-brand">
-              <div className="footer-logo">605b<span className="logo-accent">.ai</span></div>
-              <p className="footer-tagline">Self-service software for credit dispute organization.</p>
-            </div>
-            <div className="footer-links">
-              <div className="footer-column">
-                <div className="footer-column-title">Product</div>
-                <Link href="/sign-up" className="footer-link">Get Started</Link>
-                <a href="#features" className="footer-link">Features</a>
-                <a href="#how-it-works" className="footer-link">How It Works</a>
-                <Link href="/pricing" className="footer-link">Pricing</Link>
-              </div>
-              <div className="footer-column">
-                <div className="footer-column-title">Company</div>
-                <Link href="/about" className="footer-link">About</Link>
-                <Link href="/terms" className="footer-link">Terms of Service</Link>
-                <Link href="/privacy" className="footer-link">Privacy Policy</Link>
-              </div>
-              <div className="footer-column">
-                <div className="footer-column-title">Contact</div>
-                <a href="mailto:support@9thwave.io" className="footer-link">support@9thwave.io</a>
-              </div>
-            </div>
-          </div>
-          
-          <div className="footer-disclaimer">
-            <p className="disclaimer-text">
-              <strong>Important Disclaimer:</strong> 605b.ai provides software tools and educational guidance only. 
-              We are not a law firm, credit repair organization, or credit counseling service. We do not provide 
-              legal advice, credit repair services, or guarantees of any outcomes. The information provided is 
-              for educational purposes and should not be construed as legal advice. Results depend entirely on 
-              individual circumstances. Consult with a qualified attorney for legal advice specific to your situation.
-            </p>
-          </div>
+        <footer>
+          <div className="footer-inner">
+            <Link href="/" className="logo">
+              <div className="logo-mark">605B</div>
+              <span className="logo-text">605b.ai</span>
+            </Link>
 
-          <div className="footer-bottom">
-            <div>© {new Date().getFullYear()} Ninth Wave Analytics LLC · Delaware, USA</div>
-            <div className="footer-bottom-links">
-              <Link href="/terms" className="footer-bottom-link">Terms</Link>
-              <Link href="/privacy" className="footer-bottom-link">Privacy</Link>
+            <div className="footer-links">
+              <a href="https://www.annualcreditreport.com" target="_blank" rel="noopener noreferrer">Annual Credit Report</a>
+              <a href="https://www.cfpb.gov" target="_blank" rel="noopener noreferrer">CFPB</a>
+              <a href="https://www.ftc.gov" target="_blank" rel="noopener noreferrer">FTC</a>
+              <Link href="/privacy">Privacy</Link>
+              <Link href="/terms">Terms</Link>
             </div>
+
+            <div className="footer-copy">© {new Date().getFullYear()} Ninth Wave Analytics LLC. Software tools only.</div>
           </div>
         </footer>
       </div>

@@ -2,12 +2,12 @@ import { ClerkProvider } from '@clerk/nextjs';
 import './globals.css';
 
 export const metadata = {
-  title: '605b.ai - Credit Dispute Documentation Software',
-  description: 'Self-service software tools to organize credit disputes, generate FCRA-compliant letter templates, track bureau deadlines, and build documentation for identity theft victims.',
-  keywords: 'credit dispute software, identity theft documentation, FCRA 605B, dispute letters, credit bureau dispute, TransUnion, Experian, Equifax, dispute tracking',
+  title: '605b.ai | Statute-Driven Credit Reinvestigation Platform',
+  description: 'Generate compliant documentation, track statutory timelines, and maintain a complete audit trail. Self-service software for credit disputes and identity theft remediation.',
+  keywords: 'credit dispute software, identity theft documentation, FCRA 605B, dispute letters, credit bureau dispute, TransUnion, Experian, Equifax, dispute tracking, reinvestigation',
   openGraph: {
-    title: '605b.ai - Credit Dispute Documentation Software',
-    description: 'Self-service software tools to organize credit disputes and generate FCRA-compliant documentation.',
+    title: '605b.ai | Statute-Driven Credit Reinvestigation Platform',
+    description: 'Generate compliant documentation, track statutory timelines, and maintain a complete audit trail.',
     type: 'website',
   },
 };
@@ -15,58 +15,58 @@ export const metadata = {
 const clerkAppearance = {
   baseTheme: undefined,
   variables: {
-    colorPrimary: '#f7d047',
-    colorBackground: '#09090b',
-    colorText: '#fafafa',
-    colorTextSecondary: '#a1a1aa',
-    colorInputBackground: '#18181b',
-    colorInputText: '#fafafa',
+    colorPrimary: '#FF6B35',
+    colorBackground: '#0C0C0C',
+    colorText: '#FAFAFA',
+    colorTextSecondary: '#A0A0A0',
+    colorInputBackground: '#141414',
+    colorInputText: '#FAFAFA',
   },
   elements: {
     formButtonPrimary: {
-      backgroundColor: '#f7d047',
-      color: '#09090b',
+      backgroundColor: '#FF6B35',
+      color: '#FFFFFF',
       '&:hover': {
-        backgroundColor: '#d4b840',
+        backgroundColor: '#E55A2B',
       },
     },
     socialButtonsBlockButton: {
-      backgroundColor: '#27272a',
-      color: '#fafafa',
-      borderColor: '#3f3f46',
+      backgroundColor: '#1A1A1A',
+      color: '#FAFAFA',
+      borderColor: '#2A2A2A',
       '&:hover': {
-        backgroundColor: '#3f3f46',
+        backgroundColor: '#2A2A2A',
       },
     },
     socialButtonsBlockButtonText: {
-      color: '#fafafa',
+      color: '#FAFAFA',
     },
     card: {
-      backgroundColor: '#09090b',
-      borderColor: '#27272a',
+      backgroundColor: '#141414',
+      borderColor: '#2A2A2A',
     },
     headerTitle: {
-      color: '#fafafa',
+      color: '#FAFAFA',
     },
     headerSubtitle: {
-      color: '#a1a1aa',
+      color: '#A0A0A0',
     },
     dividerLine: {
-      backgroundColor: '#27272a',
+      backgroundColor: '#2A2A2A',
     },
     dividerText: {
-      color: '#71717a',
+      color: '#666666',
     },
     formFieldLabel: {
-      color: '#a1a1aa',
+      color: '#A0A0A0',
     },
     formFieldInput: {
-      backgroundColor: '#18181b',
-      borderColor: '#27272a',
-      color: '#fafafa',
+      backgroundColor: '#1A1A1A',
+      borderColor: '#2A2A2A',
+      color: '#FAFAFA',
     },
     footerActionLink: {
-      color: '#f7d047',
+      color: '#FF6B35',
     },
   },
 };
@@ -79,11 +79,7 @@ export default function RootLayout({ children }) {
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
           <link
-            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-            rel="stylesheet"
-          />
-          <link
-            href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+            href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
             rel="stylesheet"
           />
         </head>

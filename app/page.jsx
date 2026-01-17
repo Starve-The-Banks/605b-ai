@@ -209,10 +209,31 @@ export default function LandingPage() {
   const { isSignedIn } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [glowVisible, setGlowVisible] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      setMousePos({ x: e.clientX, y: e.clientY });
+      if (!glowVisible) setGlowVisible(true);
+    };
+
+    const handleMouseLeave = () => {
+      setGlowVisible(false);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    document.body.addEventListener('mouseleave', handleMouseLeave);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      document.body.removeEventListener('mouseleave', handleMouseLeave);
+    };
+  }, [glowVisible]);
 
   const features = [
     { icon: 'file', title: 'Report Parser', desc: 'Upload PDF reports from all three bureaus. Extract tradelines and flag discrepancies.' },
@@ -252,6 +273,23 @@ export default function LandingPage() {
           background-size: 80px 80px;
           pointer-events: none;
           z-index: 0;
+        }
+
+        /* Mouse-follow gradient glow */
+        .bg-glow {
+          position: fixed;
+          width: 800px;
+          height: 800px;
+          background: radial-gradient(circle, rgba(255, 107, 53, 0.08) 0%, transparent 70%);
+          pointer-events: none;
+          z-index: 1;
+          transform: translate(-50%, -50%);
+          transition: opacity 0.3s ease;
+          opacity: 0;
+        }
+
+        .bg-glow.visible {
+          opacity: 1;
         }
 
         /* Navigation */
@@ -1060,6 +1098,10 @@ export default function LandingPage() {
 
       <div className="landing-page">
         <div className="bg-grid"></div>
+        <div
+          className={`bg-glow ${glowVisible ? 'visible' : ''}`}
+          style={{ left: mousePos.x, top: mousePos.y }}
+        />
 
         {/* Navigation */}
         <nav>

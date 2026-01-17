@@ -32,7 +32,7 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.clerk.com https://clerk.accounts.dev https://*.clerk.accounts.dev https://challenges.cloudflare.com https://js.stripe.com",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.clerk.com https://clerk.605b.ai https://clerk.accounts.dev https://*.clerk.accounts.dev https://challenges.cloudflare.com https://js.stripe.com",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "img-src 'self' data: blob: https://*.clerk.com https://img.clerk.com",
               "font-src 'self' data: https://fonts.gstatic.com",

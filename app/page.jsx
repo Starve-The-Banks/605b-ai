@@ -211,10 +211,37 @@ export default function LandingPage() {
   const [mounted, setMounted] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [glowVisible, setGlowVisible] = useState(false);
+  const [activeStep, setActiveStep] = useState(-1);
+  const [seenSteps, setSeenSteps] = useState(new Set());
+  const stepRefs = useRef([]);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Scroll-triggered step reveal animation
+  useEffect(() => {
+    if (!mounted) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const index = parseInt(entry.target.dataset.stepIndex, 10);
+          if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
+            setActiveStep(index);
+            setSeenSteps((prev) => new Set([...prev, index]));
+          }
+        });
+      },
+      { threshold: 0.5, rootMargin: '-10% 0px -10% 0px' }
+    );
+
+    stepRefs.current.forEach((ref) => {
+      if (ref) observer.observe(ref);
+    });
+
+    return () => observer.disconnect();
+  }, [mounted]);
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -997,6 +1024,19 @@ export default function LandingPage() {
           text-align: center;
           padding: 24px;
           position: relative;
+          opacity: 0.65;
+          transform: scale(1);
+          transition: opacity 0.25s ease-out, transform 0.25s ease-out;
+        }
+
+        .step-card.active {
+          opacity: 1;
+          transform: scale(1.02);
+        }
+
+        .step-card.seen {
+          opacity: 0.75;
+          transform: scale(1);
         }
 
         .step-card::after {
@@ -1020,12 +1060,15 @@ export default function LandingPage() {
           color: var(--orange);
           opacity: 0.2;
           margin-bottom: 16px;
-          transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+          transition: all 0.25s ease-out;
+        }
+
+        .step-card.active .step-num {
+          opacity: 0.5;
         }
 
         .step-card:hover .step-num {
           opacity: 0.6;
-          transform: scale(1.1);
         }
 
         .step-title {
@@ -1415,7 +1458,12 @@ export default function LandingPage() {
 
             <div className="steps-grid">
               {steps.map((step, i) => (
-                <div key={i} className="step-card">
+                <div
+                  key={i}
+                  ref={(el) => (stepRefs.current[i] = el)}
+                  data-step-index={i}
+                  className={`step-card ${activeStep === i ? 'active' : ''} ${seenSteps.has(i) && activeStep !== i ? 'seen' : ''}`}
+                >
                   <div className="step-num">{step.num}</div>
                   <h3 className="step-title">{step.title}</h3>
                   <p className="step-desc">{step.desc}</p>

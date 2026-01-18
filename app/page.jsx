@@ -76,7 +76,7 @@ const terminalScenes = [
 ];
 
 // Terminal component with typing animation
-function Terminal() {
+function Terminal({ reducedMotion = false }) {
   const terminalBodyRef = useRef(null);
   const [lines, setLines] = useState([]);
   const sceneIndexRef = useRef(0);
@@ -143,6 +143,7 @@ function Terminal() {
 
   return (
     <div className="terminal">
+      {!reducedMotion && <div className="terminal-shimmer" />}
       <div className="terminal-bar">
         <span className="terminal-dot r"></span>
         <span className="terminal-dot y"></span>
@@ -421,7 +422,8 @@ export default function LandingPage() {
           height: 2px;
           background: var(--orange);
           transform: scaleX(0);
-          transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+          transform-origin: left;
+          transition: transform 0.25s ease-out;
         }
 
         @media (min-width: 1024px) {
@@ -672,6 +674,7 @@ export default function LandingPage() {
 
         /* Terminal */
         .terminal {
+          position: relative;
           background: var(--bg-secondary);
           border: 1px solid var(--border);
           border-radius: 12px;
@@ -739,6 +742,28 @@ export default function LandingPage() {
           .terminal-title {
             font-size: 14px;
           }
+        }
+
+        .terminal-shimmer {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          z-index: 1;
+          background: linear-gradient(
+            105deg,
+            transparent 0%,
+            transparent 40%,
+            rgba(255, 122, 51, 0.08) 50%,
+            transparent 60%,
+            transparent 100%
+          );
+          background-size: 200% 100%;
+          animation: shimmer 8s linear infinite;
+        }
+
+        @keyframes shimmer {
+          0% { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
         }
 
         .t-line {
@@ -1411,7 +1436,7 @@ export default function LandingPage() {
           </div>
           <p className="hero-disclaimer">Software tools only. No guarantees. Not legal advice.</p>
 
-          <Terminal />
+          <Terminal reducedMotion={reducedMotion} />
         </section>
 
         {/* Logos/Statutes strip */}

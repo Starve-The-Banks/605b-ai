@@ -221,6 +221,8 @@ export default function LandingPage() {
     setReducedMotion(mediaQuery.matches);
     const handler = (e) => setReducedMotion(e.matches);
     mediaQuery.addEventListener('change', handler);
+    // Debug: confirm component mounted client-side
+    console.log("Process animation component mounted");
     return () => mediaQuery.removeEventListener('change', handler);
   }, []);
 
@@ -1437,10 +1439,10 @@ export default function LandingPage() {
                 <motion.div
                   key={i}
                   className="step-card"
-                  initial={reducedMotion ? { opacity: 1, scale: 1 } : { opacity: 0.65, scale: 1 }}
-                  whileInView={{ opacity: 1, scale: reducedMotion ? 1 : 1.02 }}
+                  initial={reducedMotion ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 10, scale: 1 }}
+                  whileInView={{ opacity: 1, y: 0, scale: reducedMotion ? 1 : 1.02 }}
                   viewport={{ once: true, amount: 0.35 }}
-                  transition={{ duration: 0.25, ease: "easeOut" }}
+                  transition={{ duration: 0.28, ease: "easeOut" }}
                 >
                   <div className="step-num">{step.num}</div>
                   <h3 className="step-title">{step.title}</h3>

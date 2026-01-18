@@ -1,7 +1,6 @@
 "use client";
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { useAuth } from '@clerk/nextjs';
 import { useState, useEffect, useRef } from 'react';
 
@@ -412,13 +411,20 @@ export default function LandingPage() {
         .nav-link::after {
           content: '';
           position: absolute;
-          bottom: 4px;
-          left: 18px;
-          right: 18px;
-          height: 1px;
+          bottom: 6px;
+          left: 16px;
+          right: 16px;
+          height: 2px;
           background: var(--orange);
           transform: scaleX(0);
           transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @media (min-width: 1024px) {
+          .nav-link::after {
+            left: 20px;
+            right: 20px;
+          }
         }
 
         .nav-link:hover {
@@ -517,7 +523,12 @@ export default function LandingPage() {
           border: none;
           color: var(--text);
           cursor: pointer;
-          padding: 8px;
+          padding: 10px;
+        }
+
+        .mobile-menu-btn svg {
+          width: 28px;
+          height: 28px;
         }
 
         /* Hero */
@@ -555,6 +566,15 @@ export default function LandingPage() {
         @keyframes fadeInUp {
           from { opacity: 0; transform: translateY(20px); }
           to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        @keyframes blink {
+          50% { opacity: 0; }
         }
 
         .hero h1 {
@@ -1018,7 +1038,7 @@ export default function LandingPage() {
         footer {
           position: relative;
           z-index: 10;
-          padding: 32px;
+          padding: 40px 32px;
           border-top: 1px solid var(--border);
         }
 
@@ -1032,11 +1052,11 @@ export default function LandingPage() {
 
         .footer-links {
           display: flex;
-          gap: 24px;
+          gap: 28px;
         }
 
         .footer-links a {
-          font-size: 14px;
+          font-size: 15px;
           color: var(--text-muted);
           text-decoration: none;
           transition: all 0.2s;

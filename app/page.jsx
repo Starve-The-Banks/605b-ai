@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@clerk/nextjs';
 import { useState, useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
 
 // Terminal animation scenes
 const terminalScenes = [
@@ -211,43 +212,17 @@ export default function LandingPage() {
   const [mounted, setMounted] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [glowVisible, setGlowVisible] = useState(false);
-  const [activeStep, setActiveStep] = useState(-1);
-  const [seenSteps, setSeenSteps] = useState(new Set());
-  const stepRefs = useRef([]);
+  const [reducedMotion, setReducedMotion] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    // Check for reduced motion preference
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setReducedMotion(mediaQuery.matches);
+    const handler = (e) => setReducedMotion(e.matches);
+    mediaQuery.addEventListener('change', handler);
+    return () => mediaQuery.removeEventListener('change', handler);
   }, []);
-
-  // Scroll-triggered step reveal animation
-  useEffect(() => {
-    if (!mounted) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          const index = parseInt(entry.target.dataset.stepIndex, 10);
-          if (entry.isIntersecting) {
-            setActiveStep(index);
-            setSeenSteps((prev) => new Set([...prev, index]));
-          }
-        });
-      },
-      { threshold: 0.2, rootMargin: '0px 0px -20% 0px' }
-    );
-
-    // Small delay to ensure refs are populated after render
-    const timer = setTimeout(() => {
-      stepRefs.current.forEach((ref) => {
-        if (ref) observer.observe(ref);
-      });
-    }, 100);
-
-    return () => {
-      clearTimeout(timer);
-      observer.disconnect();
-    };
-  }, [mounted]);
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -698,7 +673,7 @@ export default function LandingPage() {
           border: 1px solid var(--border);
           border-radius: 12px;
           overflow: hidden;
-          max-width: 650px;
+          max-width: 720px;
           box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
           opacity: 0;
           animation: fadeInUp 0.8s ease 0.7s forwards;
@@ -714,7 +689,7 @@ export default function LandingPage() {
           display: flex;
           align-items: center;
           gap: 8px;
-          padding: 14px 16px;
+          padding: 16px 20px;
           background: var(--bg-card);
           border-bottom: 1px solid var(--border);
         }
@@ -737,18 +712,30 @@ export default function LandingPage() {
         .terminal-title {
           margin-left: 12px;
           font-family: 'JetBrains Mono', monospace;
-          font-size: 12px;
+          font-size: 13px;
           color: var(--text-muted);
         }
 
         .terminal-body {
-          padding: 20px;
+          padding: 24px;
           font-family: 'JetBrains Mono', monospace;
-          font-size: 13px;
-          line-height: 1.9;
-          min-height: 280px;
-          max-height: 280px;
+          font-size: 15px;
+          line-height: 1.7;
+          min-height: 320px;
+          max-height: 320px;
           overflow-y: auto;
+        }
+
+        @media (min-width: 768px) {
+          .terminal-body {
+            padding: 32px;
+            font-size: 17px;
+            min-height: 380px;
+            max-height: 380px;
+          }
+          .terminal-title {
+            font-size: 14px;
+          }
         }
 
         .t-line {
@@ -1030,19 +1017,6 @@ export default function LandingPage() {
           text-align: center;
           padding: 24px;
           position: relative;
-          opacity: 0.4;
-          transform: scale(0.95) translateY(8px);
-          transition: opacity 0.35s ease-out, transform 0.35s ease-out;
-        }
-
-        .step-card.active {
-          opacity: 1;
-          transform: scale(1) translateY(0);
-        }
-
-        .step-card.seen {
-          opacity: 0.7;
-          transform: scale(0.98) translateY(0);
         }
 
         .step-card::after {
@@ -1064,17 +1038,13 @@ export default function LandingPage() {
           font-size: 48px;
           font-weight: 700;
           color: var(--orange);
-          opacity: 0.2;
+          opacity: 0.3;
           margin-bottom: 16px;
-          transition: all 0.25s ease-out;
-        }
-
-        .step-card.active .step-num {
-          opacity: 0.5;
+          transition: opacity 0.25s ease-out;
         }
 
         .step-card:hover .step-num {
-          opacity: 0.6;
+          opacity: 0.5;
         }
 
         .step-title {
@@ -1464,16 +1434,18 @@ export default function LandingPage() {
 
             <div className="steps-grid">
               {steps.map((step, i) => (
-                <div
+                <motion.div
                   key={i}
-                  ref={(el) => (stepRefs.current[i] = el)}
-                  data-step-index={i}
-                  className={`step-card ${activeStep === i ? 'active' : ''} ${seenSteps.has(i) && activeStep !== i ? 'seen' : ''}`}
+                  className="step-card"
+                  initial={reducedMotion ? { opacity: 1, scale: 1 } : { opacity: 0.65, scale: 1 }}
+                  whileInView={{ opacity: 1, scale: reducedMotion ? 1 : 1.02 }}
+                  viewport={{ once: true, amount: 0.35 }}
+                  transition={{ duration: 0.25, ease: "easeOut" }}
                 >
                   <div className="step-num">{step.num}</div>
                   <h3 className="step-title">{step.title}</h3>
                   <p className="step-desc">{step.desc}</p>
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>

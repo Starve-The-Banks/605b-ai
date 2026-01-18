@@ -1218,6 +1218,7 @@ export default function LandingPage() {
         @media (max-width: 768px) {
           nav {
             padding: 0 20px;
+            height: 72px;
           }
           .nav-center {
             display: none;
@@ -1232,10 +1233,38 @@ export default function LandingPage() {
             padding-left: 20px;
             padding-right: 20px;
           }
+          .hero {
+            padding-top: 120px;
+          }
+          .hero-desc {
+            font-size: 16px;
+          }
+          .terminal {
+            max-width: 100%;
+          }
+          .terminal-body {
+            padding: 16px;
+            font-size: 12px;
+            min-height: 240px;
+            max-height: 240px;
+            line-height: 1.8;
+          }
+          .terminal-bar {
+            padding: 12px 16px;
+          }
+          .terminal-title {
+            font-size: 11px;
+          }
           .features-grid,
           .steps-grid,
           .stats-grid {
             grid-template-columns: 1fr;
+          }
+          .steps {
+            padding: 80px 20px;
+          }
+          .step-num {
+            font-size: 36px;
           }
           .hero-buttons,
           .cta-buttons {
@@ -1251,8 +1280,16 @@ export default function LandingPage() {
             gap: 20px;
             text-align: center;
           }
+          .footer-links {
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 16px;
+          }
           .logos-grid {
             gap: 24px;
+          }
+          .stat-value {
+            font-size: 36px;
           }
         }
       `}</style>

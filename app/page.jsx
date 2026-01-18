@@ -325,62 +325,87 @@ export default function LandingPage() {
         .logo {
           display: flex;
           align-items: center;
-          gap: 12px;
+          gap: 10px;
           text-decoration: none;
           color: var(--text);
+          transition: opacity 0.2s;
         }
 
-        .logo-mark {
-          width: 32px;
-          height: 32px;
+        .logo:hover {
+          opacity: 0.85;
+        }
+
+        .logo-icon {
+          width: 36px;
+          height: 36px;
           background: var(--orange);
           border-radius: 8px;
           display: flex;
           align-items: center;
           justify-content: center;
           font-family: 'JetBrains Mono', monospace;
-          font-size: 10px;
+          font-size: 11px;
           font-weight: 700;
           color: white;
           transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        .logo:hover .logo-mark {
-          transform: scale(1.1) rotate(-5deg);
+        .logo:hover .logo-icon {
+          transform: scale(1.05) rotate(-3deg);
         }
 
         .logo-text {
-          font-size: 16px;
+          display: flex;
+          align-items: baseline;
+          line-height: 1;
+          letter-spacing: -0.02em;
+        }
+
+        .logo-text-main {
+          font-size: 22px;
           font-weight: 600;
-          letter-spacing: -0.01em;
+          color: var(--text);
+        }
+
+        .logo-text-ext {
+          font-size: 22px;
+          font-weight: 600;
+          color: var(--text-secondary);
+          margin-left: 0;
         }
 
         .nav-center {
           display: flex;
           align-items: center;
-          gap: 6px;
+          gap: 8px;
         }
 
         @media (min-width: 1024px) {
           .nav-center {
-            gap: 12px;
+            gap: 16px;
+          }
+        }
+
+        @media (min-width: 1280px) {
+          .nav-center {
+            gap: 20px;
           }
         }
 
         .nav-link {
           color: var(--text-secondary);
           text-decoration: none;
-          font-size: 16px;
+          font-size: 17px;
           font-weight: 500;
-          padding: 12px 20px;
+          padding: 12px 16px;
           border-radius: 6px;
           transition: all 0.2s;
           position: relative;
         }
 
-        @media (min-width: 768px) {
+        @media (min-width: 1024px) {
           .nav-link {
-            font-size: 18px;
+            padding: 12px 20px;
           }
         }
 
@@ -1139,13 +1164,10 @@ export default function LandingPage() {
         {/* Navigation */}
         <nav>
           <Link href="/" className="logo">
-            <Image
-              src="/logos/primary/605b-bracket-box.svg"
-              alt="605b.ai"
-              width={168}
-              height={45}
-              priority
-            />
+            <span className="logo-icon">{'{}'}</span>
+            <span className="logo-text">
+              <span className="logo-text-main">605b</span><span className="logo-text-ext">.ai</span>
+            </span>
           </Link>
 
           <div className="nav-center">
@@ -1179,12 +1201,10 @@ export default function LandingPage() {
         <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
           <div className="mobile-menu-header">
             <Link href="/" className="logo">
-              <Image
-                src="/logos/primary/605b-bracket-box.svg"
-                alt="605b.ai"
-                width={168}
-                height={45}
-              />
+              <span className="logo-icon">{'{}'}</span>
+              <span className="logo-text">
+                <span className="logo-text-main">605b</span><span className="logo-text-ext">.ai</span>
+              </span>
             </Link>
             <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(false)}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -1321,12 +1341,10 @@ export default function LandingPage() {
         <footer>
           <div className="footer-inner">
             <Link href="/" className="logo">
-              <Image
-                src="/logos/primary/605b-bracket-box.svg"
-                alt="605b.ai"
-                width={168}
-                height={45}
-              />
+              <span className="logo-icon">{'{}'}</span>
+              <span className="logo-text">
+                <span className="logo-text-main">605b</span><span className="logo-text-ext">.ai</span>
+              </span>
             </Link>
 
             <div className="footer-links">

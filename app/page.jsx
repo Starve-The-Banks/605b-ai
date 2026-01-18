@@ -300,14 +300,21 @@ export default function LandingPage() {
           right: 0;
           z-index: 1000;
           padding: 0 32px;
-          height: 64px;
+          height: 84px;
+          min-height: 72px;
           display: flex;
           align-items: center;
           justify-content: space-between;
           background: rgba(12, 12, 12, 0.8);
           backdrop-filter: blur(16px);
-          border-bottom: 1px solid var(--border);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.12);
           animation: slideDown 0.6s ease forwards;
+        }
+
+        @media (min-width: 768px) {
+          nav {
+            min-height: 84px;
+          }
         }
 
         @keyframes slideDown {
@@ -351,26 +358,38 @@ export default function LandingPage() {
         .nav-center {
           display: flex;
           align-items: center;
-          gap: 8px;
+          gap: 6px;
+        }
+
+        @media (min-width: 1024px) {
+          .nav-center {
+            gap: 12px;
+          }
         }
 
         .nav-link {
           color: var(--text-secondary);
           text-decoration: none;
-          font-size: 15px;
+          font-size: 16px;
           font-weight: 500;
-          padding: 10px 18px;
+          padding: 12px 20px;
           border-radius: 6px;
           transition: all 0.2s;
           position: relative;
+        }
+
+        @media (min-width: 768px) {
+          .nav-link {
+            font-size: 18px;
+          }
         }
 
         .nav-link::after {
           content: '';
           position: absolute;
           bottom: 4px;
-          left: 16px;
-          right: 16px;
+          left: 18px;
+          right: 18px;
           height: 1px;
           background: var(--orange);
           transform: scaleX(0);
@@ -388,14 +407,14 @@ export default function LandingPage() {
         .nav-right {
           display: flex;
           align-items: center;
-          gap: 8px;
+          gap: 12px;
         }
 
         .btn {
           font-family: inherit;
-          font-size: 14px;
+          font-size: 16px;
           font-weight: 500;
-          padding: 8px 16px;
+          padding: 10px 20px;
           border-radius: 8px;
           border: none;
           cursor: pointer;
@@ -404,6 +423,13 @@ export default function LandingPage() {
           display: inline-flex;
           align-items: center;
           gap: 8px;
+        }
+
+        @media (min-width: 768px) {
+          .btn {
+            font-size: 17px;
+            padding: 12px 24px;
+          }
         }
 
         .btn-ghost {
@@ -448,8 +474,15 @@ export default function LandingPage() {
         }
 
         .btn-lg {
-          padding: 12px 24px;
-          font-size: 15px;
+          padding: 14px 28px;
+          font-size: 16px;
+        }
+
+        @media (min-width: 768px) {
+          .btn-lg {
+            padding: 16px 32px;
+            font-size: 18px;
+          }
         }
 
         /* Mobile menu button */
@@ -1109,8 +1142,8 @@ export default function LandingPage() {
             <Image
               src="/logos/primary/605b-bracket-box.svg"
               alt="605b.ai"
-              width={120}
-              height={32}
+              width={168}
+              height={45}
               priority
             />
           </Link>
@@ -1149,8 +1182,8 @@ export default function LandingPage() {
               <Image
                 src="/logos/primary/605b-bracket-box.svg"
                 alt="605b.ai"
-                width={120}
-                height={32}
+                width={168}
+                height={45}
               />
             </Link>
             <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(false)}>
@@ -1291,8 +1324,8 @@ export default function LandingPage() {
               <Image
                 src="/logos/primary/605b-bracket-box.svg"
                 alt="605b.ai"
-                width={120}
-                height={32}
+                width={168}
+                height={45}
               />
             </Link>
 

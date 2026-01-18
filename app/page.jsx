@@ -336,8 +336,8 @@ export default function LandingPage() {
         }
 
         .logo-icon {
-          width: 36px;
-          height: 36px;
+          width: 44px;
+          height: 44px;
           flex-shrink: 0;
           transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
@@ -354,15 +354,15 @@ export default function LandingPage() {
         }
 
         .logo-text-main {
-          font-size: 22px;
+          font-size: 24px;
           font-weight: 600;
           color: var(--text);
         }
 
         .logo-text-ext {
-          font-size: 22px;
+          font-size: 24px;
           font-weight: 600;
-          color: var(--text-secondary);
+          color: var(--orange);
           margin-left: 0;
         }
 
@@ -1177,7 +1177,7 @@ export default function LandingPage() {
         {/* Navigation */}
         <nav>
           <Link href="/" className="logo">
-            <Image src="/logos/favicons/favicon.svg" alt="605b.ai" width={36} height={36} className="logo-icon" />
+            <Image src="/logos/favicons/favicon.svg" alt="605b.ai" width={44} height={44} className="logo-icon" />
             <span className="logo-text">
               <span className="logo-text-main">605b</span><span className="logo-text-ext">.ai</span>
             </span>
@@ -1214,7 +1214,7 @@ export default function LandingPage() {
         <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
           <div className="mobile-menu-header">
             <Link href="/" className="logo">
-              <Image src="/logos/favicons/favicon.svg" alt="605b.ai" width={36} height={36} className="logo-icon" />
+              <Image src="/logos/favicons/favicon.svg" alt="605b.ai" width={44} height={44} className="logo-icon" />
               <span className="logo-text">
                 <span className="logo-text-main">605b</span><span className="logo-text-ext">.ai</span>
               </span>
@@ -1354,7 +1354,7 @@ export default function LandingPage() {
         <footer>
           <div className="footer-inner">
             <Link href="/" className="logo">
-              <Image src="/logos/favicons/favicon.svg" alt="605b.ai" width={36} height={36} className="logo-icon" />
+              <Image src="/logos/favicons/favicon.svg" alt="605b.ai" width={44} height={44} className="logo-icon" />
               <span className="logo-text">
                 <span className="logo-text-main">605b</span><span className="logo-text-ext">.ai</span>
               </span>

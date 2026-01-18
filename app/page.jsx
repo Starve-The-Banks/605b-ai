@@ -310,8 +310,8 @@ export default function LandingPage() {
           right: 0;
           z-index: 1000;
           padding: 0 32px;
-          height: 84px;
-          min-height: 72px;
+          height: 96px;
+          min-height: 80px;
           display: flex;
           align-items: center;
           justify-content: space-between;
@@ -323,7 +323,7 @@ export default function LandingPage() {
 
         @media (min-width: 768px) {
           nav {
-            min-height: 84px;
+            min-height: 96px;
           }
         }
 
@@ -379,27 +379,27 @@ export default function LandingPage() {
         .nav-center {
           display: flex;
           align-items: center;
-          gap: 8px;
+          gap: 24px;
         }
 
         @media (min-width: 1024px) {
           .nav-center {
-            gap: 16px;
+            gap: 40px;
           }
         }
 
         @media (min-width: 1280px) {
           .nav-center {
-            gap: 20px;
+            gap: 48px;
           }
         }
 
         .nav-link {
           color: var(--text-secondary);
           text-decoration: none;
-          font-size: 17px;
+          font-size: 18px;
           font-weight: 500;
-          padding: 12px 16px;
+          padding: 14px 12px;
           border-radius: 6px;
           transition: all 0.2s;
           position: relative;
@@ -407,7 +407,8 @@ export default function LandingPage() {
 
         @media (min-width: 1024px) {
           .nav-link {
-            padding: 12px 20px;
+            font-size: 20px;
+            padding: 14px 16px;
           }
         }
 
@@ -461,8 +462,8 @@ export default function LandingPage() {
 
         @media (min-width: 768px) {
           .btn {
-            font-size: 17px;
-            padding: 12px 24px;
+            font-size: 18px;
+            padding: 14px 28px;
           }
         }
 

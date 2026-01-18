@@ -589,9 +589,60 @@ export default function LandingPage() {
           color: var(--text-secondary);
           max-width: 540px;
           line-height: 1.7;
-          margin-bottom: 36px;
+          margin-bottom: 24px;
           opacity: 0;
           animation: fadeInUp 0.6s ease 0.5s forwards;
+        }
+
+        .hero-bridge {
+          font-size: 15px;
+          color: var(--text-muted);
+          max-width: 540px;
+          line-height: 1.6;
+          margin-bottom: 28px;
+          opacity: 0;
+          animation: fadeInUp 0.6s ease 0.55s forwards;
+        }
+
+        .hero-steps {
+          margin-bottom: 32px;
+          opacity: 0;
+          animation: fadeInUp 0.6s ease 0.58s forwards;
+        }
+
+        .hero-steps-list {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          margin-bottom: 12px;
+        }
+
+        .hero-steps-item {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          font-size: 15px;
+          color: var(--text-secondary);
+        }
+
+        .hero-steps-num {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 12px;
+          font-weight: 600;
+          color: var(--orange);
+          width: 20px;
+          height: 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: var(--orange-dim);
+          border-radius: 4px;
+        }
+
+        .hero-steps-note {
+          font-size: 13px;
+          color: var(--text-muted);
+          font-style: italic;
         }
 
         .hero-buttons {
@@ -1027,6 +1078,23 @@ export default function LandingPage() {
           margin-top: 24px;
         }
 
+        /* Audience filter */
+        .audience-filter {
+          position: relative;
+          z-index: 10;
+          padding: 32px;
+          text-align: center;
+          border-top: 1px solid var(--border);
+          background: var(--bg-secondary);
+        }
+
+        .audience-filter p {
+          font-size: 14px;
+          color: var(--text-muted);
+          max-width: 600px;
+          margin: 0 auto;
+        }
+
         /* Footer */
         footer {
           position: relative;
@@ -1252,6 +1320,26 @@ export default function LandingPage() {
             Generate compliant documentation, track statutory timelines, and maintain
             a complete audit trail — clearly, deliberately, and without shortcuts.
           </p>
+          <p className="hero-bridge">
+            If you've been told you need a "credit repair company," this gives you self-service software to do the same dispute process yourself—legally, transparently, and without monthly fees.
+          </p>
+          <div className="hero-steps">
+            <div className="hero-steps-list">
+              <div className="hero-steps-item">
+                <span className="hero-steps-num">1</span>
+                <span>Generate the documents</span>
+              </div>
+              <div className="hero-steps-item">
+                <span className="hero-steps-num">2</span>
+                <span>Review them</span>
+              </div>
+              <div className="hero-steps-item">
+                <span className="hero-steps-num">3</span>
+                <span>Mail them (certified if you choose)</span>
+              </div>
+            </div>
+            <p className="hero-steps-note">You stay in control. Nothing is sent on your behalf.</p>
+          </div>
           <div className="hero-buttons">
             {mounted && isSignedIn ? (
               <Link href="/dashboard" className="btn btn-orange btn-lg">Go to Dashboard →</Link>
@@ -1348,6 +1436,11 @@ export default function LandingPage() {
             </div>
             <p className="cta-disclaimer">Software tools only. No guarantees. Not legal advice.</p>
           </div>
+        </section>
+
+        {/* Audience Filter */}
+        <section className="audience-filter">
+          <p>If you're looking for someone to "handle everything for you," this isn't that. 605b.ai is self-service software.</p>
         </section>
 
         {/* Footer */}

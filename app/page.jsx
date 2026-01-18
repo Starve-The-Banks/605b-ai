@@ -1,6 +1,7 @@
 "use client";
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAuth } from '@clerk/nextjs';
 import { useState, useEffect, useRef } from 'react';
 
@@ -337,15 +338,7 @@ export default function LandingPage() {
         .logo-icon {
           width: 36px;
           height: 36px;
-          background: var(--orange);
-          border-radius: 8px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-family: 'JetBrains Mono', monospace;
-          font-size: 11px;
-          font-weight: 700;
-          color: white;
+          flex-shrink: 0;
           transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
@@ -1184,7 +1177,7 @@ export default function LandingPage() {
         {/* Navigation */}
         <nav>
           <Link href="/" className="logo">
-            <span className="logo-icon">{'{}'}</span>
+            <Image src="/logos/favicons/favicon.svg" alt="605b.ai" width={36} height={36} className="logo-icon" />
             <span className="logo-text">
               <span className="logo-text-main">605b</span><span className="logo-text-ext">.ai</span>
             </span>
@@ -1221,7 +1214,7 @@ export default function LandingPage() {
         <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
           <div className="mobile-menu-header">
             <Link href="/" className="logo">
-              <span className="logo-icon">{'{}'}</span>
+              <Image src="/logos/favicons/favicon.svg" alt="605b.ai" width={36} height={36} className="logo-icon" />
               <span className="logo-text">
                 <span className="logo-text-main">605b</span><span className="logo-text-ext">.ai</span>
               </span>
@@ -1361,7 +1354,7 @@ export default function LandingPage() {
         <footer>
           <div className="footer-inner">
             <Link href="/" className="logo">
-              <span className="logo-icon">{'{}'}</span>
+              <Image src="/logos/favicons/favicon.svg" alt="605b.ai" width={36} height={36} className="logo-icon" />
               <span className="logo-text">
                 <span className="logo-text-main">605b</span><span className="logo-text-ext">.ai</span>
               </span>

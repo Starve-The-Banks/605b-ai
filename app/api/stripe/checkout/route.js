@@ -77,6 +77,15 @@ const ADDON_CONFIG = {
   },
 };
 
+// Standalone products (no auth required)
+const STANDALONE_PRODUCT_CONFIG = {
+  'identity_theft_packet': {
+    priceId: process.env.STRIPE_IDENTITY_THEFT_PACKET_PRICE_ID,
+    amount: 4900, // $49.00
+    name: 'Identity Theft Dispute Packet',
+  },
+};
+
 // Allowlist of valid tier IDs - reject anything not in this list
 const VALID_TIER_IDS = ['free', 'toolkit', 'advanced', 'identity-theft'];
 const VALID_ADDON_IDS = ['extra-analysis', 'ai-credits', 'attorney-export'];

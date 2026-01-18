@@ -227,20 +227,26 @@ export default function LandingPage() {
       (entries) => {
         entries.forEach((entry) => {
           const index = parseInt(entry.target.dataset.stepIndex, 10);
-          if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
+          if (entry.isIntersecting) {
             setActiveStep(index);
             setSeenSteps((prev) => new Set([...prev, index]));
           }
         });
       },
-      { threshold: 0.5, rootMargin: '-10% 0px -10% 0px' }
+      { threshold: 0.2, rootMargin: '0px 0px -20% 0px' }
     );
 
-    stepRefs.current.forEach((ref) => {
-      if (ref) observer.observe(ref);
-    });
+    // Small delay to ensure refs are populated after render
+    const timer = setTimeout(() => {
+      stepRefs.current.forEach((ref) => {
+        if (ref) observer.observe(ref);
+      });
+    }, 100);
 
-    return () => observer.disconnect();
+    return () => {
+      clearTimeout(timer);
+      observer.disconnect();
+    };
   }, [mounted]);
 
   useEffect(() => {
@@ -1024,19 +1030,19 @@ export default function LandingPage() {
           text-align: center;
           padding: 24px;
           position: relative;
-          opacity: 0.65;
-          transform: scale(1);
-          transition: opacity 0.25s ease-out, transform 0.25s ease-out;
+          opacity: 0.4;
+          transform: scale(0.95) translateY(8px);
+          transition: opacity 0.35s ease-out, transform 0.35s ease-out;
         }
 
         .step-card.active {
           opacity: 1;
-          transform: scale(1.02);
+          transform: scale(1) translateY(0);
         }
 
         .step-card.seen {
-          opacity: 0.75;
-          transform: scale(1);
+          opacity: 0.7;
+          transform: scale(0.98) translateY(0);
         }
 
         .step-card::after {

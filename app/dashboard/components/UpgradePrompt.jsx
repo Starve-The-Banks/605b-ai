@@ -14,7 +14,7 @@ const TIER_UPGRADE_INFO = {
   advanced: {
     name: 'Advanced Suite',
     price: 89,
-    color: '#f7d047',
+    color: '#FF6B35', // Orange accent
     icon: Sparkles,
   },
   'identity-theft': {
@@ -55,11 +55,11 @@ export function UpgradePrompt({
         alignItems: 'center',
         gap: '12px',
         padding: '12px 16px',
-        background: 'rgba(247, 208, 71, 0.08)',
-        border: '1px solid rgba(247, 208, 71, 0.2)',
+        background: `${tierInfo.color}14`,
+        border: `1px solid ${tierInfo.color}33`,
         borderRadius: '10px',
       }}>
-        <Lock size={16} style={{ color: '#f7d047', flexShrink: 0 }} />
+        <Lock size={16} style={{ color: tierInfo.color, flexShrink: 0 }} />
         <span style={{ flex: 1, fontSize: '13px', color: '#a1a1aa' }}>
           {title || `Requires ${tierInfo.name}`}
         </span>
@@ -243,7 +243,7 @@ export function UsageLimitWarning({ used, total, type = 'PDF analyses' }) {
           <Lock size={14} style={{ color: '#ef4444' }} />
           <span style={{ color: '#fca5a5' }}>
             No {type} remaining.{' '}
-            <Link href="/pricing" style={{ color: '#f7d047', textDecoration: 'underline' }}>
+            <Link href="/pricing" style={{ color: '#FF6B35', textDecoration: 'underline' }}>
               Upgrade or purchase add-on
             </Link>
           </span>

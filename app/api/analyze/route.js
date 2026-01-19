@@ -313,7 +313,8 @@ Analyze thoroughly and return ONLY valid JSON, no other text.`;
 
   } catch (error) {
     console.error('Analysis error:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    // Don't expose internal error details to clients
+    return new Response(JSON.stringify({ error: 'Analysis failed. Please try again.' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });

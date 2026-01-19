@@ -21,6 +21,9 @@ function getRedis() {
   return redis;
 }
 
+// Validate intake token format (64-character hex token)
+const TOKEN_REGEX = /^[a-f0-9]{64}$/;
+
 // Bureau addresses
 const BUREAU_ADDRESSES = {
   equifax: {
@@ -81,6 +84,11 @@ export async function GET(request) {
     const intakeToken = session.metadata?.intakeToken;
     if (!intakeToken) {
       return NextResponse.json({ error: 'Missing intake data' }, { status: 400 });
+    }
+
+    // Validate intake token format to prevent injection
+    if (!TOKEN_REGEX.test(intakeToken)) {
+      return NextResponse.json({ error: 'Invalid token format' }, { status: 400 });
     }
 
     // Retrieve intake data from Redis
@@ -429,8 +437,9 @@ export async function GET(request) {
 
   } catch (error) {
     console.error('Download generation error:', error);
+    // Don't expose internal error messages to clients
     return NextResponse.json(
-      { error: error.message || 'Failed to generate packet' },
+      { error: 'Failed to generate packet. Please try again or contact support.' },
       { status: 500 }
     );
   }

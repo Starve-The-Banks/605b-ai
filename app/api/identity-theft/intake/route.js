@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { randomBytes } from 'crypto';
+import { randomBytes, createHash } from 'crypto';
+import { headers } from 'next/headers';
 
 // Lazy initialization
 let redis = null;
@@ -17,9 +18,47 @@ const MAX_CREDITORS = 20;
 const MAX_CREDITOR_LENGTH = 100;
 const MAX_FIELD_LENGTH = 200;
 
+// Rate limit: 10 submissions per hour per IP (anti-spam)
+const RATE_LIMIT = 10;
+const RATE_WINDOW_SECONDS = 3600;
+
+/**
+ * Get a hashed identifier for rate limiting (privacy-preserving)
+ */
+function getClientHash(headersList) {
+  // Use forwarded IP or fall back to a generic identifier
+  const forwarded = headersList.get('x-forwarded-for');
+  const ip = forwarded ? forwarded.split(',')[0].trim() : 'unknown';
+  // Hash the IP for privacy
+  return createHash('sha256').update(`intake:${ip}`).digest('hex').slice(0, 16);
+}
+
 export async function POST(request) {
   try {
     const redisClient = getRedis();
+    const headersList = await headers();
+
+    // Rate limit by hashed IP to prevent spam
+    const clientHash = getClientHash(headersList);
+    const rateLimitKey = `ratelimit:intake:${clientHash}`;
+
+    try {
+      const currentCount = await redisClient.incr(rateLimitKey);
+      if (currentCount === 1) {
+        // First request - set TTL
+        await redisClient.expire(rateLimitKey, RATE_WINDOW_SECONDS);
+      }
+      if (currentCount > RATE_LIMIT) {
+        return NextResponse.json(
+          { error: 'Too many requests. Please try again later.' },
+          { status: 429 }
+        );
+      }
+    } catch (rateLimitError) {
+      // Fail open for availability, but log it
+      console.error('Rate limit check failed:', rateLimitError);
+    }
+
     const body = await request.json();
 
     const { fullName, address, city, state, zip, dob, ssnLast4, bureaus, creditors } = body;

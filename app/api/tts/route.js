@@ -131,8 +131,12 @@ export async function POST(req) {
 
   } catch (error) {
     console.error('TTS API error:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
+    // Don't expose internal error details - fallback to browser TTS
+    return new Response(JSON.stringify({
+      useBrowserTTS: true,
+      error: 'Voice service temporarily unavailable'
+    }), {
+      status: 200, // Return 200 so frontend falls back gracefully
       headers: { 'Content-Type': 'application/json' }
     });
   }

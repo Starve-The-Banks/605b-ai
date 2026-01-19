@@ -26,12 +26,19 @@ const nextConfig = {
           },
           {
             key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(self), geolocation=()'
+            // Restrict powerful features - only allow what's needed
+            value: 'camera=(), microphone=(self), geolocation=(), payment=(self), usb=(), bluetooth=(), serial=(), hid=()'
+          },
+          {
+            // Strict Transport Security - enforce HTTPS
+            key: 'Strict-Transport-Security',
+            value: 'max-age=31536000; includeSubDomains'
           },
           {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
+              // Note: unsafe-inline/unsafe-eval needed for Next.js dynamic features
               "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.clerk.com https://clerk.605b.ai https://clerk.accounts.dev https://*.clerk.accounts.dev https://challenges.cloudflare.com https://js.stripe.com",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "img-src 'self' data: blob: https://*.clerk.com https://img.clerk.com",
@@ -41,7 +48,7 @@ const nextConfig = {
               "worker-src 'self' blob:",
               "object-src 'none'",
               "base-uri 'self'",
-              "form-action 'self'",
+              "form-action 'self' https://checkout.stripe.com",
               "frame-ancestors 'self'",
               "upgrade-insecure-requests",
             ].join('; ')
@@ -54,7 +61,31 @@ const nextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'no-store, max-age=0'
+            value: 'no-store, no-cache, max-age=0, must-revalidate'
+          },
+          {
+            // Prevent API responses from being embedded
+            key: 'X-Content-Type-Options',
+            value: 'nosniff'
+          },
+        ],
+      },
+      {
+        // Security headers for PDF downloads
+        source: '/api/identity-theft/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'private, no-cache, no-store, must-revalidate'
+          },
+          {
+            // Prevent caching of sensitive documents
+            key: 'Pragma',
+            value: 'no-cache'
+          },
+          {
+            key: 'Expires',
+            value: '0'
           },
         ],
       },

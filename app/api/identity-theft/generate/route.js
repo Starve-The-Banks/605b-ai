@@ -46,6 +46,9 @@ const BUREAU_ADDRESSES = {
   },
 };
 
+// Validate order ID format (64-character hex token)
+const ORDER_ID_REGEX = /^[a-f0-9]{64}$/;
+
 export async function GET(request) {
   try {
     const redisClient = getRedis();
@@ -57,6 +60,11 @@ export async function GET(request) {
 
     if (!orderId) {
       return NextResponse.json({ error: 'Order ID required' }, { status: 400 });
+    }
+
+    // Validate order ID format to prevent injection attacks
+    if (!ORDER_ID_REGEX.test(orderId)) {
+      return NextResponse.json({ error: 'Invalid order ID format' }, { status: 400 });
     }
 
     // Get order data
@@ -354,8 +362,9 @@ export async function GET(request) {
 
   } catch (error) {
     console.error('Packet generation error:', error);
+    // Don't expose internal error messages to clients
     return NextResponse.json(
-      { error: error.message || 'Failed to generate packet' },
+      { error: 'Failed to generate packet. Please try again or contact support.' },
       { status: 500 }
     );
   }

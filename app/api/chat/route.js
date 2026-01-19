@@ -70,7 +70,8 @@ export async function POST(req) {
 
   } catch (error) {
     console.error('Chat API error:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    // Don't expose internal error details to clients
+    return new Response(JSON.stringify({ error: 'Chat service temporarily unavailable. Please try again.' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });

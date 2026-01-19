@@ -248,20 +248,21 @@ export default function AnalyzeTab({ logAction, addFlaggedItem }) {
         }
         
         .file-remove {
-          width: 32px;
-          height: 32px;
+          width: 44px;
+          height: 44px;
           display: flex;
           align-items: center;
           justify-content: center;
           background: transparent;
           border: none;
-          border-radius: 6px;
+          border-radius: 8px;
           color: var(--text-muted);
           cursor: pointer;
           transition: all 0.15s;
+          flex-shrink: 0;
         }
-        
-        .file-remove:hover {
+
+        .file-remove:hover, .file-remove:active {
           background: rgba(248, 113, 113, 0.1);
           color: var(--danger);
         }
@@ -547,13 +548,46 @@ export default function AnalyzeTab({ logAction, addFlaggedItem }) {
           .analyze-container {
             padding: 20px 16px;
           }
-          
+
           .results-summary {
             grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
           }
-          
+
           .upload-zone {
             padding: 32px 20px;
+          }
+
+          .issue-actions {
+            flex-direction: column;
+          }
+
+          .issue-btn {
+            width: 100%;
+            justify-content: center;
+            min-height: 44px;
+          }
+
+          .summary-value {
+            font-size: 24px;
+          }
+
+          .section-title {
+            font-size: 10px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .results-summary {
+            grid-template-columns: 1fr;
+          }
+
+          .issue-header {
+            flex-wrap: wrap;
+          }
+
+          .issue-severity {
+            margin-top: 8px;
           }
         }
       `}</style>

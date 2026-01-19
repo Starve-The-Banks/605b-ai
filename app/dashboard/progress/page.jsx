@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import {
@@ -8,17 +8,26 @@ import {
   ArrowRight, Sparkles, FileText, Shield, Calendar,
   ChevronRight, Award, Zap
 } from 'lucide-react';
+import { useDisputes } from '@/lib/useUserData';
 
 export default function ProgressPage() {
   const { user } = useUser();
+  const { disputes, loading: disputesLoading } = useDisputes();
   const [userProfile, setUserProfile] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
-  const [stats, setStats] = useState({
-    disputesSent: 0,
-    pendingResponses: 0,
-    successfulRemovals: 0,
-    daysActive: 0,
-  });
+  const [daysActive, setDaysActive] = useState(0);
+
+  // Compute stats from actual disputes data (server-synced)
+  const stats = useMemo(() => {
+    const pending = disputes.filter(d => d.status === 'pending').length;
+    const successful = disputes.filter(d => d.status === 'resolved' || d.status === 'removed').length;
+    return {
+      disputesSent: disputes.length,
+      pendingResponses: pending,
+      successfulRemovals: successful,
+      daysActive,
+    };
+  }, [disputes, daysActive]);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -36,7 +45,7 @@ export default function ProgressPage() {
     const onboardingDate = localStorage.getItem('605b_onboarding_date');
     if (onboardingDate) {
       const days = Math.floor((Date.now() - new Date(onboardingDate).getTime()) / (1000 * 60 * 60 * 24));
-      setStats(prev => ({ ...prev, daysActive: days }));
+      setDaysActive(days);
     }
   }, []);
 

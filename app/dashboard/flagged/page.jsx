@@ -57,26 +57,38 @@ export default function FlaggedPage() {
     [flaggedItems]
   );
 
+  const [toast, setToast] = useState(null);
+
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
+
   const handleCreateDispute = async (item) => {
     setCreatingDispute(item.id);
-    
-    // Create dispute from flagged item
-    const dispute = await addDispute({
-      creditor: item.account || 'Unknown Account',
-      bureau: 'Experian', // Default - user can change
-      type: item.type === 'fraud_indicator' ? 'Identity Theft (605B)' : 'Inaccurate Information',
-      dateSent: new Date().toISOString().split('T')[0],
-      notes: `${item.issue}\n\nStatute: ${item.statute}\nRecommendation: ${item.recommendation}`,
-      flaggedItemId: item.id,
-    });
 
-    // Mark the flagged item as disputed
-    await markDisputed(item.id, dispute.id);
-    
-    setCreatingDispute(null);
-    
-    // Navigate to tracker
-    router.push('/dashboard/tracker');
+    try {
+      // Create dispute from flagged item
+      const dispute = await addDispute({
+        creditor: item.account || 'Unknown Account',
+        bureau: 'Experian', // Default - user can change
+        type: item.type === 'fraud_indicator' ? 'Identity Theft (605B)' : 'Inaccurate Information',
+        dateSent: new Date().toISOString().split('T')[0],
+        notes: `${item.issue}\n\nStatute: ${item.statute}\nRecommendation: ${item.recommendation}`,
+        flaggedItemId: item.id,
+      });
+
+      // Mark the flagged item as disputed
+      await markDisputed(item.id, dispute.id);
+
+      // Show success toast and stay on page
+      showToast('Added to Dispute Tracker');
+    } catch (err) {
+      console.error('Failed to create dispute:', err);
+      showToast('Failed to create dispute', 'error');
+    } finally {
+      setCreatingDispute(null);
+    }
   };
 
   const handleDismiss = async (itemId) => {
@@ -445,6 +457,34 @@ export default function FlaggedPage() {
               </a>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Toast notification */}
+      {toast && (
+        <div style={{
+          position: 'fixed',
+          bottom: isMobile ? '80px' : '24px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          padding: '12px 20px',
+          background: toast.type === 'error' ? '#ef4444' : '#22c55e',
+          color: 'white',
+          borderRadius: '8px',
+          fontSize: '14px',
+          fontWeight: 500,
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+          zIndex: 1000,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+        }}>
+          {toast.type === 'error' ? (
+            <AlertCircle size={16} />
+          ) : (
+            <Check size={16} />
+          )}
+          {toast.message}
         </div>
       )}
 

@@ -550,6 +550,14 @@ export default function LandingPage() {
           margin: 0 auto;
         }
 
+        .hero-content {
+          order: 1;
+        }
+
+        .hero-terminal {
+          order: 2;
+        }
+
         .hero-eyebrow {
           display: inline-flex;
           align-items: center;
@@ -1259,7 +1267,18 @@ export default function LandingPage() {
             padding-right: 20px;
           }
           .hero {
-            padding-top: 120px;
+            padding-top: 100px;
+          }
+          /* Terminal first on mobile */
+          .hero-terminal {
+            order: 1;
+            margin-bottom: 40px;
+          }
+          .hero-content {
+            order: 2;
+          }
+          .hero-terminal .terminal {
+            animation-delay: 0.3s;
           }
           .hero-desc {
             font-size: 16px;
@@ -1398,45 +1417,48 @@ export default function LandingPage() {
 
         {/* Hero */}
         <section className="hero">
-          <div className="hero-eyebrow">Statute-Driven Credit Reinvestigation Platform</div>
-          <h1>Credit Reinvestigation,<br /><span className="highlight">Structured Under Federal Law</span></h1>
-          <p className="hero-desc">
-            Generate compliant documentation, track statutory timelines, and maintain
-            a complete audit trail — clearly, deliberately, and without shortcuts.
-          </p>
-          <p className="hero-bridge">
-            If you've been told you need a "credit repair company," this gives you self-service software to do the same dispute process yourself—legally, transparently, and without monthly fees.
-          </p>
-          <div className="hero-steps">
-            <div className="hero-steps-list">
-              <div className="hero-steps-item">
-                <span className="hero-steps-num">1</span>
-                <span>Generate the documents</span>
+          <div className="hero-terminal">
+            <Terminal reducedMotion={reducedMotion} />
+          </div>
+          <div className="hero-content">
+            <div className="hero-eyebrow">Statute-Driven Credit Reinvestigation Platform</div>
+            <h1>Credit Reinvestigation,<br /><span className="highlight">Structured Under Federal Law</span></h1>
+            <p className="hero-desc">
+              Generate compliant documentation, track statutory timelines, and maintain
+              a complete audit trail — clearly, deliberately, and without shortcuts.
+            </p>
+            <p className="hero-bridge">
+              If you've been told you need a "credit repair company," this gives you self-service software to do the same dispute process yourself—legally, transparently, and without monthly fees.
+            </p>
+            <div className="hero-steps">
+              <div className="hero-steps-list">
+                <div className="hero-steps-item">
+                  <span className="hero-steps-num">1</span>
+                  <span>Generate the documents</span>
+                </div>
+                <div className="hero-steps-item">
+                  <span className="hero-steps-num">2</span>
+                  <span>Review them</span>
+                </div>
+                <div className="hero-steps-item">
+                  <span className="hero-steps-num">3</span>
+                  <span>Mail them (certified if you choose)</span>
+                </div>
               </div>
-              <div className="hero-steps-item">
-                <span className="hero-steps-num">2</span>
-                <span>Review them</span>
-              </div>
-              <div className="hero-steps-item">
-                <span className="hero-steps-num">3</span>
-                <span>Mail them (certified if you choose)</span>
-              </div>
+              <p className="hero-steps-note">You stay in control. Nothing is sent on your behalf.</p>
             </div>
-            <p className="hero-steps-note">You stay in control. Nothing is sent on your behalf.</p>
+            <div className="hero-buttons">
+              {mounted && isSignedIn ? (
+                <Link href="/dashboard" className="btn btn-orange btn-lg">Go to Dashboard →</Link>
+              ) : (
+                <>
+                  <Link href="/sign-up" className="btn btn-orange btn-lg">Start Report Analysis →</Link>
+                  <a href="#steps" className="btn btn-outline btn-lg">How It Works</a>
+                </>
+              )}
+            </div>
+            <p className="hero-disclaimer">Software tools only. No guarantees. Not legal advice.</p>
           </div>
-          <div className="hero-buttons">
-            {mounted && isSignedIn ? (
-              <Link href="/dashboard" className="btn btn-orange btn-lg">Go to Dashboard →</Link>
-            ) : (
-              <>
-                <Link href="/sign-up" className="btn btn-orange btn-lg">Start Report Analysis →</Link>
-                <a href="#steps" className="btn btn-outline btn-lg">How It Works</a>
-              </>
-            )}
-          </div>
-          <p className="hero-disclaimer">Software tools only. No guarantees. Not legal advice.</p>
-
-          <Terminal reducedMotion={reducedMotion} />
         </section>
 
         {/* Logos/Statutes strip */}

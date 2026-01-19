@@ -23,16 +23,17 @@ export default function AnalyzePage() {
   const [error, setError] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Check for existing analysis - persisted across navigation
+  // Check for existing analysis - prioritize server-synced flaggedItems
   const [hasExistingAnalysis, setHasExistingAnalysis] = useState(false);
   const [existingAnalysisMeta, setExistingAnalysisMeta] = useState(null);
 
-  // Load existing analysis metadata from localStorage
+  // Load localStorage metadata for fast initial display (UX convenience only)
   useEffect(() => {
     const savedMeta = localStorage.getItem('605b_analysis_meta');
     if (savedMeta) {
       try {
         const meta = JSON.parse(savedMeta);
+        // Only use as initial state - will be updated by server data
         setExistingAnalysisMeta(meta);
         setHasExistingAnalysis(true);
       } catch (e) {
@@ -41,21 +42,31 @@ export default function AnalyzePage() {
     }
   }, []);
 
-  // Also check if flagged items exist (in case metadata was lost)
+  // Server-synced flaggedItems are the authoritative source
+  // Update stats when server data loads (overrides localStorage)
   useEffect(() => {
-    if (!flaggedLoading && flaggedItems.length > 0 && !hasExistingAnalysis) {
-      setHasExistingAnalysis(true);
-      // Reconstruct basic metadata from flagged items
-      const pendingItems = flaggedItems.filter(i => i.status === 'pending').length;
-      const disputedItems = flaggedItems.filter(i => i.status === 'disputed').length;
-      setExistingAnalysisMeta({
-        totalFindings: flaggedItems.length,
-        pendingItems,
-        disputedItems,
-        analyzedAt: flaggedItems[0]?.createdAt || new Date().toISOString(),
-      });
+    if (!flaggedLoading) {
+      if (flaggedItems.length > 0) {
+        // Server has flagged items - this is authoritative
+        const pendingItems = flaggedItems.filter(i => i.status === 'pending').length;
+        const disputedItems = flaggedItems.filter(i => i.status === 'disputed').length;
+        const serverMeta = {
+          totalFindings: flaggedItems.length,
+          pendingItems,
+          disputedItems,
+          analyzedAt: flaggedItems[0]?.createdAt || new Date().toISOString(),
+        };
+        setExistingAnalysisMeta(serverMeta);
+        setHasExistingAnalysis(true);
+        // Sync to localStorage for faster load next time
+        localStorage.setItem('605b_analysis_meta', JSON.stringify(serverMeta));
+      } else if (!localStorage.getItem('605b_analysis_meta')) {
+        // No server data and no localStorage - no analysis exists
+        setHasExistingAnalysis(false);
+        setExistingAnalysisMeta(null);
+      }
     }
-  }, [flaggedItems, flaggedLoading, hasExistingAnalysis]);
+  }, [flaggedItems, flaggedLoading]);
 
   // Get usage stats for PDF analyses
   const usageStats = getUsageStats();

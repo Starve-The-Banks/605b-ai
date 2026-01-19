@@ -175,17 +175,13 @@ export default function OnboardingWizard({ onComplete, onSkip }) {
   const [isAnimating, setIsAnimating] = useState(false);
 
   // Beta users bypass onboarding wizard entirely - they have full access
+  // Note: We only skip the UI here. Actual entitlements come from server via /api/user-data/tier
   useEffect(() => {
     if (!tierLoading && isBeta) {
-      // Mark onboarding as complete for beta users
+      // Mark onboarding UI as seen (UX only - not for access control)
       localStorage.setItem('605b_onboarding_complete', 'true');
-      localStorage.setItem('605b_tier', 'identity-theft');
-      localStorage.setItem('605b_assessment', JSON.stringify({
-        isBetaBypass: true,
-        completedAt: new Date().toISOString(),
-      }));
-      // Skip to dashboard immediately
-      onComplete?.({ isBetaBypass: true, selectedTier: 'identity-theft' });
+      // Skip to dashboard immediately - server handles actual entitlements
+      onComplete?.({ isBetaBypass: true });
     }
   }, [isBeta, tierLoading, onComplete]);
 

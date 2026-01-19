@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
+import {
   Search, Upload, ExternalLink, AlertCircle, ChevronDown, ChevronUp,
   BookOpen, Shield, Scale, TrendingUp, AlertTriangle, CheckCircle, Clock,
-  FileText, RefreshCw, Flag, Lock, Loader2
+  FileText, RefreshCw, Flag, Lock, Loader2, RotateCcw
 } from 'lucide-react';
 import { useFlaggedItems } from '@/lib/useUserData';
 import { useUserTier } from '@/lib/useUserTier';
@@ -14,7 +14,7 @@ import Link from 'next/link';
 
 export default function AnalyzePage() {
   const router = useRouter();
-  const { saveFindings } = useFlaggedItems();
+  const { flaggedItems, saveFindings, loading: flaggedLoading } = useFlaggedItems();
   const { tier, hasFeature, getUsageStats, recordUsage, loading: tierLoading } = useUserTier();
   const [resourcesExpanded, setResourcesExpanded] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
@@ -22,6 +22,40 @@ export default function AnalyzePage() {
   const [analysisResult, setAnalysisResult] = useState(null);
   const [error, setError] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
+
+  // Check for existing analysis - persisted across navigation
+  const [hasExistingAnalysis, setHasExistingAnalysis] = useState(false);
+  const [existingAnalysisMeta, setExistingAnalysisMeta] = useState(null);
+
+  // Load existing analysis metadata from localStorage
+  useEffect(() => {
+    const savedMeta = localStorage.getItem('605b_analysis_meta');
+    if (savedMeta) {
+      try {
+        const meta = JSON.parse(savedMeta);
+        setExistingAnalysisMeta(meta);
+        setHasExistingAnalysis(true);
+      } catch (e) {
+        console.error('Failed to parse analysis metadata:', e);
+      }
+    }
+  }, []);
+
+  // Also check if flagged items exist (in case metadata was lost)
+  useEffect(() => {
+    if (!flaggedLoading && flaggedItems.length > 0 && !hasExistingAnalysis) {
+      setHasExistingAnalysis(true);
+      // Reconstruct basic metadata from flagged items
+      const pendingItems = flaggedItems.filter(i => i.status === 'pending').length;
+      const disputedItems = flaggedItems.filter(i => i.status === 'disputed').length;
+      setExistingAnalysisMeta({
+        totalFindings: flaggedItems.length,
+        pendingItems,
+        disputedItems,
+        analyzedAt: flaggedItems[0]?.createdAt || new Date().toISOString(),
+      });
+    }
+  }, [flaggedItems, flaggedLoading, hasExistingAnalysis]);
 
   // Get usage stats for PDF analyses
   const usageStats = getUsageStats();
@@ -75,6 +109,19 @@ export default function AnalyzePage() {
       if (data.analysis?.findings && data.analysis.findings.length > 0) {
         await saveFindings(data.analysis.findings);
       }
+
+      // Persist analysis metadata for navigation persistence
+      const analysisMeta = {
+        totalFindings: data.analysis?.findings?.length || 0,
+        pendingItems: data.analysis?.findings?.length || 0,
+        disputedItems: 0,
+        summary: data.analysis?.summary || {},
+        filesProcessed: data.filesProcessed?.length || 0,
+        analyzedAt: new Date().toISOString(),
+      };
+      localStorage.setItem('605b_analysis_meta', JSON.stringify(analysisMeta));
+      setExistingAnalysisMeta(analysisMeta);
+      setHasExistingAnalysis(true);
 
     } catch (err) {
       console.error('Analysis error:', err);
@@ -212,6 +259,107 @@ export default function AnalyzePage() {
           <div>
             <div style={{ fontSize: '14px', fontWeight: 500, color: '#ef4444' }}>Analysis Failed</div>
             <div style={{ fontSize: '13px', color: '#a1a1aa' }}>{error}</div>
+          </div>
+        </div>
+      )}
+
+      {/* Existing Analysis - Show when user has existing flagged items */}
+      {hasExistingAnalysis && !analysisResult && existingAnalysisMeta && (
+        <div style={{
+          background: 'var(--bg-card)',
+          border: '1px solid #3b82f6',
+          borderRadius: '12px',
+          padding: '20px 24px',
+          marginBottom: '24px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+            <div style={{
+              width: '40px',
+              height: '40px',
+              background: 'rgba(59, 130, 246, 0.1)',
+              borderRadius: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <FileText size={20} style={{ color: '#3b82f6' }} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <h2 style={{ fontSize: '16px', fontWeight: 600 }}>Previous Analysis Available</h2>
+              <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+                Analyzed {existingAnalysisMeta.analyzedAt ? new Date(existingAnalysisMeta.analyzedAt).toLocaleDateString() : 'recently'}
+              </p>
+            </div>
+          </div>
+
+          {/* Summary stats */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)',
+            gap: '12px',
+            marginBottom: '16px',
+          }}>
+            <div style={{ padding: '12px', background: 'var(--bg-secondary)', borderRadius: '8px' }}>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px' }}>Total Flagged</div>
+              <div style={{ fontSize: '20px', fontWeight: 600 }}>{existingAnalysisMeta.totalFindings || flaggedItems.length}</div>
+            </div>
+            <div style={{ padding: '12px', background: 'var(--bg-secondary)', borderRadius: '8px' }}>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px' }}>Pending</div>
+              <div style={{ fontSize: '20px', fontWeight: 600, color: 'var(--orange)' }}>
+                {existingAnalysisMeta.pendingItems ?? flaggedItems.filter(i => i.status === 'pending').length}
+              </div>
+            </div>
+            <div style={{ padding: '12px', background: 'var(--bg-secondary)', borderRadius: '8px' }}>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px' }}>Disputed</div>
+              <div style={{ fontSize: '20px', fontWeight: 600, color: '#22c55e' }}>
+                {existingAnalysisMeta.disputedItems ?? flaggedItems.filter(i => i.status === 'disputed').length}
+              </div>
+            </div>
+          </div>
+
+          {/* Action buttons */}
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <button
+              onClick={() => router.push('/dashboard/flagged')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '12px 20px',
+                background: 'var(--orange)',
+                border: 'none',
+                borderRadius: '8px',
+                color: 'white',
+                fontSize: '14px',
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              <Flag size={18} />
+              View Flagged Items
+            </button>
+            <button
+              onClick={() => {
+                setHasExistingAnalysis(false);
+                setExistingAnalysisMeta(null);
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '12px 20px',
+                background: 'transparent',
+                border: '1px solid var(--border)',
+                borderRadius: '8px',
+                color: 'var(--text-secondary)',
+                fontSize: '14px',
+                fontWeight: 500,
+                cursor: 'pointer',
+              }}
+            >
+              <RotateCcw size={16} />
+              New Analysis
+            </button>
           </div>
         </div>
       )}

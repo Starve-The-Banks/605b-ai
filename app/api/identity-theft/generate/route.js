@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import PDFDocument from 'pdfkit';
+import { auth, currentUser } from '@clerk/nextjs/server';
+import { isBetaWhitelisted } from '@/lib/beta';
 
 // Lazy initialization
 let stripe = null;
@@ -46,8 +48,8 @@ const BUREAU_ADDRESSES = {
   },
 };
 
-// Validate order ID format (64-character hex token)
-const ORDER_ID_REGEX = /^[a-f0-9]{64}$/;
+// Validate token format (64-character hex token)
+const TOKEN_REGEX = /^[a-f0-9]{64}$/;
 
 export async function GET(request) {
   try {
@@ -56,38 +58,66 @@ export async function GET(request) {
 
     const { searchParams } = new URL(request.url);
     const orderId = searchParams.get('order');
+    const intakeToken = searchParams.get('intake'); // Beta-only: direct intake token
     const docType = searchParams.get('doc') || 'all';
 
-    if (!orderId) {
-      return NextResponse.json({ error: 'Order ID required' }, { status: 400 });
+    // Check for beta whitelist access
+    const { userId } = await auth();
+    let isBeta = false;
+    if (userId) {
+      const user = await currentUser();
+      const userEmail = user?.emailAddresses?.[0]?.emailAddress;
+      isBeta = isBetaWhitelisted(userEmail);
     }
 
-    // Validate order ID format to prevent injection attacks
-    if (!ORDER_ID_REGEX.test(orderId)) {
-      return NextResponse.json({ error: 'Invalid order ID format' }, { status: 400 });
-    }
+    let orderData;
 
-    // Get order data
-    const orderDataRaw = await redisClient.get(`idt-order:${orderId}`);
-    if (!orderDataRaw) {
-      return NextResponse.json({ error: 'Order not found or expired' }, { status: 404 });
-    }
+    // Beta users can use intake token directly (bypasses payment verification)
+    if (isBeta && intakeToken) {
+      if (!TOKEN_REGEX.test(intakeToken)) {
+        return NextResponse.json({ error: 'Invalid token format' }, { status: 400 });
+      }
 
-    const orderData = typeof orderDataRaw === 'string' ? JSON.parse(orderDataRaw) : orderDataRaw;
+      const intakeDataRaw = await redisClient.get(`it:intake:${intakeToken}`);
+      if (!intakeDataRaw) {
+        return NextResponse.json({ error: 'Intake data not found or expired' }, { status: 404 });
+      }
 
-    // Verify payment was completed
-    if (orderData.status !== 'paid') {
-      // Check Stripe session status
-      if (orderData.stripeSessionId) {
-        const session = await stripeClient.checkout.sessions.retrieve(orderData.stripeSessionId);
-        if (session.payment_status === 'paid') {
-          orderData.status = 'paid';
-          await redisClient.set(`idt-order:${orderId}`, JSON.stringify(orderData), { ex: 86400 * 7 });
+      const intakeData = typeof intakeDataRaw === 'string' ? JSON.parse(intakeDataRaw) : intakeDataRaw;
+      orderData = { ...intakeData, status: 'paid', isBetaAccess: true };
+    } else {
+      // Normal flow: require order ID and payment verification
+      if (!orderId) {
+        return NextResponse.json({ error: 'Order ID required' }, { status: 400 });
+      }
+
+      // Validate order ID format to prevent injection attacks
+      if (!TOKEN_REGEX.test(orderId)) {
+        return NextResponse.json({ error: 'Invalid order ID format' }, { status: 400 });
+      }
+
+      // Get order data
+      const orderDataRaw = await redisClient.get(`idt-order:${orderId}`);
+      if (!orderDataRaw) {
+        return NextResponse.json({ error: 'Order not found or expired' }, { status: 404 });
+      }
+
+      orderData = typeof orderDataRaw === 'string' ? JSON.parse(orderDataRaw) : orderDataRaw;
+
+      // Verify payment was completed
+      if (orderData.status !== 'paid') {
+        // Check Stripe session status
+        if (orderData.stripeSessionId) {
+          const session = await stripeClient.checkout.sessions.retrieve(orderData.stripeSessionId);
+          if (session.payment_status === 'paid') {
+            orderData.status = 'paid';
+            await redisClient.set(`idt-order:${orderId}`, JSON.stringify(orderData), { ex: 86400 * 7 });
+          } else {
+            return NextResponse.json({ error: 'Payment not completed' }, { status: 402 });
+          }
         } else {
           return NextResponse.json({ error: 'Payment not completed' }, { status: 402 });
         }
-      } else {
-        return NextResponse.json({ error: 'Payment not completed' }, { status: 402 });
       }
     }
 

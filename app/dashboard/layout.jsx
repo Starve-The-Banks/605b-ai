@@ -15,7 +15,7 @@ import { useUserTier, AccessRestrictionBanner } from '@/lib/useUserTier';
 export default function DashboardLayout({ children }) {
   const { user } = useUser();
   const { isSignedIn } = useAuth();
-  const { tier, tierName, tierColor, hasFeature, isAccessFrozen, isAccessRevoked } = useUserTier();
+  const { tier, tierName, tierColor, hasFeature, isAccessFrozen, isAccessRevoked, isBeta } = useUserTier();
   const pathname = usePathname();
   const isAIStrategist = pathname === '/dashboard/ai-strategist';
   const [rightSidebarOpen, setRightSidebarOpen] = useState(false);
@@ -254,22 +254,40 @@ export default function DashboardLayout({ children }) {
                 {user?.primaryEmailAddress?.emailAddress}
               </div>
               {/* Tier Badge */}
-              <div style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '4px',
-                marginTop: '8px',
-                padding: '4px 8px',
-                background: `${tierColor}15`,
-                border: `1px solid ${tierColor}30`,
-                borderRadius: '4px',
-                fontSize: '10px',
-                fontWeight: 600,
-                color: tierColor,
-                textTransform: 'uppercase',
-              }}>
-                {tier === 'identity-theft' && <Crown size={10} />}
-                {tierName}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '8px', flexWrap: 'wrap' }}>
+                <div style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: '4px 8px',
+                  background: `${tierColor}15`,
+                  border: `1px solid ${tierColor}30`,
+                  borderRadius: '4px',
+                  fontSize: '10px',
+                  fontWeight: 600,
+                  color: tierColor,
+                  textTransform: 'uppercase',
+                }}>
+                  {tier === 'identity-theft' && <Crown size={10} />}
+                  {tierName}
+                </div>
+                {isBeta && (
+                  <div style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    padding: '4px 8px',
+                    background: 'rgba(34, 197, 94, 0.15)',
+                    border: '1px solid rgba(34, 197, 94, 0.3)',
+                    borderRadius: '4px',
+                    fontSize: '10px',
+                    fontWeight: 600,
+                    color: '#22c55e',
+                    textTransform: 'uppercase',
+                  }}>
+                    BETA
+                  </div>
+                )}
               </div>
             </div>
 

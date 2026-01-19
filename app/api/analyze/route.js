@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { auth } from '@clerk/nextjs/server';
+import { auth, currentUser } from '@clerk/nextjs/server';
 import { rateLimit, LIMITS } from '@/lib/rateLimit';
+import { isBetaWhitelisted } from '@/lib/beta';
 
 // File upload limits
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB per file
@@ -20,20 +21,29 @@ export async function POST(req) {
       });
     }
 
-    // Check rate limit
-    const { allowed, remaining, resetIn } = await rateLimit(userId, 'analyze', LIMITS.analyze);
-    if (!allowed) {
-      const hours = Math.ceil(resetIn / 3600);
-      return new Response(JSON.stringify({
-        error: `Daily limit reached (${LIMITS.analyze} analyses/day). Resets in ${hours} hour${hours > 1 ? 's' : ''}.`
-      }), {
-        status: 429,
-        headers: {
-          'Content-Type': 'application/json',
-          'X-RateLimit-Remaining': '0',
-          'X-RateLimit-Reset': String(resetIn)
-        }
-      });
+    // Check for beta whitelist - bypass rate limiting
+    const user = await currentUser();
+    const userEmail = user?.emailAddresses?.[0]?.emailAddress;
+    const isBeta = isBetaWhitelisted(userEmail);
+
+    // Check rate limit (skip for beta users)
+    let remaining = Infinity;
+    if (!isBeta) {
+      const rateLimitResult = await rateLimit(userId, 'analyze', LIMITS.analyze);
+      if (!rateLimitResult.allowed) {
+        const hours = Math.ceil(rateLimitResult.resetIn / 3600);
+        return new Response(JSON.stringify({
+          error: `Daily limit reached (${LIMITS.analyze} analyses/day). Resets in ${hours} hour${hours > 1 ? 's' : ''}.`
+        }), {
+          status: 429,
+          headers: {
+            'Content-Type': 'application/json',
+            'X-RateLimit-Remaining': '0',
+            'X-RateLimit-Reset': String(rateLimitResult.resetIn)
+          }
+        });
+      }
+      remaining = rateLimitResult.remaining;
     }
 
     const formData = await req.formData();

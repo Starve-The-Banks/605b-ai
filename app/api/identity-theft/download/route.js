@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import PDFDocument from 'pdfkit';
+import { auth, currentUser } from '@clerk/nextjs/server';
+import { isBetaWhitelisted } from '@/lib/beta';
 
 // Lazy initialization
 let stripe = null;
@@ -56,48 +58,75 @@ export async function GET(request) {
 
     const { searchParams } = new URL(request.url);
     const sessionId = searchParams.get('session_id');
+    const betaIntakeToken = searchParams.get('intake'); // Beta-only: direct intake token
 
-    if (!sessionId) {
-      return NextResponse.json({ error: 'Session ID required' }, { status: 400 });
+    // Check for beta whitelist access
+    const { userId } = await auth();
+    let isBeta = false;
+    if (userId) {
+      const user = await currentUser();
+      const userEmail = user?.emailAddresses?.[0]?.emailAddress;
+      isBeta = isBetaWhitelisted(userEmail);
     }
 
-    // Retrieve Stripe session and verify payment
-    let session;
-    try {
-      session = await stripeClient.checkout.sessions.retrieve(sessionId);
-    } catch (e) {
-      console.error('Failed to retrieve Stripe session:', e);
-      return NextResponse.json({ error: 'Invalid session' }, { status: 400 });
-    }
+    let intakeData;
 
-    // Verify payment status
-    if (session.payment_status !== 'paid') {
-      return NextResponse.json({ error: 'Payment not completed' }, { status: 402 });
-    }
+    // Beta users can use intake token directly (bypasses Stripe verification)
+    if (isBeta && betaIntakeToken) {
+      if (!TOKEN_REGEX.test(betaIntakeToken)) {
+        return NextResponse.json({ error: 'Invalid token format' }, { status: 400 });
+      }
 
-    // Verify this is an identity theft packet purchase
-    if (session.metadata?.productId !== 'identity_theft_packet') {
-      return NextResponse.json({ error: 'Invalid product' }, { status: 400 });
-    }
+      const intakeDataRaw = await redisClient.get(`it:intake:${betaIntakeToken}`);
+      if (!intakeDataRaw) {
+        return NextResponse.json({ error: 'Intake data not found or expired' }, { status: 404 });
+      }
 
-    // Get intake token from session metadata
-    const intakeToken = session.metadata?.intakeToken;
-    if (!intakeToken) {
-      return NextResponse.json({ error: 'Missing intake data' }, { status: 400 });
-    }
+      intakeData = typeof intakeDataRaw === 'string' ? JSON.parse(intakeDataRaw) : intakeDataRaw;
+    } else {
+      // Normal flow: require session ID and Stripe verification
+      if (!sessionId) {
+        return NextResponse.json({ error: 'Session ID required' }, { status: 400 });
+      }
 
-    // Validate intake token format to prevent injection
-    if (!TOKEN_REGEX.test(intakeToken)) {
-      return NextResponse.json({ error: 'Invalid token format' }, { status: 400 });
-    }
+      // Retrieve Stripe session and verify payment
+      let session;
+      try {
+        session = await stripeClient.checkout.sessions.retrieve(sessionId);
+      } catch (e) {
+        console.error('Failed to retrieve Stripe session:', e);
+        return NextResponse.json({ error: 'Invalid session' }, { status: 400 });
+      }
 
-    // Retrieve intake data from Redis
-    const intakeDataRaw = await redisClient.get(`it:intake:${intakeToken}`);
-    if (!intakeDataRaw) {
-      return NextResponse.json({ error: 'Intake data expired. Please contact support.' }, { status: 410 });
-    }
+      // Verify payment status
+      if (session.payment_status !== 'paid') {
+        return NextResponse.json({ error: 'Payment not completed' }, { status: 402 });
+      }
 
-    const intakeData = typeof intakeDataRaw === 'string' ? JSON.parse(intakeDataRaw) : intakeDataRaw;
+      // Verify this is an identity theft packet purchase
+      if (session.metadata?.productId !== 'identity_theft_packet') {
+        return NextResponse.json({ error: 'Invalid product' }, { status: 400 });
+      }
+
+      // Get intake token from session metadata
+      const intakeToken = session.metadata?.intakeToken;
+      if (!intakeToken) {
+        return NextResponse.json({ error: 'Missing intake data' }, { status: 400 });
+      }
+
+      // Validate intake token format to prevent injection
+      if (!TOKEN_REGEX.test(intakeToken)) {
+        return NextResponse.json({ error: 'Invalid token format' }, { status: 400 });
+      }
+
+      // Retrieve intake data from Redis
+      const intakeDataRaw = await redisClient.get(`it:intake:${intakeToken}`);
+      if (!intakeDataRaw) {
+        return NextResponse.json({ error: 'Intake data expired. Please contact support.' }, { status: 410 });
+      }
+
+      intakeData = typeof intakeDataRaw === 'string' ? JSON.parse(intakeDataRaw) : intakeDataRaw;
+    }
 
     // Generate PDF
     const doc = new PDFDocument({ margin: 72, size: 'LETTER' });

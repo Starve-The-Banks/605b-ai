@@ -1,6 +1,7 @@
-import { auth } from '@clerk/nextjs/server';
+import { auth, currentUser } from '@clerk/nextjs/server';
 import { rateLimit, rateLimitChars, LIMITS } from '@/lib/rateLimit';
 import { ttsSchema, validateBody } from '@/lib/validation';
+import { isBetaWhitelisted } from '@/lib/beta';
 
 export async function POST(req) {
   try {
@@ -12,6 +13,11 @@ export async function POST(req) {
         headers: { 'Content-Type': 'application/json' }
       });
     }
+
+    // Check for beta whitelist - bypass rate limiting
+    const user = await currentUser();
+    const userEmail = user?.emailAddresses?.[0]?.emailAddress;
+    const isBeta = isBetaWhitelisted(userEmail);
 
     // Validate request body with Zod
     const body = await req.json();
@@ -27,40 +33,48 @@ export async function POST(req) {
     const truncatedText = text;
     const charCount = truncatedText.length;
 
-    // Check daily TTS request limit (15/day)
-    const { allowed: dailyAllowed, remaining: dailyRemaining } = await rateLimit(
-      userId, 
-      'tts', 
-      LIMITS.tts
-    );
-    
-    if (!dailyAllowed) {
-      return new Response(JSON.stringify({ 
-        error: 'Daily voice limit reached. Resets tomorrow.',
-        useBrowserTTS: true,
-        text: truncatedText
-      }), {
-        status: 200, // Return 200 so frontend falls back gracefully
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
+    // Rate limiting (skip for beta users)
+    let dailyRemaining = Infinity;
+    let charsRemaining = Infinity;
 
-    // Check monthly character limit (40k/month)
-    const { allowed: monthlyAllowed, remaining: charsRemaining } = await rateLimitChars(
-      userId,
-      charCount,
-      LIMITS.ttsChars
-    );
+    if (!isBeta) {
+      // Check daily TTS request limit (15/day)
+      const { allowed: dailyAllowed, remaining: dailyRem } = await rateLimit(
+        userId,
+        'tts',
+        LIMITS.tts
+      );
+      dailyRemaining = dailyRem;
 
-    if (!monthlyAllowed) {
-      return new Response(JSON.stringify({ 
-        error: 'Monthly voice quota exceeded. Using browser voice.',
-        useBrowserTTS: true,
-        text: truncatedText
-      }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      if (!dailyAllowed) {
+        return new Response(JSON.stringify({
+          error: 'Daily voice limit reached. Resets tomorrow.',
+          useBrowserTTS: true,
+          text: truncatedText
+        }), {
+          status: 200, // Return 200 so frontend falls back gracefully
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      // Check monthly character limit (40k/month)
+      const { allowed: monthlyAllowed, remaining: charsRem } = await rateLimitChars(
+        userId,
+        charCount,
+        LIMITS.ttsChars
+      );
+      charsRemaining = charsRem;
+
+      if (!monthlyAllowed) {
+        return new Response(JSON.stringify({
+          error: 'Monthly voice quota exceeded. Using browser voice.',
+          useBrowserTTS: true,
+          text: truncatedText
+        }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
     }
 
     if (!process.env.ELEVENLABS_API_KEY) {

@@ -1,6 +1,7 @@
-import { auth } from '@clerk/nextjs/server';
+import { auth, currentUser } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { tierPostSchema, validateBody } from '@/lib/validation';
+import { isBetaWhitelisted } from '@/lib/beta';
 
 // Lazy initialization to avoid build-time errors
 let redis = null;
@@ -77,6 +78,22 @@ export async function GET() {
           features: TIER_FEATURES.free,
           pdfAnalysesUsed: 0,
           pdfAnalysesRemaining: 1,
+        },
+      });
+    }
+
+    // Check for beta whitelist access
+    const user = await currentUser();
+    const userEmail = user?.emailAddresses?.[0]?.emailAddress;
+
+    if (isBetaWhitelisted(userEmail)) {
+      return NextResponse.json({
+        tierData: {
+          tier: 'identity-theft',
+          features: TIER_FEATURES['identity-theft'],
+          pdfAnalysesUsed: 0,
+          pdfAnalysesRemaining: -1, // Unlimited
+          isBeta: true,
         },
       });
     }

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useUser, useAuth } from '@clerk/nextjs';
+import { useUserTier } from '@/lib/useUserTier';
 import {
   Shield, FileText, Scale, Zap, ArrowRight, ArrowLeft,
   Check, Target, Clock, AlertTriangle, Sparkles, Upload,
@@ -126,7 +127,7 @@ const TIERS = {
     name: 'Advanced Dispute Suite',
     price: 89,
     icon: Zap,
-    color: '#f7d047',
+    color: '#FF6B35',
     maxScore: 50,
     description: 'Full dispute capabilities',
     features: [
@@ -162,6 +163,7 @@ const TIERS = {
 export default function OnboardingWizard({ onComplete, onSkip }) {
   const { user } = useUser();
   const { isSignedIn } = useAuth();
+  const { isBeta, loading: tierLoading } = useUserTier();
   const isMobile = useIsMobile();
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState({
@@ -171,6 +173,21 @@ export default function OnboardingWizard({ onComplete, onSkip }) {
     complexityFactors: [],
   });
   const [isAnimating, setIsAnimating] = useState(false);
+
+  // Beta users bypass onboarding wizard entirely - they have full access
+  useEffect(() => {
+    if (!tierLoading && isBeta) {
+      // Mark onboarding as complete for beta users
+      localStorage.setItem('605b_onboarding_complete', 'true');
+      localStorage.setItem('605b_tier', 'identity-theft');
+      localStorage.setItem('605b_assessment', JSON.stringify({
+        isBetaBypass: true,
+        completedAt: new Date().toISOString(),
+      }));
+      // Skip to dashboard immediately
+      onComplete?.({ isBetaBypass: true, selectedTier: 'identity-theft' });
+    }
+  }, [isBeta, tierLoading, onComplete]);
 
   // Calculate complexity score
   const calculateScore = () => {
@@ -366,7 +383,7 @@ export default function OnboardingWizard({ onComplete, onSkip }) {
     },
     progressFill: {
       height: '100%',
-      background: 'linear-gradient(90deg, #f7d047, #d4b840)',
+      background: 'linear-gradient(90deg, #FF6B35, #e55a2b)',
       transition: 'width 0.3s ease',
       borderRadius: '0 2px 2px 0',
     },
@@ -465,10 +482,10 @@ export default function OnboardingWizard({ onComplete, onSkip }) {
       alignItems: 'center',
       gap: '6px',
       padding: '12px 24px',
-      background: 'linear-gradient(135deg, #f7d047 0%, #d4b840 100%)',
+      background: 'linear-gradient(135deg, #FF6B35 0%, #e55a2b 100%)',
       border: 'none',
       borderRadius: '10px',
-      color: '#09090b',
+      color: '#ffffff',
       fontSize: '15px',
       fontWeight: 600,
       cursor: 'pointer',
@@ -526,15 +543,15 @@ export default function OnboardingWizard({ onComplete, onSkip }) {
               <div style={{
                 width: '80px',
                 height: '80px',
-                background: 'linear-gradient(135deg, rgba(247, 208, 71, 0.2) 0%, rgba(247, 208, 71, 0.05) 100%)',
-                border: '2px solid rgba(247, 208, 71, 0.3)',
+                background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.2) 0%, rgba(255, 107, 53, 0.05) 100%)',
+                border: '2px solid rgba(255, 107, 53, 0.3)',
                 borderRadius: '20px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 margin: '0 auto 24px',
               }}>
-                <Sparkles size={36} color="#f7d047" />
+                <Sparkles size={36} color="#FF6B35" />
               </div>
               <h1 style={styles.title}>Welcome{user?.firstName ? `, ${user.firstName}` : ''}!</h1>
               <p style={styles.subtitle}>
@@ -543,13 +560,13 @@ export default function OnboardingWizard({ onComplete, onSkip }) {
               </p>
             </div>
             <div style={{
-              background: 'rgba(247, 208, 71, 0.1)',
-              border: '1px solid rgba(247, 208, 71, 0.2)',
+              background: 'rgba(255, 107, 53, 0.1)',
+              border: '1px solid rgba(255, 107, 53, 0.2)',
               borderRadius: '12px',
               padding: '16px 20px',
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <HelpCircle size={20} color="#f7d047" />
+                <HelpCircle size={20} color="#FF6B35" />
                 <div>
                   <div style={{ fontSize: '14px', fontWeight: 500, color: '#fafafa' }}>
                     Quick assessment
@@ -616,8 +633,8 @@ export default function OnboardingWizard({ onComplete, onSkip }) {
                   key={count.id}
                   style={{
                     ...styles.option,
-                    borderColor: answers.itemCount === count.id ? '#f7d047' : '#27272a',
-                    background: answers.itemCount === count.id ? 'rgba(247, 208, 71, 0.1)' : '#1a1a1c',
+                    borderColor: answers.itemCount === count.id ? '#FF6B35' : '#27272a',
+                    background: answers.itemCount === count.id ? 'rgba(255, 107, 53, 0.1)' : '#1a1a1c',
                     padding: '14px 20px',
                   }}
                   onClick={() => selectItemCount(count.id)}
@@ -626,11 +643,11 @@ export default function OnboardingWizard({ onComplete, onSkip }) {
                     width: '40px',
                     height: '40px',
                     borderRadius: '10px',
-                    background: answers.itemCount === count.id ? 'rgba(247, 208, 71, 0.2)' : '#27272a',
+                    background: answers.itemCount === count.id ? 'rgba(255, 107, 53, 0.2)' : '#27272a',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: answers.itemCount === count.id ? '#f7d047' : '#71717a',
+                    color: answers.itemCount === count.id ? '#FF6B35' : '#71717a',
                     fontSize: '16px',
                     fontWeight: 600,
                   }}>
@@ -668,8 +685,8 @@ export default function OnboardingWizard({ onComplete, onSkip }) {
                     key={bureau.id}
                     style={{
                       padding: '12px 16px',
-                      background: answers.bureauCount === bureau.id ? 'rgba(247, 208, 71, 0.1)' : '#1a1a1c',
-                      border: `2px solid ${answers.bureauCount === bureau.id ? '#f7d047' : '#27272a'}`,
+                      background: answers.bureauCount === bureau.id ? 'rgba(255, 107, 53, 0.1)' : '#1a1a1c',
+                      border: `2px solid ${answers.bureauCount === bureau.id ? '#FF6B35' : '#27272a'}`,
                       borderRadius: '10px',
                       textAlign: 'left',
                       cursor: 'pointer',
@@ -704,19 +721,19 @@ export default function OnboardingWizard({ onComplete, onSkip }) {
                       key={factor.id}
                       style={{
                         ...styles.factorOption,
-                        borderColor: isSelected ? '#f7d047' : '#27272a',
-                        background: isSelected ? 'rgba(247, 208, 71, 0.1)' : '#1a1a1c',
+                        borderColor: isSelected ? '#FF6B35' : '#27272a',
+                        background: isSelected ? 'rgba(255, 107, 53, 0.1)' : '#1a1a1c',
                       }}
                       onClick={() => toggleComplexityFactor(factor.id)}
                     >
                       <div style={{
                         ...styles.checkbox,
-                        background: isSelected ? '#f7d047' : 'transparent',
-                        borderColor: isSelected ? '#f7d047' : '#3f3f46',
+                        background: isSelected ? '#FF6B35' : 'transparent',
+                        borderColor: isSelected ? '#FF6B35' : '#3f3f46',
                       }}>
-                        {isSelected && <Check size={14} color="#09090b" />}
+                        {isSelected && <Check size={14} color="#ffffff" />}
                       </div>
-                      <factor.icon size={18} style={{ color: isSelected ? '#f7d047' : '#71717a' }} />
+                      <factor.icon size={18} style={{ color: isSelected ? '#FF6B35' : '#71717a' }} />
                       <span style={{ fontSize: '14px', color: isSelected ? '#fafafa' : '#a1a1aa' }}>
                         {factor.label}
                       </span>

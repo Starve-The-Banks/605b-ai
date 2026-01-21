@@ -1,14 +1,22 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth, useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import {
   Check, X, Shield, Zap, Crown, ArrowRight, FileText,
   MessageSquare, Clock, Download, Scale, AlertTriangle,
   ChevronDown, ChevronUp, HelpCircle, Eye, Sparkles,
-  FileSearch, Lock, Plus, Menu
+  FileSearch, Lock, Plus, Menu, CheckCircle
 } from 'lucide-react';
+
+// Tier hierarchy for comparisons
+const TIER_LEVELS = {
+  'free': 0,
+  'toolkit': 1,
+  'advanced': 2,
+  'identity-theft': 3,
+};
 
 
 const TIERS = [
@@ -163,11 +171,71 @@ export default function PricingPage() {
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
   const [showDisclaimerError, setShowDisclaimerError] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [currentTier, setCurrentTier] = useState('free');
+  const [tierLoading, setTierLoading] = useState(false);
+  const [upgradeInfo, setUpgradeInfo] = useState(null);
+
+  // Fetch current tier and upgrade pricing when signed in
+  useEffect(() => {
+    if (!isSignedIn) {
+      setCurrentTier('free');
+      setUpgradeInfo(null);
+      return;
+    }
+
+    const fetchTierInfo = async () => {
+      setTierLoading(true);
+      try {
+        // Fetch from checkout endpoint which provides upgrade pricing
+        const res = await fetch('/api/stripe/checkout', {
+          cache: 'no-store',
+          headers: { 'Cache-Control': 'no-cache' }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setCurrentTier(data.currentTier || 'free');
+          setUpgradeInfo(data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch tier info:', err);
+      }
+      setTierLoading(false);
+    };
+
+    fetchTierInfo();
+  }, [isSignedIn]);
+
+  // Helper to check if user owns this tier or higher
+  const ownsTierOrHigher = (tierId) => {
+    const currentLevel = TIER_LEVELS[currentTier] || 0;
+    const tierLevel = TIER_LEVELS[tierId] || 0;
+    return currentLevel >= tierLevel && currentLevel > 0;
+  };
+
+  // Helper to get upgrade price for a tier
+  const getUpgradePrice = (tierId) => {
+    if (!upgradeInfo?.tiers) return null;
+    const tierInfo = upgradeInfo.tiers.find(t => t.id === tierId);
+    if (tierInfo?.isUpgrade && tierInfo?.upgradePrice !== null) {
+      return tierInfo.upgradePrice;
+    }
+    return null;
+  };
 
   const handleCheckout = async (tier) => {
-    // Free tier goes straight to signup
+    // Free tier - go to dashboard if signed in, signup if not
     if (tier.isFree) {
-      window.location.href = `/sign-up?tier=${tier.id}`;
+      if (isSignedIn) {
+        window.location.href = '/dashboard';
+      } else {
+        window.location.href = `/sign-up?tier=${tier.id}`;
+      }
+      return;
+    }
+
+    // Block if user already owns this tier or higher
+    if (ownsTierOrHigher(tier.id)) {
+      alert('You already own this tier or a higher tier.');
       return;
     }
 
@@ -186,6 +254,12 @@ export default function PricingPage() {
 
     setLoading(tier.id);
     try {
+      // Store pending payment in localStorage for post-payment polling
+      localStorage.setItem('605b_payment_pending', JSON.stringify({
+        tier: tier.id,
+        startedAt: new Date().toISOString(),
+      }));
+
       const response = await fetch('/api/stripe/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1228,87 +1302,141 @@ export default function PricingPage() {
         {/* Pricing Cards */}
         <section className="pricing-section">
           <div className="pricing-grid">
-            {TIERS.map((tier) => (
-              <div
-                key={tier.id}
-                className={`pricing-card ${tier.recommended ? 'recommended' : ''} ${tier.isFree ? 'free' : ''}`}
-              >
-                {tier.recommended && (
-                  <div className="recommended-badge">Most Popular</div>
-                )}
-                {tier.isFree && (
-                  <div className="free-badge">Free Analyzer (Read-Only)</div>
-                )}
+            {TIERS.map((tier) => {
+              const isOwned = ownsTierOrHigher(tier.id);
+                const isCurrentTierExact = currentTier === tier.id;
+                const upgradePrice = getUpgradePrice(tier.id);
+                const isUpgrade = upgradePrice !== null && !isOwned;
 
-                <div className="tier-header">
+                return (
                   <div
-                    className="tier-icon"
-                    style={{ background: `${tier.color}20`, color: tier.color }}
+                    key={tier.id}
+                    className={`pricing-card ${tier.recommended && !isOwned ? 'recommended' : ''} ${tier.isFree ? 'free' : ''} ${isCurrentTierExact ? 'current-tier' : ''}`}
+                    style={isOwned && !tier.isFree ? { opacity: 0.7, borderStyle: 'solid', borderColor: '#22c55e' } : {}}
                   >
-                    <tier.icon size={22} />
-                  </div>
-                  <div>
-                    <div className="tier-name">{tier.name}</div>
-                    <div className="tier-desc">{tier.description}</div>
-                  </div>
-                </div>
-
-                <div className="tier-price">
-                  {tier.isFree ? (
-                    <span className="price-free">Free</span>
-                  ) : (
-                    <>
-                      <span className="price-currency">$</span>
-                      <span className="price-amount">{tier.price}</span>
-                    </>
-                  )}
-                  <div className="price-label">
-                    {tier.isFree ? 'No credit card required' : 'One-time purchase'}
-                  </div>
-                </div>
-
-                {tier.note && (
-                  <div className="tier-note">{tier.note}</div>
-                )}
-
-                <div className="tier-best-for">
-                  <strong>Best for:</strong> {tier.bestFor}
-                </div>
-
-                <div className="features-list">
-                  {tier.features.map((feature, i) => (
-                    <div key={i} className="feature-item">
-                      <div className={`feature-icon ${feature.included ? 'included' : 'excluded'}`}>
-                        {feature.included ? <Check size={10} /> : <X size={10} />}
+                    {isCurrentTierExact && !tier.isFree && (
+                      <div className="recommended-badge" style={{ background: '#22c55e' }}>
+                        <CheckCircle size={12} style={{ marginRight: '4px' }} />
+                        Your Current Plan
                       </div>
-                      <span className={`feature-text ${feature.included ? '' : 'excluded'}`}>
-                        {feature.text}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+                    )}
+                    {tier.recommended && !isOwned && (
+                      <div className="recommended-badge">Most Popular</div>
+                    )}
+                    {tier.isFree && !isSignedIn && (
+                      <div className="free-badge">Free Analyzer (Read-Only)</div>
+                    )}
 
-                <button
-                  className={`buy-button ${tier.recommended ? 'primary' : tier.isFree ? 'free-btn' : 'secondary'}`}
-                  onClick={() => handleCheckout(tier)}
-                  disabled={loading === tier.id}
-                >
-                  {loading === tier.id ? (
-                    'Processing...'
-                  ) : tier.isFree ? (
-                    <>
-                      Start Report Analysis
-                      <ArrowRight size={16} />
-                    </>
-                  ) : (
-                    <>
-                      Buy {tier.name} — ${tier.price}
-                      <ArrowRight size={16} />
-                    </>
-                  )}
-                </button>
-              </div>
-            ))}
+                    <div className="tier-header">
+                      <div
+                        className="tier-icon"
+                        style={{ background: `${tier.color}20`, color: tier.color }}
+                      >
+                        <tier.icon size={22} />
+                      </div>
+                      <div>
+                        <div className="tier-name">{tier.name}</div>
+                        <div className="tier-desc">{tier.description}</div>
+                      </div>
+                    </div>
+
+                    <div className="tier-price">
+                      {tier.isFree ? (
+                        <span className="price-free">Free</span>
+                      ) : isUpgrade ? (
+                        <>
+                          <span className="price-currency">$</span>
+                          <span className="price-amount">{Math.round(upgradePrice / 100)}</span>
+                          <div className="price-label" style={{ color: '#22c55e' }}>
+                            Upgrade price (you save ${tier.price - Math.round(upgradePrice / 100)})
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <span className="price-currency">$</span>
+                          <span className="price-amount">{tier.price}</span>
+                          <div className="price-label">
+                            {isOwned ? 'Already owned' : 'One-time purchase'}
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                    {tier.note && (
+                      <div className="tier-note">{tier.note}</div>
+                    )}
+
+                    <div className="tier-best-for">
+                      <strong>Best for:</strong> {tier.bestFor}
+                    </div>
+
+                    <div className="features-list">
+                      {tier.features.map((feature, i) => (
+                        <div key={i} className="feature-item">
+                          <div className={`feature-icon ${feature.included ? 'included' : 'excluded'}`}>
+                            {feature.included ? <Check size={10} /> : <X size={10} />}
+                          </div>
+                          <span className={`feature-text ${feature.included ? '' : 'excluded'}`}>
+                            {feature.text}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {isOwned && !tier.isFree ? (
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px',
+                        padding: '12px 20px',
+                        background: 'rgba(34, 197, 94, 0.1)',
+                        border: '1px solid rgba(34, 197, 94, 0.3)',
+                        borderRadius: '10px',
+                        color: '#22c55e',
+                        fontWeight: 600,
+                        fontSize: '14px',
+                      }}>
+                        <CheckCircle size={18} />
+                        {isCurrentTierExact ? 'Current Plan' : 'Included in Your Plan'}
+                      </div>
+                    ) : (
+                      <button
+                        className={`buy-button ${tier.recommended ? 'primary' : tier.isFree ? 'free-btn' : 'secondary'}`}
+                        onClick={() => handleCheckout(tier)}
+                        disabled={loading === tier.id || tierLoading}
+                      >
+                        {loading === tier.id ? (
+                          'Processing...'
+                        ) : tier.isFree ? (
+                          isSignedIn ? (
+                            <>
+                              Go to Dashboard
+                              <ArrowRight size={16} />
+                            </>
+                          ) : (
+                            <>
+                              Start Report Analysis
+                              <ArrowRight size={16} />
+                            </>
+                          )
+                        ) : isUpgrade ? (
+                          <>
+                            Upgrade for ${Math.round(upgradePrice / 100)}
+                            <ArrowRight size={16} />
+                          </>
+                        ) : (
+                          <>
+                            Buy {tier.name} — ${tier.price}
+                            <ArrowRight size={16} />
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+
           </div>
         </section>
 

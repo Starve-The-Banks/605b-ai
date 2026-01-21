@@ -1,21 +1,102 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useUser, useAuth, SignOutButton } from '@clerk/nextjs';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import {
   Search, Sparkles, FileText, Clock, Flag, FileCheck,
-  ChevronLeft, ChevronRight, LogOut, Settings, User, ChevronUp, TrendingUp, Bell, Menu, X, Lock, Crown
+  ChevronLeft, ChevronRight, LogOut, Settings, User, ChevronUp, TrendingUp, Bell, Menu, X, Lock, Crown, Loader2, CheckCircle
 } from 'lucide-react';
 import Image from 'next/image';
 import OnboardingWizard from './components/OnboardingWizard';
 import { useUserTier, AccessRestrictionBanner } from '@/lib/useUserTier';
 
-export default function DashboardLayout({ children }) {
+// Payment sync banner component
+function PaymentSyncBanner({ isPolling, syncComplete, tier }) {
+  if (syncComplete) {
+    return (
+      <div style={{
+        padding: '14px 16px',
+        background: 'rgba(34, 197, 94, 0.15)',
+        border: '1px solid rgba(34, 197, 94, 0.3)',
+        borderRadius: '10px',
+        marginBottom: '20px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+      }}>
+        <div style={{
+          width: '22px',
+          height: '22px',
+          borderRadius: '50%',
+          background: 'rgba(34, 197, 94, 0.2)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+        }}>
+          <CheckCircle size={14} style={{ color: '#22c55e' }} />
+        </div>
+        <div style={{ minWidth: 0 }}>
+          <div style={{ fontWeight: 600, color: '#fafafa', fontSize: '14px' }}>
+            Payment Confirmed
+          </div>
+          <div style={{ fontSize: '13px', color: '#a1a1aa', lineHeight: 1.5 }}>
+            Your {tier || 'purchase'} has been activated. All features are now unlocked.
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isPolling) {
+    return (
+      <div style={{
+        padding: '14px 16px',
+        background: 'rgba(59, 130, 246, 0.15)',
+        border: '1px solid rgba(59, 130, 246, 0.3)',
+        borderRadius: '10px',
+        marginBottom: '20px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+      }}>
+        <div style={{
+          width: '22px',
+          height: '22px',
+          borderRadius: '50%',
+          background: 'rgba(59, 130, 246, 0.2)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+        }}>
+          <Loader2 size={14} style={{ color: '#3b82f6', animation: 'spin 1s linear infinite' }} />
+        </div>
+        <div style={{ minWidth: 0 }}>
+          <div style={{ fontWeight: 600, color: '#fafafa', fontSize: '14px' }}>
+            Confirming Payment...
+          </div>
+          <div style={{ fontSize: '13px', color: '#a1a1aa', lineHeight: 1.5 }}>
+            Your payment was successful. Activating your features now...
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+}
+
+function DashboardLayoutContent({ children }) {
   const { user } = useUser();
   const { isSignedIn } = useAuth();
-  const { tier, tierName, tierColor, hasFeature, isAccessFrozen, isAccessRevoked, isBeta } = useUserTier();
+  const {
+    tier, tierName, tierColor, hasFeature, isAccessFrozen, isAccessRevoked, isBeta,
+    isPollingForPayment, paymentSyncComplete, startPaymentPolling
+  } = useUserTier();
+  const searchParams = useSearchParams();
   const pathname = usePathname();
   const isAIStrategist = pathname === '/dashboard/ai-strategist';
   const [rightSidebarOpen, setRightSidebarOpen] = useState(false);
@@ -121,6 +202,20 @@ export default function DashboardLayout({ children }) {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Handle payment success from URL params
+  useEffect(() => {
+    const isPaymentSuccess = searchParams?.get('success') === 'true';
+    const purchasedTier = searchParams?.get('tier');
+
+    if (isPaymentSuccess && purchasedTier && !isPollingForPayment && !paymentSyncComplete) {
+      // Payment just completed - start polling if tier doesn't match yet
+      if (tier === 'free' || tier !== purchasedTier) {
+        console.log('[Dashboard] Payment success detected, starting polling for:', purchasedTier);
+        startPaymentPolling(purchasedTier);
+      }
+    }
+  }, [searchParams, tier, isPollingForPayment, paymentSyncComplete, startPaymentPolling]);
 
   const handleOnboardingComplete = () => {
     setShowOnboarding(false);
@@ -518,6 +613,11 @@ export default function DashboardLayout({ children }) {
           transition: 'margin-right 0.3s ease',
           width: isMobile ? '100%' : 'auto',
         }}>
+          <PaymentSyncBanner
+            isPolling={isPollingForPayment}
+            syncComplete={paymentSyncComplete}
+            tier={tierName}
+          />
           <AccessRestrictionBanner />
           {children}
         </main>
@@ -676,6 +776,31 @@ export default function DashboardLayout({ children }) {
           </>
         )}
       </div>
+      <style jsx global>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </>
+  );
+}
+
+// Wrapper component with Suspense for useSearchParams
+export default function DashboardLayout({ children }) {
+  return (
+    <Suspense fallback={
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        background: 'var(--bg)',
+      }}>
+        <Loader2 size={32} style={{ color: 'var(--orange)', animation: 'spin 1s linear infinite' }} />
+      </div>
+    }>
+      <DashboardLayoutContent>{children}</DashboardLayoutContent>
+    </Suspense>
   );
 }

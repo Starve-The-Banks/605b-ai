@@ -514,9 +514,12 @@ export async function POST(request) {
       case 'checkout.session.completed': {
         const session = event.data.object;
 
+        console.log(`[WEBHOOK] checkout.session.completed - Session: ${session.id}, Status: ${session.payment_status}`);
+        console.log(`[WEBHOOK] Session metadata:`, JSON.stringify(session.metadata, null, 2));
+
         // CRITICAL: Only grant access if payment is confirmed
         if (session.payment_status !== 'paid') {
-          console.log(`Session ${session.id} not paid yet (status: ${session.payment_status}), skipping`);
+          console.log(`[WEBHOOK] Session ${session.id} not paid yet (status: ${session.payment_status}), skipping entitlement grant`);
           break;
         }
 
@@ -529,8 +532,11 @@ export async function POST(request) {
         const disclaimerVersion = session.metadata?.disclaimerVersion;
         const disclaimerTimestamp = session.metadata?.disclaimerTimestamp;
 
+        console.log(`[WEBHOOK] Processing: User=${clerkUserId}, Type=${productType}, Product=${productId}, Upgrade=${isUpgrade}`);
+
         if (!clerkUserId) {
-          console.error('Missing clerkUserId in checkout session');
+          console.error('[WEBHOOK] CRITICAL: Missing clerkUserId in checkout session metadata');
+          console.error('[WEBHOOK] Session details:', { id: session.id, metadata: session.metadata, client_reference_id: session.client_reference_id });
           // Record this as a failed grant - we have payment but can't identify user
           await recordFailedGrant(redisClient, {
             eventId: event.id,
@@ -632,10 +638,13 @@ export async function POST(request) {
             };
 
             // CRITICAL: Grant the tier entitlement
+            console.log(`[WEBHOOK] Granting tier entitlement to user ${clerkUserId}:`, { tier: productId, features: Object.keys(features) });
             await redisClient.set(`user:${clerkUserId}:tier`, JSON.stringify(userTierData));
+            console.log(`[WEBHOOK] Successfully stored tier data for user ${clerkUserId}`);
 
             // Mark entitlement as granted (for idempotency)
             await markEntitlementGranted(redisClient, clerkUserId, productId, session.id);
+            console.log(`[WEBHOOK] Marked entitlement as granted for user ${clerkUserId}, session ${session.id}`);
 
             // Update profile (non-critical, but try)
             try {
@@ -672,11 +681,13 @@ export async function POST(request) {
               console.error('Non-critical: Failed to add audit entry:', auditError);
             }
 
-            console.log(`[PURCHASE] User ${clerkUserId} ${isUpgrade ? 'upgraded to' : 'purchased'} ${productId} tier`);
+            console.log(`[WEBHOOK] SUCCESS: User ${clerkUserId} ${isUpgrade ? 'upgraded to' : 'purchased'} ${productId} tier`);
+            console.log(`[WEBHOOK] Entitlement grant complete. User should now have access to ${productId} features.`);
 
           } catch (grantError) {
             // CRITICAL: Grant failed - record for retry
-            console.error(`[GRANT_FAILED] Tier grant failed for user ${clerkUserId}:`, grantError);
+            console.error(`[WEBHOOK] GRANT_FAILED: Tier grant failed for user ${clerkUserId}:`, grantError);
+            console.error(`[WEBHOOK] Grant error stack:`, grantError.stack);
             await recordFailedGrant(redisClient, {
               eventId: event.id,
               eventType: event.type,

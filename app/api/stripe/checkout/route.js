@@ -334,6 +334,7 @@ async function createCheckoutSession(stripeClient, { customerId, userId, priceId
   }
 
   // Use Stripe Price ID as source of truth
+  // CRITICAL: Include {CHECKOUT_SESSION_ID} for post-payment sync fallback
   const session = await stripeClient.checkout.sessions.create({
     customer: customerId,
     client_reference_id: userId,
@@ -345,7 +346,7 @@ async function createCheckoutSession(stripeClient, { customerId, userId, priceId
         quantity: 1,
       },
     ],
-    success_url: `${appUrl}/dashboard?success=true&${productType}=${productId}${isUpgrade ? '&upgrade=true' : ''}`,
+    success_url: `${appUrl}/dashboard?success=true&session_id={CHECKOUT_SESSION_ID}&${productType}=${productId}${isUpgrade ? '&upgrade=true' : ''}`,
     cancel_url: `${appUrl}/pricing?canceled=true`,
     metadata: {
       clerkUserId: userId,
@@ -364,7 +365,7 @@ async function createCheckoutSession(stripeClient, { customerId, userId, priceId
     allow_promotion_codes: true,
     custom_text: {
       submit: {
-        message: isUpgrade 
+        message: isUpgrade
           ? `Upgrade from ${TIER_CONFIG[upgradeFrom]?.name || upgradeFrom} - you're only paying the difference!`
           : 'By completing this purchase, you acknowledge that 605b.ai provides self-service software tools only and does not perform credit repair services on your behalf.',
       },

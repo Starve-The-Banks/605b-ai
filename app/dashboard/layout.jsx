@@ -207,12 +207,13 @@ function DashboardLayoutContent({ children }) {
   useEffect(() => {
     const isPaymentSuccess = searchParams?.get('success') === 'true';
     const purchasedTier = searchParams?.get('tier');
+    const sessionId = searchParams?.get('session_id');
 
     if (isPaymentSuccess && purchasedTier && !isPollingForPayment && !paymentSyncComplete) {
-      // Payment just completed - start polling if tier doesn't match yet
+      // Payment just completed - start sync/polling if tier doesn't match yet
       if (tier === 'free' || tier !== purchasedTier) {
-        console.log('[Dashboard] Payment success detected, starting polling for:', purchasedTier);
-        startPaymentPolling(purchasedTier);
+        console.log('[Dashboard] Payment success detected, starting sync for:', purchasedTier, 'session:', sessionId);
+        startPaymentPolling(purchasedTier, sessionId);
       }
     }
   }, [searchParams, tier, isPollingForPayment, paymentSyncComplete, startPaymentPolling]);

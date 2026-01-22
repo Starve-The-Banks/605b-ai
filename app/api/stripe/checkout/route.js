@@ -349,15 +349,24 @@ async function createCheckoutSession(stripeClient, { customerId, userId, priceId
     success_url: `${appUrl}/dashboard?success=true&session_id={CHECKOUT_SESSION_ID}&${productType}=${productId}${isUpgrade ? '&upgrade=true' : ''}`,
     cancel_url: `${appUrl}/pricing?canceled=true`,
     metadata: {
+      // CRITICAL: Canonical identity mapping
       clerkUserId: userId,
+      userId: userId, // Duplicate for redundancy
+      userEmail: user?.emailAddresses?.[0]?.emailAddress || '',
+      // Product info
       productType: productType,
       productId: productId,
+      // Disclaimer
       disclaimerAccepted: 'true',
       disclaimerVersion: CURRENT_DISCLAIMER_VERSION,
       disclaimerTimestamp: disclaimerTimestamp || new Date().toISOString(),
+      // Upgrade info
       isUpgrade: isUpgrade ? 'true' : 'false',
       upgradeFrom: upgradeFrom || '',
       amountCharged: amountToCharge ? String(amountToCharge) : '',
+      // Environment tracking for debugging
+      env: process.env.VERCEL_ENV || process.env.NODE_ENV || 'unknown',
+      stripeMode: process.env.STRIPE_SECRET_KEY?.startsWith('sk_live') ? 'live' : 'test',
     },
     invoice_creation: {
       enabled: true,

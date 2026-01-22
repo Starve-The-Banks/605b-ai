@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 
 // Lazy initialization
 let redis = null;
+let stripe = null;
 
 function getRedis() {
   if (!redis) {
@@ -10,6 +11,14 @@ function getRedis() {
     redis = Redis.fromEnv();
   }
   return redis;
+}
+
+function getStripe() {
+  if (!stripe) {
+    const Stripe = require('stripe').default;
+    stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+  }
+  return stripe;
 }
 
 /**
@@ -56,7 +65,6 @@ export async function GET() {
     try {
       const queueLength = await redisClient.llen('stripe:failed_grants_queue');
       if (queueLength > 0) {
-        // Check if any are for this user
         const queueItems = await redisClient.lrange('stripe:failed_grants_queue', 0, 100);
         for (const eventId of queueItems) {
           const grantData = await redisClient.get(`stripe:failed_grant:${eventId}`);
@@ -97,9 +105,49 @@ export async function GET() {
       }
     }
 
+    // Fetch recent checkout sessions from Stripe for this customer
+    let recentStripeSessions = [];
+    if (stripeCustomerId) {
+      try {
+        const stripeClient = getStripe();
+        const sessions = await stripeClient.checkout.sessions.list({
+          customer: stripeCustomerId,
+          limit: 5,
+        });
+        recentStripeSessions = sessions.data.map(s => ({
+          id: s.id,
+          paymentStatus: s.payment_status,
+          amountTotal: s.amount_total,
+          currency: s.currency,
+          created: new Date(s.created * 1000).toISOString(),
+          metadata: {
+            productType: s.metadata?.productType,
+            productId: s.metadata?.productId,
+            userId: s.metadata?.clerkUserId || s.metadata?.userId,
+            env: s.metadata?.env,
+            mode: s.metadata?.stripeMode,
+          },
+          clientReferenceId: s.client_reference_id,
+        }));
+      } catch (e) {
+        console.error('Error fetching Stripe sessions:', e);
+      }
+    }
+
+    // Environment and configuration info
+    const stripeMode = process.env.STRIPE_SECRET_KEY?.startsWith('sk_live') ? 'live' : 'test';
+    const webhookConfigured = !!process.env.STRIPE_WEBHOOK_SECRET;
+
     return NextResponse.json({
       debug: true,
       timestamp: new Date().toISOString(),
+      environment: {
+        vercelEnv: process.env.VERCEL_ENV || 'unknown',
+        nodeEnv: process.env.NODE_ENV || 'unknown',
+        appUrl: process.env.NEXT_PUBLIC_APP_URL || 'not set',
+        stripeMode: stripeMode,
+        webhookConfigured: webhookConfigured,
+      },
       user: {
         id: userId,
         email: user?.emailAddresses?.[0]?.emailAddress || 'unknown',
@@ -114,16 +162,21 @@ export async function GET() {
         accessFrozen: parseTierData?.accessFrozen || false,
         isUpgrade: parseTierData?.isUpgrade || false,
         upgradedFrom: parseTierData?.upgradedFrom || null,
+        reconciledAt: parseTierData?.reconciledAt || null,
+        reconcileSource: parseTierData?.reconcileSource || null,
       },
       stripe: {
         sessionId: stripeSessionId,
         customerId: stripeCustomerId,
         paymentIntentId: parseTierData?.stripePaymentIntentId || null,
+        mode: stripeMode,
+        recentSessions: recentStripeSessions,
       },
       grants: {
         entitlementRecord: parseEntitlementData,
         grantRecords: grantRecords,
         pendingGrants: pendingGrants,
+        idempotencyKeyExists: stripeSessionId ? !!(await redisClient.get(`stripe:grant:${userId}:${stripeSessionId}`)) : false,
       },
       profile: {
         tier: parseProfileData?.tier || null,

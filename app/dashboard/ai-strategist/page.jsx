@@ -42,38 +42,14 @@ VOICE MODE INSTRUCTIONS:
 
 export default function AIStrategistPage() {
   const { tier, loading: tierLoading, hasFeature } = useUserTier();
+
+  // ALL HOOKS MUST BE DECLARED BEFORE ANY CONDITIONAL RETURNS
+  // React requires hooks to be called in the same order on every render
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showIntro, setShowIntro] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
-
-  // Check if user has AI chat access (advanced or identity-theft tier)
-  const hasAIAccess = hasFeature('aiChat');
-
-  // Show loading state while checking tier
-  if (tierLoading) {
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '400px' }}>
-        <Loader2 size={24} style={{ animation: 'spin 1s linear infinite', color: 'var(--orange)' }} />
-      </div>
-    );
-  }
-
-  // Show upgrade prompt if user doesn't have access
-  if (!hasAIAccess) {
-    return (
-      <div style={{ padding: '40px 20px' }}>
-        <UpgradePrompt
-          feature="ai-chat"
-          requiredTier="advanced"
-          title="Unlock AI Strategist"
-          description="Get personalized credit repair guidance with our AI strategist. Ask questions about your specific situation, get letter recommendations, and learn your rights under FCRA."
-        />
-      </div>
-    );
-  }
-
   const [voiceMode, setVoiceMode] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -86,6 +62,9 @@ export default function AIStrategistPage() {
   const inputRef = useRef(null);
   const recognitionRef = useRef(null);
   const audioRef = useRef(null);
+
+  // Check if user has AI chat access (advanced or identity-theft tier)
+  const hasAIAccess = hasFeature('aiChat');
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -379,6 +358,29 @@ export default function AIStrategistPage() {
       setIsLoading(false);
     }
   };
+
+  // Show loading state while checking tier - AFTER all hooks
+  if (tierLoading) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '400px' }}>
+        <Loader2 size={24} style={{ animation: 'spin 1s linear infinite', color: 'var(--orange)' }} />
+      </div>
+    );
+  }
+
+  // Show upgrade prompt if user doesn't have access - AFTER all hooks
+  if (!hasAIAccess) {
+    return (
+      <div style={{ padding: '40px 20px' }}>
+        <UpgradePrompt
+          feature="ai-chat"
+          requiredTier="advanced"
+          title="Unlock AI Strategist"
+          description="Get personalized credit repair guidance with our AI strategist. Ask questions about your specific situation, get letter recommendations, and learn your rights under FCRA."
+        />
+      </div>
+    );
+  }
 
   const styles = {
     container: {

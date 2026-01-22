@@ -1,6 +1,11 @@
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
+// Force dynamic rendering - this route uses auth headers
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const runtime = 'nodejs';
+
 // Lazy initialization
 let redis = null;
 let stripe = null;

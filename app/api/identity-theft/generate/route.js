@@ -3,6 +3,11 @@ import PDFDocument from 'pdfkit';
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { isBetaWhitelisted } from '@/lib/beta';
 
+// Force dynamic rendering - this route uses request.url
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const runtime = 'nodejs';
+
 // Lazy initialization
 let stripe = null;
 let redis = null;

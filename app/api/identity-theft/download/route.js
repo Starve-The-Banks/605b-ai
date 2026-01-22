@@ -3,6 +3,11 @@ import PDFDocument from 'pdfkit';
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { isBetaWhitelisted } from '@/lib/beta';
 
+// Force dynamic rendering - this route uses request.url
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const runtime = 'nodejs';
+
 // Lazy initialization
 let stripe = null;
 let redis = null;
@@ -70,6 +75,7 @@ export async function GET(request) {
     }
 
     let intakeData;
+    let intakeToken; // Track which token was used for updating Redis
 
     // Beta users can use intake token directly (bypasses Stripe verification)
     if (isBeta && betaIntakeToken) {
@@ -77,7 +83,8 @@ export async function GET(request) {
         return NextResponse.json({ error: 'Invalid token format' }, { status: 400 });
       }
 
-      const intakeDataRaw = await redisClient.get(`it:intake:${betaIntakeToken}`);
+      intakeToken = betaIntakeToken;
+      const intakeDataRaw = await redisClient.get(`it:intake:${intakeToken}`);
       if (!intakeDataRaw) {
         return NextResponse.json({ error: 'Intake data not found or expired' }, { status: 404 });
       }
@@ -109,7 +116,7 @@ export async function GET(request) {
       }
 
       // Get intake token from session metadata
-      const intakeToken = session.metadata?.intakeToken;
+      intakeToken = session.metadata?.intakeToken;
       if (!intakeToken) {
         return NextResponse.json({ error: 'Missing intake data' }, { status: 400 });
       }

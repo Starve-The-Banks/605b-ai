@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { ShieldCheck } from 'lucide-react';
 
 export default function PrivacyPolicy() {
-  const effectiveDate = "January 9, 2026";
+  const effectiveDate = "January 23, 2026";
 
   return (
     <>
@@ -323,7 +323,54 @@ export default function PrivacyPolicy() {
           </section>
 
           <section style={{ marginBottom: '32px' }}>
-            <h2 style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text)', marginBottom: '16px' }}>6. Data Retention</h2>
+            <h2 style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text)', marginBottom: '16px' }}>6. Financial Data Access via Third-Party Integrations</h2>
+            <p style={{ marginBottom: '16px' }}>
+              With your explicit authorization, we may access financial account information through secure third-party data aggregation services. This section describes what data we access, how we use it, and how we protect it.
+            </p>
+
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--orange)', marginBottom: '12px' }}>6.1 Data We May Access</h3>
+            <p style={{ marginBottom: '16px' }}>When you connect a financial account, we may receive read-only access to:</p>
+            <ul style={{ marginBottom: '16px', paddingLeft: '24px' }}>
+              <li style={{ marginBottom: '8px' }}>Transaction history (including merchant names, dates, amounts, and transaction categories)</li>
+              <li style={{ marginBottom: '8px' }}>Account type and status metadata</li>
+              <li style={{ marginBottom: '8px' }}>Available and current balances, where applicable</li>
+              <li style={{ marginBottom: '8px' }}>Account identifiers necessary to maintain the connection</li>
+            </ul>
+
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--orange)', marginBottom: '12px' }}>6.2 How We Use This Data</h3>
+            <p style={{ marginBottom: '16px' }}>
+              We use financial data solely to provide you with analytics, insights, and tools related to your personal financial management within our platform. This data helps you understand your financial activity in the context of the services we provide.
+            </p>
+
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--orange)', marginBottom: '12px' }}>6.3 What We Do Not Do</h3>
+            <p style={{
+              marginBottom: '16px',
+              padding: '16px',
+              background: 'rgba(34, 197, 94, 0.1)',
+              border: '1px solid rgba(34, 197, 94, 0.3)',
+              borderRadius: '8px',
+            }}>
+              <strong>Important:</strong> We do not initiate payments, transfer funds, or perform any form of money movement through these integrations. We do not use this data for credit underwriting, lending decisions, or account ownership verification. Access is strictly read-only.
+            </p>
+
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--orange)', marginBottom: '12px' }}>6.4 Data Sharing and Retention</h3>
+            <p style={{ marginBottom: '16px' }}>
+              We do not sell your financial data. We do not share your financial data with third parties except as necessary to maintain the integration or as required by law. We retain financial data only for as long as reasonably necessary to provide our services to you or as required for legal compliance. You may revoke access or request deletion of this data at any time.
+            </p>
+
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--orange)', marginBottom: '12px' }}>6.5 Data Storage</h3>
+            <p style={{ marginBottom: '16px' }}>
+              All financial data accessed through these integrations is stored exclusively in the United States using industry-standard encryption and security practices.
+            </p>
+
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--orange)', marginBottom: '12px' }}>6.6 Your Consent</h3>
+            <p>
+              Financial data is accessed only after you provide explicit consent and complete the authorization process through our third-party data provider. You may disconnect your accounts at any time through your account settings.
+            </p>
+          </section>
+
+          <section style={{ marginBottom: '32px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text)', marginBottom: '16px' }}>7. Data Retention</h2>
             <p style={{ marginBottom: '16px' }}>
               We retain your personal information for as long as your account is active or as needed to provide you the Service. We may also retain certain information as required by law or for legitimate business purposes, such as:
             </p>
@@ -338,38 +385,38 @@ export default function PrivacyPolicy() {
           </section>
 
           <section style={{ marginBottom: '32px' }}>
-            <h2 style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text)', marginBottom: '16px' }}>7. Your Rights and Choices</h2>
+            <h2 style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text)', marginBottom: '16px' }}>8. Your Rights and Choices</h2>
             
-            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--orange)', marginBottom: '12px' }}>7.1 Access and Portability</h3>
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--orange)', marginBottom: '12px' }}>8.1 Access and Portability</h3>
             <p style={{ marginBottom: '16px' }}>
               You may access your personal information through your account dashboard. You may export your dispute history and audit log at any time.
             </p>
 
-            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--orange)', marginBottom: '12px' }}>7.2 Correction</h3>
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--orange)', marginBottom: '12px' }}>8.2 Correction</h3>
             <p style={{ marginBottom: '16px' }}>
               You may update or correct your account information at any time through your account settings.
             </p>
 
-            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--orange)', marginBottom: '12px' }}>7.3 Deletion</h3>
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--orange)', marginBottom: '12px' }}>8.3 Deletion</h3>
             <p style={{ marginBottom: '16px' }}>
               You may request deletion of your account and personal information by contacting us. We will delete or anonymize your information within 30 days, except where we are required to retain it by law.
             </p>
 
-            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--orange)', marginBottom: '12px' }}>7.4 Email Communications</h3>
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--orange)', marginBottom: '12px' }}>8.4 Email Communications</h3>
             <p style={{ marginBottom: '16px' }}>
               You may opt out of non-essential email communications through your account settings. You cannot opt out of transactional emails related to your account.
             </p>
 
-            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--orange)', marginBottom: '12px' }}>7.5 Cookies</h3>
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--orange)', marginBottom: '12px' }}>8.5 Cookies</h3>
             <p>
               Most web browsers are set to accept cookies by default. You can usually modify your browser settings to remove or reject cookies. Note that removing or rejecting cookies may affect the availability and functionality of the Service.
             </p>
           </section>
 
           <section style={{ marginBottom: '32px' }}>
-            <h2 style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text)', marginBottom: '16px' }}>8. State-Specific Rights</h2>
+            <h2 style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text)', marginBottom: '16px' }}>9. State-Specific Rights</h2>
             
-            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--orange)', marginBottom: '12px' }}>8.1 California Residents (CCPA/CPRA)</h3>
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--orange)', marginBottom: '12px' }}>9.1 California Residents (CCPA/CPRA)</h3>
             <p style={{ marginBottom: '16px' }}>
               If you are a California resident, you have additional rights under the California Consumer Privacy Act (CCPA) and California Privacy Rights Act (CPRA):
             </p>
@@ -384,42 +431,42 @@ export default function PrivacyPolicy() {
               To exercise these rights, please contact us using the information provided below.
             </p>
 
-            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--orange)', marginBottom: '12px' }}>8.2 Other State Laws</h3>
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--orange)', marginBottom: '12px' }}>9.2 Other State Laws</h3>
             <p>
               If you are a resident of Virginia, Colorado, Connecticut, Utah, or other states with comprehensive privacy laws, you may have similar rights. Please contact us to exercise your rights under applicable state law.
             </p>
           </section>
 
           <section style={{ marginBottom: '32px' }}>
-            <h2 style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text)', marginBottom: '16px' }}>9. Children's Privacy</h2>
+            <h2 style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text)', marginBottom: '16px' }}>10. Children's Privacy</h2>
             <p>
               The Service is not intended for individuals under the age of 18. We do not knowingly collect personal information from children under 18. If you are a parent or guardian and believe your child has provided us with personal information, please contact us immediately. If we become aware that we have collected personal information from a child under 18, we will take steps to delete that information.
             </p>
           </section>
 
           <section style={{ marginBottom: '32px' }}>
-            <h2 style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text)', marginBottom: '16px' }}>10. International Data Transfers</h2>
+            <h2 style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text)', marginBottom: '16px' }}>11. International Data Transfers</h2>
             <p>
               Your information may be transferred to and processed in countries other than your country of residence, including the United States. These countries may have data protection laws that are different from the laws of your country. By using the Service, you consent to the transfer of your information to the United States and other countries.
             </p>
           </section>
 
           <section style={{ marginBottom: '32px' }}>
-            <h2 style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text)', marginBottom: '16px' }}>11. Third-Party Links</h2>
+            <h2 style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text)', marginBottom: '16px' }}>12. Third-Party Links</h2>
             <p>
               The Service may contain links to third-party websites (such as AnnualCreditReport.com, IdentityTheft.gov, and credit bureau websites). We are not responsible for the privacy practices of these third-party sites. We encourage you to review the privacy policies of any third-party sites you visit.
             </p>
           </section>
 
           <section style={{ marginBottom: '32px' }}>
-            <h2 style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text)', marginBottom: '16px' }}>12. Do Not Track</h2>
+            <h2 style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text)', marginBottom: '16px' }}>13. Do Not Track</h2>
             <p>
               Some browsers have a "Do Not Track" feature that signals to websites that you do not want to have your online activity tracked. The Service does not currently respond to "Do Not Track" signals.
             </p>
           </section>
 
           <section style={{ marginBottom: '32px' }}>
-            <h2 style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text)', marginBottom: '16px' }}>13. Contact Us</h2>
+            <h2 style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text)', marginBottom: '16px' }}>14. Contact Us</h2>
             <p style={{ marginBottom: '16px' }}>
               If you have any questions about this Privacy Policy or our privacy practices, or if you wish to exercise your privacy rights, please contact us at:
             </p>

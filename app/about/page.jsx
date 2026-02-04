@@ -663,27 +663,9 @@ export default function AboutPage() {
         .footer-logo {
           display: flex;
           align-items: center;
-          gap: 12px;
+          gap: 10px;
           margin-bottom: 12px;
-        }
-
-        .footer-logo-mark {
-          width: 32px;
-          height: 32px;
-          background: var(--orange);
-          border-radius: 8px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-family: 'JetBrains Mono', monospace;
-          font-size: 10px;
-          font-weight: 700;
-          color: white;
-        }
-
-        .footer-logo-text {
-          font-size: 16px;
-          font-weight: 600;
+          text-decoration: none;
           color: var(--text);
         }
 
@@ -1047,10 +1029,12 @@ export default function AboutPage() {
           <div className="footer-content">
             <div className="footer-main">
               <div className="footer-brand">
-                <div className="footer-logo">
-                  <div className="footer-logo-mark">605B</div>
-                  <span className="footer-logo-text">605b.ai</span>
-                </div>
+                <Link href="/" className="footer-logo">
+                  <Image src="/logos/favicons/favicon.svg" alt="605b.ai" width={44} height={44} className="logo-icon" />
+                  <span className="logo-text">
+                    <span className="logo-text-main">605b</span><span className="logo-text-ext">.ai</span>
+                  </span>
+                </Link>
                 <p className="footer-tagline">Self-service software for credit dispute organization.</p>
               </div>
               <div className="footer-links">

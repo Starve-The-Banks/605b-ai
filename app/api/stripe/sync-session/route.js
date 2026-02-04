@@ -21,6 +21,39 @@ function getRedis() {
   return redis;
 }
 
+// Grant idempotency key prefix - MUST match webhook/route.js
+const GRANT_KEY_PREFIX = 'grant:session:';
+const IDEMPOTENCY_TTL_SECONDS = 90 * 24 * 60 * 60; // 90 days
+
+/**
+ * Atomically try to acquire grant lock for a session.
+ * Returns true if this call acquired the lock (grant not yet done).
+ * Returns false if grant was already completed by webhook or sync-session.
+ */
+async function tryAcquireGrantLock(redisClient, sessionId, userId, tier, source) {
+  const key = `${GRANT_KEY_PREFIX}${sessionId}`;
+  const value = JSON.stringify({
+    userId,
+    tier,
+    grantedAt: new Date().toISOString(),
+    source, // 'webhook' or 'sync-session'
+  });
+  
+  // SETNX: Set only if key does not exist (atomic operation)
+  const result = await redisClient.set(key, value, { ex: IDEMPOTENCY_TTL_SECONDS, nx: true });
+  return result === 'OK';
+}
+
+/**
+ * Get grant info for a session (for returning already-granted info)
+ */
+async function getGrantInfo(redisClient, sessionId) {
+  const key = `${GRANT_KEY_PREFIX}${sessionId}`;
+  const data = await redisClient.get(key);
+  if (!data) return null;
+  return typeof data === 'string' ? JSON.parse(data) : data;
+}
+
 // Tier features (must match webhook)
 const TIER_FEATURES = {
   free: {
@@ -134,11 +167,11 @@ export async function POST(request) {
       });
     }
 
-    // Check if entitlement already exists for this session (idempotency)
-    const existingGrant = await redisClient.get(`stripe:grant:${userId}:${sessionId}`);
+    // Check if entitlement already exists for this session using unified key
+    // This key is shared with webhook to prevent double-grants
+    const existingGrant = await getGrantInfo(redisClient, sessionId);
     if (existingGrant) {
-      console.log(`[SYNC] Entitlement already granted for session ${sessionId}`);
-      const grantData = typeof existingGrant === 'string' ? JSON.parse(existingGrant) : existingGrant;
+      console.log(`[SYNC] Grant already exists for session ${sessionId} (by ${existingGrant.source})`);
 
       // Return current tier data
       const tierData = await redisClient.get(`user:${userId}:tier`);
@@ -147,7 +180,8 @@ export async function POST(request) {
       return NextResponse.json({
         granted: true,
         alreadyGranted: true,
-        tier: grantData.productId,
+        grantedBy: existingGrant.source,
+        tier: existingGrant.tier,
         tierData: parsedTierData,
       });
     }
@@ -161,6 +195,24 @@ export async function POST(request) {
     console.log(`[SYNC] Processing: Type=${productType}, Product=${productId}, Upgrade=${isUpgrade}`);
 
     if (productType === 'tier' && productId) {
+      // ATOMIC GRANT LOCK: Try to acquire lock before granting
+      // This prevents race with webhook - only one can succeed
+      const acquiredGrant = await tryAcquireGrantLock(redisClient, sessionId, userId, productId, 'sync-session');
+      if (!acquiredGrant) {
+        // Grant already exists (webhook beat us) - return current tier data
+        console.log(`[SYNC] Grant lock not acquired for session ${sessionId} - webhook already granted`);
+        const tierData = await redisClient.get(`user:${userId}:tier`);
+        const parsedTierData = tierData ? (typeof tierData === 'string' ? JSON.parse(tierData) : tierData) : null;
+        
+        return NextResponse.json({
+          granted: true,
+          alreadyGranted: true,
+          grantedBy: 'webhook',
+          tier: productId,
+          tierData: parsedTierData,
+        });
+      }
+
       const features = TIER_FEATURES[productId] || TIER_FEATURES.free;
 
       // Get existing tier data
@@ -221,21 +273,13 @@ export async function POST(request) {
       console.log(`[SYNC] Granting tier ${productId} to user ${userId}`);
       await redisClient.set(`user:${userId}:tier`, JSON.stringify(userTierData));
 
-      // Mark as granted (idempotency)
-      await redisClient.set(`stripe:grant:${userId}:${sessionId}`, JSON.stringify({
-        productType,
-        productId,
-        grantedAt: new Date().toISOString(),
-        grantSource: 'sync-session',
-      }), { ex: 90 * 24 * 60 * 60 }); // 90 days TTL
-
       // Store reverse mappings
-      await redisClient.set(`stripe:session:${sessionId}:user`, userId, { ex: 90 * 24 * 60 * 60 });
+      await redisClient.set(`stripe:session:${sessionId}:user`, userId, { ex: IDEMPOTENCY_TTL_SECONDS });
       if (session.payment_intent) {
-        await redisClient.set(`stripe:pi:${session.payment_intent}:user`, userId, { ex: 90 * 24 * 60 * 60 });
+        await redisClient.set(`stripe:pi:${session.payment_intent}:user`, userId, { ex: IDEMPOTENCY_TTL_SECONDS });
       }
       if (session.customer) {
-        await redisClient.set(`stripe:customer:${session.customer}:user`, userId, { ex: 90 * 24 * 60 * 60 });
+        await redisClient.set(`stripe:customer:${session.customer}:user`, userId, { ex: IDEMPOTENCY_TTL_SECONDS });
       }
 
       console.log(`[SYNC] SUCCESS: User ${userId} granted ${productId} tier via sync-session`);

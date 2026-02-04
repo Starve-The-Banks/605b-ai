@@ -95,14 +95,32 @@ const ADDON_GRANTS = {
 const IDEMPOTENCY_TTL_SECONDS = 90 * 24 * 60 * 60; // 90 days
 const FAILED_GRANT_TTL_SECONDS = 30 * 24 * 60 * 60; // 30 days for retry queue
 
-async function isEventProcessed(redisClient, eventId) {
-  const key = `stripe:event:${eventId}`;
-  const exists = await redisClient.get(key);
-  return !!exists;
+/**
+ * Atomically check and mark an event as processed using SET NX (set if not exists).
+ * Returns true if this call acquired the lock (event was not yet processed).
+ * Returns false if event was already processed by another request.
+ */
+async function tryAcquireEventLock(redisClient, eventId, eventType) {
+  const key = `idempo:webhook:event:${eventId}`;
+  const value = JSON.stringify({
+    processedAt: new Date().toISOString(),
+    eventType: eventType,
+    status: 'processing',
+  });
+  
+  // SETNX: Set only if key does not exist (atomic operation)
+  // Upstash Redis supports this via set with nx option
+  const result = await redisClient.set(key, value, { ex: IDEMPOTENCY_TTL_SECONDS, nx: true });
+  
+  // result is 'OK' if set succeeded (we got the lock), null if key already exists
+  return result === 'OK';
 }
 
-async function markEventProcessed(redisClient, eventId, eventType, status = 'success') {
-  const key = `stripe:event:${eventId}`;
+/**
+ * Update the status of a processed event (for observability)
+ */
+async function updateEventStatus(redisClient, eventId, eventType, status) {
+  const key = `idempo:webhook:event:${eventId}`;
   await redisClient.set(key, JSON.stringify({
     processedAt: new Date().toISOString(),
     eventType: eventType,
@@ -299,17 +317,51 @@ async function getPurchaseRecord(redisClient, sessionId) {
 }
 
 // ===========================================
-// GRANT IDEMPOTENCY: Check if already granted for this session
+// GRANT IDEMPOTENCY: Unified key for webhook + sync-session
 // ===========================================
 
-async function isAlreadyGranted(redisClient, userId, sessionId) {
-  const entitlement = await redisClient.get(`entitlement:${userId}`);
-  if (!entitlement) return false;
+// Canonical grant idempotency key - BOTH webhook and sync-session must use this
+const GRANT_KEY_PREFIX = 'grant:session:';
+
+/**
+ * Atomically try to acquire grant lock for a session.
+ * Returns true if this call acquired the lock (grant not yet done).
+ * Returns false if grant was already completed by webhook or sync-session.
+ */
+async function tryAcquireGrantLock(redisClient, sessionId, userId, tier, source) {
+  const key = `${GRANT_KEY_PREFIX}${sessionId}`;
+  const value = JSON.stringify({
+    userId,
+    tier,
+    grantedAt: new Date().toISOString(),
+    source, // 'webhook' or 'sync-session'
+  });
   
-  const data = typeof entitlement === 'string' ? JSON.parse(entitlement) : entitlement;
-  return data.sessionId === sessionId;
+  // SETNX: Set only if key does not exist (atomic operation)
+  const result = await redisClient.set(key, value, { ex: IDEMPOTENCY_TTL_SECONDS, nx: true });
+  return result === 'OK';
 }
 
+/**
+ * Check if a grant already exists for a session (non-atomic check for read purposes)
+ */
+async function isGrantedForSession(redisClient, sessionId) {
+  const key = `${GRANT_KEY_PREFIX}${sessionId}`;
+  const exists = await redisClient.get(key);
+  return !!exists;
+}
+
+/**
+ * Get grant info for a session
+ */
+async function getGrantInfo(redisClient, sessionId) {
+  const key = `${GRANT_KEY_PREFIX}${sessionId}`;
+  const data = await redisClient.get(key);
+  if (!data) return null;
+  return typeof data === 'string' ? JSON.parse(data) : data;
+}
+
+// Legacy entitlement record (kept for backward compatibility with existing data)
 async function markEntitlementGranted(redisClient, userId, tier, sessionId) {
   await redisClient.set(`entitlement:${userId}`, JSON.stringify({
     tier,
@@ -496,15 +548,13 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
   }
 
-  // Idempotency guard: Skip if already processed
-  const alreadyProcessed = await isEventProcessed(redisClient, event.id);
-  if (alreadyProcessed) {
-    console.log(`Event ${event.id} already processed, skipping`);
+  // ATOMIC idempotency guard: Try to acquire lock for this event
+  // Uses SET NX (set if not exists) - only one request can succeed
+  const acquired = await tryAcquireEventLock(redisClient, event.id, event.type);
+  if (!acquired) {
+    console.log(`Event ${event.id} already being processed or completed, skipping`);
     return NextResponse.json({ received: true, skipped: true });
   }
-
-  // Mark as processed immediately to prevent race conditions
-  await markEventProcessed(redisClient, event.id, event.type);
 
   try {
     switch (event.type) {
@@ -577,10 +627,11 @@ export async function POST(request) {
         // Process tier purchase with error recovery
         if (productType === 'tier' && productId) {
           try {
-            // GRANT IDEMPOTENCY: Check if already granted for this session
-            const alreadyGranted = await isAlreadyGranted(redisClient, clerkUserId, session.id);
-            if (alreadyGranted) {
-              console.log(`[SKIP] Tier already granted for user ${clerkUserId}, session ${session.id}`);
+            // ATOMIC GRANT IDEMPOTENCY: Try to acquire grant lock for this session
+            // Uses same key as sync-session to prevent double-grants
+            const acquiredGrant = await tryAcquireGrantLock(redisClient, session.id, clerkUserId, productId, 'webhook');
+            if (!acquiredGrant) {
+              console.log(`[SKIP] Grant lock not acquired for session ${session.id} - already granted by webhook or sync-session`);
               break;
             }
 
@@ -700,7 +751,7 @@ export async function POST(request) {
               rawEventData: event.data.object,
             });
             // Update event status to failed
-            await markEventProcessed(redisClient, event.id, event.type, 'grant_failed');
+            await updateEventStatus(redisClient, event.id, event.type, 'grant_failed');
           }
         }
 
@@ -765,7 +816,7 @@ export async function POST(request) {
               rawEventData: event.data.object,
             });
             // Update event status to failed
-            await markEventProcessed(redisClient, event.id, event.type, 'grant_failed');
+            await updateEventStatus(redisClient, event.id, event.type, 'grant_failed');
           }
         }
 

@@ -337,6 +337,18 @@ export default function Sidebar({
           
           .close-btn {
             display: flex;
+            min-height: 44px;
+            min-width: 44px;
+          }
+          
+          .nav-item {
+            min-height: 44px;
+            padding: 12px 12px;
+          }
+          
+          .resource-link {
+            min-height: 44px;
+            padding: 12px 12px;
           }
         }
       `}</style>

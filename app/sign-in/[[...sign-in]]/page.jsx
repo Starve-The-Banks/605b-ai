@@ -17,7 +17,7 @@ export default function SignInPage() {
           align-items: center;
           justify-content: center;
           background: var(--bg);
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+          font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
         .bg-grid {
@@ -111,6 +111,15 @@ export default function SignInPage() {
         @media (max-width: 480px) {
           .auth-nav {
             padding: 0 20px;
+          }
+          .auth-nav-link {
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 12px;
+          }
+          .auth-logo {
+            min-height: 44px;
           }
         }
       `}</style>

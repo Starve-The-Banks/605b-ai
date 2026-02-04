@@ -1,0 +1,13 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="56" y="56" width="400" height="400" rx="48" fill="#FF6B35"/>
+  <text
+    x="256"
+    y="245"
+    font-family="'IBM Plex Sans', sans-serif"
+    font-size="210"
+    font-weight="600"
+    fill="#FFFFFF"
+    text-anchor="middle"
+    dominant-baseline="middle"
+  >§</text>
+</svg>

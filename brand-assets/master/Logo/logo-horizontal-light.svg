@@ -1,0 +1,29 @@
+<svg width="1200" height="300" viewBox="0 0 1200 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="50" y="50" width="200" height="200" rx="24" fill="#FF6B35"/>
+  <text
+    x="150"
+    y="160"
+    font-family="'IBM Plex Sans', sans-serif"
+    font-size="105"
+    font-weight="600"
+    fill="#FFFFFF"
+    text-anchor="middle"
+    dominant-baseline="middle"
+  >§</text>
+  <text
+    x="306"
+    y="196"
+    font-family="'IBM Plex Sans', sans-serif"
+    font-size="100"
+    font-weight="600"
+    fill="#111111"
+  >605b</text>
+  <text
+    x="588"
+    y="196"
+    font-family="'IBM Plex Sans', sans-serif"
+    font-size="100"
+    font-weight="600"
+    fill="#FF6B35"
+  >.ai</text>
+</svg>

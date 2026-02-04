@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import { LIMITS, rateLimit } from '@/lib/rateLimit';
+import { logError } from '@/lib/logging';
 
 // Lazy initialization to avoid build-time errors
 let stripe = null;
@@ -27,6 +29,16 @@ const PRODUCT_CONFIG = {
   amount: 4900, // $49.00 in cents
 };
 
+function getClientIp(request) {
+  const forwarded = request.headers.get('x-forwarded-for');
+  const realIp = request.headers.get('x-real-ip');
+  const cfIp = request.headers.get('cf-connecting-ip');
+  if (cfIp) return cfIp;
+  if (realIp) return realIp;
+  if (forwarded) return forwarded.split(',')[0].trim();
+  return null;
+}
+
 export async function POST(request) {
   try {
     const stripeClient = getStripe();
@@ -46,6 +58,25 @@ export async function POST(request) {
 
     const body = await request.json();
     const { intakeToken } = body;
+
+    const clientIp = getClientIp(request);
+    const limiterId = clientIp ? `ip:${clientIp}` : `intake:${intakeToken || 'missing'}`;
+    const rateLimitResult = await rateLimit(
+      limiterId,
+      'identity_theft_checkout',
+      LIMITS.identityTheftCheckout,
+      3600,
+      { failClosed: true }
+    );
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        {
+          error: 'Too many requests. Please try again later.',
+          resetIn: rateLimitResult.resetIn,
+        },
+        { status: 429 }
+      );
+    }
 
     if (!intakeToken) {
       return NextResponse.json({ error: 'Intake token required' }, { status: 400 });
@@ -93,9 +124,9 @@ export async function POST(request) {
     return NextResponse.json({ url: session.url });
 
   } catch (error) {
-    console.error('Identity theft checkout error:', error);
+    logError('Identity theft checkout error', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to create checkout session' },
+      { error: 'Failed to create checkout session' },
       { status: 500 }
     );
   }

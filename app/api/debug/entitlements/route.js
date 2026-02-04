@@ -1,5 +1,6 @@
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
+import { logError } from '@/lib/logging';
 
 // Lazy initialization
 let redis = null;
@@ -21,6 +22,18 @@ function getStripe() {
   return stripe;
 }
 
+function isAllowlisted(userId, user) {
+  const allowlist = process.env.DEBUG_ENTITLEMENTS_ALLOWLIST;
+  if (!allowlist) return false;
+  const entries = allowlist
+    .split(',')
+    .map(entry => entry.trim().toLowerCase())
+    .filter(Boolean);
+  if (!entries.length) return false;
+  const email = user?.emailAddresses?.[0]?.emailAddress?.toLowerCase();
+  return entries.includes(userId?.toLowerCase()) || (email && entries.includes(email));
+}
+
 /**
  * GET /api/debug/entitlements
  *
@@ -34,6 +47,10 @@ export async function GET() {
 
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (process.env.NODE_ENV === 'production' && !isAllowlisted(userId, user)) {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
 
     const redisClient = getRedis();
@@ -84,7 +101,7 @@ export async function GET() {
         }
       }
     } catch (e) {
-      console.error('Error checking pending grants:', e);
+      logError('Error checking pending grants', e, { userId });
     }
 
     // Look up any Stripe session mappings
@@ -130,7 +147,7 @@ export async function GET() {
           clientReferenceId: s.client_reference_id,
         }));
       } catch (e) {
-        console.error('Error fetching Stripe sessions:', e);
+        logError('Error fetching Stripe sessions', e, { userId });
       }
     }
 
@@ -193,9 +210,9 @@ export async function GET() {
     });
 
   } catch (error) {
-    console.error('[DEBUG] Error fetching entitlements:', error);
+    logError('Error fetching entitlements', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to fetch entitlements' },
+      { error: 'Failed to fetch entitlements' },
       { status: 500 }
     );
   }

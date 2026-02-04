@@ -1,6 +1,8 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { emailNotificationSchema, validateBody } from '@/lib/validation';
+import { LIMITS, rateLimit } from '@/lib/rateLimit';
+import { logError } from '@/lib/logging';
 
 // Lazy initialization to avoid build-time errors
 let resend = null;
@@ -24,9 +26,26 @@ export async function POST(request) {
       );
     }
 
+    const rateLimitResult = await rateLimit(
+      userId,
+      'email_notifications',
+      LIMITS.emailNotifications,
+      3600,
+      { failClosed: true }
+    );
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        {
+          error: 'Too many requests. Please try again later.',
+          resetIn: rateLimitResult.resetIn,
+        },
+        { status: 429 }
+      );
+    }
+
     const resendClient = getResend();
     if (!resendClient) {
-      console.error('RESEND_API_KEY not configured');
+      logError('Email service not configured', null);
       return NextResponse.json(
         { error: 'Email service not configured' },
         { status: 503 }
@@ -62,9 +81,9 @@ export async function POST(request) {
     });
 
     if (sendError) {
-      console.error('Resend error:', sendError);
+      logError('Resend error', sendError, { userId });
       return NextResponse.json(
-        { error: 'Failed to send email', details: sendError.message },
+        { error: 'Failed to send email' },
         { status: 500 }
       );
     }
@@ -75,7 +94,7 @@ export async function POST(request) {
       emailId: emailResult?.id,
     });
   } catch (error) {
-    console.error('Email notification error:', error);
+    logError('Email notification error', error);
     return NextResponse.json(
       { error: 'Failed to process notification' },
       { status: 500 }

@@ -262,8 +262,6 @@ export default function LandingPage() {
     { num: '04', title: 'Document', desc: 'Log responses, monitor deadlines, maintain complete audit trail.' },
   ];
 
-  const statutes = ['FCRA', 'FDCPA', 'FCBA', 'TILA', 'ECOA', 'RESPA', 'EFTA'];
-
   return (
     <>
       <style jsx global>{`
@@ -615,57 +613,6 @@ export default function LandingPage() {
           animation: fadeInUp 0.6s ease 0.5s forwards;
         }
 
-        .hero-bridge {
-          font-size: 15px;
-          color: var(--text-muted);
-          max-width: 540px;
-          line-height: 1.6;
-          margin-bottom: 28px;
-          opacity: 0;
-          animation: fadeInUp 0.6s ease 0.55s forwards;
-        }
-
-        .hero-steps {
-          margin-bottom: 32px;
-          opacity: 0;
-          animation: fadeInUp 0.6s ease 0.58s forwards;
-        }
-
-        .hero-steps-list {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-          margin-bottom: 12px;
-        }
-
-        .hero-steps-item {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          font-size: 15px;
-          color: var(--text-secondary);
-        }
-
-        .hero-steps-num {
-          font-family: 'JetBrains Mono', monospace;
-          font-size: 12px;
-          font-weight: 600;
-          color: var(--orange);
-          width: 20px;
-          height: 20px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: var(--orange-dim);
-          border-radius: 4px;
-        }
-
-        .hero-steps-note {
-          font-size: 13px;
-          color: var(--text-muted);
-          font-style: italic;
-        }
-
         .hero-buttons {
           display: flex;
           gap: 12px;
@@ -811,54 +758,6 @@ export default function LandingPage() {
 
         .t-error {
           color: var(--orange);
-        }
-
-        /* Logos strip */
-        .logos {
-          position: relative;
-          z-index: 10;
-          padding: 60px 32px;
-          border-top: 1px solid var(--border);
-          border-bottom: 1px solid var(--border);
-          background: var(--bg-secondary);
-        }
-
-        .logos-inner {
-          max-width: 1200px;
-          margin: 0 auto;
-          text-align: center;
-        }
-
-        .logos-label {
-          font-size: 13px;
-          font-weight: 500;
-          color: var(--text-muted);
-          margin-bottom: 24px;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-        }
-
-        .logos-grid {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 48px;
-          flex-wrap: wrap;
-        }
-
-        .logo-item {
-          font-size: 18px;
-          font-weight: 600;
-          color: var(--text-muted);
-          opacity: 0.4;
-          transition: all 0.3s;
-          cursor: default;
-        }
-
-        .logo-item:hover {
-          opacity: 1;
-          color: var(--orange);
-          transform: translateY(-2px);
         }
 
         /* Stats */
@@ -1074,13 +973,13 @@ export default function LandingPage() {
           font-size: 48px;
           font-weight: 700;
           color: var(--orange);
-          opacity: 0.3;
+          opacity: 0.6;
           margin-bottom: 16px;
           transition: opacity 0.25s ease-out;
         }
 
         .step-card:hover .step-num {
-          opacity: 0.5;
+          opacity: 1.0;
         }
 
         .step-title {
@@ -1269,13 +1168,13 @@ export default function LandingPage() {
           .hero {
             padding-top: 100px;
           }
-          /* Terminal first on mobile */
-          .hero-terminal {
-            order: 1;
-            margin-bottom: 40px;
-          }
+          /* Content first on mobile */
           .hero-content {
+            order: 1;
+          }
+          .hero-terminal {
             order: 2;
+            margin-top: 40px;
           }
           .hero-terminal .terminal {
             animation-delay: 0.3s;
@@ -1328,9 +1227,6 @@ export default function LandingPage() {
             flex-wrap: wrap;
             justify-content: center;
             gap: 16px;
-          }
-          .logos-grid {
-            gap: 24px;
           }
           .stat-value {
             font-size: 36px;
@@ -1427,26 +1323,6 @@ export default function LandingPage() {
               Generate compliant documentation, track statutory timelines, and maintain
               a complete audit trail — clearly, deliberately, and without shortcuts.
             </p>
-            <p className="hero-bridge">
-              If you've been told you need a "credit repair company," this gives you self-service software to do the same dispute process yourself—legally, transparently, and without monthly fees.
-            </p>
-            <div className="hero-steps">
-              <div className="hero-steps-list">
-                <div className="hero-steps-item">
-                  <span className="hero-steps-num">1</span>
-                  <span>Generate the documents</span>
-                </div>
-                <div className="hero-steps-item">
-                  <span className="hero-steps-num">2</span>
-                  <span>Review them</span>
-                </div>
-                <div className="hero-steps-item">
-                  <span className="hero-steps-num">3</span>
-                  <span>Mail them (certified if you choose)</span>
-                </div>
-              </div>
-              <p className="hero-steps-note">You stay in control. Nothing is sent on your behalf.</p>
-            </div>
             <div className="hero-buttons">
               {mounted && isSignedIn ? (
                 <Link href="/dashboard" className="btn btn-orange btn-lg">Go to Dashboard →</Link>
@@ -1458,18 +1334,6 @@ export default function LandingPage() {
               )}
             </div>
             <p className="hero-disclaimer">Software tools only. No guarantees. Not legal advice.</p>
-          </div>
-        </section>
-
-        {/* Logos/Statutes strip */}
-        <section className="logos">
-          <div className="logos-inner">
-            <div className="logos-label">Structured Around Federal Consumer Protection Statutes</div>
-            <div className="logos-grid">
-              {statutes.map((statute) => (
-                <span key={statute} className="logo-item">{statute}</span>
-              ))}
-            </div>
           </div>
         </section>
 
@@ -1553,7 +1417,7 @@ export default function LandingPage() {
 
         {/* Audience Filter */}
         <section className="audience-filter">
-          <p>If you're looking for someone to "handle everything for you," this isn't that. 605b.ai is self-service software.</p>
+          <p>Built for people who want direct control over their own credit dispute process.</p>
         </section>
 
         {/* Footer */}

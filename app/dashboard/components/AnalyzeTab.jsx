@@ -185,7 +185,7 @@ export default function AnalyzeTab({ logAction, addFlaggedItem }) {
           align-items: center;
           gap: 8px;
           padding: 12px 24px;
-          background: linear-gradient(135deg, var(--accent) 0%, #d4b840 100%);
+          background: linear-gradient(135deg, var(--accent) 0%, #E55A2B 100%);
           color: var(--bg-deep);
           font-weight: 600;
           border-radius: 10px;
@@ -274,7 +274,7 @@ export default function AnalyzeTab({ logAction, addFlaggedItem }) {
           gap: 10px;
           width: 100%;
           padding: 16px;
-          background: linear-gradient(135deg, var(--accent) 0%, #d4b840 100%);
+          background: linear-gradient(135deg, var(--accent) 0%, #E55A2B 100%);
           color: var(--bg-deep);
           font-weight: 600;
           font-size: 15px;

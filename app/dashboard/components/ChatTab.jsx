@@ -376,7 +376,7 @@ export default function ChatTab({ logAction }) {
           background: linear-gradient(135deg, rgba(212, 165, 116, 0.2) 0%, rgba(212, 165, 116, 0.05) 100%);
           border: 1px solid rgba(212, 165, 116, 0.3);
           border-radius: 16px;
-          color: #d4a574;
+          color: #FF6B35;
         }
         .intro-title {
           font-size: 22px;
@@ -422,7 +422,7 @@ export default function ChatTab({ logAction }) {
         .quick-start:hover {
           background: rgba(212, 165, 116, 0.1);
           border-color: rgba(212, 165, 116, 0.3);
-          color: #d4a574;
+          color: #FF6B35;
           transform: translateY(-2px);
         }
         .quick-start-icon {
@@ -438,7 +438,7 @@ export default function ChatTab({ logAction }) {
         }
         .quick-start:hover .quick-start-icon {
           background: rgba(212, 165, 116, 0.2);
-          color: #d4a574;
+          color: #FF6B35;
         }
         .messages-container {
           display: flex;
@@ -467,7 +467,7 @@ export default function ChatTab({ logAction }) {
           white-space: pre-wrap;
         }
         .msg.user .msg-content {
-          background: linear-gradient(135deg, #d4a574 0%, #c49665 100%);
+          background: linear-gradient(135deg, #FF6B35 0%, #E55A2B 100%);
           color: #09090b;
           border-bottom-right-radius: 4px;
         }
@@ -550,7 +550,7 @@ export default function ChatTab({ logAction }) {
           transition: all 0.2s;
         }
         .send-btn {
-          background: linear-gradient(135deg, #d4a574 0%, #c49665 100%);
+          background: linear-gradient(135deg, #FF6B35 0%, #E55A2B 100%);
           color: #09090b;
         }
         .send-btn:hover {
@@ -722,11 +722,11 @@ export default function ChatTab({ logAction }) {
             {isListening ? (
               <Mic size={64} color="#22c55e" />
             ) : isSpeaking ? (
-              <AudioLines size={64} color="#d4a574" />
+              <AudioLines size={64} color="#FF6B35" />
             ) : isLoading ? (
               <Loader2 size={64} color="#f59e0b" style={{ animation: 'spin 1s linear infinite' }} />
             ) : (
-              <AudioLines size={64} color="#d4a574" />
+              <AudioLines size={64} color="#FF6B35" />
             )}
           </div>
           

@@ -347,7 +347,7 @@ export default function FloatingChatWidget({ currentTab }) {
             width: 56px;
             height: 56px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #d4a574 0%, #b8956a 100%);
+            background: linear-gradient(135deg, #FF6B35 0%, #E55A2B 100%);
             border: none;
             cursor: pointer;
             display: flex;
@@ -440,7 +440,7 @@ export default function FloatingChatWidget({ currentTab }) {
           justify-content: center;
           background: rgba(212, 165, 116, 0.2);
           border-radius: 8px;
-          color: #d4a574;
+          color: #FF6B35;
         }
         .widget-actions {
           display: flex;
@@ -482,7 +482,7 @@ export default function FloatingChatWidget({ currentTab }) {
         }
         .widget-msg.user {
           align-self: flex-end;
-          background: #d4a574;
+          background: #FF6B35;
           color: #09090b;
           border-radius: 12px 12px 4px 12px;
         }
@@ -523,7 +523,7 @@ export default function FloatingChatWidget({ currentTab }) {
         .quick-prompt:hover {
           background: rgba(212, 165, 116, 0.1);
           border-color: rgba(212, 165, 116, 0.3);
-          color: #d4a574;
+          color: #FF6B35;
         }
         .widget-input-area {
           display: flex;
@@ -543,7 +543,7 @@ export default function FloatingChatWidget({ currentTab }) {
           outline: none;
         }
         .widget-input:focus {
-          border-color: #d4a574;
+          border-color: #FF6B35;
         }
         .widget-input::placeholder {
           color: #52525b;
@@ -564,11 +564,11 @@ export default function FloatingChatWidget({ currentTab }) {
           transition: all 0.15s;
         }
         .widget-send {
-          background: #d4a574;
+          background: #FF6B35;
           color: #09090b;
         }
         .widget-send:hover {
-          background: #c49665;
+          background: #E55A2B;
         }
         .widget-send:disabled {
           background: #3f3f46;

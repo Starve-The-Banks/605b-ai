@@ -214,7 +214,7 @@ export default function CommandPalette({ currentTab }) {
             background: linear-gradient(135deg, rgba(212, 165, 116, 0.15) 0%, rgba(212, 165, 116, 0.05) 100%);
             border: 1px solid rgba(212, 165, 116, 0.3);
             border-radius: 12px;
-            color: #d4a574;
+            color: #FF6B35;
             font-size: 14px;
             font-weight: 500;
             cursor: pointer;
@@ -337,7 +337,7 @@ export default function CommandPalette({ currentTab }) {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: #d4a574;
+          background: #FF6B35;
           border: none;
           border-radius: 8px;
           color: #09090b;
@@ -345,7 +345,7 @@ export default function CommandPalette({ currentTab }) {
           transition: all 0.15s;
         }
         .cmd-send:hover {
-          background: #c49665;
+          background: #E55A2B;
         }
         .cmd-send:disabled {
           background: #27272a;
@@ -393,7 +393,7 @@ export default function CommandPalette({ currentTab }) {
           justify-content: center;
           background: linear-gradient(135deg, rgba(212, 165, 116, 0.2) 0%, rgba(212, 165, 116, 0.1) 100%);
           border-radius: 12px;
-          color: #d4a574;
+          color: #FF6B35;
         }
         .cmd-intro-title {
           font-size: 18px;
@@ -441,7 +441,7 @@ export default function CommandPalette({ currentTab }) {
           white-space: pre-wrap;
         }
         .cmd-msg.user .cmd-msg-content {
-          background: #d4a574;
+          background: #FF6B35;
           color: #09090b;
           border-bottom-right-radius: 4px;
         }
@@ -485,7 +485,7 @@ export default function CommandPalette({ currentTab }) {
         .cmd-suggestion:hover {
           background: rgba(212, 165, 116, 0.1);
           border-color: rgba(212, 165, 116, 0.3);
-          color: #d4a574;
+          color: #FF6B35;
         }
         .cmd-suggestion-icon {
           width: 28px;
@@ -530,7 +530,7 @@ export default function CommandPalette({ currentTab }) {
           transition: all 0.15s;
         }
         .cmd-reset:hover {
-          color: #d4a574;
+          color: #FF6B35;
           background: rgba(212, 165, 116, 0.1);
         }
         .typing-dots {

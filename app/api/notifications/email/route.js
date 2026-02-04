@@ -118,7 +118,7 @@ function buildEmailBody(urgentItems, warningItems) {
             <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 600px;">
               <tr>
                 <td style="padding-bottom: 24px;">
-                  <h1 style="margin: 0; color: #f7d047; font-size: 24px; font-weight: 700;">
+                  <h1 style="margin: 0; color: #FF6B35; font-size: 24px; font-weight: 700;">
                     605b.ai
                   </h1>
                 </td>
@@ -153,7 +153,7 @@ function buildEmailBody(urgentItems, warningItems) {
                     Under the Fair Credit Reporting Act (FCRA), credit bureaus must respond to disputes within 30 days.
                     If they miss this deadline, you may have additional leverage for escalation or legal action.
                   </p>
-                  <a href="https://605b.ai/dashboard/tracker" style="display: inline-block; background: linear-gradient(135deg, #f7d047 0%, #d4b840 100%); color: #09090b; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; font-size: 14px;">
+                  <a href="https://605b.ai/dashboard/tracker" style="display: inline-block; background: linear-gradient(135deg, #FF6B35 0%, #E55A2B 100%); color: #09090b; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; font-size: 14px;">
                     View Your Disputes →
                   </a>
                 </td>

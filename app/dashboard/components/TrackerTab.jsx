@@ -130,7 +130,7 @@ export default function TrackerTab({ disputes = [], setDisputes, logAction }) {
           align-items: center;
           gap: 8px;
           padding: 10px 18px;
-          background: linear-gradient(135deg, var(--accent) 0%, #d4b840 100%);
+          background: linear-gradient(135deg, var(--accent) 0%, #E55A2B 100%);
           color: var(--bg-deep);
           font-weight: 600;
           font-size: 14px;

@@ -541,7 +541,7 @@ export default function ChatSidebar({ logAction, onClose }) {
         }
         
         .input-btn.send {
-          background: linear-gradient(135deg, var(--accent) 0%, #d4b840 100%);
+          background: linear-gradient(135deg, var(--accent) 0%, #E55A2B 100%);
           color: var(--bg-deep);
         }
         

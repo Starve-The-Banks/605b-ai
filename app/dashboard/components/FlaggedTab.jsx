@@ -131,7 +131,7 @@ export default function FlaggedTab({ flaggedItems = [], setFlaggedItems, logActi
         }
         
         .action-btn.primary {
-          background: linear-gradient(135deg, var(--accent) 0%, #d4b840 100%);
+          background: linear-gradient(135deg, var(--accent) 0%, #E55A2B 100%);
           color: var(--bg-deep);
         }
         

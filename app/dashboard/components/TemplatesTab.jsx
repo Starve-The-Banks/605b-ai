@@ -330,7 +330,7 @@ export default function TemplatesTab({ logAction, addDispute }) {
           align-items: center;
           gap: 4px;
           padding: 4px 10px;
-          background: linear-gradient(135deg, var(--accent) 0%, #d4b840 100%);
+          background: linear-gradient(135deg, var(--accent) 0%, #E55A2B 100%);
           border-radius: 4px;
           font-size: 10px;
           font-weight: 700;
@@ -425,7 +425,7 @@ export default function TemplatesTab({ logAction, addDispute }) {
         }
         
         .card-btn.primary {
-          background: linear-gradient(135deg, var(--accent) 0%, #d4b840 100%);
+          background: linear-gradient(135deg, var(--accent) 0%, #E55A2B 100%);
           color: var(--bg-deep);
         }
         

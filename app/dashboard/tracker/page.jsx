@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useUser } from '@clerk/nextjs';
 import {
   Clock, Plus, CheckCircle, AlertCircle, Hourglass, X,
@@ -55,6 +55,27 @@ export default function TrackerPage() {
     }
   }, []);
 
+  const triggerEmailNotification = useCallback(async (urgentNotifications) => {
+    const lastEmailSent = localStorage.getItem('605b_last_email_notification');
+    const today = new Date().toDateString();
+    if (lastEmailSent === today) return;
+
+    try {
+      await fetch('/api/notifications/email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          notifications: urgentNotifications,
+          email: user?.primaryEmailAddress?.emailAddress,
+        }),
+      });
+      localStorage.setItem('605b_last_email_notification', today);
+    } catch (error) {
+      console.error('Failed to send email notification:', error);
+    }
+  }, [user?.primaryEmailAddress?.emailAddress]);
+
   // Check for upcoming deadlines and generate notifications
   useEffect(() => {
     if (!settings.deadlineReminders) return;
@@ -101,28 +122,7 @@ export default function TrackerPage() {
     checkDeadlines();
     const interval = setInterval(checkDeadlines, 60000);
     return () => clearInterval(interval);
-  }, [disputes, settings]);
-
-  const triggerEmailNotification = async (urgentNotifications) => {
-    const lastEmailSent = localStorage.getItem('605b_last_email_notification');
-    const today = new Date().toDateString();
-    if (lastEmailSent === today) return;
-
-    try {
-      await fetch('/api/notifications/email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          notifications: urgentNotifications,
-          email: user?.primaryEmailAddress?.emailAddress,
-        }),
-      });
-      localStorage.setItem('605b_last_email_notification', today);
-    } catch (error) {
-      console.error('Failed to send email notification:', error);
-    }
-  };
+  }, [disputes, settings, triggerEmailNotification]);
 
   const saveDisputes = (newDisputes) => {
     setDisputes(newDisputes);

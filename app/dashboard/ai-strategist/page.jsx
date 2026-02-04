@@ -63,6 +63,8 @@ export default function AIStrategistPage() {
   const inputRef = useRef(null);
   const recognitionRef = useRef(null);
   const audioRef = useRef(null);
+  const speakTextRef = useRef(null);
+  const sendMessageRef = useRef(null);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -122,7 +124,7 @@ export default function AIStrategistPage() {
 
     recognition.onend = () => {
       if (transcript && voiceMode) {
-        sendMessage(transcript);
+        sendMessageRef.current?.(transcript);
         setTranscript('');
       }
       setIsListening(false);
@@ -145,7 +147,7 @@ export default function AIStrategistPage() {
     }
   }, [voiceMode, isMobile]);
 
-  const speakText = useCallback(async (text) => {
+  const speakText = async (text) => {
     if (!audioEnabled || !text) return;
 
     try {
@@ -209,7 +211,9 @@ export default function AIStrategistPage() {
       setUsingBrowserTTS(true);
       browserSpeak(text);
     }
-  }, [audioEnabled, voiceMode]);
+  };
+
+  speakTextRef.current = speakText;
 
   const browserSpeak = (text) => {
     if ('speechSynthesis' in window) {
@@ -291,7 +295,7 @@ export default function AIStrategistPage() {
     setIsSpeaking(false);
   };
 
-  const sendMessage = async (text) => {
+  const sendMessage = useCallback(async (text) => {
     const messageText = text || inputValue.trim();
     if (!messageText || isLoading) return;
 
@@ -347,7 +351,7 @@ export default function AIStrategistPage() {
       }
 
       if (voiceMode && audioEnabled) {
-        speakText(assistantMessage);
+        speakTextRef.current?.(assistantMessage);
       }
 
     } catch (err) {
@@ -355,7 +359,11 @@ export default function AIStrategistPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [audioEnabled, inputValue, isLoading, messages, voiceMode]);
+
+  useEffect(() => {
+    sendMessageRef.current = sendMessage;
+  }, [sendMessage]);
 
   const styles = {
     container: {

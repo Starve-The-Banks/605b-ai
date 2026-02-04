@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { MessageCircle, X, Send, Loader2, ChevronDown, Sparkles, Mic, MicOff, AudioLines } from 'lucide-react';
 
 // Contextual prompts based on which page the user is on
@@ -99,6 +99,8 @@ export default function FloatingChatWidget({ currentTab }) {
   const inputRef = useRef(null);
   const recognitionRef = useRef(null);
   const audioRef = useRef(null);
+  const speakTextRef = useRef(null);
+  const sendMessageRef = useRef(null);
 
   // Check for voice support
   useEffect(() => {
@@ -134,7 +136,7 @@ export default function FloatingChatWidget({ currentTab }) {
       setIsListening(false);
       // Auto-send if voice mode is active and we have input
       if (voiceMode && input.trim()) {
-        sendMessage(input);
+        sendMessageRef.current?.(input);
       }
     };
 
@@ -247,6 +249,8 @@ export default function FloatingChatWidget({ currentTab }) {
     }
   };
 
+  speakTextRef.current = speakText;
+
   const browserSpeak = (text) => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
@@ -264,7 +268,7 @@ export default function FloatingChatWidget({ currentTab }) {
     }
   };
 
-  const sendMessage = async (text) => {
+  const sendMessage = useCallback(async (text) => {
     const messageText = text || input.trim();
     if (!messageText || isLoading) return;
 
@@ -310,7 +314,7 @@ export default function FloatingChatWidget({ currentTab }) {
 
       // Speak response if voice mode is active
       if (voiceMode && audioEnabled) {
-        speakText(assistantMessage);
+        speakTextRef.current?.(assistantMessage);
       }
     } catch (err) {
       setMessages(prev => [...prev, { 
@@ -320,7 +324,11 @@ export default function FloatingChatWidget({ currentTab }) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [audioEnabled, currentTab, input, isLoading, messages, voiceMode]);
+
+  useEffect(() => {
+    sendMessageRef.current = sendMessage;
+  }, [sendMessage]);
 
   const handleQuickPrompt = (prompt) => {
     sendMessage(prompt);

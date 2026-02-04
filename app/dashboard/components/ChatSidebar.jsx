@@ -36,6 +36,8 @@ export default function ChatSidebar({ logAction, onClose }) {
   const inputRef = useRef(null);
   const recognitionRef = useRef(null);
   const audioRef = useRef(null);
+  const speakTextRef = useRef(null);
+  const sendMessageRef = useRef(null);
 
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -68,7 +70,7 @@ export default function ChatSidebar({ logAction, onClose }) {
     recognition.onend = () => {
       setIsListening(false);
       if (mode === 'voice' && input.trim()) {
-        sendMessage(input);
+        sendMessageRef.current?.(input);
       }
     };
 
@@ -102,7 +104,7 @@ export default function ChatSidebar({ logAction, onClose }) {
     }
   };
 
-  const speakText = useCallback(async (text) => {
+  const speakText = async (text) => {
     if (!audioEnabled || !text) return;
 
     try {
@@ -147,7 +149,9 @@ export default function ChatSidebar({ logAction, onClose }) {
     } catch (error) {
       browserSpeak(text);
     }
-  }, [audioEnabled, mode]);
+  };
+
+  speakTextRef.current = speakText;
 
   const browserSpeak = (text) => {
     if ('speechSynthesis' in window) {
@@ -166,7 +170,7 @@ export default function ChatSidebar({ logAction, onClose }) {
     }
   };
 
-  const sendMessage = async (text) => {
+  const sendMessage = useCallback(async (text) => {
     const messageText = text || input.trim();
     if (!messageText || isLoading) return;
 
@@ -208,7 +212,7 @@ export default function ChatSidebar({ logAction, onClose }) {
       logAction?.('AI_CHAT', { query: messageText.substring(0, 50), mode });
       
       if (mode === 'voice' && audioEnabled) {
-        speakText(assistantMessage);
+        speakTextRef.current?.(assistantMessage);
       }
     } catch (err) {
       setMessages(prev => [...prev, { 
@@ -220,7 +224,11 @@ export default function ChatSidebar({ logAction, onClose }) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [audioEnabled, input, isLoading, logAction, messages, mode]);
+
+  useEffect(() => {
+    sendMessageRef.current = sendMessage;
+  }, [sendMessage]);
 
   return (
     <>

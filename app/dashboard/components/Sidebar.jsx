@@ -446,7 +446,14 @@ export default function Sidebar({
           <div className="user-card">
             <div className="user-avatar">
               {user?.imageUrl ? (
-                <img src={user.imageUrl} alt="" />
+                <Image
+                  src={user.imageUrl}
+                  alt=""
+                  width={32}
+                  height={32}
+                  sizes="32px"
+                  style={{ borderRadius: '50%', objectFit: 'cover' }}
+                />
               ) : (
                 user?.firstName?.charAt(0) || user?.emailAddresses?.[0]?.emailAddress?.charAt(0)?.toUpperCase() || 'U'
               )}

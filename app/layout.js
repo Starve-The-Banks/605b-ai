@@ -1,4 +1,5 @@
 import { ClerkProvider } from '@clerk/nextjs';
+import { IBM_Plex_Sans, Inter, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 
 export const metadata = {
@@ -27,6 +28,26 @@ export const viewport = {
   maximumScale: 5,
   userScalable: true,
 };
+
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+});
+
+const ibmPlexSans = IBM_Plex_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+  variable: '--font-ibm-plex-sans',
+});
+
+const jetBrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+  variable: '--font-jetbrains-mono',
+});
 
 const clerkAppearance = {
   baseTheme: undefined,
@@ -91,15 +112,7 @@ export default function RootLayout({ children }) {
   return (
     <ClerkProvider appearance={clerkAppearance}>
       <html lang="en">
-        <head>
-          <link rel="preconnect" href="https://fonts.googleapis.com" />
-          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-          <link
-            href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
-            rel="stylesheet"
-          />
-        </head>
-        <body>
+        <body className={`${inter.variable} ${ibmPlexSans.variable} ${jetBrainsMono.variable}`}>
           {children}
         </body>
       </html>

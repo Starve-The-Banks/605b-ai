@@ -51,29 +51,6 @@ export default function AIStrategistPage() {
   // Check if user has AI chat access (advanced or identity-theft tier)
   const hasAIAccess = hasFeature('aiChat');
 
-  // Show loading state while checking tier
-  if (tierLoading) {
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '400px' }}>
-        <Loader2 size={24} style={{ animation: 'spin 1s linear infinite', color: 'var(--orange)' }} />
-      </div>
-    );
-  }
-
-  // Show upgrade prompt if user doesn't have access
-  if (!hasAIAccess) {
-    return (
-      <div style={{ padding: '40px 20px' }}>
-        <UpgradePrompt
-          feature="ai-chat"
-          requiredTier="advanced"
-          title="Unlock AI Strategist"
-          description="Get personalized credit repair guidance with our AI strategist. Ask questions about your specific situation, get letter recommendations, and learn your rights under FCRA."
-        />
-      </div>
-    );
-  }
-
   const [voiceMode, setVoiceMode] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -633,6 +610,27 @@ export default function AIStrategistPage() {
       animation: 'typingBounce 1.4s ease-in-out infinite',
     },
   };
+
+  if (tierLoading) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '400px' }}>
+        <Loader2 size={24} style={{ animation: 'spin 1s linear infinite', color: 'var(--orange)' }} />
+      </div>
+    );
+  }
+
+  if (!hasAIAccess) {
+    return (
+      <div style={{ padding: '40px 20px' }}>
+        <UpgradePrompt
+          feature="ai-chat"
+          requiredTier="advanced"
+          title="Unlock AI Strategist"
+          description="Get personalized credit repair guidance with our AI strategist. Ask questions about your specific situation, get letter recommendations, and learn your rights under FCRA."
+        />
+      </div>
+    );
+  }
 
   return (
     <>

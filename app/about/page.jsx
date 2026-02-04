@@ -1,6 +1,7 @@
 "use client";
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAuth } from '@clerk/nextjs';
 import { 
   Shield, Menu, X, ArrowRight, Eye, Lock, Send, 
@@ -55,29 +56,45 @@ export default function AboutPage() {
         .logo {
           display: flex;
           align-items: center;
-          gap: 12px;
+          gap: 10px;
           text-decoration: none;
           color: var(--text);
+          transition: opacity 0.2s;
         }
 
-        .logo-mark {
-          width: 32px;
-          height: 32px;
-          background: var(--orange);
-          border-radius: 8px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-family: 'JetBrains Mono', monospace;
-          font-size: 10px;
-          font-weight: 700;
-          color: white;
+        .logo:hover {
+          opacity: 0.85;
+        }
+
+        .logo-icon {
+          width: 44px;
+          height: 44px;
+          flex-shrink: 0;
+          transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .logo:hover .logo-icon {
+          transform: scale(1.05) rotate(-3deg);
         }
 
         .logo-text {
-          font-size: 16px;
+          display: flex;
+          align-items: baseline;
+          line-height: 1;
+          letter-spacing: -0.02em;
+        }
+
+        .logo-text-main {
+          font-size: 24px;
           font-weight: 600;
-          letter-spacing: -0.01em;
+          color: var(--text);
+        }
+
+        .logo-text-ext {
+          font-size: 24px;
+          font-weight: 600;
+          color: var(--orange);
+          margin-left: 0;
         }
 
         .nav-links {
@@ -788,8 +805,10 @@ export default function AboutPage() {
         {/* Navigation */}
         <nav className="nav">
           <Link href="/" className="logo">
-            <div className="logo-mark">605B</div>
-            <span className="logo-text">605b.ai</span>
+            <Image src="/logos/favicons/favicon.svg" alt="605b.ai" width={44} height={44} className="logo-icon" />
+            <span className="logo-text">
+              <span className="logo-text-main">605b</span><span className="logo-text-ext">.ai</span>
+            </span>
           </Link>
           <div className="nav-links">
             <Link href="/" className="nav-link">Home</Link>
@@ -812,8 +831,10 @@ export default function AboutPage() {
         <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
           <div className="mobile-menu-header">
             <span className="logo">
-              <div className="logo-mark">605B</div>
-              <span className="logo-text">605b.ai</span>
+              <Image src="/logos/favicons/favicon.svg" alt="605b.ai" width={44} height={44} className="logo-icon" />
+              <span className="logo-text">
+                <span className="logo-text-main">605b</span><span className="logo-text-ext">.ai</span>
+              </span>
             </span>
             <button className="mobile-menu-btn" style={{ display: 'block' }} onClick={() => setMobileMenuOpen(false)}>
               <X size={24} />

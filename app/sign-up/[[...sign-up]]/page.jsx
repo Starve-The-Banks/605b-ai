@@ -13,7 +13,7 @@ export default function SignUpPage() {
           background: var(--bg);
           display: flex;
           flex-direction: column;
-          font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
         .bg-grid {
@@ -145,15 +145,6 @@ export default function SignUpPage() {
         @media (max-width: 480px) {
           .auth-nav {
             padding: 0 20px;
-          }
-          .auth-nav-link {
-            min-height: 44px;
-            display: inline-flex;
-            align-items: center;
-            padding: 8px 12px;
-          }
-          .auth-logo {
-            min-height: 44px;
           }
         }
       `}</style>

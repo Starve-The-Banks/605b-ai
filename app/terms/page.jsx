@@ -13,7 +13,7 @@ export default function TermsOfService() {
           min-height: 100vh;
           background: var(--bg);
           color: var(--text);
-          font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         }
         .bg-grid {
           position: fixed;
@@ -131,18 +131,6 @@ export default function TermsOfService() {
           .legal-footer-inner {
             flex-direction: column;
             gap: 16px;
-          }
-          .legal-nav-link {
-            min-height: 44px;
-            display: inline-flex;
-            align-items: center;
-            padding: 8px 12px;
-          }
-          .legal-footer-links a {
-            min-height: 44px;
-            display: inline-flex;
-            align-items: center;
-            padding: 8px 12px;
           }
         }
       `}</style>

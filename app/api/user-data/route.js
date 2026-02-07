@@ -1,17 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
+import { getRedis } from '@/lib/redis';
 import { userDataSchema, validateBody } from '@/lib/validation';
-
-// Lazy initialization to avoid build-time errors
-let redis = null;
-
-function getRedis() {
-  if (!redis) {
-    const { Redis } = require('@upstash/redis');
-    redis = Redis.fromEnv();
-  }
-  return redis;
-}
 
 // Get user data
 export async function GET() {

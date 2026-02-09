@@ -1522,43 +1522,6 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Stats */}
-        <section className="stats">
-          <div className="stats-grid">
-            <div className="stat-item">
-              <div className="stat-value">62</div>
-              <div className="stat-label">Statute-Specific Templates</div>
-            </div>
-            <div className="stat-item">
-              <div className="stat-value">3</div>
-              <div className="stat-label">Credit Bureaus Supported</div>
-            </div>
-            <div className="stat-item">
-              <div className="stat-value">7</div>
-              <div className="stat-label">Federal Statutes Covered</div>
-            </div>
-          </div>
-        </section>
-
-        {/* Features */}
-        <section className="features" id="features">
-          <div className="section-header">
-            <div className="section-eyebrow">Platform</div>
-            <h2 className="section-title">Core reinvestigation tools</h2>
-            <p className="section-desc">Six tools designed for structured documentation, deadlines, and audit-ready recordkeeping.</p>
-          </div>
-
-          <div className="features-grid">
-            {features.map((feature, i) => (
-              <div key={i} className="feature-card">
-                <div className="feature-icon">{icons[feature.icon]}</div>
-                <h3 className="feature-title">{feature.title}</h3>
-                <p className="feature-desc">{feature.desc}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
         {/* Dashboard Preview */}
         {HAS_DASHBOARD_PREVIEW && (
           <section className="preview">
@@ -1597,6 +1560,43 @@ export default function LandingPage() {
             </div>
           </section>
         )}
+
+        {/* Stats */}
+        <section className="stats">
+          <div className="stats-grid">
+            <div className="stat-item">
+              <div className="stat-value">62</div>
+              <div className="stat-label">Statute-Specific Templates</div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-value">3</div>
+              <div className="stat-label">Credit Bureaus Supported</div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-value">7</div>
+              <div className="stat-label">Federal Statutes Covered</div>
+            </div>
+          </div>
+        </section>
+
+        {/* Features */}
+        <section className="features" id="features">
+          <div className="section-header">
+            <div className="section-eyebrow">Platform</div>
+            <h2 className="section-title">Core reinvestigation tools</h2>
+            <p className="section-desc">Six tools designed for structured documentation, deadlines, and audit-ready recordkeeping.</p>
+          </div>
+
+          <div className="features-grid">
+            {features.map((feature, i) => (
+              <div key={i} className="feature-card">
+                <div className="feature-icon">{icons[feature.icon]}</div>
+                <h3 className="feature-title">{feature.title}</h3>
+                <p className="feature-desc">{feature.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
 
         {/* Steps */}
         <section className="steps" id="steps">

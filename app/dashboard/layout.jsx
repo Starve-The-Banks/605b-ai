@@ -14,6 +14,10 @@ import { useUserTier, AccessRestrictionBanner } from '@/lib/useUserTier';
 
 // Payment sync banner component
 function PaymentSyncBanner({ isPolling, syncComplete, tier }) {
+  const [dismissed, setDismissed] = useState(false);
+
+  if (dismissed) return null;
+
   if (syncComplete) {
     return (
       <div style={{
@@ -38,7 +42,7 @@ function PaymentSyncBanner({ isPolling, syncComplete, tier }) {
         }}>
           <CheckCircle size={14} style={{ color: '#22c55e' }} />
         </div>
-        <div style={{ minWidth: 0 }}>
+        <div style={{ minWidth: 0, flex: 1 }}>
           <div style={{ fontWeight: 600, color: '#fafafa', fontSize: '14px' }}>
             Payment Confirmed
           </div>
@@ -46,6 +50,23 @@ function PaymentSyncBanner({ isPolling, syncComplete, tier }) {
             Your {tier || 'purchase'} has been activated. All features are now unlocked.
           </div>
         </div>
+        <button
+          onClick={() => setDismissed(true)}
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            color: '#a1a1aa',
+            padding: '4px',
+            flexShrink: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+          aria-label="Dismiss"
+        >
+          <X size={16} />
+        </button>
       </div>
     );
   }

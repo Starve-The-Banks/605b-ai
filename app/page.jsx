@@ -1504,8 +1504,7 @@ export default function LandingPage() {
             <div className="hero-eyebrow">Statute-Driven Credit Reinvestigation Platform</div>
             <h1>Credit Reinvestigation,<br /><span className="highlight">Structured Under Federal Law</span></h1>
             <p className="hero-desc">
-              Generate compliant documentation, track statutory timelines, and maintain
-              a complete audit trail — clearly, deliberately, and without shortcuts.
+              Organize disputes, generate statute-specific letters, and track every deadline.
             </p>
             <div className="hero-buttons">
               {mounted && isSignedIn ? (

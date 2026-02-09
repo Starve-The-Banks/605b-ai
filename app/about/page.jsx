@@ -8,6 +8,7 @@ import {
   FileText, Users, Target, Zap, Scale, CheckCircle2
 } from 'lucide-react';
 import { useState } from 'react';
+import { SUPPORT_EMAIL, SUPPORT_MAILTO } from '@/lib/constants';
 
 
 export default function AboutPage() {
@@ -1002,7 +1003,7 @@ export default function AboutPage() {
             </div>
             <div className="company-contact">
               <p>Questions? Reach out.</p>
-              <a href="mailto:support@9thwave.io">support@9thwave.io</a>
+              <a href={SUPPORT_MAILTO}>{SUPPORT_EMAIL}</a>
             </div>
           </div>
         </section>
@@ -1052,7 +1053,7 @@ export default function AboutPage() {
                 </div>
                 <div className="footer-column">
                   <div className="footer-column-title">Contact</div>
-                  <a href="mailto:support@9thwave.io" className="footer-link">support@9thwave.io</a>
+                  <a href={SUPPORT_MAILTO} className="footer-link">{SUPPORT_EMAIL}</a>
                 </div>
               </div>
             </div>

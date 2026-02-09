@@ -8,6 +8,7 @@ import {
   FileSearch, Loader2, AlertTriangle, ChevronRight
 } from 'lucide-react';
 import Link from 'next/link';
+import { SUPPORT_EMAIL, SUPPORT_MAILTO } from '@/lib/constants';
 
 const TIERS = [
   {
@@ -430,7 +431,7 @@ export default function AccountPage() {
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0' }}>
             <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Support</span>
-            <a href="mailto:support@9thwave.io" style={{ fontSize: '13px', color: 'var(--orange)' }}>support@9thwave.io</a>
+            <a href={SUPPORT_MAILTO} style={{ fontSize: '13px', color: 'var(--orange)' }}>{SUPPORT_EMAIL}</a>
           </div>
         </div>
       </div>

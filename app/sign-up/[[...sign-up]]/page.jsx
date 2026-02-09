@@ -9,11 +9,13 @@ export default function SignUpPage() {
     <>
       <style jsx global>{`
         .auth-page {
-          min-height: 100vh;
+          min-height: 100dvh;
           background: var(--bg);
           display: flex;
           flex-direction: column;
           font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+          padding-top: env(safe-area-inset-top, 0px);
+          padding-bottom: env(safe-area-inset-bottom, 0px);
         }
 
         .bg-grid {
@@ -32,6 +34,7 @@ export default function SignUpPage() {
           z-index: 100;
           padding: 0 32px;
           height: 64px;
+          flex-shrink: 0;
           display: flex;
           align-items: center;
           justify-content: space-between;
@@ -44,26 +47,6 @@ export default function SignUpPage() {
           gap: 12px;
           text-decoration: none;
           color: var(--text);
-        }
-
-        .auth-logo-mark {
-          width: 32px;
-          height: 32px;
-          background: var(--orange);
-          border-radius: 8px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-family: 'JetBrains Mono', monospace;
-          font-size: 10px;
-          font-weight: 700;
-          color: white;
-        }
-
-        .auth-logo-text {
-          font-size: 16px;
-          font-weight: 600;
-          letter-spacing: -0.01em;
         }
 
         .auth-nav-link {
@@ -85,6 +68,7 @@ export default function SignUpPage() {
           padding: 40px 20px;
           position: relative;
           z-index: 10;
+          min-height: 0;
         }
 
         .auth-container {
@@ -133,6 +117,7 @@ export default function SignUpPage() {
           position: relative;
           z-index: 10;
           padding: 20px 32px;
+          flex-shrink: 0;
           border-top: 1px solid var(--border);
           text-align: center;
         }
@@ -145,6 +130,9 @@ export default function SignUpPage() {
         @media (max-width: 480px) {
           .auth-nav {
             padding: 0 20px;
+          }
+          .auth-main {
+            padding: 24px 20px;
           }
         }
       `}</style>

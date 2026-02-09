@@ -254,9 +254,22 @@ export async function GET() {
 
     // Check for beta whitelist access
     const user = await currentUser();
-    const userEmail = user?.emailAddresses?.[0]?.emailAddress;
+    // Get primary email address (or first if no primary)
+    const primaryEmail = user?.emailAddresses?.find(e => e.id === user.primaryEmailAddressId)?.emailAddress;
+    const userEmail = primaryEmail || user?.emailAddresses?.[0]?.emailAddress;
+    
+    // Debug logging for beta whitelist
+    const whitelistEnv = process.env.BETA_WHITELIST_EMAILS;
+    console.log('[TIER] Beta check:', {
+      userId,
+      userEmail,
+      allEmails: user?.emailAddresses?.map(e => e.emailAddress),
+      whitelistEnv: whitelistEnv ? `${whitelistEnv.split(',').length} emails` : 'NOT SET',
+      isWhitelisted: isBetaWhitelisted(userEmail)
+    });
 
     if (isBetaWhitelisted(userEmail)) {
+      console.log('[TIER] ✓ Granting beta access to:', userEmail);
       return NextResponse.json({
         tierData: {
           tier: 'identity-theft',

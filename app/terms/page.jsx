@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { ShieldCheck } from 'lucide-react';
+import { SUPPORT_EMAIL } from '@/lib/constants';
 
 export default function TermsOfService() {
   const effectiveDate = "January 9, 2026";
@@ -300,7 +301,7 @@ export default function TermsOfService() {
               Please review the features of each tier carefully before purchasing. A free tier is available to allow users to evaluate the platform prior to upgrading.
             </p>
             <p>
-              If you believe you were charged in error or experienced a technical billing issue, please contact support@9thwave.io.
+              If you believe you were charged in error or experienced a technical billing issue, please contact {SUPPORT_EMAIL}.
             </p>
           </section>
 

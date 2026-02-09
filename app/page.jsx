@@ -83,22 +83,25 @@ function Terminal({ reducedMotion = false }) {
   const isRunningRef = useRef(false);
 
   useEffect(() => {
-    if (isRunningRef.current) return;
-    isRunningRef.current = true;
+    let cancelled = false;
 
     const typeText = async (text, onChar) => {
       for (let i = 0; i <= text.length; i++) {
+        if (cancelled) return;
         onChar(text.slice(0, i));
         await new Promise(r => setTimeout(r, 25));
       }
     };
 
     const playScene = async (scene) => {
+      if (cancelled) return;
       setLines([]);
       const currentLines = [];
 
       for (const line of scene.lines) {
+        if (cancelled) return;
         await new Promise(r => setTimeout(r, line.delay));
+        if (cancelled) return;
 
         if (line.type === 'cmd') {
           const lineId = Date.now();
@@ -106,12 +109,14 @@ function Terminal({ reducedMotion = false }) {
           setLines([...currentLines]);
 
           await typeText(line.text, (partial) => {
+            if (cancelled) return;
             const updated = currentLines.map(l =>
               l.id === lineId ? { ...l, text: partial } : l
             );
             setLines([...updated]);
           });
 
+          if (cancelled) return;
           currentLines[currentLines.length - 1].typing = false;
           setLines([...currentLines]);
         } else {
@@ -124,12 +129,15 @@ function Terminal({ reducedMotion = false }) {
         }
       }
 
-      await new Promise(r => setTimeout(r, scene.pause));
+      if (!cancelled) {
+        await new Promise(r => setTimeout(r, scene.pause));
+      }
     };
 
     const runLoop = async () => {
-      while (true) {
+      while (!cancelled) {
         await playScene(terminalScenes[sceneIndexRef.current]);
+        if (cancelled) return;
         sceneIndexRef.current = (sceneIndexRef.current + 1) % terminalScenes.length;
       }
     };
@@ -138,7 +146,10 @@ function Terminal({ reducedMotion = false }) {
       runLoop();
     }, 1000);
 
-    return () => clearTimeout(timer);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, []);
 
   return (
@@ -378,30 +389,31 @@ export default function LandingPage() {
         .nav-center {
           display: flex;
           align-items: center;
-          gap: 24px;
+          gap: 32px;
         }
 
         @media (min-width: 1024px) {
           .nav-center {
-            gap: 40px;
+            gap: 44px;
           }
         }
 
         @media (min-width: 1280px) {
           .nav-center {
-            gap: 48px;
+            gap: 52px;
           }
         }
 
         .nav-link {
-          color: var(--text-secondary);
+          color: var(--text);
           text-decoration: none;
           font-size: 18px;
-          font-weight: 500;
+          font-weight: 600;
           padding: 14px 12px;
           border-radius: 6px;
           transition: all 0.2s;
           position: relative;
+          opacity: 0.85;
         }
 
         @media (min-width: 1024px) {
@@ -432,7 +444,7 @@ export default function LandingPage() {
         }
 
         .nav-link:hover {
-          color: var(--text);
+          opacity: 1;
         }
 
         .nav-link:hover::after {

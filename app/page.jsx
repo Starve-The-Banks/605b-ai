@@ -218,12 +218,16 @@ const icons = {
   ),
 };
 
+// Dashboard preview on landing page (set false to hide)
+const HAS_DASHBOARD_PREVIEW = true;
+
 export default function LandingPage() {
   const { isSignedIn } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [glowVisible, setGlowVisible] = useState(false);
+  const [lightboxSrc, setLightboxSrc] = useState(null);
   const [reducedMotion, setReducedMotion] = useState(false);
 
   useEffect(() => {
@@ -237,6 +241,18 @@ export default function LandingPage() {
     console.log("Process animation component mounted");
     return () => mediaQuery.removeEventListener('change', handler);
   }, []);
+
+  // Close lightbox on Escape
+  useEffect(() => {
+    if (!lightboxSrc) return;
+    const handleKey = (e) => { if (e.key === 'Escape') setLightboxSrc(null); };
+    document.addEventListener('keydown', handleKey);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', handleKey);
+      document.body.style.overflow = '';
+    };
+  }, [lightboxSrc]);
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -633,6 +649,14 @@ export default function LandingPage() {
           animation: fadeInUp 0.6s ease 0.6s forwards;
         }
 
+        .hero-pricing-hint {
+          font-size: 14px;
+          color: var(--text-secondary);
+          margin-bottom: 8px;
+          opacity: 0;
+          animation: fadeInUp 0.6s ease 0.65s forwards;
+        }
+
         .hero-disclaimer {
           font-size: 13px;
           color: var(--text-muted);
@@ -939,6 +963,147 @@ export default function LandingPage() {
           line-height: 1.6;
         }
 
+        /* Dashboard Preview */
+        .preview {
+          position: relative;
+          z-index: 10;
+          padding: 120px 32px 80px;
+          max-width: 1200px;
+          margin: 0 auto;
+        }
+
+        .preview-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 24px;
+        }
+
+        .preview-item {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .preview-frame {
+          position: relative;
+          border-radius: 12px;
+          border: 1px solid var(--border);
+          overflow: hidden;
+          box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 107, 53, 0.06);
+          aspect-ratio: 16 / 10;
+          cursor: pointer;
+          background: none;
+          padding: 0;
+          display: block;
+          width: 100%;
+          transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .preview-frame:hover {
+          border-color: var(--orange);
+          box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 107, 53, 0.2);
+        }
+
+        .preview-frame img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: top;
+        }
+
+        .preview-zoom-hint {
+          position: absolute;
+          bottom: 12px;
+          right: 12px;
+          background: rgba(0, 0, 0, 0.7);
+          color: var(--text-secondary);
+          font-size: 12px;
+          padding: 4px 10px;
+          border-radius: 6px;
+          opacity: 0;
+          transition: opacity 0.2s;
+          pointer-events: none;
+        }
+
+        .preview-frame:hover .preview-zoom-hint {
+          opacity: 1;
+        }
+
+        .preview-caption {
+          font-size: 13px;
+          color: var(--text-muted);
+          text-align: center;
+          margin-top: 12px;
+        }
+
+        /* Lightbox */
+        .lightbox {
+          position: fixed;
+          inset: 0;
+          z-index: 5000;
+          background: rgba(0, 0, 0, 0.9);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 40px;
+          cursor: pointer;
+          animation: fadeIn 0.2s ease;
+        }
+
+        .lightbox-close {
+          position: absolute;
+          top: 20px;
+          right: 20px;
+          background: rgba(255, 255, 255, 0.1);
+          border: none;
+          color: white;
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: background 0.2s;
+          z-index: 5001;
+        }
+
+        .lightbox-close:hover {
+          background: rgba(255, 255, 255, 0.2);
+        }
+
+        .lightbox-img {
+          max-width: 90vw;
+          max-height: 90vh;
+          object-fit: contain;
+          border-radius: 8px;
+          cursor: default;
+          box-shadow: 0 0 80px rgba(0, 0, 0, 0.5);
+        }
+
+        @media (max-width: 768px) {
+          .lightbox {
+            padding: 16px;
+          }
+          .lightbox-img {
+            max-width: 100vw;
+            max-height: 85vh;
+            border-radius: 4px;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .preview {
+            padding: 80px 20px 60px;
+          }
+          .preview-grid {
+            grid-template-columns: 1fr;
+            gap: 32px;
+          }
+          .preview-frame {
+            border-radius: 8px;
+          }
+        }
+
         /* Steps */
         .steps {
           position: relative;
@@ -1193,6 +1358,13 @@ export default function LandingPage() {
           }
           .hero-desc {
             font-size: 16px;
+            margin-bottom: 20px;
+          }
+          .hero-buttons {
+            margin-bottom: 16px;
+          }
+          .hero-disclaimer {
+            margin-bottom: 32px;
           }
           .terminal {
             max-width: 100%;
@@ -1345,6 +1517,7 @@ export default function LandingPage() {
                 </>
               )}
             </div>
+            <p className="hero-pricing-hint">Free to analyze your report. Upgrade when you're ready to act.</p>
             <p className="hero-disclaimer">Software tools only. No guarantees. Not legal advice.</p>
           </div>
         </section>
@@ -1357,8 +1530,8 @@ export default function LandingPage() {
               <div className="stat-label">Statute-Specific Templates</div>
             </div>
             <div className="stat-item">
-              <div className="stat-value">30</div>
-              <div className="stat-label">Day Response Window</div>
+              <div className="stat-value">3</div>
+              <div className="stat-label">Credit Bureaus Supported</div>
             </div>
             <div className="stat-item">
               <div className="stat-value">7</div>
@@ -1385,6 +1558,45 @@ export default function LandingPage() {
             ))}
           </div>
         </section>
+
+        {/* Dashboard Preview */}
+        {HAS_DASHBOARD_PREVIEW && (
+          <section className="preview">
+            <div className="section-header">
+              <div className="section-eyebrow">Inside the Platform</div>
+              <h2 className="section-title">Your reinvestigation command center</h2>
+              <p className="section-desc">Flag discrepancies, generate statute-specific letters — all in one place.</p>
+            </div>
+            <div className="preview-grid">
+              <div className="preview-item">
+                <button className="preview-frame" onClick={() => setLightboxSrc('/dashboard-preview-flagged.png')} aria-label="View flagged items screenshot full size">
+                  <Image
+                    src="/dashboard-preview-flagged.png"
+                    alt="605b.ai flagged items — review discrepancies with severity and statute references"
+                    width={2048}
+                    height={1280}
+                    quality={90}
+                  />
+                  <span className="preview-zoom-hint">Click to enlarge</span>
+                </button>
+                <p className="preview-caption">Flagged discrepancies with severity and statute references</p>
+              </div>
+              <div className="preview-item">
+                <button className="preview-frame" onClick={() => setLightboxSrc('/dashboard-preview.png')} aria-label="View templates screenshot full size">
+                  <Image
+                    src="/dashboard-preview.png"
+                    alt="605b.ai letter templates — 62 statute-specific dispute templates"
+                    width={2048}
+                    height={1280}
+                    quality={90}
+                  />
+                  <span className="preview-zoom-hint">Click to enlarge</span>
+                </button>
+                <p className="preview-caption">62 statute-specific letter templates</p>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Steps */}
         <section className="steps" id="steps">
@@ -1453,6 +1665,25 @@ export default function LandingPage() {
             <div className="footer-copy">© {new Date().getFullYear()} Ninth Wave Analytics LLC. Software tools only.</div>
           </div>
         </footer>
+
+        {/* Lightbox */}
+        {lightboxSrc && (
+          <div className="lightbox" onClick={() => setLightboxSrc(null)}>
+            <button className="lightbox-close" onClick={() => setLightboxSrc(null)} aria-label="Close">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={lightboxSrc}
+              alt="Dashboard preview"
+              className="lightbox-img"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        )}
       </div>
     </>
   );

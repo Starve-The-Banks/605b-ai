@@ -478,7 +478,7 @@ export default function PrivacyPolicy() {
               marginBottom: '16px',
             }}>
               <p style={{ marginBottom: '4px' }}><strong>Ninth Wave Analytics LLC</strong></p>
-              <p style={{ marginBottom: '4px' }}>Email: privacy@9thwave.io</p>
+              <p style={{ marginBottom: '4px' }}>Email: privacy@605b.ai</p>
             </div>
             <p>
               We will respond to your request within 30 days (or sooner if required by applicable law).

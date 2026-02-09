@@ -409,7 +409,7 @@ export default function TermsOfService() {
               marginBottom: '16px',
             }}>
               <p style={{ marginBottom: '4px' }}><strong>Ninth Wave Analytics LLC</strong></p>
-              <p style={{ marginBottom: '4px' }}>Email: legal@9thwave.io</p>
+              <p style={{ marginBottom: '4px' }}>Email: legal@605b.ai</p>
             </div>
           </section>
         </div>

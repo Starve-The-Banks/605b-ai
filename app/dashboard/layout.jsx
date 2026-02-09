@@ -11,6 +11,7 @@ import {
 import Image from 'next/image';
 import OnboardingWizard from './components/OnboardingWizard';
 import { useUserTier, AccessRestrictionBanner } from '@/lib/useUserTier';
+import { trackPurchase, trackSignUp } from '@/lib/tracking';
 
 // Payment sync banner component
 function PaymentSyncBanner({ isPolling, syncComplete, tier }) {
@@ -234,12 +235,16 @@ function DashboardLayoutContent({ children }) {
       // Payment just completed - start sync/polling if tier doesn't match yet
       if (tier === 'free' || tier !== purchasedTier) {
         console.log('[Dashboard] Payment success detected, starting sync for:', purchasedTier, 'session:', sessionId);
+        // Fire conversion event for ad platforms
+        const tierPrices = { toolkit: 39, advanced: 89, 'identity-theft': 179 };
+        trackPurchase({ tier: purchasedTier, value: tierPrices[purchasedTier] || 0 });
         startPaymentPolling(purchasedTier, sessionId);
       }
     }
   }, [searchParams, tier, isPollingForPayment, paymentSyncComplete, startPaymentPolling]);
 
   const handleOnboardingComplete = () => {
+    trackSignUp('onboarding');
     setShowOnboarding(false);
   };
 

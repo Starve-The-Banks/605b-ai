@@ -1,5 +1,7 @@
 import { ClerkProvider } from '@clerk/nextjs';
 import { IBM_Plex_Sans, Inter, JetBrains_Mono } from 'next/font/google';
+import { Suspense } from 'react';
+import TrackingPixels from './components/TrackingPixels';
 import './globals.css';
 
 export const metadata = {
@@ -113,6 +115,9 @@ export default function RootLayout({ children }) {
     <ClerkProvider appearance={clerkAppearance}>
       <html lang="en">
         <body className={`${inter.variable} ${ibmPlexSans.variable} ${jetBrainsMono.variable}`}>
+          <Suspense fallback={null}>
+            <TrackingPixels />
+          </Suspense>
           {children}
         </body>
       </html>

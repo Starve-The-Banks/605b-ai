@@ -9,6 +9,7 @@ import {
   ChevronDown, ChevronUp, HelpCircle, Eye, Sparkles,
   FileSearch, Lock, Plus, Menu, CheckCircle
 } from 'lucide-react';
+import { trackViewPricing, trackInitiateCheckout } from '@/lib/tracking';
 
 // Tier hierarchy for comparisons
 const TIER_LEVELS = {
@@ -175,6 +176,11 @@ export default function PricingPage() {
   const [tierLoading, setTierLoading] = useState(false);
   const [upgradeInfo, setUpgradeInfo] = useState(null);
 
+  // Track pricing page view
+  useEffect(() => {
+    trackViewPricing();
+  }, []);
+
   // Fetch current tier and upgrade pricing when signed in
   useEffect(() => {
     if (!isSignedIn) {
@@ -253,6 +259,7 @@ export default function PricingPage() {
     }
 
     setLoading(tier.id);
+    trackInitiateCheckout(tier.id);
     try {
       // Store pending payment in localStorage for post-payment polling
       localStorage.setItem('605b_payment_pending', JSON.stringify({

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useUser, useAuth } from '@clerk/nextjs';
+import { preserveUTMs } from '@/lib/utm';
 import { useUserTier } from '@/lib/useUserTier';
 import {
   Shield, FileText, Scale, Zap, ArrowRight, ArrowLeft,
@@ -309,7 +310,7 @@ export default function OnboardingWizard({ onComplete, onSkip }) {
 
     // If they selected a paid tier, redirect to pricing with their tier highlighted
     if (tierId !== 'free') {
-      window.location.href = `/pricing?recommended=${tierId}`;
+      window.location.href = preserveUTMs(`/pricing?recommended=${tierId}`);
     } else {
       onComplete?.({ ...answers, selectedTier: tierId });
     }

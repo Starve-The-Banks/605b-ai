@@ -478,7 +478,8 @@ export default function PrivacyPolicy() {
               marginBottom: '16px',
             }}>
               <p style={{ marginBottom: '4px' }}><strong>Ninth Wave Analytics LLC</strong></p>
-              <p style={{ marginBottom: '4px' }}>Email: privacy@605b.ai</p>
+              <p style={{ marginBottom: '4px' }}>Email: <a href="mailto:privacy@605b.ai" style={{ color: 'var(--orange)' }}>privacy@605b.ai</a></p>
+              <p style={{ marginBottom: '0' }}>Phone: <a href="tel:+17606664106" style={{ color: 'var(--orange)' }}>(760) 666-4106</a></p>
             </div>
             <p>
               We will respond to your request within 30 days (or sooner if required by applicable law).
@@ -493,7 +494,8 @@ export default function PrivacyPolicy() {
             <div className="legal-footer-links">
               <Link href="/">Home</Link>
               <Link href="/terms">Terms</Link>
-              <a href="mailto:privacy@605b.ai">Contact</a>
+              <Link href="/contact">Contact</Link>
+              <a href="tel:+17606664106">(760) 666-4106</a>
             </div>
             <div className="legal-footer-copy">© {new Date().getFullYear()} Ninth Wave Analytics LLC</div>
           </div>

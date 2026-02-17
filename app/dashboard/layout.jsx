@@ -11,7 +11,8 @@ import {
 import Image from 'next/image';
 import OnboardingWizard from './components/OnboardingWizard';
 import { useUserTier, AccessRestrictionBanner } from '@/lib/useUserTier';
-import { trackPurchase, trackSignUp } from '@/lib/tracking';
+import { trackPurchase } from '@/lib/tracking';
+import { trackLead, trackPurchase as metaTrackPurchase } from '@/lib/metaPixel';
 
 // Payment sync banner component
 function PaymentSyncBanner({ isPolling, syncComplete, tier }) {
@@ -129,6 +130,7 @@ function DashboardLayoutContent({ children }) {
   const [notifications, setNotifications] = useState([]);
   const [isMobile, setIsMobile] = useState(false);
   const userMenuRef = useRef(null);
+  const purchaseFiredRef = useRef(false);
 
   // Check if mobile on mount and resize
   useEffect(() => {
@@ -234,21 +236,26 @@ function DashboardLayoutContent({ children }) {
     if (isPaymentSuccess && purchasedTier && !isPollingForPayment && !paymentSyncComplete) {
       // Payment just completed - start sync/polling if tier doesn't match yet
       if (tier === 'free' || tier !== purchasedTier) {
-        console.log('[Dashboard] Payment success detected, starting sync for:', purchasedTier, 'session:', sessionId);
-        // Fire conversion event for ad platforms
-        const tierPrices = { toolkit: 39, advanced: 89, 'identity-theft': 179 };
-        trackPurchase({ tier: purchasedTier, value: tierPrices[purchasedTier] || 0 });
+        if (!purchaseFiredRef.current) {
+          purchaseFiredRef.current = true;
+          console.log('[Dashboard] Payment success detected, starting sync for:', purchasedTier, 'session:', sessionId);
+          const tierPrices = { toolkit: 39, advanced: 89, 'identity-theft': 179 };
+          const value = tierPrices[purchasedTier] || 0;
+          metaTrackPurchase({ tier: purchasedTier, value }, sessionId || undefined);
+          trackPurchase({ tier: purchasedTier, value });
+        }
         startPaymentPolling(purchasedTier, sessionId);
       }
     }
   }, [searchParams, tier, isPollingForPayment, paymentSyncComplete, startPaymentPolling]);
 
   const handleOnboardingComplete = () => {
-    trackSignUp('onboarding');
+    trackLead();
     setShowOnboarding(false);
   };
 
   const handleOnboardingSkip = () => {
+    trackLead();
     localStorage.setItem('605b_onboarding_complete', 'true');
     setShowOnboarding(false);
   };

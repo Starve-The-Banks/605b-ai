@@ -1,7 +1,7 @@
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { tierPostSchema, validateBody } from '@/lib/validation';
-import { isBetaWhitelisted } from '@/lib/beta';
+import { isBetaWhitelisted, isBetaWhitelistedByUserId } from '@/lib/beta';
 
 // Lazy initialization to avoid build-time errors
 let redis = null;
@@ -237,48 +237,78 @@ const TIER_FEATURES = {
   },
 };
 
-export async function GET() {
+export async function GET(request) {
+  const debugMode = request?.url ? new URL(request.url).searchParams.get('debug') === '1' : false;
+
   try {
-    const { userId } = await auth();
+    const authObj = await auth();
+    const { userId } = authObj;
 
     if (!userId) {
-      return NextResponse.json({
+      const payload = {
         tierData: {
           tier: 'free',
           features: TIER_FEATURES.free,
           pdfAnalysesUsed: 0,
           pdfAnalysesRemaining: 1,
         },
-      });
+      };
+      if (debugMode) payload.debug = { reason: 'not_authenticated', userId: null };
+      return NextResponse.json(payload);
     }
 
-    // Check for beta whitelist access
+    // Check for beta whitelist access (check ALL emails: primary + all from array + session)
     const user = await currentUser();
-    // Get primary email address (or first if no primary)
-    const primaryEmail = user?.emailAddresses?.find(e => e.id === user.primaryEmailAddressId)?.emailAddress;
-    const userEmail = primaryEmail || user?.emailAddresses?.[0]?.emailAddress;
-    
-    // Debug logging for beta whitelist
+    const fromArray = (user?.emailAddresses ?? []).map(e => e?.emailAddress).filter(Boolean);
+    const primary = user?.primaryEmailAddress?.emailAddress || user?.emailAddresses?.find(e => e.id === user.primaryEmailAddressId)?.emailAddress;
+    const sessionEmail = authObj?.sessionClaims?.email || authObj?.sessionClaims?.primary_email;
+    const allEmailsRaw = [primary, ...fromArray, sessionEmail].filter(Boolean);
+    const allEmails = [...new Set(allEmailsRaw.map(e => String(e).trim().toLowerCase()))];
+    const userEmail = primary || fromArray[0] || sessionEmail;
+    let isWhitelisted = allEmails.some(email => isBetaWhitelisted(email));
+    // Explicit fallback for known beta email (in case Clerk shape or env differs)
+    if (!isWhitelisted && (userEmail || '').toLowerCase().includes('subs-tre@outlook.com')) {
+      isWhitelisted = true;
+      console.log('[TIER] Beta access via explicit fallback for subs-tre@outlook.com');
+    }
+    // UserId whitelist (works when Clerk email is missing, e.g. cross-instance)
+    if (!isWhitelisted && isBetaWhitelistedByUserId(userId)) {
+      isWhitelisted = true;
+      console.log('[TIER] Beta access via BETA_WHITELIST_USER_IDS for', userId);
+    }
+
     const whitelistEnv = process.env.BETA_WHITELIST_EMAILS;
+    const whitelistCount = whitelistEnv ? whitelistEnv.split(',').length : 0;
+    const debugPayload = debugMode ? {
+      userId,
+      userEmail: userEmail || null,
+      allEmails,
+      isWhitelisted,
+      whitelistCount,
+      hasWhitelistEnv: !!whitelistEnv,
+    } : undefined;
+
     console.log('[TIER] Beta check:', {
       userId,
       userEmail,
-      allEmails: user?.emailAddresses?.map(e => e.emailAddress),
-      whitelistEnv: whitelistEnv ? `${whitelistEnv.split(',').length} emails` : 'NOT SET',
-      isWhitelisted: isBetaWhitelisted(userEmail)
+      allEmails,
+      whitelistEnv: whitelistEnv ? `${whitelistCount} emails` : 'NOT SET',
+      isWhitelisted,
     });
 
-    if (isBetaWhitelisted(userEmail)) {
-      console.log('[TIER] ✓ Granting beta access to:', userEmail);
-      return NextResponse.json({
+    if (isWhitelisted) {
+      console.log('[TIER] ✓ Granting beta access to:', userEmail, '(matched one of', allEmails.length, 'emails)');
+      const payload = {
         tierData: {
           tier: 'identity-theft',
           features: TIER_FEATURES['identity-theft'],
           pdfAnalysesUsed: 0,
-          pdfAnalysesRemaining: -1, // Unlimited
+          pdfAnalysesRemaining: -1,
           isBeta: true,
         },
-      });
+      };
+      if (debugPayload) payload.debug = debugPayload;
+      return NextResponse.json(payload);
     }
 
     const redisClient = getRedis();
@@ -292,17 +322,21 @@ export async function GET() {
 
       if (recoveredTierData) {
         console.log(`[TIER] Self-heal successful for user ${userId}: ${recoveredTierData.tier}`);
-        return NextResponse.json({ tierData: recoveredTierData });
+        const payload = { tierData: recoveredTierData };
+        if (debugPayload) payload.debug = debugPayload;
+        return NextResponse.json(payload);
       }
 
-      return NextResponse.json({
+      const freePayload = {
         tierData: {
           tier: 'free',
           features: TIER_FEATURES.free,
           pdfAnalysesUsed: 0,
           pdfAnalysesRemaining: 1,
         },
-      });
+      };
+      if (debugPayload) freePayload.debug = debugPayload;
+      return NextResponse.json(freePayload);
     }
 
     const tierData = typeof tierDataRaw === 'string' ? JSON.parse(tierDataRaw) : tierDataRaw;
@@ -312,7 +346,9 @@ export async function GET() {
       tierData.features = { ...TIER_FEATURES[tierData.tier], ...tierData.features };
     }
 
-    return NextResponse.json({ tierData });
+    const payload = { tierData };
+    if (debugPayload) payload.debug = debugPayload;
+    return NextResponse.json(payload);
 
   } catch (error) {
     console.error('Error fetching tier:', error);

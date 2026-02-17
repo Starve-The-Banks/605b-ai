@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { trackPurchase } from '@/lib/metaPixel';
 
 function SuccessContent() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id');
   const [status, setStatus] = useState('loading');
+  const purchaseFired = useRef(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -15,6 +17,12 @@ function SuccessContent() {
       setStatus('error');
       setError('No session ID provided.');
       return;
+    }
+
+    // Fire Purchase event once (standalone identity-theft packet, $49)
+    if (!purchaseFired.current) {
+      purchaseFired.current = true;
+      trackPurchase({ tier: 'identity_theft_packet', value: 49 }, sessionId);
     }
 
     // Short delay to allow Stripe to process

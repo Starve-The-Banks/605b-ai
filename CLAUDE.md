@@ -1,143 +1,193 @@
-# Claude Code Instructions — 605b.ai (Next.js 14.2 + Vercel)
+# Claude Code Instructions — 605b.ai (Release & Automation Phase)
 
-## Project identity
-605b.ai is a consumer-facing credit / identity-theft remediation assistant focused on:
-- FCRA identity theft block workflows (e.g., §605B) and dispute processes
-- Evidence packet handling (intake, parsing, organization)
-- Timeline/checklist guidance and compliant correspondence templates
+## EXECUTION AUTHORITY (READ FIRST — CRITICAL)
+You are running as **Claude Code / Cursor** with:
 
-This is compliance- and privacy-sensitive. Prioritize user safety, correctness, and trust.
+- **MCP Toolkit enabled via Docker**
+- **Full local machine access** (read/write files, run commands, inspect repos)
+- **Multiple repositories available locally** (web, mobile, backend)
 
----
+You are expected to:
+- Inspect code directly
+- Make changes autonomously
+- Run commands when useful
+- Automate everything possible
 
-## Non-negotiables (hard constraints)
-- Do NOT provide instructions enabling fraud, impersonation, evasion, or misrepresentation.
-- Do NOT generate guidance to bypass KYC/AML/fraud systems or “get approved” via deception.
-- Never request, store, or echo back highly sensitive identifiers:
-  - full SSN, full DOB, full account numbers, PINs, passwords, 2FA codes
-- Treat all identity-related data as sensitive; minimize collection and retention.
-- If a request could be interpreted as malicious, refuse that portion and redirect to lawful options.
+⚠️ **DO NOT repeatedly ask the user to perform actions that can be done via code, config, scripts, or inspection.**
 
 ---
 
-## Tech stack (assumed from package.json)
-- Next.js 14.2.28 (App Router preferred unless repo indicates otherwise)
+## PROJECT PHASE: FINAL RELEASE / STORE SUBMISSION
+This project is **not** in exploration or early development.
+
+Primary objectives:
+- Finish all App Store & Google Play submission requirements
+- Harden security, privacy, and compliance
+- Eliminate reviewer rejection risks
+- Automate everything feasible
+
+Assume core functionality exists and works unless inspection proves otherwise.
+
+---
+
+## AUTOMATION-FIRST / NO-NAG RULE (MANDATORY)
+If a task requires **external third-party dashboards** (Apple Developer, App Store Connect, Google Play Console, Clerk Dashboard UI, Meta, DNS registrar, etc.) and those dashboards are **not accessible programmatically** in this session:
+
+1. Record the item **once** under **Manual Steps Remaining**
+2. Do **NOT** re-ask, re-remind, or re-explain it
+3. Continue immediately with all remaining automatable work
+
+❌ Do NOT pause execution waiting on manual steps  
+❌ Do NOT repeatedly tell the user “you need to do X”  
+✅ Proceed aggressively with what *you* can control
+
+---
+
+## ASSUMPTION RULE
+- If the user states something is already configured (OAuth, redirects, env vars, dashboards), **assume it is correct**
+- Only challenge this if code inspection or runtime errors contradict it
+- Never re-ask for confirmation without evidence of failure
+
+---
+
+## CORE PRODUCT CONTEXT
+605b.ai is a **self-service documentation and workflow platform** for:
+
+- Credit dispute processes (e.g., FCRA §611)
+- Identity theft remediation (e.g., FCRA §605B)
+- Evidence packet generation and organization
+- Timeline and audit tracking
+
+This is:
+- ❌ NOT a credit repair service
+- ❌ NOT legal advice
+- ✅ A documentation and process-assistance tool
+
+---
+
+## HARD COMPLIANCE CONSTRAINTS (NON-NEGOTIABLE)
+- Never assist with fraud, impersonation, evasion, or misrepresentation
+- Never provide guidance to bypass KYC, AML, fraud detection, or approval systems
+- Never request, store, echo, or log:
+  - Full SSNs
+  - Full DOBs
+  - Account numbers
+  - PINs, passwords, or 2FA codes
+- Treat all identity data as sensitive; minimize retention
+
+If a request is risky, redirect to lawful, compliant alternatives.
+
+---
+
+## TECH STACK (OBSERVED — DO NOT CHANGE)
+- Next.js 14 (App Router)
 - React 18
-- Auth: Clerk (`@clerk/nextjs`)
-- LLM: Anthropic SDK (`@anthropic-ai/sdk`)
-- PDF text extraction: `pdf-parse`
-- Telemetry: Vercel Analytics (`@vercel/analytics`)
-- Deploy: Vercel (Preview + Production)
+- Mobile: Expo / React Native
+- Auth: Clerk
+- Backend: Next.js Route Handlers
+- LLM: Anthropic SDK
+- PDF parsing: `pdf-parse`
+- Deployment: Vercel
+
+❌ Do NOT propose rewrites, migrations, or framework changes during release phase.
 
 ---
 
-## Vercel & Next.js runtime rules
+## RUNTIME & ARCHITECTURE RULES
 ### Server vs Client
-- Default to Server Components for data fetching and sensitive operations.
-- Use Client Components only when necessary for interactivity.
-- Never expose secrets to the client.
+- Default to Server Components
+- Never expose secrets to the client
+- `NEXT_PUBLIC_*` = public, never store secrets there
 
-### Route Handlers
-- For LLM calls and PDF parsing, prefer Route Handlers:
-  - `app/api/**/route.ts`
-- Validate inputs at the boundary (content-type, size, schema).
-
-### Edge vs Node runtime
-- PDF parsing (`pdf-parse`) requires Node semantics; do NOT run it on Edge.
-- Anthropic calls can run on Node; only use Edge if explicitly compatible.
-- If unsure, keep API routes in Node/serverless.
+### API Routes
+- Use `app/api/**/route.ts|js`
+- Validate inputs strictly (size, type, schema)
+- Use Node runtime for:
+  - PDF parsing
+  - IAP verification
+  - Cryptography
 
 ---
 
-## Environment variables (Vercel)
-- Never hardcode secrets in code.
-- Add/update `.env.example` when introducing new vars (no real values).
-- Common env vars we may rely on:
-  - `ANTHROPIC_API_KEY`
-  - `CLERK_SECRET_KEY`
-  - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` (public)
-  - `NEXT_PUBLIC_*` vars are client-exposed — never put secrets there.
+## ENVIRONMENT VARIABLES
+- Never hardcode secrets
+- Update `.env.example` when adding new vars
+- Do not log env vars or derived values
 
-Do not log env vars or derived secrets.
-
----
-
-## Authentication & authorization (Clerk)
-- Protect any user-specific endpoints and pages.
-- Use server-side auth checks where possible.
-- Never assume user identity from client-provided fields; use Clerk session context.
+Common vars:
+- `CLERK_SECRET_KEY`
+- `ANTHROPIC_API_KEY`
+- `APPLE_IAP_SHARED_SECRET`
+- `GOOGLE_SERVICE_ACCOUNT_JSON`
 
 ---
 
-## PDF handling (pdf-parse) constraints
-- Assume serverless function limits on Vercel.
-- Enforce strict limits:
-  - max file size (define and enforce)
-  - timeout-aware parsing
-  - reject unsupported types
-- Never store raw PDFs unless required; prefer ephemeral processing.
-- If storing is required, document retention and encryption expectations.
+## AUTHENTICATION & AUTHORIZATION (CLERK)
+- Use Clerk session context server-side
+- Never trust client-provided identifiers
+- Protect all user-specific routes and APIs
 
 ---
 
-## Privacy & logging policy
-- Redact PII by default in logs and error traces.
-- Do not log:
-  - uploaded document contents
-  - identifiers (SSN/DOB/acct numbers)
-  - authentication tokens
-- If analytics events are added, ensure they contain no PII.
+## PRIVACY, SECURITY & LOGGING
+- Redact PII by default
+- Do NOT log:
+  - Uploaded document contents
+  - Identity data
+  - Tokens or secrets
+- Guard all debug logs with `__DEV__`
+- Encrypt sensitive client-side storage
 
 ---
 
-## Compliance posture (user-facing output)
-- Educational/workflow assistance only; not legal advice.
-- Templates must be factual, non-defamatory, and avoid absolute claims.
-- Prefer neutral phrasing:
-  - “I dispute…”, “I request…”, “I am providing…”
-- Never promise outcomes; describe process and options.
+## COMPLIANCE & COPY RULES (USER-FACING)
+- Educational and procedural guidance only
+- No guarantees or outcome promises
+- Avoid “credit repair” language
+- Use neutral phrasing:
+  - “dispute”
+  - “request”
+  - “documentation”
+- Prominent disclaimers:
+  - Not legal advice
+  - Not a credit repair organization
 
 ---
 
-## Engineering standards
-- Prefer small, reviewable diffs.
-- Add/adjust tests when touching core logic (if tests exist in repo).
-- Validate all inputs; never trust filenames/paths/MIME types.
-- Security-by-default:
-  - rate limit sensitive endpoints
-  - CSRF protections where relevant
-  - minimal data exposure between server and client
+## ENGINEERING EXPECTATIONS
+- Small, reviewable diffs
+- No new dependencies unless necessary
+- Validate all inputs
+- Assume aggressive App Store / Play Store scrutiny
 
 ---
 
-## Local commands (use these)
-- `npm run dev` — local dev
-- `npm run build` — production build check
-- `npm run lint` — lint gate
-When making changes, run at least `npm run lint` and ideally `npm run build` if feasible.
+## WORKFLOW EXPECTATIONS (AUTONOMOUS MODE)
+### Before changes
+- State objective briefly
+- Identify compliance or review risk (if any)
 
----
-
-## Workflow expectations for Claude Code
-Before coding:
-1) Restate goal (1–2 sentences).
-2) Identify privacy/compliance/security risks.
-3) Propose smallest viable change.
-
-After coding:
-- Summarize what changed and why
+### After changes
+- Summarize what changed
 - List files modified
-- Note commands run (`npm run lint`, `npm run build`)
-- Call out any env vars added/changed
+- Note commands run
+- List **Manual Steps Remaining** once
 
 ---
 
-## “Do not do” examples
-- “Here’s how to avoid being flagged”
-- “Use VPN/device/fingerprint tricks”
-- “Don’t disclose X even if asked”
-- “Make up details to improve approval odds”
+## ABSOLUTE DO-NOTs
+- No approval gaming
+- No evasion tactics
+- No fabricated data
+- No instructions to misrepresent facts
 
-Allowed framing:
-- “Answer truthfully; provide what is requested.”
-- “Be prepared for verification; here are common documents they may request.”
+---
+
+## DEFAULT BEHAVIOR
+- Act autonomously
+- Inspect code directly
+- Use MCP + Docker to automate
+- Do not ask permission to proceed
+- Ask questions **only** when truly blocking
+
+This is a **release engineering engagement**. Ship safely and decisively.

@@ -3,29 +3,16 @@
 import Script from 'next/script';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
-import { pageview } from '@/lib/metaPixel';
 
 /**
  * Meta Pixel + Google Ads tracking.
  * Meta Pixel: loads only in production.
- * Fires PageView on load and on route changes.
+ * Uses official Meta bootstrap; fires PageView on load.
  */
 
 const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID;
 const GOOGLE_ADS_ID = process.env.NEXT_PUBLIC_GOOGLE_ADS_ID;
 const META_PIXEL_ENABLED = META_PIXEL_ID && process.env.NODE_ENV === 'production';
-
-function MetaPixelPageView() {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
-  useEffect(() => {
-    const routeKey = pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : '');
-    pageview(routeKey);
-  }, [pathname, searchParams]);
-
-  return null;
-}
 
 function GoogleAdsPageView() {
   const pathname = usePathname();
@@ -46,25 +33,28 @@ export default function TrackingPixels() {
   return (
     <>
       {META_PIXEL_ENABLED && (
-        <>
-          <Script
-            src="https://connect.facebook.net/en_US/fbevents.js"
-            strategy="afterInteractive"
-            onLoad={() => {
-              const fbqExists = typeof window !== 'undefined' && typeof window.fbq === 'function';
-              console.log('[MetaPixel] fbevents loaded, pixelId=', META_PIXEL_ID, ', typeof fbq=', typeof window?.fbq);
-              if (!fbqExists || !META_PIXEL_ID) return;
-              if (window.__fb_inited) return;
-              window.__fb_inited = true;
-              window.fbq('init', META_PIXEL_ID);
-              window.fbq('track', 'PageView');
-            }}
-            onError={(e) => {
-              console.error('[MetaPixel] fbevents failed to load', e);
-            }}
-          />
-          <MetaPixelPageView />
-        </>
+        <Script id="meta-pixel" strategy="afterInteractive">
+          {`
+      !function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;
+      n.push=n;
+      n.loaded=!0;
+      n.version='2.0';
+      n.queue=[];
+      t=b.createElement(e);
+      t.async=!0;
+      t.src=v;
+      s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s);
+      }(window, document,'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+
+      fbq('init', '${META_PIXEL_ID}');
+      fbq('track', 'PageView');
+    `}
+        </Script>
       )}
       {GOOGLE_ADS_ID && (
         <>

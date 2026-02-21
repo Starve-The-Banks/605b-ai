@@ -7,16 +7,13 @@ import { pageview } from '@/lib/metaPixel';
 
 /**
  * Meta Pixel + Google Ads tracking.
- * Meta Pixel: loads only in production (or when NEXT_PUBLIC_META_PIXEL_PREVIEW=true).
+ * Meta Pixel: loads only in production.
  * Fires PageView on load and on route changes.
- * Lead/Purchase fired via lib/metaPixel from dashboard and identity-theft success.
  */
 
 const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID;
 const GOOGLE_ADS_ID = process.env.NEXT_PUBLIC_GOOGLE_ADS_ID;
-const META_PIXEL_ENABLED =
-  META_PIXEL_ID &&
-  (process.env.NODE_ENV === 'production' || process.env.NEXT_PUBLIC_META_PIXEL_PREVIEW === 'true');
+const META_PIXEL_ENABLED = META_PIXEL_ID && process.env.NODE_ENV === 'production';
 
 function MetaPixelPageView() {
   const pathname = usePathname();
@@ -50,9 +47,22 @@ export default function TrackingPixels() {
     <>
       {META_PIXEL_ENABLED && (
         <>
-          <Script id="meta-pixel" strategy="afterInteractive">
-            {`!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${META_PIXEL_ID}');`}
-          </Script>
+          <Script
+            src="https://connect.facebook.net/en_US/fbevents.js"
+            strategy="afterInteractive"
+            onLoad={() => {
+              const fbqExists = typeof window !== 'undefined' && typeof window.fbq === 'function';
+              console.log('[MetaPixel] fbevents loaded, pixelId=', META_PIXEL_ID, ', typeof fbq=', typeof window?.fbq);
+              if (!fbqExists || !META_PIXEL_ID) return;
+              if (window.__fb_inited) return;
+              window.__fb_inited = true;
+              window.fbq('init', META_PIXEL_ID);
+              window.fbq('track', 'PageView');
+            }}
+            onError={(e) => {
+              console.error('[MetaPixel] fbevents failed to load', e);
+            }}
+          />
           <MetaPixelPageView />
         </>
       )}

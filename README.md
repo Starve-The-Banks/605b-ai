@@ -85,15 +85,34 @@ See `.env.example` for all required variables:
 - `STRIPE_*` - Payments
 - `ELEVENLABS_API_KEY` - TTS (optional)
 
+
+## E2E Tests (Purchase Meta Pixel)
+
+```bash
+# Run E2E test (requires env: STRIPE_SECRET_KEY, CLERK_TEST_USER_*, META_PIXEL_ID)
+npm run test:e2e
+
+# Run with visible browser for debugging
+npm run test:e2e -- --headed
+```
+
+See `.env.example` E2E section for required variables.
+
 ## Deployment
 
-Deployed on Vercel. Environment variables configured in Vercel dashboard.
+Deployed on Vercel (project **605b-ai**, scope `--scope 605b-ai`). Environment variables configured in Vercel dashboard.
 
 ```bash
 # Build for production
 npm run build
 
-# Deploy (auto on push to main)
+# Deploy to production (use safe script; never use raw vercel --prod)
+npm run vercel:prod:safe
+
+# Verify domain routing
+npm run vercel:check:domains
+
+# Auto-deploy on push to main (via Vercel Git integration)
 git push origin main
 ```
 

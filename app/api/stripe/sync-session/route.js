@@ -1,17 +1,11 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
+import { getStripe } from '@/lib/stripe';
 
 // Lazy initialization to avoid build-time errors
-let stripe = null;
 let redis = null;
 
-function getStripe() {
-  if (!stripe) {
-    const Stripe = require('stripe').default;
-    stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-  }
-  return stripe;
-}
+
 
 function getRedis() {
   if (!redis) {

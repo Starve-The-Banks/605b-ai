@@ -2,18 +2,12 @@ import { NextResponse } from 'next/server';
 import PDFDocument from 'pdfkit';
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { isBetaWhitelisted } from '@/lib/beta';
+import { getStripe } from '@/lib/stripe';
 
 // Lazy initialization
-let stripe = null;
 let redis = null;
 
-function getStripe() {
-  if (!stripe) {
-    const Stripe = require('stripe').default;
-    stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-  }
-  return stripe;
-}
+
 
 function getRedis() {
   if (!redis) {

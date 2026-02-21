@@ -1,11 +1,10 @@
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { logError } from '@/lib/logging';
+import { getStripe } from '@/lib/stripe';
 
 // Lazy initialization
 let redis = null;
-let stripe = null;
-
 function getRedis() {
   if (!redis) {
     const { Redis } = require('@upstash/redis');
@@ -14,13 +13,7 @@ function getRedis() {
   return redis;
 }
 
-function getStripe() {
-  if (!stripe) {
-    const Stripe = require('stripe').default;
-    stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-  }
-  return stripe;
-}
+
 
 function isAllowlisted(userId, user) {
   const allowlist = process.env.DEBUG_ENTITLEMENTS_ALLOWLIST;

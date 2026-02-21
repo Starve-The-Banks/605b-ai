@@ -88,15 +88,65 @@ See `.env.example` for all required variables:
 
 ## E2E Tests (Purchase Meta Pixel)
 
-```bash
-# Run E2E test (requires env: STRIPE_SECRET_KEY, CLERK_TEST_USER_*, META_PIXEL_ID)
-npm run test:e2e
+Two-lane verification system that keeps production safe:
 
-# Run with visible browser for debugging
-npm run test:e2e -- --headed
+### One-time auth setup
+
+```bash
+# Opens a browser — sign in manually, session is saved for all future tests
+npm run auth:save
 ```
 
-See `.env.example` E2E section for required variables.
+### Lane 1: Prod-safe pixel verification (no charges)
+
+Verifies the Meta Purchase pixel fires correctly against production WITHOUT
+creating any real Stripe checkout or charging anything. Intercepts the
+`/api/stripe/session` response to simulate a paid session.
+
+```bash
+npm run purchase:pixel:prod-safe
+```
+
+### Lane 2: Full Stripe checkout E2E (preview only, test mode)
+
+Runs a real Stripe Checkout with test card 4242 against a **preview deployment**
+that uses Stripe test-mode keys. Never touches production Stripe.
+
+```bash
+PREVIEW_URL=https://your-preview-url.vercel.app npm run purchase:pixel:preview-e2e
+```
+
+### Stripe test-mode setup for Lane 2
+
+1. Go to [Stripe Dashboard](https://dashboard.stripe.com) and toggle **Test mode** (top-right switch)
+2. Copy your test API keys from Developers > API keys:
+   - `sk_test_...` (Secret key)
+   - `pk_test_...` (Publishable key)
+3. Create three test-mode Prices (Products > + Add product, or use existing products):
+   - **Dispute Toolkit**: $39.00 USD, one-time → copy `price_...` ID
+   - **Advanced Dispute Suite**: $89.00 USD, one-time → copy `price_...` ID
+   - **605B Identity Theft Toolkit**: $179.00 USD, one-time → copy `price_...` ID
+4. Set Vercel Preview env vars:
+
+```bash
+vercel env add STRIPE_SECRET_KEY_TEST preview --scope 605b-ai
+vercel env add NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_TEST preview --scope 605b-ai
+vercel env add STRIPE_TOOLKIT_PRICE_ID_TEST preview --scope 605b-ai
+vercel env add STRIPE_ADVANCED_PRICE_ID_TEST preview --scope 605b-ai
+vercel env add STRIPE_IDENTITY_THEFT_PRICE_ID_TEST preview --scope 605b-ai
+vercel env add STRIPE_MODE preview --scope 605b-ai   # value: test
+```
+
+5. Redeploy preview: `git push origin main` (or `vercel --scope 605b-ai`)
+6. Run: `PREVIEW_URL=https://... npm run purchase:pixel:preview-e2e`
+
+### Checklist
+
+- [ ] `npm run auth:save` — sign in once, save session
+- [ ] `npm run purchase:pixel:prod-safe` — verify pixel fires (no charges)
+- [ ] Set Stripe test keys on Vercel Preview
+- [ ] Redeploy preview
+- [ ] `PREVIEW_URL=https://... npm run purchase:pixel:preview-e2e` — full checkout E2E
 
 ## Deployment
 

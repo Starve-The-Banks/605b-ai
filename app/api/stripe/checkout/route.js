@@ -1,18 +1,9 @@
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { stripeCheckoutSchema, validateBody } from '@/lib/validation';
+import { getStripe, getStripePriceId } from '@/lib/stripe';
 
-// Lazy initialization to avoid build-time errors
-let stripe = null;
 let redis = null;
-
-function getStripe() {
-  if (!stripe) {
-    const Stripe = require('stripe').default;
-    stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-  }
-  return stripe;
-}
 
 function getRedis() {
   if (!redis) {
@@ -40,19 +31,19 @@ const TIER_CONFIG = {
     features: ['1 PDF analysis (read-only)', 'Issue categorization', 'Educational walkthrough'],
   },
   toolkit: {
-    priceId: process.env.STRIPE_TOOLKIT_PRICE_ID,
+    priceId: getStripePriceId('STRIPE_TOOLKIT_PRICE_ID'),
     amount: 3900,  // $39.00 in cents
     name: 'Dispute Toolkit',
     features: ['Full analysis export', 'Core bureau templates', 'Dispute tracker'],
   },
   advanced: {
-    priceId: process.env.STRIPE_ADVANCED_PRICE_ID,
+    priceId: getStripePriceId('STRIPE_ADVANCED_PRICE_ID'),
     amount: 8900,  // $89.00 in cents
     name: 'Advanced Dispute Suite',
     features: ['Full template library (62)', 'Creditor templates', 'AI Strategist', 'CFPB/FTC generators'],
   },
   'identity-theft': {
-    priceId: process.env.STRIPE_IDENTITY_THEFT_PRICE_ID,
+    priceId: getStripePriceId('STRIPE_IDENTITY_THEFT_PRICE_ID'),
     amount: 17900,  // $179.00 in cents
     name: '605B Identity Theft Toolkit',
     features: ['605B workflows', 'FTC integration', 'Fraud affidavits', 'Attorney-ready docs'],
@@ -61,17 +52,17 @@ const TIER_CONFIG = {
 
 const ADDON_CONFIG = {
   'extra-analysis': {
-    priceId: process.env.STRIPE_EXTRA_ANALYSIS_PRICE_ID,
+    priceId: getStripePriceId('STRIPE_EXTRA_ANALYSIS_PRICE_ID'),
     amount: 700,
     name: 'Additional Report Analysis',
   },
   'ai-credits': {
-    priceId: process.env.STRIPE_AI_CREDITS_PRICE_ID,
+    priceId: getStripePriceId('STRIPE_AI_CREDITS_PRICE_ID'),
     amount: 1000,
     name: 'AI Strategist Credits',
   },
   'attorney-export': {
-    priceId: process.env.STRIPE_ATTORNEY_EXPORT_PRICE_ID,
+    priceId: getStripePriceId('STRIPE_ATTORNEY_EXPORT_PRICE_ID'),
     amount: 3900,
     name: 'Attorney Export Pack',
   },
@@ -80,7 +71,7 @@ const ADDON_CONFIG = {
 // Standalone products (no auth required)
 const STANDALONE_PRODUCT_CONFIG = {
   'identity_theft_packet': {
-    priceId: process.env.STRIPE_IDENTITY_THEFT_PACKET_PRICE_ID,
+    priceId: getStripePriceId('STRIPE_IDENTITY_THEFT_PACKET_PRICE_ID'),
     amount: 4900, // $49.00
     name: 'Identity Theft Dispute Packet',
   },

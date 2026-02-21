@@ -1,17 +1,11 @@
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
+import { getStripe, getStripePriceId } from '@/lib/stripe';
 
 // Lazy initialization
-let stripe = null;
 let redis = null;
 
-function getStripe() {
-  if (!stripe) {
-    const Stripe = require('stripe').default;
-    stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-  }
-  return stripe;
-}
+
 
 function getRedis() {
   if (!redis) {
@@ -76,9 +70,9 @@ const TIER_FEATURES = {
 
 // Price ID to tier mapping
 const PRICE_TO_TIER = {
-  [process.env.STRIPE_TOOLKIT_PRICE_ID]: 'toolkit',
-  [process.env.STRIPE_ADVANCED_PRICE_ID]: 'advanced',
-  [process.env.STRIPE_IDENTITY_THEFT_PRICE_ID]: 'identity-theft',
+  [getStripePriceId("STRIPE_TOOLKIT_PRICE_ID")]: 'toolkit',
+  [getStripePriceId("STRIPE_ADVANCED_PRICE_ID")]: 'advanced',
+  [getStripePriceId("STRIPE_IDENTITY_THEFT_PRICE_ID")]: 'identity-theft',
 };
 
 // Amount to tier mapping (fallback if price ID doesn't match)

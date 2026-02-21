@@ -1,18 +1,12 @@
 import { NextResponse } from 'next/server';
 import { LIMITS, rateLimit } from '@/lib/rateLimit';
 import { logError } from '@/lib/logging';
+import { getStripe, getStripePriceId } from '@/lib/stripe';
 
 // Lazy initialization to avoid build-time errors
-let stripe = null;
 let redis = null;
 
-function getStripe() {
-  if (!stripe) {
-    const Stripe = require('stripe').default;
-    stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-  }
-  return stripe;
-}
+
 
 function getRedis() {
   if (!redis) {
@@ -24,7 +18,7 @@ function getRedis() {
 
 // Product configuration - NEVER accept priceId from client
 const PRODUCT_CONFIG = {
-  priceId: process.env.STRIPE_IDENTITY_THEFT_PACKET_PRICE_ID,
+  priceId: getStripePriceId("STRIPE_IDENTITY_THEFT_PACKET_PRICE_ID"),
   name: 'Identity Theft Dispute Packet',
   amount: 4900, // $49.00 in cents
 };

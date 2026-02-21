@@ -11,7 +11,11 @@
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "vercel:prod:safe": "bash scripts/vercel-guard.sh && vercel --prod --scope 605b-ai",
     "vercel:check:domains": "vercel domains inspect 605b.ai --scope 605b-ai && vercel domains inspect www.605b.ai --scope 605b-ai",
-    "test:e2e": "playwright test tests/"
+    "test:e2e": "playwright test tests/",
+    "purchase:pixel:headed": "node scripts/run-purchase-pixel-headed.cjs",
+    "purchase:pixel:prod-safe": "playwright test tests/purchase-pixel-prod-safe.spec.cjs",
+    "purchase:pixel:preview-e2e": "playwright test tests/purchase-pixel-preview-e2e.spec.cjs",
+    "auth:save": "node scripts/clerk-auth-save.cjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",

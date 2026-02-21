@@ -43,3 +43,7 @@ coverage/
 # Vercel
 .vercel/
 .vercel
+
+# Playwright auth state & artifacts
+.playwright/
+test-results/

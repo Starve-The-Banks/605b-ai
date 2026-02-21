@@ -8,7 +8,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "vercel:prod:safe": "bash scripts/vercel-guard.sh && vercel --prod --scope 605b-ai",
+    "vercel:check:domains": "vercel domains inspect 605b.ai --scope 605b-ai && vercel domains inspect www.605b.ai --scope 605b-ai",
+    "test:e2e": "playwright test tests/"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",
@@ -29,6 +32,7 @@
     "zod": "^4.3.5"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@types/jest": "^30.0.0",
     "eslint": "^8.57.0",
     "eslint-config-next": "^14.2.35",

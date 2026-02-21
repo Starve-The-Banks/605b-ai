@@ -7,7 +7,7 @@ import { useEffect } from 'react';
 /**
  * Meta Pixel + Google Ads tracking.
  * Meta Pixel: loads only in production.
- * Uses official Meta bootstrap; fires PageView on load.
+ * Two-step setup: stub fbq, then load fbevents.js and init/track on load.
  */
 
 const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID;
@@ -33,28 +33,25 @@ export default function TrackingPixels() {
   return (
     <>
       {META_PIXEL_ENABLED && (
-        <Script id="meta-pixel" strategy="afterInteractive">
-          {`
-      !function(f,b,e,v,n,t,s)
-      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-      if(!f._fbq)f._fbq=n;
-      n.push=n;
-      n.loaded=!0;
-      n.version='2.0';
-      n.queue=[];
-      t=b.createElement(e);
-      t.async=!0;
-      t.src=v;
-      s=b.getElementsByTagName(e)[0];
-      s.parentNode.insertBefore(t,s);
-      }(window, document,'script',
-      'https://connect.facebook.net/en_US/fbevents.js');
-
-      fbq('init', '${META_PIXEL_ID}');
-      fbq('track', 'PageView');
-    `}
-        </Script>
+        <>
+          <Script
+            id="fbq-stub"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{
+              __html: "window.fbq = window.fbq || function(){ (window.fbq.q = window.fbq.q || []).push(arguments); }; window._fbq = window.fbq;"
+            }}
+          />
+          <Script
+            src="https://connect.facebook.net/en_US/fbevents.js"
+            strategy="afterInteractive"
+            onLoad={() => {
+              if (typeof window !== 'undefined' && typeof window.fbq === 'function') {
+                window.fbq('init', process.env.NEXT_PUBLIC_META_PIXEL_ID);
+                window.fbq('track', 'PageView');
+              }
+            }}
+          />
+        </>
       )}
       {GOOGLE_ADS_ID && (
         <>

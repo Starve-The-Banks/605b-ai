@@ -10,6 +10,7 @@ import {
   FileSearch, Lock, Plus, Menu, CheckCircle
 } from 'lucide-react';
 import { trackViewPricing, trackInitiateCheckout } from '@/lib/tracking';
+import SiteFooter from '@/app/components/SiteFooter';
 
 // Tier hierarchy for comparisons
 const TIER_LEVELS = {
@@ -1631,6 +1632,8 @@ export default function PricingPage() {
             <ArrowRight size={18} />
           </Link>
         </section>
+
+        <SiteFooter variant="full" />
       </div>
     </>
   );

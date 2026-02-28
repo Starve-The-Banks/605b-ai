@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { SUPPORT_EMAIL, SUPPORT_MAILTO } from '@/lib/constants';
+import SiteFooter from '@/app/components/SiteFooter';
 
 
 export default function AboutPage() {
@@ -1025,56 +1026,7 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* Footer */}
-        <footer className="footer">
-          <div className="footer-content">
-            <div className="footer-main">
-              <div className="footer-brand">
-                <Link href="/" className="footer-logo">
-                  <Image src="/logos/favicons/favicon.svg" alt="605b.ai" width={44} height={44} className="logo-icon" />
-                  <span className="logo-text">
-                    <span className="logo-text-main">605b</span><span className="logo-text-ext">.ai</span>
-                  </span>
-                </Link>
-                <p className="footer-tagline">Self-service software for credit dispute organization.</p>
-              </div>
-              <div className="footer-links">
-                <div className="footer-column">
-                  <div className="footer-column-title">Product</div>
-                  <Link href="/sign-up" className="footer-link">Get Started</Link>
-                  <Link href="/#features" className="footer-link">Features</Link>
-                  <Link href="/pricing" className="footer-link">Pricing</Link>
-                </div>
-                <div className="footer-column">
-                  <div className="footer-column-title">Company</div>
-                  <Link href="/about" className="footer-link">About</Link>
-                  <Link href="/terms" className="footer-link">Terms of Service</Link>
-                  <Link href="/privacy" className="footer-link">Privacy Policy</Link>
-                </div>
-                <div className="footer-column">
-                  <div className="footer-column-title">Contact</div>
-                  <a href={SUPPORT_MAILTO} className="footer-link">{SUPPORT_EMAIL}</a>
-                </div>
-              </div>
-            </div>
-            
-            <div className="footer-disclaimer">
-              <p className="disclaimer-text">
-                <strong>Important Disclaimer:</strong> 605b.ai provides software tools and educational guidance only. 
-                We are not a law firm, credit repair organization, or credit counseling service. We do not provide 
-                legal advice, credit repair services, or guarantees of any outcomes.
-              </p>
-            </div>
-
-            <div className="footer-bottom">
-              <div>© {new Date().getFullYear()} Ninth Wave Analytics LLC · Delaware, USA</div>
-              <div className="footer-bottom-links">
-                <Link href="/terms" className="footer-bottom-link">Terms</Link>
-                <Link href="/privacy" className="footer-bottom-link">Privacy</Link>
-              </div>
-            </div>
-          </div>
-        </footer>
+        <SiteFooter variant="full" />
       </div>
     </>
   );

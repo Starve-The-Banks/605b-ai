@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { ShieldCheck } from 'lucide-react';
+import SiteFooter from '@/app/components/SiteFooter';
 
 export default function PrivacyPolicy() {
   const effectiveDate = "January 23, 2026";
@@ -489,17 +490,7 @@ export default function PrivacyPolicy() {
         </div>
         </main>
 
-        <footer className="legal-footer">
-          <div className="legal-footer-inner">
-            <div className="legal-footer-links">
-              <Link href="/">Home</Link>
-              <Link href="/terms">Terms</Link>
-              <Link href="/contact">Contact</Link>
-              <a href="tel:+17606664106">(760) 666-4106</a>
-            </div>
-            <div className="legal-footer-copy">© {new Date().getFullYear()} Ninth Wave Analytics LLC</div>
-          </div>
-        </footer>
+        <SiteFooter variant="minimal" />
       </div>
     </>
   );

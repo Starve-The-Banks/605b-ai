@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useAuth } from '@clerk/nextjs';
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
+import SiteFooter from './components/SiteFooter';
 
 // Terminal animation scenes
 const terminalScenes = [
@@ -1643,27 +1644,7 @@ export default function LandingPage() {
           <p>Built for people who want direct control over their own credit dispute process.</p>
         </section>
 
-        {/* Footer */}
-        <footer>
-          <div className="footer-inner">
-            <Link href="/" className="logo">
-              <Image src="/logos/favicons/favicon.svg" alt="605b.ai" width={44} height={44} className="logo-icon" />
-              <span className="logo-text">
-                <span className="logo-text-main">605b</span><span className="logo-text-ext">.ai</span>
-              </span>
-            </Link>
-
-            <div className="footer-links">
-              <a href="https://www.annualcreditreport.com" target="_blank" rel="noopener noreferrer">Annual Credit Report</a>
-              <a href="https://www.cfpb.gov" target="_blank" rel="noopener noreferrer">CFPB</a>
-              <a href="https://www.ftc.gov" target="_blank" rel="noopener noreferrer">FTC</a>
-              <Link href="/privacy">Privacy</Link>
-              <Link href="/terms">Terms</Link>
-            </div>
-
-            <div className="footer-copy">© {new Date().getFullYear()} Ninth Wave Analytics LLC. Software tools only.</div>
-          </div>
-        </footer>
+        <SiteFooter variant="full" />
 
         {/* Lightbox */}
         {lightboxSrc && (

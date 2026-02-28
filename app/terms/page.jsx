@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { ShieldCheck } from 'lucide-react';
 import { SUPPORT_EMAIL } from '@/lib/constants';
+import SiteFooter from '@/app/components/SiteFooter';
 
 export default function TermsOfService() {
   const effectiveDate = "January 9, 2026";
@@ -415,16 +416,7 @@ export default function TermsOfService() {
         </div>
         </main>
 
-        <footer className="legal-footer">
-          <div className="legal-footer-inner">
-            <div className="legal-footer-links">
-              <Link href="/">Home</Link>
-              <Link href="/privacy">Privacy</Link>
-              <a href="mailto:legal@605b.ai">Contact</a>
-            </div>
-            <div className="legal-footer-copy">© {new Date().getFullYear()} Ninth Wave Analytics LLC</div>
-          </div>
-        </footer>
+        <SiteFooter variant="minimal" />
       </div>
     </>
   );

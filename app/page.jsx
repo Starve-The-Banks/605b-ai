@@ -1502,23 +1502,26 @@ export default function LandingPage() {
             <Terminal reducedMotion={reducedMotion} />
           </div>
           <div className="hero-content">
-            <div className="hero-eyebrow">Statute-Driven Credit Reinvestigation Platform</div>
-            <h1>Credit Reinvestigation,<br /><span className="highlight">Structured Under Federal Law</span></h1>
+            <div className="hero-eyebrow">Credit Dispute Documentation Software</div>
+            <h1>Automate Your<br /><span className="highlight">Dispute Documentation</span></h1>
             <p className="hero-desc">
-              Organize disputes, generate statute-specific letters, and track every deadline.
+              Like TurboTax for credit disputes — upload your report, identify discrepancies, generate statute-specific letters, and track every deadline. Identity theft recovery workflows included.
             </p>
             <div className="hero-buttons">
               {mounted && isSignedIn ? (
                 <Link href="/dashboard" className="btn btn-orange btn-lg">Go to Dashboard →</Link>
               ) : (
                 <>
-                  <Link href="/sign-up" className="btn btn-orange btn-lg">Start Report Analysis →</Link>
-                  <a href="#steps" className="btn btn-outline btn-lg">How It Works</a>
+                  <Link href="/sign-up" className="btn btn-orange btn-lg">Start Analysis →</Link>
+                  <Link href="/pricing" className="btn btn-outline btn-lg">See Pricing</Link>
                 </>
               )}
             </div>
-            <p className="hero-pricing-hint">Free to analyze your report. Upgrade when you're ready to act.</p>
-            <p className="hero-disclaimer">Software tools only. No guarantees. Not legal advice.</p>
+            <div className="hero-buttons" style={{ marginTop: '0', opacity: 1, animation: 'fadeInUp 0.6s ease 0.65s forwards' }}>
+              <a href="#features" className="btn btn-ghost btn-lg" style={{ padding: '10px 20px', fontSize: '15px' }}>View Templates & Tools ↓</a>
+            </div>
+            <p className="hero-pricing-hint">Free to analyze your report. One-time purchase to unlock tools.</p>
+            <p className="hero-disclaimer">Software tools only. Not a credit repair service. No guarantees. Not legal advice.</p>
           </div>
         </section>
 
@@ -1629,13 +1632,13 @@ export default function LandingPage() {
         {/* CTA */}
         <section className="cta">
           <div className="cta-inner">
-            <h2>Ready to structure your reinvestigation?</h2>
-            <p>Start with a report analysis. Identify discrepancies, generate documentation, and track statutory timelines.</p>
+            <h2>Ready to organize your dispute process?</h2>
+            <p>Upload your report, identify discrepancies, generate documentation, and track every statutory deadline.</p>
             <div className="cta-buttons">
-              <Link href="/sign-up" className="btn btn-orange btn-lg">Start Report Analysis →</Link>
-              <a href="https://www.annualcreditreport.com" target="_blank" rel="noopener noreferrer" className="btn btn-outline btn-lg">Get Free Reports</a>
+              <Link href="/sign-up" className="btn btn-orange btn-lg">Start Analysis →</Link>
+              <Link href="/pricing" className="btn btn-outline btn-lg">See Pricing</Link>
             </div>
-            <p className="cta-disclaimer">Software tools only. No guarantees. Not legal advice.</p>
+            <p className="cta-disclaimer">605b.ai is software that helps users generate and organize dispute documentation. It is not a credit repair organization and does not provide legal advice.</p>
           </div>
         </section>
 

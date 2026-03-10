@@ -257,6 +257,7 @@ export default function PrivacyPolicy() {
             <p style={{ marginBottom: '16px' }}>We share information with third-party service providers who perform services on our behalf:</p>
             <ul style={{ marginBottom: '16px', paddingLeft: '24px' }}>
               <li style={{ marginBottom: '8px' }}><strong>Clerk:</strong> Authentication and user management</li>
+              <li style={{ marginBottom: '8px' }}><strong>Stripe:</strong> Payment processing for one-time software license purchases. We do not store your full credit card number, expiration date, or CVV. Stripe handles all payment data in accordance with PCI DSS standards. See <a href="https://stripe.com/privacy" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--orange)' }}>Stripe&apos;s Privacy Policy</a>.</li>
               <li style={{ marginBottom: '8px' }}><strong>Anthropic:</strong> AI processing for credit report analysis (credit report content is processed but not stored by Anthropic)</li>
               <li style={{ marginBottom: '8px' }}><strong>Upstash:</strong> Database services for storing your disputes, settings, and audit logs</li>
               <li style={{ marginBottom: '8px' }}><strong>Resend:</strong> Email delivery for notifications and reminders</li>

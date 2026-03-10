@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { Trash2 } from 'lucide-react';
+import { SUPPORT_EMAIL, SUPPORT_MAILTO } from '@/lib/constants';
 
 export default function DeleteAccountPage() {
   return (
@@ -207,8 +208,8 @@ export default function DeleteAccountPage() {
               </h3>
               <p>
                 If you are unable to access the app, you can request account deletion by emailing{' '}
-                <a href="mailto:support@605b.ai" style={{ color: 'var(--orange)', textDecoration: 'none' }}>
-                  support@605b.ai
+                <a href={SUPPORT_MAILTO} style={{ color: 'var(--orange)', textDecoration: 'none' }}>
+                  {SUPPORT_EMAIL}
                 </a>{' '}
                 from the email address associated with your account. We will process your request within 5 business days.
               </p>
@@ -267,8 +268,8 @@ export default function DeleteAccountPage() {
               </h2>
               <p style={{ marginBottom: '0' }}>
                 If you have questions about account deletion or your data, contact us at{' '}
-                <a href="mailto:support@605b.ai" style={{ color: 'var(--orange)', textDecoration: 'none' }}>
-                  support@605b.ai
+                <a href={SUPPORT_MAILTO} style={{ color: 'var(--orange)', textDecoration: 'none' }}>
+                  {SUPPORT_EMAIL}
                 </a>
                 . For details on how we handle your data, see our{' '}
                 <Link href="/privacy" style={{ color: 'var(--orange)', textDecoration: 'none' }}>
@@ -287,7 +288,7 @@ export default function DeleteAccountPage() {
               <Link href="/">Home</Link>
               <Link href="/privacy">Privacy</Link>
               <Link href="/terms">Terms</Link>
-              <a href="mailto:support@605b.ai">Contact</a>
+              <a href={SUPPORT_MAILTO}>Contact</a>
             </div>
             <div className="legal-footer-copy">&copy; {new Date().getFullYear()} Ninth Wave Analytics LLC</div>
           </div>

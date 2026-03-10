@@ -290,6 +290,12 @@ export default function TermsOfService() {
             <p style={{ marginBottom: '16px' }}>
               The Service offers both free and paid tiers. Paid tiers require a one-time payment for a perpetual software license. All prices are listed in U.S. dollars and are subject to change without notice.
             </p>
+            <p style={{ marginBottom: '16px' }}>
+              Payments are processed by <strong>Stripe, Inc.</strong> We do not store your full credit card details on our servers. All payment information is handled directly by Stripe in accordance with PCI DSS standards. Your use of Stripe is subject to Stripe&apos;s terms and privacy policy.
+            </p>
+            <p style={{ marginBottom: '16px' }}>
+              User authentication is provided by <strong>Clerk</strong>. Your account credentials and session management are handled by Clerk&apos;s infrastructure. Your use of your account is subject to maintaining accurate credentials as described in Section 3.3.
+            </p>
 
             <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--orange)', marginBottom: '12px' }}>5.2 Refund Policy</h3>
             <p style={{ marginBottom: '16px' }}>

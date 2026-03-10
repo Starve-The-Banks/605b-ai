@@ -65,7 +65,7 @@ export async function DELETE() {
   } catch (error) {
     console.error('[Account Deletion] Failed:', error);
     return NextResponse.json(
-      { error: 'Failed to delete account. Please try again or contact support@9thwave.io.' },
+      { error: 'Failed to delete account. Please try again or contact support@605b.ai.' },
       { status: 500 }
     );
   }

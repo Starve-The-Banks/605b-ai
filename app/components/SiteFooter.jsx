@@ -30,9 +30,9 @@ export default function SiteFooter({ variant = 'full' }) {
             lineHeight: 1.7,
             marginBottom: '16px',
           }}>
-            <strong>Disclaimer:</strong> 605b.ai provides software tools and educational guidance only.
-            We are not a law firm, credit repair organization, or credit counseling service.
-            We do not provide legal advice, credit repair services, or guarantees of any outcomes.
+            <strong>Disclaimer:</strong> 605b.ai is software that helps users generate and organize dispute documentation.
+            It is not a credit repair organization and does not provide legal advice.
+            We are not a law firm or credit counseling service. No guarantees of any outcomes.
           </div>
           <div style={{
             display: 'flex',
@@ -137,9 +137,10 @@ export default function SiteFooter({ variant = 'full' }) {
         {/* Disclaimer */}
         <div style={{ paddingTop: '24px', borderTop: '1px solid var(--border)' }}>
           <p style={{ fontSize: '12px', color: 'var(--text-muted)', lineHeight: 1.7 }}>
-            <strong>Important Disclaimer:</strong> 605b.ai provides software tools and educational guidance only.
-            We are not a law firm, credit repair organization, or credit counseling service. We do not provide
-            legal advice, credit repair services, or guarantees of any outcomes. Results depend on individual circumstances.
+            <strong>Important Disclaimer:</strong> 605b.ai is software that helps users generate and organize
+            dispute documentation. It is not a credit repair organization and does not provide legal advice.
+            We are not a law firm or credit counseling service. We do not guarantee any outcomes.
+            Results depend on individual circumstances.
           </p>
         </div>
 
@@ -155,7 +156,7 @@ export default function SiteFooter({ variant = 'full' }) {
           flexWrap: 'wrap',
           gap: '16px',
         }}>
-          <div>© {year} {COMPANY_NAME} · Delaware, USA</div>
+          <div>© {year} {COMPANY_NAME} · 605b.ai is operated by Ninth Wave Analytics LLC.</div>
           <div style={{ display: 'flex', gap: '24px' }}>
             <Link href="/terms" style={{ fontSize: '13px', color: 'var(--text-muted)', textDecoration: 'none' }}>Terms</Link>
             <Link href="/privacy" style={{ fontSize: '13px', color: 'var(--text-muted)', textDecoration: 'none' }}>Privacy</Link>

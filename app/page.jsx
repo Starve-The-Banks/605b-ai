@@ -1513,12 +1513,9 @@ export default function LandingPage() {
               ) : (
                 <>
                   <Link href="/sign-up" className="btn btn-orange btn-lg">Start Analysis →</Link>
-                  <Link href="/pricing" className="btn btn-outline btn-lg">See Pricing</Link>
+                  <a href="#features" className="btn btn-outline btn-lg">View Templates</a>
                 </>
               )}
-            </div>
-            <div className="hero-buttons" style={{ marginTop: '0', opacity: 1, animation: 'fadeInUp 0.6s ease 0.65s forwards' }}>
-              <a href="#features" className="btn btn-ghost btn-lg" style={{ padding: '10px 20px', fontSize: '15px' }}>View Templates & Tools ↓</a>
             </div>
             <p className="hero-pricing-hint">Free to analyze your report. One-time purchase to unlock tools.</p>
             <p className="hero-disclaimer">Software tools only. Not a credit repair service. No guarantees. Not legal advice.</p>

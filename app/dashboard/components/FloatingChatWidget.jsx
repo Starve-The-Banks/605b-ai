@@ -46,20 +46,20 @@ const CONTEXTUAL_PROMPTS = {
 // Page-specific welcome messages
 const PAGE_CONTEXT = {
   analyze: "I see you're on the Analyze page. Need help downloading your credit reports or understanding what to look for?",
-  chat: "Ask me anything about credit repair, identity theft, or your rights under the FCRA.",
+  chat: "Ask me anything about credit disputes, identity theft, or your rights under the FCRA.",
   templates: "Looking at letter templates? I can help you pick the right one and explain how to customize it.",
   tracker: "Managing your disputes? I can explain deadlines, next steps, and what to do if they don't respond.",
   flagged: "These are items you've flagged for action. Want help prioritizing or understanding your options?",
   audit: "Your audit log tracks everything for potential legal action. Need help understanding how to use it?"
 };
 
-const SYSTEM_PROMPT = `You are 605b.ai's help assistant embedded in a credit repair application. You help users navigate the app and understand their rights.
+const SYSTEM_PROMPT = `You are 605b.ai's help assistant embedded in a credit dispute documentation application. You help users navigate the app and understand their rights.
 
 CURRENT CONTEXT: The user is viewing the {PAGE} page of the dashboard.
 
 Your role:
 - Help users understand how to use the current page
-- Explain credit repair concepts in simple, non-technical language
+- Explain credit dispute concepts in simple, non-technical language
 - Guide them through getting their credit reports
 - Answer questions about FCRA, FDCPA, and their rights
 - Be encouraging - many users are stressed about their credit situation

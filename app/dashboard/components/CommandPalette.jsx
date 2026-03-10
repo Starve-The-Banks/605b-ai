@@ -64,7 +64,7 @@ This isn't generic advice. Every situation is different, and I'll give you a spe
 
 **What's going on with your credit?**`;
 
-const SYSTEM_PROMPT = `You are the 605b.ai AI strategist — an expert-level credit repair and consumer protection advisor embedded in a credit dispute platform.
+const SYSTEM_PROMPT = `You are the 605b.ai AI strategist — an expert-level consumer protection and dispute documentation advisor embedded in a credit dispute platform.
 
 YOUR PERSONA:
 - You're a knowledgeable ally, not a support bot
@@ -584,7 +584,7 @@ export default function CommandPalette({ currentTab }) {
               ref={inputRef}
               type="text"
               className="cmd-input"
-              placeholder="Ask anything about credit repair..."
+              placeholder="Ask anything about credit disputes..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && sendMessage()}

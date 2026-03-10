@@ -634,7 +634,7 @@ export default function AIStrategistPage() {
           feature="ai-chat"
           requiredTier="advanced"
           title="Unlock AI Strategist"
-          description="Get personalized credit repair guidance with our AI strategist. Ask questions about your specific situation, get letter recommendations, and learn your rights under FCRA."
+          description="Get personalized dispute documentation guidance with our AI strategist. Ask questions about your specific situation, get letter recommendations, and learn your rights under FCRA."
         />
       </div>
     );

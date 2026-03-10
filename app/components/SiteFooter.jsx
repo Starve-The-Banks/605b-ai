@@ -46,10 +46,11 @@ export default function SiteFooter({ variant = 'full' }) {
               <Link href="/privacy" style={{ fontSize: '13px', color: 'var(--text-muted)', textDecoration: 'none' }}>Privacy</Link>
               <Link href="/terms" style={{ fontSize: '13px', color: 'var(--text-muted)', textDecoration: 'none' }}>Terms</Link>
               <Link href="/contact" style={{ fontSize: '13px', color: 'var(--text-muted)', textDecoration: 'none' }}>Contact</Link>
+              <a href={SUPPORT_MAILTO} style={{ fontSize: '13px', color: 'var(--text-muted)', textDecoration: 'none' }}>{SUPPORT_EMAIL}</a>
               <a href={COMPANY_PHONE_TEL} style={{ fontSize: '13px', color: 'var(--text-muted)', textDecoration: 'none' }}>{COMPANY_PHONE}</a>
             </div>
             <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-              © {year} {COMPANY_NAME}
+              © {year} {COMPANY_NAME} · 605b.ai is operated by Ninth Wave Analytics LLC.
             </div>
           </div>
         </div>

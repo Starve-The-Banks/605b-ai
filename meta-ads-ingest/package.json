@@ -1,0 +1,23 @@
+{
+  "name": "meta-ads-ingest",
+  "version": "1.0.0",
+  "description": "Meta Ads API ingestion script",
+  "main": "fetch-meta-ads.js",
+  "scripts": {
+    "start": "node fetch-meta-ads.js",
+    "pipeline": "node run-pipeline.js",
+    "report": "node generate-report.js",
+    "export": "node export-dashboard-json.js",
+    "api-calls": "node generate-api-calls.js",
+    "traffic": "node generate_ads_api_traffic.js",
+    "seed-meta-telemetry": "node metaTelemetrySeeder.js",
+    "seed-meta-telemetry:dry": "node metaTelemetrySeeder.js --dry-run",
+    "telemetry:report": "node metaTelemetrySeeder.js --report-only"
+  },
+  "dependencies": {
+    "axios": "^1.6.8",
+    "dotenv": "^16.4.5",
+    "pg": "^8.11.3",
+    "simple-statistics": "^7.8.3"
+  }
+}

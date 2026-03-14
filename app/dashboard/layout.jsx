@@ -12,7 +12,7 @@ import Image from 'next/image';
 import OnboardingWizard from './components/OnboardingWizard';
 import { useUserTier, AccessRestrictionBanner } from '@/lib/useUserTier';
 import { trackPurchase } from '@/lib/tracking';
-import { trackLead, trackPurchase as metaTrackPurchase } from '@/lib/metaPixel';
+import { trackLead } from '@/lib/metaPixel';
 
 // Payment sync banner component
 function PaymentSyncBanner({ isPolling, syncComplete, tier }) {
@@ -234,17 +234,39 @@ function DashboardLayoutContent({ children }) {
     const sessionId = searchParams?.get('session_id');
 
     if (isPaymentSuccess && purchasedTier && !isPollingForPayment && !paymentSyncComplete) {
-      // Payment just completed - start sync/polling if tier doesn't match yet
       if (tier === 'free' || tier !== purchasedTier) {
-        if (!purchaseFiredRef.current) {
-          purchaseFiredRef.current = true;
-          console.log('[Dashboard] Payment success detected, starting sync for:', purchasedTier, 'session:', sessionId);
-          const tierPrices = { toolkit: 39, advanced: 89, 'identity-theft': 179 };
-          const value = tierPrices[purchasedTier] || 0;
-          metaTrackPurchase({ tier: purchasedTier, value }, sessionId || undefined);
-          trackPurchase({ tier: purchasedTier, value });
-        }
+        console.log('[Dashboard] Payment success detected, starting sync for:', purchasedTier, 'session:', sessionId);
         startPaymentPolling(purchasedTier, sessionId);
+      }
+
+      if (!purchaseFiredRef.current) {
+        (async () => {
+          const tierPrices = { toolkit: 39, advanced: 89, 'identity-theft': 179 };
+          let value = tierPrices[purchasedTier] || 0;
+          let currency = 'USD';
+
+          if (sessionId) {
+            try {
+              const res = await fetch(`/api/stripe/session?session_id=${encodeURIComponent(sessionId)}`);
+              if (res.ok) {
+                const data = await res.json();
+                value = data.value ?? value;
+                currency = data.currency ?? currency;
+              } else if (res.status === 402) {
+                return;
+              }
+            } catch (_) {}
+          }
+
+          purchaseFiredRef.current = true;
+          if (process.env.NEXT_PUBLIC_PIXEL_DEBUG === 'true') {
+            console.log('[MetaPixel] Purchase:', { value, currency });
+          }
+          if (typeof window !== 'undefined' && typeof window.fbq === 'function') {
+            window.fbq('track', 'Purchase', { value, currency });
+          }
+          trackPurchase({ tier: purchasedTier, value });
+        })();
       }
     }
   }, [searchParams, tier, isPollingForPayment, paymentSyncComplete, startPaymentPolling]);

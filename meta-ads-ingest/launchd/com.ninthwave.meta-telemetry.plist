@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.ninthwave.meta-telemetry</string>
+  <key>WorkingDirectory</key>
+  <string>__REPO_DIR__</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>-c</string>
+    <string>set -a; [ -f __REPO_DIR__/.secrets/meta.env ] &amp;&amp; source __REPO_DIR__/.secrets/meta.env; set +a; export PATH="/usr/local/bin:/opt/homebrew/bin:$PATH"; cd __REPO_DIR__ &amp;&amp; __NODE_PATH__ metaTelemetrySeeder.js</string>
+  </array>
+  <key>StartInterval</key>
+  <integer>10800</integer>
+  <key>RunAtLoad</key>
+  <false/>
+  <key>StandardOutPath</key>
+  <string>__HOME__/Library/Logs/meta-telemetry.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>__HOME__/Library/Logs/meta-telemetry.err.log</string>
+</dict>
+</plist>

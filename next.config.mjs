@@ -8,9 +8,10 @@ const nextConfig = {
     const cspDirectives = [
       "default-src 'self'",
       // Note: unsafe-inline/unsafe-eval needed for Next.js dynamic features
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.clerk.com https://clerk.605b.ai https://clerk.accounts.dev https://*.clerk.accounts.dev https://challenges.cloudflare.com https://js.stripe.com https://connect.facebook.net",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.clerk.com https://clerk.605b.ai https://clerk.accounts.dev https://*.clerk.accounts.dev https://challenges.cloudflare.com https://js.stripe.com https://connect.facebook.net https://www.facebook.com",
+      "script-src-elem 'self' 'unsafe-inline' 'unsafe-eval' https://js.clerk.com https://clerk.605b.ai https://clerk.accounts.dev https://*.clerk.accounts.dev https://challenges.cloudflare.com https://js.stripe.com https://connect.facebook.net https://www.facebook.com",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "img-src 'self' data: blob: https://*.clerk.com https://img.clerk.com",
+      "img-src 'self' data: blob: https://*.clerk.com https://img.clerk.com https://www.facebook.com",
       "font-src 'self' data: https://fonts.gstatic.com",
       "connect-src 'self' https://clerk.605b.ai https://api.clerk.dev https://clerk.accounts.dev https://*.clerk.accounts.dev https://*.clerk.com https://accounts.google.com https://api.stripe.com https://api.elevenlabs.io https://api.anthropic.com wss://*.clerk.accounts.dev https://connect.facebook.net https://www.facebook.com",
       "frame-src 'self' https://accounts.google.com https://clerk.accounts.dev https://*.clerk.accounts.dev https://challenges.cloudflare.com https://js.stripe.com https://hooks.stripe.com",

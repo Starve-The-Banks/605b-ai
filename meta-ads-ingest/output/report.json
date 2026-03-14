@@ -1,0 +1,44 @@
+{
+  "generated_at": "2026-03-10T04:47:13.280Z",
+  "period": {
+    "account_summary": "Last 30 days",
+    "performance_data": "Last 7 days"
+  },
+  "account_summary": {
+    "active_days": "0",
+    "total_spend": "0",
+    "total_impressions": "0",
+    "total_clicks": "0",
+    "avg_ctr": "0",
+    "avg_cpc": "0",
+    "avg_cpm": "0",
+    "total_reach": "0",
+    "spend_trend": "stable",
+    "spend_volatility": "0.00"
+  },
+  "campaign_performance": [],
+  "adset_performance": [],
+  "top_performers": [],
+  "worst_performers": [],
+  "anomalies": {
+    "total_count": 0,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "recent_events": []
+  },
+  "insights": {
+    "total_campaigns": 0,
+    "total_adsets": 0,
+    "active_campaigns": 0,
+    "budget_utilization": 0,
+    "avg_performance_score": 0,
+    "high_performing_ads": 0
+  },
+  "data_quality": {
+    "campaigns_with_data": 0,
+    "adsets_with_data": 0,
+    "data_freshness": null
+  }
+}

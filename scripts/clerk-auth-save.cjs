@@ -22,12 +22,13 @@ const AUTH_FILE = path.join(__dirname, '..', '.playwright', 'auth.json');
   const context = await browser.newContext();
   const page = await context.newPage();
 
-  await page.goto(BASE_URL + '/sign-in', { waitUntil: 'networkidle' });
+  await page.goto(BASE_URL + '/sign-in', { waitUntil: 'domcontentloaded', timeout: 60000 });
 
   console.log('\n=== Sign in manually in the browser window ===');
-  console.log('Once you reach /dashboard, the session will be saved automatically.\n');
+  console.log('Once you reach /dashboard, the session will be saved automatically.');
+  console.log('You have 5 minutes.\n');
 
-  await page.waitForURL(/\/dashboard/, { timeout: 120_000 });
+  await page.waitForURL(/\/dashboard/, { timeout: 300_000 });
   console.log('Dashboard reached — saving storageState...');
 
   await context.storageState({ path: AUTH_FILE });

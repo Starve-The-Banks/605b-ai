@@ -1,0 +1,37 @@
+[
+  {
+    "name": "homepage",
+    "url": "https://605b.ai",
+    "path": "/Users/seek/Desktop/creditclear-app/underwriting-proof/screenshots/homepage.png",
+    "success": true,
+    "description": "Homepage"
+  },
+  {
+    "name": "features",
+    "url": "https://605b.ai/#features",
+    "path": "/Users/seek/Desktop/creditclear-app/underwriting-proof/screenshots/features.png",
+    "success": true,
+    "description": "Features section"
+  },
+  {
+    "name": "pricing",
+    "url": "https://605b.ai/#pricing",
+    "path": "/Users/seek/Desktop/creditclear-app/underwriting-proof/screenshots/pricing.png",
+    "success": true,
+    "description": "Pricing section"
+  },
+  {
+    "name": "privacy-policy",
+    "url": "https://605b.ai/privacy",
+    "path": "/Users/seek/Desktop/creditclear-app/underwriting-proof/screenshots/privacy-policy.png",
+    "success": true,
+    "description": "Privacy Policy"
+  },
+  {
+    "name": "terms-of-service",
+    "url": "https://605b.ai/terms",
+    "path": "/Users/seek/Desktop/creditclear-app/underwriting-proof/screenshots/terms-of-service.png",
+    "success": true,
+    "description": "Terms of Service"
+  }
+]

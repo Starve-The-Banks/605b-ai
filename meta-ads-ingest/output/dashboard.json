@@ -1,0 +1,85 @@
+{
+  "generated_at": "2026-03-10T04:47:13.279Z",
+  "period": "Last 7 days",
+  "kpis": {
+    "total_spend": 0,
+    "total_impressions": 0,
+    "total_clicks": 0,
+    "avg_ctr": 0,
+    "avg_cpc": 0,
+    "avg_cpm": 0
+  },
+  "charts": {
+    "daily_spend": {
+      "type": "line",
+      "title": "Daily Spend Trend",
+      "data": [],
+      "summary": {
+        "total_days": 0,
+        "avg_daily_spend": 0
+      }
+    },
+    "campaign_distribution": {
+      "type": "pie",
+      "title": "Campaign Spend Distribution",
+      "data": [],
+      "summary": {
+        "total_campaigns": 0,
+        "active_campaigns": 0
+      }
+    },
+    "grade_distribution": {
+      "type": "bar",
+      "title": "Ad Performance Grades",
+      "data": [],
+      "summary": {
+        "total_ads": 0,
+        "high_performers": 0
+      }
+    },
+    "anomaly_timeline": {
+      "type": "scatter",
+      "title": "Anomaly Events Timeline",
+      "data": [],
+      "summary": {
+        "total_anomalies": 0,
+        "days_with_anomalies": 0
+      }
+    },
+    "performance_trends": {
+      "type": "line",
+      "title": "Daily Performance Trends",
+      "data": []
+    }
+  },
+  "tables": {
+    "adset_performance": {
+      "title": "Top Adsets by Spend",
+      "columns": [
+        "name",
+        "spend",
+        "clicks",
+        "ctr",
+        "cpc",
+        "status"
+      ],
+      "data": []
+    }
+  },
+  "alerts": {
+    "total": 0,
+    "by_severity": {},
+    "latest_event": null
+  },
+  "meta": {
+    "data_freshness": "2026-03-10T04:47:13.279Z",
+    "refresh_interval": "1 hour",
+    "version": "2.0.0",
+    "data_quality": {
+      "campaigns_with_data": 0,
+      "adsets_with_data": 0,
+      "ads_with_scores": 0,
+      "anomalies_detected": 0
+    }
+  }
+}

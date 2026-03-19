@@ -13,10 +13,12 @@ import { verifyAppleReceipt, verifyGoogleReceipt } from '@/lib/iap-verify';
  *   { platform: 'ios' | 'android', receipts: [{ receiptData, productId, transactionId }] }
  */
 
+// Must match mobile client (creditclear-mobile/src/payments/config.ts)
+// and store product IDs registered in App Store Connect / Google Play Console.
 const PRODUCT_TO_TIER = {
-  'com.creditclear.app.toolkit': 'toolkit',
-  'com.creditclear.app.advanced': 'advanced',
-  'com.creditclear.app.identity_theft': 'identity-theft',
+  'com.creditclear.toolkit': 'toolkit',
+  'com.creditclear.advanced': 'advanced',
+  'com.creditclear.identitytheft': 'identity-theft',
 };
 
 const TIER_LEVEL = {

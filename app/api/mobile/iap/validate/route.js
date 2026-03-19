@@ -21,11 +21,14 @@ import { verifyAppleReceipt, verifyGoogleReceipt } from '@/lib/iap-verify';
  * without blocking on store configuration.
  */
 
-// Map product IDs to tier names
+// Map product IDs to tier names.
+// These must match exactly what is registered in App Store Connect and
+// Google Play Console AND what the mobile client sends in IAP_PRODUCTS
+// (see creditclear-mobile/src/payments/config.ts).
 const PRODUCT_TO_TIER = {
-  'com.creditclear.app.toolkit': 'toolkit',
-  'com.creditclear.app.advanced': 'advanced',
-  'com.creditclear.app.identity_theft': 'identity-theft',
+  'com.creditclear.toolkit': 'toolkit',
+  'com.creditclear.advanced': 'advanced',
+  'com.creditclear.identitytheft': 'identity-theft',
 };
 
 // Tier feature definitions (must match lib/useUserTier.js)

@@ -1502,23 +1502,23 @@ export default function LandingPage() {
             <Terminal reducedMotion={reducedMotion} />
           </div>
           <div className="hero-content">
-            <div className="hero-eyebrow">Credit Dispute Documentation Software</div>
-            <h1>Automate Your<br /><span className="highlight">Dispute Documentation</span></h1>
+            <div className="hero-eyebrow">Credit Report Scanner</div>
+            <h1>Scan Your Credit Report for<br /><span className="highlight">Accounts You Don&apos;t Recognize</span></h1>
             <p className="hero-desc">
-              Like TurboTax for credit disputes — upload your report, identify discrepancies, generate statute-specific letters, and track every deadline. Identity theft recovery workflows included.
+              Upload your credit report and scan it for accounts you don&apos;t recognize, inaccurate information, and items worth reviewing.
             </p>
             <div className="hero-buttons">
               {mounted && isSignedIn ? (
                 <Link href="/dashboard" className="btn btn-orange btn-lg">Go to Dashboard →</Link>
               ) : (
                 <>
-                  <Link href="/sign-up" className="btn btn-orange btn-lg">Start Analysis →</Link>
-                  <a href="#features" className="btn btn-outline btn-lg">View Templates</a>
+                  <Link href="/sign-up" className="btn btn-orange btn-lg">Scan My Credit Report →</Link>
+                  <a href="#steps" className="btn btn-outline btn-lg">How It Works</a>
                 </>
               )}
             </div>
-            <p className="hero-pricing-hint">Free to analyze your report. One-time purchase to unlock tools.</p>
-            <p className="hero-disclaimer">Software tools only. Not a credit repair service. No guarantees. Not legal advice.</p>
+            <p className="hero-pricing-hint">Free to scan. One-time purchase to unlock dispute tools.</p>
+            <p className="hero-disclaimer">Secure processing · Uploaded PDFs are not stored · Software tools only · No guaranteed results</p>
           </div>
         </section>
 

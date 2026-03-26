@@ -58,61 +58,68 @@ const clerkAppearance = {
     colorBackground: '#0C0C0C',
     colorText: '#FAFAFA',
     colorTextSecondary: '#A0A0A0',
+    colorNeutral: '#A0A0A0',
     colorInputBackground: '#141414',
     colorInputText: '#FAFAFA',
+    borderRadius: '8px',
+    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
   },
   elements: {
     formButtonPrimary: {
       backgroundColor: '#FF6B35',
       color: '#FFFFFF',
-      '&:hover': {
-        backgroundColor: '#E55A2B',
-      },
+      fontWeight: 600,
+      '&:hover': { backgroundColor: '#E55A2B' },
+      '&:focus': { boxShadow: '0 0 0 3px rgba(255, 107, 53, 0.25)' },
     },
     socialButtonsBlockButton: {
-      backgroundColor: '#1A1A1A',
+      backgroundColor: '#1E1E1E',
       color: '#FAFAFA',
-      borderColor: '#2A2A2A',
-      '&:hover': {
-        backgroundColor: '#2A2A2A',
-      },
+      borderColor: '#333333',
+      fontWeight: 500,
+      minHeight: '44px',
+      '&:hover': { backgroundColor: '#2A2A2A', borderColor: '#444444' },
     },
     socialButtonsBlockButtonText: {
       color: '#FAFAFA',
+      fontWeight: 500,
+    },
+    socialButtonsIconBox: {
+      width: '20px',
+      height: '20px',
     },
     card: {
       backgroundColor: '#141414',
       borderColor: '#2A2A2A',
+      boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
     },
-    headerTitle: {
-      color: '#FAFAFA',
-    },
-    headerSubtitle: {
-      color: '#A0A0A0',
-    },
-    dividerLine: {
-      backgroundColor: '#2A2A2A',
-    },
-    dividerText: {
-      color: '#666666',
-    },
-    formFieldLabel: {
-      color: '#A0A0A0',
-    },
+    headerTitle: { color: '#FAFAFA' },
+    headerSubtitle: { color: '#A0A0A0' },
+    dividerLine: { backgroundColor: '#2A2A2A' },
+    dividerText: { color: '#555555', fontSize: '12px' },
+    formFieldLabel: { color: '#A0A0A0', fontSize: '13px' },
     formFieldInput: {
       backgroundColor: '#1A1A1A',
       borderColor: '#2A2A2A',
       color: '#FAFAFA',
+      minHeight: '44px',
     },
-    footerActionLink: {
-      color: '#FF6B35',
-    },
+    footerActionLink: { color: '#FF6B35' },
+    alertTextDanger: { color: '#ef4444' },
+    identityPreviewEditButton: { color: '#FF6B35' },
+    formResendCodeLink: { color: '#FF6B35' },
   },
 };
 
 export default function RootLayout({ children }) {
   return (
-    <ClerkProvider appearance={clerkAppearance}>
+    <ClerkProvider
+      appearance={clerkAppearance}
+      signInUrl="/sign-in"
+      signUpUrl="/sign-up"
+      afterSignInUrl="/dashboard"
+      afterSignUpUrl="/dashboard"
+    >
       <html lang="en">
         <body className={`${inter.variable} ${ibmPlexSans.variable} ${jetBrainsMono.variable}`}>
           <Suspense fallback={null}>

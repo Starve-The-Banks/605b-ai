@@ -1,0 +1,221 @@
+{
+  "project": "605b.ai Meta Ads Render - New Video Set",
+  "company": "Ninth Wave Analytics LLC",
+  "created": "2026-03-14",
+  "purpose": "New Meta ad videos (ignoring existing)",
+  "brand_assets": {
+    "primary_logo": "public/logos/primary/605b-bracket-box.svg",
+    "watermark_icon": "public/logos/favicons/favicon.svg",
+    "primary_color": "#FF6B35",
+    "text_color": "#FAFAFA"
+  },
+  "video_specifications": {
+    "aspect_ratio": "9:16",
+    "resolution": "1080x1920",
+    "duration_target": "20-21 seconds",
+    "format": "mp4",
+    "quality": "high",
+    "subtitles": "enabled"
+  },
+  "generation_status": "4 videos queued successfully",
+  "video_ids_generated": [
+    "acd3b717b02848a1afdf6bf1958221f5",
+    "ee2cddd66b75499288c6968b18835c63", 
+    "6a17fafbc2204f6b9ccc040207e74e44",
+    "edc204de40ff49f1a4bff44680b937da"
+  ],
+  "videos": [
+    {
+      "id": "report_analysis_v2",
+      "heygen_video_id": "acd3b717b02848a1afdf6bf1958221f5",
+      "title": "605b.ai Report Analysis",
+      "target_audience": "Broad cold traffic",
+      "script": "Thousands of people discover credit report errors every month. 605b.ai scans your credit file systematically — upload your reports, we identify inconsistencies and questionable items across all three bureaus. Then generate professional dispute documentation with proper statute references. Try 605b.ai free and organize your credit process properly.",
+      "word_count": 48,
+      "runtime_estimate": 21,
+      "heygen_config": {
+        "orientation": "portrait",
+        "duration_sec": 21,
+        "avatar_style": "professional_business",
+        "background": "modern_office",
+        "voice_tone": "conversational_authority",
+        "subtitles": true
+      },
+      "scenes": [
+        {
+          "scene": 1,
+          "timestamp": "0-2s",
+          "type": "hook",
+          "spoken": "Thousands of people discover credit report errors every month.",
+          "subtitle": "Thousands discover credit report errors monthly",
+          "avatar_direction": "direct_eye_contact_serious_approachable",
+          "logo_placement": "favicon_watermark_bottom_right_20_opacity"
+        },
+        {
+          "scene": 2,
+          "timestamp": "2-7s",
+          "type": "problem_context",
+          "spoken": "605b.ai scans your credit file systematically —",
+          "subtitle": "605b.ai scans systematically",
+          "avatar_direction": "explanatory_gestures_concerned_confident",
+          "logo_placement": "favicon_watermark_continues"
+        },
+        {
+          "scene": 3,
+          "timestamp": "7-13s",
+          "type": "analysis_process",
+          "spoken": "upload your reports, we identify inconsistencies and questionable items across all three bureaus.",
+          "subtitle": "Upload → Identify → Flag across all 3 bureaus",
+          "avatar_direction": "systematic_counting_analytical",
+          "logo_placement": "favicon_watermark_continues"
+        },
+        {
+          "scene": 4,
+          "timestamp": "13-17s",
+          "type": "documentation_generation",
+          "spoken": "Then generate professional dispute documentation with proper statute references.",
+          "subtitle": "Generate professional dispute docs",
+          "avatar_direction": "professional_gestures_problem_solving",
+          "logo_placement": "favicon_watermark_continues"
+        },
+        {
+          "scene": 5,
+          "timestamp": "17-21s",
+          "type": "cta",
+          "spoken": "Try 605b.ai free and organize your credit process properly.",
+          "subtitle": "Try FREE → 605b.ai",
+          "avatar_direction": "direct_address_inviting_professional",
+          "logo_placement": "primary_logo_center_bottom_100_opacity"
+        }
+      ]
+    },
+    {
+      "id": "error_detection_v2",
+      "heygen_video_id": "6a17fafbc2204f6b9ccc040207e74e44",
+      "title": "605b.ai Error Detection",
+      "target_audience": "Problem-aware users",
+      "script": "Credit reporting errors happen more often than most people realize. 605b.ai analyzes your credit files using the same methods professionals use — we scan for date discrepancies, balance inconsistencies, and unverified accounts. Generate compliant dispute letters immediately. Start free at 605b.ai.",
+      "word_count": 41,
+      "runtime_estimate": 20,
+      "heygen_config": {
+        "orientation": "portrait", 
+        "duration_sec": 20,
+        "avatar_style": "professional_business",
+        "background": "modern_office",
+        "voice_tone": "conversational_authority",
+        "subtitles": true
+      },
+      "scenes": [
+        {
+          "scene": 1,
+          "timestamp": "0-2s",
+          "type": "hook",
+          "spoken": "Credit reporting errors happen more often than most people realize.",
+          "subtitle": "Credit errors happen more often than you think",
+          "avatar_direction": "knowing_expression_slight_nod_direct_contact",
+          "logo_placement": "favicon_watermark_bottom_right_20_opacity"
+        },
+        {
+          "scene": 2,
+          "timestamp": "2-7s",
+          "type": "professional_method",
+          "spoken": "605b.ai analyzes your credit files using the same methods professionals use —",
+          "subtitle": "605b.ai uses professional methods",
+          "avatar_direction": "authoritative_gestures_professional",
+          "logo_placement": "favicon_watermark_continues"
+        },
+        {
+          "scene": 3,
+          "timestamp": "7-13s",
+          "type": "detection_process",
+          "spoken": "we scan for date discrepancies, balance inconsistencies, and unverified accounts.",
+          "subtitle": "Scans for discrepancies • inconsistencies • unverified accounts",
+          "avatar_direction": "counting_fingers_focused",
+          "logo_placement": "favicon_watermark_continues"
+        },
+        {
+          "scene": 4,
+          "timestamp": "13-17s",
+          "type": "letter_generation",
+          "spoken": "Generate compliant dispute letters immediately.",
+          "subtitle": "Generate compliant letters immediately",
+          "avatar_direction": "confident_pointing_decisive",
+          "logo_placement": "favicon_watermark_continues"
+        },
+        {
+          "scene": 5,
+          "timestamp": "17-20s",
+          "type": "cta",
+          "spoken": "Start free at 605b.ai.",
+          "subtitle": "Start FREE → 605b.ai",
+          "avatar_direction": "direct_address_encouraging",
+          "logo_placement": "primary_logo_center_bottom_100_opacity"
+        }
+      ]
+    },
+    {
+      "id": "process_control_v2",
+      "heygen_video_id": "edc204de40ff49f1a4bff44680b937da",
+      "title": "605b.ai Process Control",
+      "target_audience": "Sophisticated users",
+      "script": "Most credit dispute services handle everything behind closed doors. 605b.ai gives you direct control — analyze your own reports, review flagged items yourself, customize dispute letters before sending. Professional-grade tools without the middleman. Get started free at 605b.ai.",
+      "word_count": 41,
+      "runtime_estimate": 21,
+      "heygen_config": {
+        "orientation": "portrait",
+        "duration_sec": 21,
+        "avatar_style": "professional_business", 
+        "background": "modern_office",
+        "voice_tone": "conversational_authority",
+        "subtitles": true
+      },
+      "scenes": [
+        {
+          "scene": 1,
+          "timestamp": "0-2s",
+          "type": "hook",
+          "spoken": "Most credit dispute services handle everything behind closed doors.",
+          "subtitle": "Most services work behind closed doors",
+          "avatar_direction": "serious_slight_disapproval_direct_contact",
+          "logo_placement": "favicon_watermark_bottom_right_20_opacity"
+        },
+        {
+          "scene": 2,
+          "timestamp": "2-7s",
+          "type": "direct_control",
+          "spoken": "605b.ai gives you direct control —",
+          "subtitle": "605b.ai gives you direct control",
+          "avatar_direction": "empowering_gestures_confident",
+          "logo_placement": "favicon_watermark_continues"
+        },
+        {
+          "scene": 3,
+          "timestamp": "7-13s",
+          "type": "self_service_process",
+          "spoken": "analyze your own reports, review flagged items yourself, customize dispute letters before sending.",
+          "subtitle": "Analyze → Review → Customize → Send",
+          "avatar_direction": "step_by_step_demonstration_organized",
+          "logo_placement": "favicon_watermark_continues"
+        },
+        {
+          "scene": 4,
+          "timestamp": "13-17s",
+          "type": "professional_tools",
+          "spoken": "Professional-grade tools without the middleman.",
+          "subtitle": "Professional tools, no middleman",
+          "avatar_direction": "professional_gestures_authoritative",
+          "logo_placement": "favicon_watermark_continues"
+        },
+        {
+          "scene": 5,
+          "timestamp": "17-21s",
+          "type": "cta",
+          "spoken": "Get started free at 605b.ai.",
+          "subtitle": "Get started FREE → 605b.ai",
+          "avatar_direction": "direct_address_welcoming",
+          "logo_placement": "primary_logo_center_bottom_100_opacity"
+        }
+      ]
+    }
+  ]
+}

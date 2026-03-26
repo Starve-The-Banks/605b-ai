@@ -1,7 +1,8 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
+import { getValidateBodyError } from '@/lib/iap-request';
 import { getRedis } from '@/lib/redis';
-import { verifyAppleReceipt, verifyGoogleReceipt } from '@/lib/iap-verify';
+import { getIapEnvStatus, verifyAppleReceipt, verifyGoogleReceipt } from '@/lib/iap-verify';
 
 /**
  * POST /api/mobile/iap/validate
@@ -16,9 +17,9 @@ import { verifyAppleReceipt, verifyGoogleReceipt } from '@/lib/iap-verify';
  *   APPLE_IAP_SHARED_SECRET      — from App Store Connect
  *   GOOGLE_SERVICE_ACCOUNT_JSON  — stringified service account key JSON
  *
- * If the env vars are not set, verification is skipped (dev/sandbox mode)
- * and a warning is logged. This allows TestFlight and internal testing
- * without blocking on store configuration.
+ * If required store secrets are missing for the request platform, the route
+ * returns 503 with { error: 'server misconfigured' } — verification is not
+ * skipped and entitlements are not granted without successful store verification.
  */
 
 // Map product IDs to tier names.
@@ -54,21 +55,58 @@ const TIER_FEATURES = {
   },
 };
 
+function badRequest() {
+  return NextResponse.json({ error: 'missing required fields' }, { status: 400 });
+}
+
+function serverMisconfigured() {
+  return NextResponse.json({ error: 'server misconfigured' }, { status: 503 });
+}
+
+async function safeJson(request) {
+  try {
+    return await request.json();
+  } catch {
+    return null;
+  }
+}
+
+async function safeAuth() {
+  try {
+    return await auth();
+  } catch (error) {
+    console.error('[IAP Validate] auth failed');
+    return { userId: null };
+  }
+}
+
 export async function POST(request) {
   try {
-    const { userId } = await auth();
+    const envStatus = getIapEnvStatus();
+    console.info('[IAP Validate] env', {
+      APPLE_IAP_SHARED_SECRET: envStatus.appleSharedSecretLoaded,
+      GOOGLE_SERVICE_ACCOUNT_JSON: envStatus.googleServiceAccountLoaded,
+      GOOGLE_PLAY_PACKAGE_NAME: envStatus.googlePackageNameLoaded,
+    });
+
+    const body = await safeJson(request);
+    const bodyError = getValidateBodyError(body);
+    if (bodyError) {
+      return badRequest();
+    }
+
+    const { platform, receiptData, productId, transactionId } = body;
+
+    const { userId } = await safeAuth();
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { platform, receiptData, productId, transactionId } = body;
-
-    if (!platform || !receiptData || !productId || !transactionId) {
-      return NextResponse.json(
-        { error: 'Missing required fields: platform, receiptData, productId, transactionId' },
-        { status: 400 }
-      );
+    if (
+      (platform === 'ios' && !envStatus.appleSharedSecretLoaded) ||
+      (platform === 'android' && !envStatus.googleServiceAccountLoaded)
+    ) {
+      return serverMisconfigured();
     }
 
     // Determine tier from product ID
@@ -101,17 +139,15 @@ export async function POST(request) {
     let verification;
     if (platform === 'ios') {
       verification = await verifyAppleReceipt(receiptData, productId);
-    } else if (platform === 'android') {
-      verification = await verifyGoogleReceipt(receiptData, productId);
     } else {
-      return NextResponse.json(
-        { success: false, granted: false, error: `Unsupported platform: ${platform}` },
-        { status: 400 }
-      );
+      verification = await verifyGoogleReceipt(receiptData, productId);
     }
 
     if (!verification.valid) {
       console.warn(`[IAP Validate] Verification failed: ${verification.error}`);
+      if (verification.error === 'server misconfigured') {
+        return serverMisconfigured();
+      }
       return NextResponse.json({
         success: false,
         granted: false,
@@ -157,8 +193,8 @@ export async function POST(request) {
   } catch (error) {
     console.error('[IAP Validate] Error:', error);
     return NextResponse.json(
-      { error: 'Validation failed. Please try again.' },
-      { status: 500 }
+      { error: 'validation failed' },
+      { status: 400 }
     );
   }
 }

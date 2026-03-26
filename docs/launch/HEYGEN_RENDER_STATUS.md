@@ -97,9 +97,21 @@ wget "https://files2.heygen.ai/aws_pacific/avatar_tmp/614b4cf84363400b9827981094
 - **PNG:** Static thumbnail image
 - **ASS:** Subtitle file (Advanced SubStation Alpha format)
 
+## Download Status Update (March 17, 2026)
+
+**ATTEMPTED:** Fresh URL retrieval via HeyGen MCP
+**STATUS:** HeyGen MCP server unavailable in current Cursor environment
+**RESULT:** Original URLs expired (403 forbidden)
+
+**Manual Download Required:**
+1. Access https://app.heygen.com/dashboard
+2. Navigate to completed videos
+3. Download videos using IDs: acd3b717b02848a1afdf6bf1958221f5, ee2cddd66b75499288c6968b18835c63, 6a17fafbc2204f6b9ccc040207e74e44, edc204de40ff49f1a4bff44680b937da
+4. Save to: `/public/ads/meta-launch/` with naming convention below
+
 ## Important Notes
 
-- **URL Expiration:** These URLs contain temporary access tokens that expire. Download videos promptly.
+- **URL Expiration:** Original URLs with temporary access tokens have expired
 - **Quality:** All videos are rendered in 1080x1920 (9:16 aspect ratio) for mobile/story format
 - **Formats:** MP4 files are suitable for Meta Ads, Instagram Stories, TikTok
 - **Captions:** Use captioned versions for accessibility compliance
@@ -121,12 +133,12 @@ These videos are ready for:
 - Facebook/Instagram feed ads (9:16 format)
 - Audience Network placements
 
-**Recommended naming convention for downloads:**
-- `605b_report_analysis_v2.mp4`
-- `605b_business_ad_v2.mp4` 
-- `605b_error_detection_v2.mp4`
-- `605b_process_control_v2.mp4`
+**Required naming convention for manual downloads:**
+- `605b_report_analysis_v2.mp4` (save to `/public/ads/meta-launch/`)
+- `605b_business_ad_v2.mp4` (save to `/public/ads/meta-launch/`)
+- `605b_error_detection_v2.mp4` (save to `/public/ads/meta-launch/`)
+- `605b_process_control_v2.mp4` (save to `/public/ads/meta-launch/`)
 
 ---
 
-**Status:** ✅ All renders complete - Ready for download and campaign deployment
+**Status:** ✅ All renders complete - Manual download required (HeyGen MCP unavailable)

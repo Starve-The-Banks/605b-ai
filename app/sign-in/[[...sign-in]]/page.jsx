@@ -142,7 +142,9 @@ export default function SignInPage() {
             </div>
 
             <SignIn
-              afterSignInUrl="/dashboard"
+              forceRedirectUrl="/dashboard"
+              fallbackRedirectUrl="/dashboard"
+              signUpForceRedirectUrl="/dashboard"
               signUpUrl="/sign-up"
               appearance={{
                 variables: {
@@ -152,15 +154,18 @@ export default function SignInPage() {
                   colorInputText: '#FAFAFA',
                   colorText: '#FAFAFA',
                   colorTextSecondary: '#A0A0A0',
+                  colorNeutral: '#A0A0A0',
+                  borderRadius: '8px',
+                  fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
                 },
                 elements: {
                   formButtonPrimary: {
                     backgroundColor: '#FF6B35',
                     color: '#FFFFFF',
                     minHeight: '44px',
-                    '&:hover': {
-                      backgroundColor: '#E55A2B',
-                    },
+                    fontWeight: 600,
+                    '&:hover': { backgroundColor: '#E55A2B' },
+                    '&:focus': { boxShadow: '0 0 0 3px rgba(255, 107, 53, 0.25)' },
                   },
                   card: {
                     backgroundColor: '#141414',
@@ -168,11 +173,13 @@ export default function SignInPage() {
                     borderRadius: '12px',
                     width: '100%',
                     maxWidth: '420px',
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
                   },
                   formFieldInput: {
                     minHeight: '44px',
                     backgroundColor: '#1A1A1A',
                     borderColor: '#2A2A2A',
+                    color: '#FAFAFA',
                     '&:focus': {
                       borderColor: '#FF6B35',
                       boxShadow: '0 0 0 3px rgba(255, 107, 53, 0.1)',
@@ -180,15 +187,29 @@ export default function SignInPage() {
                   },
                   socialButtonsBlockButton: {
                     minHeight: '44px',
-                    backgroundColor: '#1A1A1A',
-                    borderColor: '#2A2A2A',
-                    '&:hover': {
-                      backgroundColor: '#2A2A2A',
-                    },
+                    backgroundColor: '#1E1E1E',
+                    borderColor: '#333333',
+                    color: '#FAFAFA',
+                    fontWeight: 500,
+                    '&:hover': { backgroundColor: '#2A2A2A', borderColor: '#444444' },
                   },
-                  footerActionLink: {
-                    color: '#FF6B35',
+                  socialButtonsBlockButtonText: {
+                    color: '#FAFAFA',
+                    fontWeight: 500,
                   },
+                  socialButtonsIconBox: {
+                    width: '20px',
+                    height: '20px',
+                  },
+                  footerActionLink: { color: '#FF6B35' },
+                  headerTitle: { display: 'none' },
+                  headerSubtitle: { display: 'none' },
+                  dividerLine: { backgroundColor: '#2A2A2A' },
+                  dividerText: { color: '#555555', fontSize: '12px' },
+                  formFieldLabel: { color: '#A0A0A0', fontSize: '13px' },
+                  identityPreviewEditButton: { color: '#FF6B35' },
+                  alertTextDanger: { color: '#ef4444' },
+                  formResendCodeLink: { color: '#FF6B35' },
                 }
               }}
             />

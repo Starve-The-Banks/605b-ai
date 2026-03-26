@@ -1,0 +1,116 @@
+{
+  "generated_at": "2026-03-18T00:55:20.449Z",
+  "total": 10,
+  "scripts": [
+    {
+      "id": "ad_01",
+      "hook": "Most people never check this section of their credit report.",
+      "problem": "Credit reports can contain inaccuracies or suspicious accounts that can potentially impact your financial life.",
+      "demo": "With 605b.ai, simply upload your report. Our system scans it thoroughly, identifies and flags any potential issues. It then generates dispute documentation for any inaccuracies found.",
+      "cta": "Take control, know what's inside your report. Visit 605b.ai today for a comprehensive credit report analysis.",
+      "compliance": {
+        "compliant": true,
+        "violations": []
+      }
+    },
+    {
+      "id": "ad_02",
+      "hook": "There's a page in your credit report nobody talks about.",
+      "problem": "Errors and suspicious accounts can lurk undetected, confusing and compromising your financial standing.",
+      "demo": "Upload your report to 605b.ai. Our system scans meticulously, flags potential inaccuracies, and highlights suspicious accounts. Then, it generates dispute documentation tailored to your unique situation.",
+      "cta": "Start analyzing your credit report with 605b.ai today. Knowledge is power, take control now.",
+      "compliance": {
+        "compliant": true,
+        "violations": []
+      }
+    },
+    {
+      "id": "ad_03",
+      "hook": "One upload showed me accounts I never opened.",
+      "problem": "Credit reports can contain inaccuracies or even fraudulent accounts, affecting your financial health.",
+      "demo": "With 605b.ai, upload your credit report. Our system will scan it, flagging potential issues. If anything suspicious is identified, it generates dispute documentation for you.",
+      "cta": "Take control of your credit report analysis. Start with 605b.ai today.",
+      "compliance": {
+        "compliant": true,
+        "violations": []
+      }
+    },
+    {
+      "id": "ad_04",
+      "hook": "Three bureaus. Three different versions of your credit.",
+      "problem": "Inaccuracies and suspicious accounts can lurk in these reports, unnoticed and potentially harmful.",
+      "demo": "With 605b.ai, you simply upload your reports. Our system scans them, identifying potential inaccuracies and flagging suspicious accounts. Then, it generates the necessary dispute documentation for you.",
+      "cta": "Don't let errors go unnoticed. Review your credit reports with 605b.ai today.",
+      "compliance": {
+        "compliant": true,
+        "violations": []
+      }
+    },
+    {
+      "id": "ad_05",
+      "hook": "Your credit report might have items that aren't yours.",
+      "problem": "Due to oversight or identity theft, credit reports can contain inaccuracies or suspicious accounts.",
+      "demo": "With 605b.ai, you simply upload your report. Our system scans it, identifies potential flags, and generates dispute documentation for suspicious items.",
+      "cta": "Take control of your credit report analysis. Start using 605b.ai today.",
+      "compliance": {
+        "compliant": true,
+        "violations": []
+      }
+    },
+    {
+      "id": "ad_06",
+      "hook": "I checked my credit report and something didn't add up.",
+      "problem": "Did you know that credit reports can contain errors or fraudulent accounts, impacting your financial health?",
+      "demo": "With 605b.ai, upload your credit report, let our AI-powered tool scan for potential inaccuracies or suspicious accounts. If it flags anything, our system generates dispute documentation for you.",
+      "cta": "Take control of your finances. Analyze your credit report with 605b.ai today.",
+      "compliance": {
+        "compliant": true,
+        "violations": []
+      }
+    },
+    {
+      "id": "ad_07",
+      "hook": "Not all accounts on your credit report are accurate.",
+      "problem": "Due to potential clerical errors or fraudulent activity, your credit report may contain inaccuracies that you're not responsible for.",
+      "demo": "With 605b.ai, you can upload your credit report, and our system will automatically scan for potential inaccuracies or suspicious accounts. Any flagged items will be highlighted, and the tool will generate dispute documentation for review.",
+      "cta": "Don't let errors go unnoticed. Analyze your credit report today at 605b.ai.",
+      "compliance": {
+        "compliant": true,
+        "violations": []
+      }
+    },
+    {
+      "id": "ad_08",
+      "hook": "Your credit file may contain information that's outdated.",
+      "problem": "Errors and fraudulent accounts can sneak into your credit reports, often unnoticed.",
+      "demo": "With 605b.ai, you can upload your report, which our system will scan meticulously. Suspicious accounts and potential inaccuracies are flagged, then it automatically generates dispute documentation.",
+      "cta": "Take control. Analyze your credit report today at 605b.ai.",
+      "compliance": {
+        "compliant": true,
+        "violations": []
+      }
+    },
+    {
+      "id": "ad_09",
+      "hook": "Something on your credit report looks different than expected.",
+      "problem": "Credit reports can contain inaccuracies or suspicious accounts due to clerical errors or identity theft.",
+      "demo": "With 605b.ai, you upload your credit report, our system scans it, flags any potential inaccuracies or suspicious accounts, then generates dispute documentation for you to review.",
+      "cta": "Take control, identify potential discrepancies. Start your credit report analysis at 605b.ai today.",
+      "compliance": {
+        "compliant": true,
+        "violations": []
+      }
+    },
+    {
+      "id": "ad_10",
+      "hook": "A quick scan found accounts I didn't recognize.",
+      "problem": "Credit reports can sometimes contain errors or unfamiliar accounts, possibly due to inaccuracies or fraud.",
+      "demo": "With 605b.ai, you simply upload your report. Our system immediately scans it, flags any suspicious items, and helps you identify potential inaccuracies. Then, it generates the necessary dispute documentation.",
+      "cta": "Stay on top of your credit report analysis. Begin your journey with 605b.ai today.",
+      "compliance": {
+        "compliant": true,
+        "violations": []
+      }
+    }
+  ]
+}

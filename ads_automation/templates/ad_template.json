@@ -1,0 +1,284 @@
+{
+  "name": "605b.ai Meta Ad Template",
+  "description": "Professional video ad template for 605b.ai credit dispute software",
+  "version": "1.0",
+  "duration": 25,
+  "dimensions": {
+    "width": 1080,
+    "height": 1920
+  },
+  "framerate": 30,
+  "template": {
+    "elements": [
+      {
+        "type": "video",
+        "name": "background_gradient",
+        "source": {
+          "type": "color",
+          "color": "#0a0e27"
+        },
+        "duration": 25,
+        "x": 0,
+        "y": 0,
+        "width": 1080,
+        "height": 1920
+      },
+      {
+        "type": "video",
+        "name": "product_demo_scan",
+        "source": "{{demo_scan_video}}",
+        "duration": 3,
+        "x": 90,
+        "y": 400,
+        "width": 900,
+        "height": 600,
+        "start_time": 2,
+        "border_radius": 20,
+        "shadow": {
+          "blur": 20,
+          "color": "#000000",
+          "opacity": 0.3
+        }
+      },
+      {
+        "type": "video", 
+        "name": "product_demo_report",
+        "source": "{{demo_report_video}}",
+        "duration": 4,
+        "x": 90,
+        "y": 400, 
+        "width": 900,
+        "height": 600,
+        "start_time": 7,
+        "border_radius": 20,
+        "shadow": {
+          "blur": 20,
+          "color": "#000000",
+          "opacity": 0.3
+        }
+      },
+      {
+        "type": "video",
+        "name": "product_demo_results", 
+        "source": "{{demo_results_video}}",
+        "duration": 4,
+        "x": 90,
+        "y": 400,
+        "width": 900,
+        "height": 600,
+        "start_time": 12,
+        "border_radius": 20,
+        "shadow": {
+          "blur": 20,
+          "color": "#000000", 
+          "opacity": 0.3
+        }
+      },
+      {
+        "type": "image",
+        "name": "logo_main",
+        "source": "{{logo_image}}",
+        "duration": 25,
+        "x": 90,
+        "y": 100,
+        "width": 200,
+        "height": 60,
+        "opacity": 1
+      },
+      {
+        "type": "image",
+        "name": "logo_cta",
+        "source": "{{logo_image}}",
+        "duration": 5,
+        "x": 340,
+        "y": 1400,
+        "width": 400,
+        "height": 120,
+        "start_time": 20,
+        "opacity": 1
+      },
+      {
+        "type": "text",
+        "name": "hook_text",
+        "text": "{{hook_text}}",
+        "duration": 2,
+        "x": 90,
+        "y": 200,
+        "width": 900,
+        "font_family": "Inter",
+        "font_size": 64,
+        "font_weight": "bold",
+        "color": "#ffffff",
+        "text_align": "left",
+        "line_height": 1.2,
+        "start_time": 0,
+        "animation": {
+          "type": "slide_up",
+          "duration": 0.5
+        }
+      },
+      {
+        "type": "text",
+        "name": "problem_text",
+        "text": "{{problem_text}}",
+        "duration": 5,
+        "x": 90,
+        "y": 1100,
+        "width": 900,
+        "font_family": "Inter",
+        "font_size": 48,
+        "font_weight": "medium",
+        "color": "#e2e8f0",
+        "text_align": "left",
+        "line_height": 1.3,
+        "start_time": 2,
+        "animation": {
+          "type": "fade_in",
+          "duration": 0.5
+        }
+      },
+      {
+        "type": "text",
+        "name": "proof_text",
+        "text": "{{proof_text}}",
+        "duration": 5,
+        "x": 90,
+        "y": 1100,
+        "width": 900,
+        "font_family": "Inter",
+        "font_size": 42,
+        "font_weight": "medium",
+        "color": "#10b981",
+        "text_align": "left",
+        "line_height": 1.3,
+        "start_time": 7,
+        "animation": {
+          "type": "slide_up",
+          "duration": 0.5
+        }
+      },
+      {
+        "type": "text",
+        "name": "demo_text",
+        "text": "{{demo_text}}",
+        "duration": 8,
+        "x": 90,
+        "y": 1100,
+        "width": 900,
+        "font_family": "Inter",
+        "font_size": 44,
+        "font_weight": "medium",
+        "color": "#ffffff",
+        "text_align": "left",
+        "line_height": 1.3,
+        "start_time": 12,
+        "animation": {
+          "type": "fade_in",
+          "duration": 0.5
+        }
+      },
+      {
+        "type": "text",
+        "name": "cta_text",
+        "text": "{{cta_text}}",
+        "duration": 5,
+        "x": 90,
+        "y": 1600,
+        "width": 900,
+        "font_family": "Inter",
+        "font_size": 52,
+        "font_weight": "bold",
+        "color": "#ff6b35",
+        "text_align": "center",
+        "line_height": 1.2,
+        "start_time": 20,
+        "animation": {
+          "type": "scale_in",
+          "duration": 0.5
+        }
+      },
+      {
+        "type": "shape",
+        "name": "cta_background",
+        "shape": "rectangle",
+        "duration": 5,
+        "x": 70,
+        "y": 1580,
+        "width": 940,
+        "height": 200,
+        "start_time": 20,
+        "fill_color": "#1f2937",
+        "border_radius": 25,
+        "border": {
+          "width": 3,
+          "color": "#ff6b35"
+        },
+        "opacity": 0.9
+      },
+      {
+        "type": "audio",
+        "name": "voiceover",
+        "source": "{{voiceover_audio}}",
+        "duration": 25,
+        "volume": 1.0,
+        "start_time": 0
+      }
+    ],
+    "variables": {
+      "logo_image": {
+        "type": "image",
+        "description": "605b.ai logo PNG file"
+      },
+      "demo_scan_video": {
+        "type": "video",
+        "description": "Screen recording of credit report scanning"
+      },
+      "demo_report_video": {
+        "type": "video", 
+        "description": "Screen recording of credit report analysis"
+      },
+      "demo_results_video": {
+        "type": "video",
+        "description": "Screen recording of dispute generation results"
+      },
+      "voiceover_audio": {
+        "type": "audio",
+        "description": "Generated voiceover MP3 file"
+      },
+      "hook_text": {
+        "type": "text",
+        "description": "Hook text overlay (2 seconds)"
+      },
+      "problem_text": {
+        "type": "text",
+        "description": "Problem statement text (5 seconds)"
+      },
+      "proof_text": {
+        "type": "text",
+        "description": "Social proof text (5 seconds)"
+      },
+      "demo_text": {
+        "type": "text",
+        "description": "Product demo explanation (8 seconds)"
+      },
+      "cta_text": {
+        "type": "text", 
+        "description": "Call-to-action text (5 seconds)"
+      }
+    }
+  },
+  "output_settings": {
+    "format": "mp4",
+    "quality": "high",
+    "bitrate": "8000k",
+    "audio_bitrate": "192k"
+  },
+  "compliance_notes": {
+    "disclaimers": [
+      "Software provides tools only",
+      "No guarantee of outcomes", 
+      "Not a credit repair service"
+    ],
+    "required_text": "Educational software only. No guaranteed results."
+  }
+}

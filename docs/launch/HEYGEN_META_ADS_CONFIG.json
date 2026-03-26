@@ -1,0 +1,197 @@
+{
+  "project": "605b.ai Meta Ads Launch",
+  "company": "Ninth Wave Analytics LLC",
+  "generated": "2026-03-14",
+  "logo_assets": {
+    "primary_logo": "public/logos/primary/605b-bracket-box.svg",
+    "watermark_icon": "public/logos/favicons/favicon.svg",
+    "brand_color": "#FF6B35",
+    "text_color": "#FAFAFA"
+  },
+  "video_specifications": {
+    "aspect_ratio": "9:16",
+    "resolution": "1080x1920",
+    "duration": "20-21 seconds",
+    "format": "mp4",
+    "quality": "high"
+  },
+  "videos": [
+    {
+      "id": "credit_report_errors",
+      "title": "Credit Report Errors",
+      "target_audience": "Cold traffic",
+      "script": "Most people have no idea their credit report contains errors. 605b.ai scans your credit file like TurboTax scans your taxes — upload your report, we flag suspicious items and incorrect information. Then generate professional dispute letters with proper statute references in minutes. Try it free at 605b.ai and take control of your credit.",
+      "word_count": 54,
+      "estimated_runtime": 21,
+      "avatar_style": "professional_business_casual",
+      "background": "neutral_office",
+      "voice_tone": "conversational_authority",
+      "subtitle_style": "white_text_black_stroke",
+      "scenes": [
+        {
+          "scene": 1,
+          "timestamp": "0-2s",
+          "type": "hook",
+          "spoken": "Most people have no idea their credit report contains errors.",
+          "caption": "Most people have no idea their credit report contains errors.",
+          "avatar_direction": "direct_eye_contact_serious_lean_forward",
+          "logo": "favicon_watermark_bottom_right_20_opacity"
+        },
+        {
+          "scene": 2,
+          "timestamp": "2-7s", 
+          "type": "problem_context",
+          "spoken": "605b.ai scans your credit file like TurboTax scans your taxes —",
+          "caption": "605b.ai scans like TurboTax",
+          "avatar_direction": "explanatory_gestures_concerned",
+          "logo": "favicon_watermark_continues"
+        },
+        {
+          "scene": 3,
+          "timestamp": "7-13s",
+          "type": "scanning_process", 
+          "spoken": "upload your report, we flag suspicious items and incorrect information.",
+          "caption": "Upload → Flag → Analyze",
+          "avatar_direction": "systematic_hand_movements_analytical",
+          "logo": "favicon_watermark_continues"
+        },
+        {
+          "scene": 4,
+          "timestamp": "13-17s",
+          "type": "letter_generation",
+          "spoken": "Then generate professional dispute letters with proper statute references in minutes.",
+          "caption": "Professional dispute letters in minutes", 
+          "avatar_direction": "confident_gestures_problem_solving",
+          "logo": "favicon_watermark_continues"
+        },
+        {
+          "scene": 5,
+          "timestamp": "17-21s",
+          "type": "cta",
+          "spoken": "Try it free at 605b.ai and take control of your credit.",
+          "caption": "Try FREE → 605b.ai",
+          "avatar_direction": "direct_address_inviting_welcoming_gesture",
+          "logo": "primary_logo_center_bottom_100_opacity"
+        }
+      ]
+    },
+    {
+      "id": "identity_theft_recovery", 
+      "title": "Identity Theft Recovery",
+      "target_audience": "Problem-aware users",
+      "script": "Identity theft victims often struggle with the wrong paperwork for months. 605b.ai has the actual FCRA workflows you need — upload credit reports, identify theft-related accounts, generate statute-specific letters. Built for people who want to handle their own recovery process. Get started free at 605b.ai.",
+      "word_count": 47,
+      "estimated_runtime": 20,
+      "avatar_style": "professional_business_casual",
+      "background": "neutral_office", 
+      "voice_tone": "conversational_authority",
+      "subtitle_style": "white_text_black_stroke",
+      "scenes": [
+        {
+          "scene": 1,
+          "timestamp": "0-2s",
+          "type": "hook", 
+          "spoken": "Identity theft victims often struggle with the wrong paperwork for months.",
+          "caption": "Identity theft victims struggle with wrong paperwork",
+          "avatar_direction": "empathetic_authoritative_direct_eye_contact",
+          "logo": "favicon_watermark_bottom_right_20_opacity"
+        },
+        {
+          "scene": 2,
+          "timestamp": "2-7s",
+          "type": "solution_introduction",
+          "spoken": "605b.ai has the actual FCRA workflows you need —",
+          "caption": "605b.ai has actual FCRA workflows",
+          "avatar_direction": "confident_reassuring_gestures",
+          "logo": "favicon_watermark_continues"
+        },
+        {
+          "scene": 3, 
+          "timestamp": "7-13s",
+          "type": "process_explanation",
+          "spoken": "upload credit reports, identify theft-related accounts, generate statute-specific letters.",
+          "caption": "Upload → Identify → Generate", 
+          "avatar_direction": "step_by_step_counting_gestures",
+          "logo": "favicon_watermark_continues"
+        },
+        {
+          "scene": 4,
+          "timestamp": "13-17s", 
+          "type": "self_service_emphasis",
+          "spoken": "Built for people who want to handle their own recovery process.",
+          "caption": "Handle your own recovery",
+          "avatar_direction": "empowering_hand_movements_confident", 
+          "logo": "favicon_watermark_continues"
+        },
+        {
+          "scene": 5,
+          "timestamp": "17-20s",
+          "type": "cta",
+          "spoken": "Get started free at 605b.ai.",
+          "caption": "Get started FREE → 605b.ai",
+          "avatar_direction": "direct_address_encouraging",
+          "logo": "primary_logo_center_bottom_100_opacity"
+        }
+      ]
+    },
+    {
+      "id": "collections_disputes",
+      "title": "Collections Disputes", 
+      "target_audience": "Collections-aware users",
+      "script": "Questionable collections on your credit report are more common than you think. 605b.ai analyzes your credit files and flags accounts that don't look right — wrong dates, incorrect balances, unverified debts. Then generates FDCPA and FCRA compliant dispute letters. Try free at 605b.ai. Own your credit process.",
+      "word_count": 50,
+      "estimated_runtime": 21,
+      "avatar_style": "professional_business_casual", 
+      "background": "neutral_office",
+      "voice_tone": "conversational_authority",
+      "subtitle_style": "white_text_black_stroke",
+      "scenes": [
+        {
+          "scene": 1,
+          "timestamp": "0-2s",
+          "type": "hook",
+          "spoken": "Questionable collections on your credit report are more common than you think.",
+          "caption": "Questionable collections are more common than you think", 
+          "avatar_direction": "knowing_expression_slight_nod_direct_eye_contact",
+          "logo": "favicon_watermark_bottom_right_20_opacity"
+        },
+        {
+          "scene": 2, 
+          "timestamp": "2-7s",
+          "type": "analysis_process",
+          "spoken": "605b.ai analyzes your credit files and flags accounts that don't look right —",
+          "caption": "605b.ai flags accounts that don't look right",
+          "avatar_direction": "analytical_gestures_serious",
+          "logo": "favicon_watermark_continues"
+        },
+        {
+          "scene": 3,
+          "timestamp": "7-13s", 
+          "type": "problem_examples",
+          "spoken": "wrong dates, incorrect balances, unverified debts.",
+          "caption": "Wrong dates • Incorrect balances • Unverified debts",
+          "avatar_direction": "counting_on_fingers_concerned_controlled",
+          "logo": "favicon_watermark_continues"
+        },
+        {
+          "scene": 4,
+          "timestamp": "13-17s",
+          "type": "compliance_solution", 
+          "spoken": "Then generates FDCPA and FCRA compliant dispute letters.",
+          "caption": "FDCPA & FCRA compliant letters",
+          "avatar_direction": "professional_gestures_confident",
+          "logo": "favicon_watermark_continues"
+        },
+        {
+          "scene": 5,
+          "timestamp": "17-21s",
+          "type": "cta", 
+          "spoken": "Try free at 605b.ai. Own your credit process.",
+          "caption": "Try FREE → 605b.ai",
+          "avatar_direction": "direct_address_empowering",
+          "logo": "primary_logo_center_bottom_100_opacity"
+        }
+      ]
+    }
+  ]
+}

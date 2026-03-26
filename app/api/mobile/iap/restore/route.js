@@ -1,7 +1,8 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
+import { getRestoreBodyError } from '@/lib/iap-request';
 import { getRedis } from '@/lib/redis';
-import { verifyAppleReceipt, verifyGoogleReceipt } from '@/lib/iap-verify';
+import { getIapEnvStatus, verifyAppleReceipt, verifyGoogleReceipt } from '@/lib/iap-verify';
 
 /**
  * POST /api/mobile/iap/restore
@@ -50,21 +51,58 @@ const TIER_FEATURES = {
   },
 };
 
+function badRequest() {
+  return NextResponse.json({ error: 'missing required fields' }, { status: 400 });
+}
+
+function serverMisconfigured() {
+  return NextResponse.json({ error: 'server misconfigured' }, { status: 503 });
+}
+
+async function safeJson(request) {
+  try {
+    return await request.json();
+  } catch {
+    return null;
+  }
+}
+
+async function safeAuth() {
+  try {
+    return await auth();
+  } catch (error) {
+    console.error('[IAP Restore] auth failed');
+    return { userId: null };
+  }
+}
+
 export async function POST(request) {
   try {
-    const { userId } = await auth();
+    const envStatus = getIapEnvStatus();
+    console.info('[IAP Restore] env', {
+      APPLE_IAP_SHARED_SECRET: envStatus.appleSharedSecretLoaded,
+      GOOGLE_SERVICE_ACCOUNT_JSON: envStatus.googleServiceAccountLoaded,
+      GOOGLE_PLAY_PACKAGE_NAME: envStatus.googlePackageNameLoaded,
+    });
+
+    const body = await safeJson(request);
+    const bodyError = getRestoreBodyError(body);
+    if (bodyError) {
+      return badRequest();
+    }
+
+    const { platform, receipts } = body;
+
+    const { userId } = await safeAuth();
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { platform, receipts } = body;
-
-    if (!platform || !Array.isArray(receipts)) {
-      return NextResponse.json(
-        { error: 'Missing required fields: platform, receipts[]' },
-        { status: 400 }
-      );
+    if (
+      (platform === 'ios' && !envStatus.appleSharedSecretLoaded) ||
+      (platform === 'android' && !envStatus.googleServiceAccountLoaded)
+    ) {
+      return serverMisconfigured();
     }
 
     console.info(`[IAP Restore] userId=${userId} platform=${platform} receipts=${receipts.length}`);
@@ -76,6 +114,11 @@ export async function POST(request) {
     const restoredTransactions = [];
 
     for (const receipt of receipts) {
+      if (!receipt || !receipt.receiptData || !receipt.productId || !receipt.transactionId) {
+        console.warn('[IAP Restore] Skipping malformed receipt entry');
+        continue;
+      }
+
       const tier = PRODUCT_TO_TIER[receipt.productId];
       if (!tier) continue;
 
@@ -97,6 +140,10 @@ export async function POST(request) {
         verification = await verifyAppleReceipt(receipt.receiptData, receipt.productId);
       } else {
         verification = await verifyGoogleReceipt(receipt.receiptData, receipt.productId);
+      }
+
+      if (verification.error === 'server misconfigured') {
+        return serverMisconfigured();
       }
 
       if (verification.valid) {
@@ -149,8 +196,8 @@ export async function POST(request) {
   } catch (error) {
     console.error('[IAP Restore] Error:', error);
     return NextResponse.json(
-      { error: 'Restore failed. Please try again.' },
-      { status: 500 }
+      { error: 'restore failed' },
+      { status: 400 }
     );
   }
 }

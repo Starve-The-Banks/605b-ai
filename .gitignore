@@ -47,3 +47,23 @@ coverage/
 # Playwright auth state & artifacts
 .playwright/
 test-results/
+
+# Ads / HeyGen — local secrets (not covered by `.env.*`)
+.ads.env
+.ads.env.local
+
+# Local temp, frame dumps, transcripts
+tmp/
+
+# Ads automation — generated / bulky outputs
+ads_automation/output/
+ads_automation/voice/*.mp3
+ads_automation/voice/voice_generation_results.json
+ads_automation/scripts/generated_scripts.json
+ads_automation/assets/*.mp4
+
+# Marketing video assets (large binaries; store outside git if needed)
+public/ads/**/*.mp4
+
+# Underwriting — generated screenshot run log
+underwriting-proof/screenshot-results.json

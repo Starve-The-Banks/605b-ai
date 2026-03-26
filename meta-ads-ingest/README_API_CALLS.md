@@ -28,7 +28,7 @@ Generate 100+ successful Meta Marketing API calls to satisfy the requirements fo
 
 ### 1. Navigate to the folder
 ```bash
-cd ~/Desktop/creditclear-app/meta-ads-ingest
+cd ~/Desktop/dev/creditclear-app/meta-ads-ingest
 ```
 
 ### 2. Verify environment variables

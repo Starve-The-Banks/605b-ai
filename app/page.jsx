@@ -1503,9 +1503,9 @@ export default function LandingPage() {
           </div>
           <div className="hero-content">
             <div className="hero-eyebrow">Credit Report Scanner</div>
-            <h1>Scan Your Credit Report for<br /><span className="highlight">Accounts You Don&apos;t Recognize</span></h1>
+            <h1>Find What Doesn&apos;t Belong on Your<br /><span className="highlight">Credit Report</span></h1>
             <p className="hero-desc">
-              Upload your credit report and scan it for accounts you don&apos;t recognize, inaccurate information, and items worth reviewing.
+              Upload your report to uncover suspicious accounts, errors, and items worth reviewing.
             </p>
             <div className="hero-buttons">
               {mounted && isSignedIn ? (

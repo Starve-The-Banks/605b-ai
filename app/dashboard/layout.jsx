@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { useUser, useAuth, SignOutButton } from '@clerk/nextjs';
 import Link from 'next/link';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams, useRouter } from 'next/navigation';
 import {
   Search, Sparkles, FileText, Clock, Flag, FileCheck,
   ChevronLeft, ChevronRight, LogOut, Settings, User, ChevronUp, TrendingUp, Bell, Menu, X, Lock, Crown, Loader2, CheckCircle
@@ -14,9 +14,27 @@ import { useUserTier, AccessRestrictionBanner } from '@/lib/useUserTier';
 import { trackPurchase } from '@/lib/tracking';
 import { trackLead } from '@/lib/metaPixel';
 
+const PAYMENT_BANNER_DISMISS_KEY = '605b_payment_confirmed_banner_dismissed';
+
 // Payment sync banner component
 function PaymentSyncBanner({ isPolling, syncComplete, tier }) {
-  const [dismissed, setDismissed] = useState(false);
+  const searchParams = useSearchParams();
+  const [dismissed, setDismissed] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return sessionStorage.getItem(PAYMENT_BANNER_DISMISS_KEY) === '1';
+  });
+
+  useEffect(() => {
+    if (searchParams?.get('success') === 'true') {
+      sessionStorage.removeItem(PAYMENT_BANNER_DISMISS_KEY);
+      setDismissed(false);
+    }
+  }, [searchParams]);
+
+  const handleDismiss = () => {
+    sessionStorage.setItem(PAYMENT_BANNER_DISMISS_KEY, '1');
+    setDismissed(true);
+  };
 
   if (dismissed) return null;
 
@@ -53,7 +71,8 @@ function PaymentSyncBanner({ isPolling, syncComplete, tier }) {
           </div>
         </div>
         <button
-          onClick={() => setDismissed(true)}
+          type="button"
+          onClick={handleDismiss}
           style={{
             background: 'none',
             border: 'none',
@@ -121,6 +140,7 @@ function DashboardLayoutContent({ children }) {
   } = useUserTier();
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const router = useRouter();
   const isAIStrategist = pathname === '/dashboard/ai-strategist';
   const [rightSidebarOpen, setRightSidebarOpen] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -270,6 +290,15 @@ function DashboardLayoutContent({ children }) {
       }
     }
   }, [searchParams, tier, isPollingForPayment, paymentSyncComplete, startPaymentPolling]);
+
+  // Remove Stripe success query params after checkout (prevents re-processing and stale URLs)
+  useEffect(() => {
+    if (searchParams?.get('success') !== 'true') return;
+    const t = setTimeout(() => {
+      router.replace(pathname || '/dashboard', { scroll: false });
+    }, 2000);
+    return () => clearTimeout(t);
+  }, [searchParams, pathname, router]);
 
   const handleOnboardingComplete = () => {
     trackLead();

@@ -1,10 +1,13 @@
 "use client";
 
 import { useState } from 'react';
-import { Flag, AlertTriangle, Trash2, FileText, ChevronRight, CheckCircle } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Flag, AlertTriangle, Trash2, FileText, ChevronRight, CheckCircle, X } from 'lucide-react';
 
 export default function FlaggedTab({ flaggedItems = [], setFlaggedItems, logAction }) {
+  const router = useRouter();
   const [selectedItems, setSelectedItems] = useState([]);
+  const [detailItem, setDetailItem] = useState(null);
   
   const removeItem = (id) => {
     setFlaggedItems?.(prev => prev.filter(item => item.id !== id));
@@ -391,7 +394,14 @@ export default function FlaggedTab({ flaggedItems = [], setFlaggedItems, logActi
                   Remove ({selectedItems.length})
                 </button>
               )}
-              <button className="action-btn primary">
+              <button
+                type="button"
+                className="action-btn primary"
+                onClick={() => {
+                  logAction?.('FLAGGED_GENERATE_LETTERS', { count: flaggedItems.length });
+                  router.push('/dashboard/templates');
+                }}
+              >
                 <FileText size={16} />
                 Generate Letters
               </button>
@@ -439,17 +449,34 @@ export default function FlaggedTab({ flaggedItems = [], setFlaggedItems, logActi
                 </div>
                 
                 <div className="item-actions">
-                  <button className="icon-btn" title="Generate letter">
+                  <button
+                    type="button"
+                    className="icon-btn"
+                    title="Generate letter"
+                    onClick={() => {
+                      logAction?.('FLAGGED_ITEM_LETTER', { itemId: item.id });
+                      router.push('/dashboard/templates');
+                    }}
+                  >
                     <FileText size={16} />
                   </button>
                   <button 
+                    type="button"
                     className="icon-btn danger" 
                     title="Remove"
                     onClick={() => removeItem(item.id)}
                   >
                     <Trash2 size={16} />
                   </button>
-                  <button className="icon-btn" title="View details">
+                  <button
+                    type="button"
+                    className="icon-btn"
+                    title="View details"
+                    onClick={() => {
+                      logAction?.('FLAGGED_ITEM_DETAIL', { itemId: item.id });
+                      setDetailItem(item);
+                    }}
+                  >
                     <ChevronRight size={16} />
                   </button>
                 </div>
@@ -464,6 +491,88 @@ export default function FlaggedTab({ flaggedItems = [], setFlaggedItems, logActi
             <div className="empty-title">No flagged items</div>
             <div className="empty-desc">
               Items you flag from credit report analysis will appear here for action
+            </div>
+          </div>
+        )}
+
+        {detailItem && (
+          <div
+            role="presentation"
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 300,
+              background: 'rgba(0,0,0,0.75)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: 16,
+            }}
+            onClick={() => setDetailItem(null)}
+          >
+            <div
+              role="dialog"
+              aria-modal="true"
+              style={{
+                background: 'var(--bg-card, #141414)',
+                border: '1px solid var(--border, #2a2a2a)',
+                borderRadius: 14,
+                maxWidth: 440,
+                width: '100%',
+                padding: 22,
+                position: 'relative',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                type="button"
+                aria-label="Close"
+                onClick={() => setDetailItem(null)}
+                style={{
+                  position: 'absolute',
+                  top: 12,
+                  right: 12,
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--text-muted)',
+                  cursor: 'pointer',
+                  padding: 4,
+                }}
+              >
+                <X size={18} />
+              </button>
+              <h3 style={{ margin: '0 0 8px 0', fontSize: 18, color: 'var(--text)' }}>{detailItem.title}</h3>
+              {detailItem.bureau && (
+                <p style={{ margin: '0 0 12px', fontSize: 13, color: 'var(--text-muted)' }}>{detailItem.bureau}</p>
+              )}
+              <p style={{ margin: '0 0 12px', fontSize: 14, lineHeight: 1.6, color: 'var(--text-secondary)' }}>
+                {detailItem.description}
+              </p>
+              {detailItem.recommendation && (
+                <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, color: 'var(--text-secondary)' }}>
+                  <strong>Recommendation:</strong> {detailItem.recommendation}
+                </p>
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  setDetailItem(null);
+                  router.push('/dashboard/templates');
+                }}
+                style={{
+                  marginTop: 18,
+                  padding: '10px 16px',
+                  borderRadius: 8,
+                  border: 'none',
+                  background: 'var(--orange, #FF6B35)',
+                  color: '#fff',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  width: '100%',
+                }}
+              >
+                Open templates
+              </button>
             </div>
           </div>
         )}

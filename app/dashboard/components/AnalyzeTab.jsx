@@ -1,13 +1,100 @@
 "use client";
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
+import { useUser } from '@clerk/nextjs';
+import Link from 'next/link';
 import { Upload, FileText, AlertTriangle, CheckCircle, Loader2, X, ExternalLink } from 'lucide-react';
+import {
+  pickNewerSnapshot,
+  loadServerAnalyzeSnapshot,
+  saveServerAnalyzeSnapshot,
+  clearServerAnalyzeSnapshot,
+} from '@/lib/analyzeSnapshotSync';
+
+const analyzeStorageKey = (userId) => (userId ? `605b_analyze_snapshot_${userId}` : '605b_analyze_snapshot_guest');
 
 export default function AnalyzeTab({ logAction, addFlaggedItem }) {
+  const router = useRouter();
+  const { user, isLoaded } = useUser();
   const [files, setFiles] = useState([]);
   const [analyzing, setAnalyzing] = useState(false);
   const [results, setResults] = useState(null);
   const [dragActive, setDragActive] = useState(false);
+  const [flaggedIssueId, setFlaggedIssueId] = useState(null);
+  const [restoredNotice, setRestoredNotice] = useState(false);
+  /** 'browser' | 'account' — where the winning summary came from */
+  const [restoreSource, setRestoreSource] = useState(null);
+
+  const storageKey = useMemo(() => analyzeStorageKey(user?.id), [user?.id]);
+
+  useEffect(() => {
+    if (!isLoaded || typeof window === 'undefined') return;
+    let cancelled = false;
+
+    (async () => {
+      let localParsed = null;
+      try {
+        const raw = localStorage.getItem(storageKey);
+        if (raw) localParsed = JSON.parse(raw);
+      } catch {
+        /* ignore */
+      }
+
+      let serverSnap = null;
+      if (user?.id) {
+        serverSnap = await loadServerAnalyzeSnapshot();
+      }
+      if (cancelled) return;
+
+      const picked = pickNewerSnapshot(localParsed, serverSnap);
+      if (!picked?.results) return;
+
+      const { _source, results: r, filesMeta, savedAt } = picked;
+      setResults(r);
+      setRestoredNotice(true);
+      setRestoreSource(_source === 'server' ? 'account' : 'browser');
+
+      const normalized = { results: r, filesMeta: filesMeta || [], savedAt: savedAt || new Date().toISOString() };
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(normalized));
+      } catch {
+        /* quota */
+      }
+
+      if (user?.id && _source === 'local') {
+        void saveServerAnalyzeSnapshot(normalized);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isLoaded, storageKey, user?.id]);
+
+  const persistSnapshot = useCallback(
+    (nextResults, nextFiles) => {
+      if (typeof window === 'undefined') return;
+      const payload = {
+        results: nextResults,
+        filesMeta: (nextFiles || []).map((f) => ({
+          name: f.name,
+          size: f.size,
+          lastModified: f.lastModified,
+        })),
+        savedAt: new Date().toISOString(),
+      };
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(payload));
+      } catch {
+        /* quota */
+      }
+      if (user?.id) {
+        void saveServerAnalyzeSnapshot(payload);
+      }
+    },
+    [storageKey, user?.id]
+  );
 
   const handleDrop = useCallback((e) => {
     e.preventDefault();
@@ -86,6 +173,7 @@ export default function AnalyzeTab({ logAction, addFlaggedItem }) {
     setResults(mockResults);
     setAnalyzing(false);
     logAction?.('ANALYZE_COMPLETED', { issuesFound: mockResults.issues.length });
+    persistSnapshot(mockResults, files);
   };
 
   const flagItem = (issue) => {
@@ -97,7 +185,22 @@ export default function AnalyzeTab({ logAction, addFlaggedItem }) {
       bureau: issue.bureau,
       recommendation: issue.recommendation
     });
+    setFlaggedIssueId(issue.id);
+    window.setTimeout(() => setFlaggedIssueId((id) => (id === issue.id ? null : id)), 4000);
   };
+
+  const clearSnapshot = useCallback(() => {
+    try {
+      localStorage.removeItem(storageKey);
+    } catch {
+      /* ignore */
+    }
+    if (user?.id) {
+      void clearServerAnalyzeSnapshot();
+    }
+    setRestoredNotice(false);
+    setRestoreSource(null);
+  }, [storageKey, user?.id]);
 
   return (
     <>
@@ -593,6 +696,41 @@ export default function AnalyzeTab({ logAction, addFlaggedItem }) {
       `}</style>
 
       <div className="analyze-container">
+        {restoredNotice && results && (
+          <div
+            style={{
+              marginBottom: 16,
+              padding: '12px 14px',
+              borderRadius: 10,
+              background: 'rgba(59, 130, 246, 0.12)',
+              border: '1px solid rgba(59, 130, 246, 0.35)',
+              fontSize: 13,
+              color: 'var(--text-secondary, #a1a1aa)',
+            }}
+          >
+            {restoreSource === 'account'
+              ? 'Restored your last analysis summary from your account. Original PDF files are never uploaded to our servers—you only have the issue list here. Upload PDFs again to run a new analysis.'
+              : 'Restored your last analysis summary from this browser. PDFs are not stored on our servers; only the issue summary is saved (and synced to your account when signed in). Upload PDFs again to re-run analysis.'}{' '}
+            <button
+              type="button"
+              onClick={() => {
+                clearSnapshot();
+                setResults(null);
+                setFiles([]);
+              }}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'var(--orange, #FF6B35)',
+                cursor: 'pointer',
+                fontWeight: 600,
+                textDecoration: 'underline',
+              }}
+            >
+              Clear saved analysis
+            </button>
+          </div>
+        )}
         {!results ? (
           <>
             <section className="section">
@@ -605,7 +743,15 @@ export default function AnalyzeTab({ logAction, addFlaggedItem }) {
                 onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
                 onDragLeave={() => setDragActive(false)}
                 onDrop={handleDrop}
-                onClick={() => document.getElementById('file-input').click()}
+                onClick={() => document.getElementById('file-input')?.click()}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    document.getElementById('file-input')?.click();
+                  }
+                }}
+                role="button"
+                tabIndex={0}
               >
                 <div className="upload-icon">
                   <Upload size={28} />
@@ -614,7 +760,14 @@ export default function AnalyzeTab({ logAction, addFlaggedItem }) {
                 <p className="upload-desc">
                   Upload PDF reports from Experian, TransUnion, or Equifax
                 </p>
-                <button className="upload-btn">
+                <button
+                  type="button"
+                  className="upload-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    document.getElementById('file-input')?.click();
+                  }}
+                >
                   <Upload size={18} />
                   Choose Files
                 </button>
@@ -639,13 +792,14 @@ export default function AnalyzeTab({ logAction, addFlaggedItem }) {
                         <div className="file-name">{file.name}</div>
                         <div className="file-size">{(file.size / 1024 / 1024).toFixed(2)} MB</div>
                       </div>
-                      <button className="file-remove" onClick={() => removeFile(i)}>
+                      <button type="button" className="file-remove" onClick={() => removeFile(i)}>
                         <X size={18} />
                       </button>
                     </div>
                   ))}
                   
                   <button 
+                    type="button"
                     className="analyze-btn"
                     onClick={analyzeReports}
                     disabled={analyzing}
@@ -740,21 +894,45 @@ export default function AnalyzeTab({ logAction, addFlaggedItem }) {
                     </div>
                     
                     <div className="issue-actions">
-                      <button className="issue-btn primary" onClick={() => flagItem(issue)}>
+                      <button
+                        type="button"
+                        className="issue-btn primary"
+                        onClick={() => flagItem(issue)}
+                      >
                         Flag for Action
                       </button>
-                      <button className="issue-btn secondary">
+                      <button
+                        type="button"
+                        className="issue-btn secondary"
+                        onClick={() => {
+                          logAction?.('GENERATE_LETTER_CLICK', { issueId: issue.id, title: issue.title });
+                          router.push('/dashboard/templates');
+                        }}
+                      >
                         Generate Letter
                       </button>
                     </div>
+                    {flaggedIssueId === issue.id && (
+                      <p style={{ marginTop: 10, fontSize: 13, color: '#22c55e' }}>
+                        Saved to Flagged —{' '}
+                        <Link href="/dashboard/flagged" style={{ color: 'var(--orange, #FF6B35)', fontWeight: 600 }}>
+                          open Flagged
+                        </Link>
+                      </p>
+                    )}
                   </div>
                 ))}
               </div>
             </section>
             
             <button 
+              type="button"
               className="analyze-btn"
-              onClick={() => { setResults(null); setFiles([]); }}
+              onClick={() => {
+                setResults(null);
+                setFiles([]);
+                clearSnapshot();
+              }}
               style={{ marginTop: 0 }}
             >
               Analyze More Reports

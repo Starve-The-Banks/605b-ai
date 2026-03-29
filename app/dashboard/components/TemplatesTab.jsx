@@ -105,10 +105,14 @@ export default function TemplatesTab({ logAction, addDispute }) {
   const handleUseTemplate = (template) => {
     logAction?.('TEMPLATE_USED', { templateId: template.id, title: template.title });
     addDispute?.({
+      creditor: template.title,
+      bureau: 'Experian',
       type: template.title,
       templateId: template.id,
-      category: template.category
+      category: template.category,
+      dateSent: new Date().toISOString().split('T')[0],
     });
+    setSelectedTemplate(null);
   };
 
   return (
@@ -468,6 +472,49 @@ export default function TemplatesTab({ logAction, addDispute }) {
           color: var(--text-secondary);
           margin-bottom: 8px;
         }
+
+        .preview-overlay {
+          position: fixed;
+          inset: 0;
+          z-index: 300;
+          background: rgba(0, 0, 0, 0.75);
+          display: flex;
+          align-items: flex-end;
+          justify-content: center;
+          padding: 16px;
+        }
+        @media (min-width: 640px) {
+          .preview-overlay {
+            align-items: center;
+          }
+        }
+        .preview-modal {
+          background: var(--bg-card, #141414);
+          border: 1px solid var(--border, #2a2a2a);
+          border-radius: 14px;
+          max-width: 480px;
+          width: 100%;
+          max-height: 85vh;
+          overflow-y: auto;
+          padding: 22px;
+          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+        .preview-modal h3 {
+          margin: 0 0 8px 0;
+          font-size: 18px;
+          color: var(--text, #fafafa);
+        }
+        .preview-modal .preview-sub {
+          font-size: 13px;
+          color: var(--text-muted, #888);
+          margin-bottom: 14px;
+        }
+        .preview-actions {
+          display: flex;
+          gap: 10px;
+          margin-top: 18px;
+          flex-wrap: wrap;
+        }
         
         @media (max-width: 768px) {
           .templates-container {
@@ -563,11 +610,22 @@ export default function TemplatesTab({ logAction, addDispute }) {
                 </div>
                 
                 <div className="card-actions">
-                  <button className="card-btn secondary">
+                  <button
+                    type="button"
+                    className="card-btn secondary"
+                    onClick={() => {
+                      logAction?.('TEMPLATE_PREVIEW', { templateId: template.id, title: template.title });
+                      setSelectedTemplate(template);
+                    }}
+                  >
                     <Eye size={16} />
                     Preview
                   </button>
-                  <button className="card-btn primary" onClick={() => handleUseTemplate(template)}>
+                  <button
+                    type="button"
+                    className="card-btn primary"
+                    onClick={() => handleUseTemplate(template)}
+                  >
                     <Download size={16} />
                     Use Template
                   </button>
@@ -582,6 +640,50 @@ export default function TemplatesTab({ logAction, addDispute }) {
             </div>
             <div className="empty-title">No templates found</div>
             <p>Try adjusting your search or filter criteria</p>
+          </div>
+        )}
+
+        {selectedTemplate && (
+          <div
+            className="preview-overlay"
+            onClick={() => setSelectedTemplate(null)}
+            role="presentation"
+          >
+            <div
+              className="preview-modal"
+              onClick={(e) => e.stopPropagation()}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="template-preview-title"
+            >
+              <h3 id="template-preview-title">{selectedTemplate.title}</h3>
+              <div className="preview-sub">{selectedTemplate.subtitle}</div>
+              <p style={{ fontSize: 14, lineHeight: 1.6, color: 'var(--text-secondary, #ccc)', margin: 0 }}>
+                {selectedTemplate.description}
+              </p>
+              <div style={{ marginTop: 12, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                {selectedTemplate.tags.map((tag, i) => (
+                  <span key={i} className="tag" style={{ fontSize: 12 }}>{tag}</span>
+                ))}
+              </div>
+              <div className="preview-actions">
+                <button
+                  type="button"
+                  className="card-btn secondary"
+                  onClick={() => setSelectedTemplate(null)}
+                >
+                  Close
+                </button>
+                <button
+                  type="button"
+                  className="card-btn primary"
+                  onClick={() => handleUseTemplate(selectedTemplate)}
+                >
+                  <Download size={16} />
+                  Use Template
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>

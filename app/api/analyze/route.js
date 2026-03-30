@@ -2,6 +2,7 @@ import pdfParse from 'pdf-parse';
 import Anthropic from '@anthropic-ai/sdk';
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
+import { getRedis } from '@/lib/redis';
 
 // Vercel request body limits are tight; stay under ~4.5MB platform ceiling
 const MAX_FILE_SIZE = 4 * 1024 * 1024;
@@ -306,10 +307,51 @@ RECOMMENDATIONS:
     }
 
     // =========================
-    // 7. SUCCESS RESPONSE
+    // 7. UPDATE USAGE & SUCCESS RESPONSE
     // =========================
     const duration = Date.now() - startTime;
     console.log('[Analyze] Analysis completed successfully in', duration, 'ms');
+    
+    // Update user's analysis usage count
+    let remaining = 0;
+    try {
+      const redisClient = getRedis();
+      const tierKey = `user:${userId}:tier`;
+      const tierRaw = await redisClient.get(tierKey);
+      
+      if (tierRaw) {
+        const tierData = typeof tierRaw === 'string' ? JSON.parse(tierRaw) : tierRaw;
+        const currentUsed = tierData.pdfAnalysesUsed || 0;
+        const maxAnalyses = tierData.features?.pdfAnalyses || 1;
+        
+        // Increment usage count
+        const newUsed = currentUsed + 1;
+        const updatedTierData = {
+          ...tierData,
+          pdfAnalysesUsed: newUsed,
+          pdfAnalysesRemaining: maxAnalyses === -1 ? -1 : Math.max(0, maxAnalyses - newUsed),
+        };
+        
+        // Save updated tier data
+        await redisClient.set(tierKey, JSON.stringify(updatedTierData));
+        remaining = updatedTierData.pdfAnalysesRemaining;
+        
+        console.log('[Analyze] Updated usage:', {
+          userId,
+          oldUsed: currentUsed,
+          newUsed,
+          maxAnalyses,
+          remaining
+        });
+      } else {
+        console.warn('[Analyze] No tier data found for user:', userId);
+        remaining = 0;
+      }
+    } catch (usageErr) {
+      console.error('[Analyze] Failed to update usage count:', usageErr);
+      // Continue with response - don't fail analysis due to usage tracking issue
+      remaining = 0;
+    }
     
     return successResponse({
       filesProcessed: [{ 
@@ -317,7 +359,7 @@ RECOMMENDATIONS:
         pages: pdfData.numpages || 1 
       }],
       analysis: analysisResult,
-      remaining: 999 // TODO: Implement actual usage tracking
+      remaining: remaining === -1 ? 999 : remaining // Convert unlimited to large number for mobile
     });
 
   } catch (err) {

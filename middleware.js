@@ -26,12 +26,24 @@ const isProtectedRoute = createRouteMatcher([
   '/api/notifications(.*)',
 ]);
 
+const isApiRoute = createRouteMatcher(['/api(.*)']);
+
 export default clerkMiddleware(async (auth, req) => {
   const { userId, redirectToSignIn } = await auth();
   const { pathname } = req.nextUrl;
 
   // Protect all dashboard and API routes
   if (isProtectedRoute(req) && !userId) {
+    // For API routes, return JSON error instead of redirecting
+    if (isApiRoute(req)) {
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } 
+        },
+        { status: 401 }
+      );
+    }
     // Redirect unauthenticated users to sign-in, preserving intended destination
     return redirectToSignIn({ returnBackUrl: req.url });
   }

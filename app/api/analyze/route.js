@@ -3,8 +3,11 @@ import Anthropic from '@anthropic-ai/sdk';
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
-// Maximum file size (10MB in bytes)
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
+// Vercel request body limits are tight; stay under ~4.5MB platform ceiling
+const MAX_FILE_SIZE = 4 * 1024 * 1024;
+
+export const runtime = 'nodejs';
+export const maxDuration = 60;
 
 // AI analysis timeout (30 seconds)
 const AI_TIMEOUT_MS = 30 * 1000;
@@ -33,20 +36,64 @@ function successResponse(data) {
   });
 }
 
+/** React Native often omits MIME or sends octet-stream; web may send application/pdf */
+function isLikelyPdfFile(file) {
+  const name = (file.name || '').toLowerCase();
+  const t = (file.type || '').toLowerCase();
+  if (name.endsWith('.pdf')) return true;
+  if (t === 'application/pdf' || t === 'application/x-pdf') return true;
+  if (t === 'application/octet-stream' || t === '') return true;
+  return false;
+}
+
+function buildFallbackAnalysis(fileName) {
+  return {
+    summary: {
+      overallAssessment:
+        'Automated analysis could not be completed. You can still review your report and use the app tools for disputes and next steps.',
+      potentialIssues: 0,
+      highPriorityItems: 0,
+      totalAccounts: 0,
+      automatedAnalysisIncomplete: true
+    },
+    findings: [
+      {
+        id: 'fallback-info',
+        type: 'info',
+        severity: 'low',
+        account: 'General',
+        issue:
+          'The server could not finish AI analysis. If this persists, try a PDF exported from the bureau site (searchable text, not scan-only).',
+        recommendation: 'Try again or continue with manual review.',
+        successLikelihood: 'N/A'
+      }
+    ],
+    positiveFactors: [],
+    crossBureauInconsistencies: [],
+    personalInfo: {},
+    _fallback: true,
+    _fileNameHint: typeof fileName === 'string' ? fileName.slice(0, 200) : ''
+  };
+}
+
 export async function POST(request) {
   const startTime = Date.now();
-  console.log('[Analyze] POST /api/analyze - request started');
-  
+  const contentType = request.headers.get('content-type') || '';
+  console.log('[Analyze] POST start', {
+    method: request.method,
+    contentTypePreview: contentType.slice(0, 120)
+  });
+
   try {
     // =========================
     // 1. AUTHENTICATION
     // =========================
     let authResult;
     try {
-      authResult = auth();
+      authResult = await auth();
     } catch (authErr) {
-      console.error('[Analyze] Clerk auth() threw error:', authErr);
-      return errorResponse("AUTH_ERROR", "Authentication service unavailable", 500);
+      console.error('[Analyze] Clerk auth() threw error:', authErr?.stack || authErr);
+      return errorResponse("AUTH_ERROR", "Authentication service unavailable", 503);
     }
 
     const { userId } = authResult;
@@ -87,14 +134,14 @@ export async function POST(request) {
     // =========================
     // 3. VALIDATE FILE
     // =========================
-    if (file.type !== 'application/pdf') {
-      console.warn('[Analyze] Invalid file type:', file.type);
+    if (!isLikelyPdfFile(file)) {
+      console.warn('[Analyze] Invalid file type:', file.type, file.name);
       return errorResponse("INVALID_TYPE", "Only PDF files are supported", 400);
     }
 
     if (file.size > MAX_FILE_SIZE) {
       console.warn('[Analyze] File too large:', file.size);
-      return errorResponse("FILE_TOO_LARGE", "File must be under 10MB", 413);
+      return errorResponse("FILE_TOO_LARGE", "File must be under 4MB", 413);
     }
 
     // =========================
@@ -113,7 +160,7 @@ export async function POST(request) {
     // Additional buffer size validation after conversion
     if (buffer.length > MAX_FILE_SIZE) {
       console.warn('[Analyze] Buffer size exceeds limit after conversion:', buffer.length);
-      return errorResponse("FILE_TOO_LARGE", "File must be under 10MB", 413);
+      return errorResponse("FILE_TOO_LARGE", "File must be under 4MB", 413);
     }
 
     // =========================
@@ -170,8 +217,12 @@ export async function POST(request) {
       console.log('[Analyze] Starting AI analysis...');
       
       if (!process.env.ANTHROPIC_API_KEY) {
-        console.error('[Analyze] ANTHROPIC_API_KEY not configured');
-        return errorResponse("CONFIGURATION_ERROR", "Analysis service is not properly configured", 500);
+        console.error('[Analyze] ANTHROPIC_API_KEY not configured — returning fallback analysis');
+        return successResponse({
+          filesProcessed: [{ name: file.name, pages: pdfData.numpages || 1 }],
+          analysis: buildFallbackAnalysis(file.name),
+          remaining: 999
+        });
       }
 
       // Truncate text to fit within token limits
@@ -242,33 +293,47 @@ RECOMMENDATIONS:
       // Validate AI response is not empty
       if (!aiResponse || aiResponse.trim().length < 20) {
         console.error('[Analyze] AI returned empty or minimal response:', aiResponse?.slice(0, 100));
-        return errorResponse("AI_UNAVAILABLE", "Analysis service returned incomplete results - please try again", 502);
+        analysisResult = buildFallbackAnalysis(file.name);
+        if (aiTimeout) clearTimeout(aiTimeout);
+        return successResponse({
+          filesProcessed: [{ name: file.name, pages: pdfData.numpages || 1 }],
+          analysis: analysisResult,
+          remaining: 999
+        });
       }
 
-      // Parse AI response into structured format
-      const analysis = parseAnalysisResponse(aiResponse, extractedText);
-      analysisResult = analysis;
+      // Parse AI response into structured format (never throw to client)
+      try {
+        analysisResult = parseAnalysisResponse(aiResponse, extractedText);
+      } catch (parseErr) {
+        console.error('[Analyze] parseAnalysisResponse failed:', parseErr?.stack || parseErr);
+        analysisResult = buildFallbackAnalysis(file.name);
+      }
 
     } catch (err) {
-      console.error('[Analyze] AI analysis failed:', err);
+      console.error('[Analyze] AI analysis failed:', err?.stack || err);
       
       // Clear timeout if it's still active
       if (aiTimeout) clearTimeout(aiTimeout);
       
-      // Handle specific error types
+      // Handle specific error types — prefer 200 + fallback over 5xx for resilience
       if (err.name === 'AbortError') {
-        return errorResponse("AI_TIMEOUT", "Analysis took too long - please try a smaller PDF", 408);
+        return successResponse({
+          filesProcessed: [{ name: file.name, pages: pdfData.numpages || 1 }],
+          analysis: buildFallbackAnalysis(file.name),
+          remaining: 999
+        });
       }
       
       if (err.status === 429) {
         return errorResponse("RATE_LIMITED", "Analysis service is currently busy - please try again in a moment", 429);
       }
       
-      if (err.status >= 500 || err.status === undefined) {
-        return errorResponse("AI_UNAVAILABLE", "Analysis service is temporarily unavailable - please try again later", 502);
-      }
-      
-      return errorResponse("AI_UNAVAILABLE", "Analysis could not be completed - please try again", 500);
+      return successResponse({
+        filesProcessed: [{ name: file.name, pages: pdfData.numpages || 1 }],
+        analysis: buildFallbackAnalysis(file.name),
+        remaining: 999
+      });
     }
 
     // =========================
@@ -287,14 +352,13 @@ RECOMMENDATIONS:
     });
 
   } catch (err) {
-    console.error('[Analyze] UNHANDLED ERROR in POST /api/analyze:', err);
-    
-    // Even unhandled errors should return structured responses
-    return errorResponse(
-      "PROCESSING_FAILED", 
-      "An unexpected error occurred during analysis",
-      500
-    );
+    console.error('[Analyze] UNHANDLED ERROR in POST /api/analyze:', err?.stack || err);
+    // Never surface 500 to clients — return valid JSON + fallback so apps stay usable
+    return successResponse({
+      filesProcessed: [{ name: 'unknown', pages: 1 }],
+      analysis: buildFallbackAnalysis(''),
+      remaining: 999
+    });
   }
 }
 

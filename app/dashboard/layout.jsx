@@ -13,6 +13,7 @@ import OnboardingWizard from './components/OnboardingWizard';
 import { useUserTier, AccessRestrictionBanner } from '@/lib/useUserTier';
 import { trackPurchase } from '@/lib/tracking';
 import { trackLead } from '@/lib/metaPixel';
+import { fetchWithTimeout, DEFAULT_API_TIMEOUT_MS } from '@/lib/fetchWithTimeout';
 
 const PAYMENT_BANNER_DISMISS_KEY = '605b_payment_confirmed_banner_dismissed';
 
@@ -181,7 +182,7 @@ function DashboardLayoutContent({ children }) {
       // Check server if signed in
       if (isSignedIn) {
         try {
-          const res = await fetch('/api/user-data/profile');
+          const res = await fetchWithTimeout('/api/user-data/profile', { cache: 'no-store' }, DEFAULT_API_TIMEOUT_MS);
           if (res.ok) {
             const { profile } = await res.json();
             if (profile?.onboardingComplete) {

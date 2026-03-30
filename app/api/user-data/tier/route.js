@@ -3,18 +3,9 @@ import { NextResponse } from 'next/server';
 import { tierPostSchema, validateBody } from '@/lib/validation';
 import { isBetaWhitelisted, isBetaWhitelistedByUserId } from '@/lib/beta';
 import { getStripe, getStripePriceId } from '@/lib/stripe';
+import { getRedis } from '@/lib/redis';
 
-// Lazy initialization to avoid build-time errors
-let redis = null;
-function getRedis() {
-  if (!redis) {
-    const { Redis } = require('@upstash/redis');
-    redis = Redis.fromEnv();
-  }
-  return redis;
-}
-
-
+const STRIPE_RECOVERY_BUDGET_MS = 10_000;
 
 // Product ID to tier mapping
 const PRICE_TO_TIER = {
@@ -307,11 +298,21 @@ export async function GET(request) {
     const redisClient = getRedis();
     const tierDataRaw = await redisClient.get(`user:${userId}:tier`);
 
-    // If no tier data found, try to self-heal from Stripe
+    // If no tier data found, try to self-heal from Stripe (bounded time — never hang the client)
     if (!tierDataRaw) {
       console.log(`[TIER] No tier data found for user ${userId}, attempting self-heal from Stripe`);
 
-      const recoveredTierData = await attemptStripeRecovery(redisClient, userId, userEmail);
+      let recoveredTierData = null;
+      try {
+        recoveredTierData = await Promise.race([
+          attemptStripeRecovery(redisClient, userId, userEmail),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('stripe_recovery_timeout')), STRIPE_RECOVERY_BUDGET_MS)
+          ),
+        ]);
+      } catch (e) {
+        console.warn('[TIER] Self-heal skipped or timed out:', e?.message || e);
+      }
 
       if (recoveredTierData) {
         console.log(`[TIER] Self-heal successful for user ${userId}: ${recoveredTierData.tier}`);
@@ -332,7 +333,22 @@ export async function GET(request) {
       return NextResponse.json(freePayload);
     }
 
-    const tierData = typeof tierDataRaw === 'string' ? JSON.parse(tierDataRaw) : tierDataRaw;
+    let tierData;
+    try {
+      tierData = typeof tierDataRaw === 'string' ? JSON.parse(tierDataRaw) : tierDataRaw;
+    } catch (parseErr) {
+      console.error('[TIER] Corrupt tier blob in Redis:', parseErr?.message || parseErr);
+      const freePayload = {
+        tierData: {
+          tier: 'free',
+          features: TIER_FEATURES.free,
+          pdfAnalysesUsed: 0,
+          pdfAnalysesRemaining: 1,
+        },
+      };
+      if (debugPayload) freePayload.debug = debugPayload;
+      return NextResponse.json(freePayload);
+    }
 
     // CRITICAL: Ensure highest tier has ALL features
     if (tierData.tier && TIER_FEATURES[tierData.tier]) {
@@ -344,11 +360,17 @@ export async function GET(request) {
     return NextResponse.json(payload);
 
   } catch (error) {
-    console.error('Error fetching tier:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch tier data' },
-      { status: 500 }
-    );
+    console.error('Error fetching tier:', error?.stack || error);
+    const fallback = {
+      tierData: {
+        tier: 'free',
+        features: TIER_FEATURES.free,
+        pdfAnalysesUsed: 0,
+        pdfAnalysesRemaining: 1,
+      },
+      degraded: true,
+    };
+    return NextResponse.json(fallback, { status: 200 });
   }
 }
 
@@ -389,10 +411,18 @@ export async function POST(request) {
     return NextResponse.json({ tierData });
 
   } catch (error) {
-    console.error('Error setting tier:', error);
+    console.error('Error setting tier:', error?.stack || error);
     return NextResponse.json(
-      { error: 'Failed to set tier' },
-      { status: 500 }
+      {
+        tierData: {
+          tier: 'free',
+          features: TIER_FEATURES.free,
+          pdfAnalysesUsed: 0,
+          pdfAnalysesRemaining: 1,
+        },
+        degraded: true,
+      },
+      { status: 200 }
     );
   }
 }

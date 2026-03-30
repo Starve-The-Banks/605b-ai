@@ -31,7 +31,8 @@ export async function GET() {
 
     return NextResponse.json({ profile: profile || {} });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch profile' }, { status: 500 });
+    console.error('[profile GET]', error?.stack || error);
+    return NextResponse.json({ profile: {}, degraded: true }, { status: 200 });
   }
 }
 
@@ -56,6 +57,7 @@ export async function POST(request) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to save profile' }, { status: 500 });
+    console.error('[profile POST]', error?.stack || error);
+    return NextResponse.json({ success: false, degraded: true }, { status: 200 });
   }
 }

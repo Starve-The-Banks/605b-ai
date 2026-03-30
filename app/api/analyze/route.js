@@ -11,6 +11,7 @@ export const maxDuration = 60;
 
 // AI analysis timeout (30 seconds)
 const AI_TIMEOUT_MS = 30 * 1000;
+const AI_MODEL = process.env.ANTHROPIC_ANALYZE_MODEL || 'claude-sonnet-4-20250514';
 
 // Anthropic client instance
 const anthropic = new Anthropic({
@@ -44,36 +45,6 @@ function isLikelyPdfFile(file) {
   if (t === 'application/pdf' || t === 'application/x-pdf') return true;
   if (t === 'application/octet-stream' || t === '') return true;
   return false;
-}
-
-function buildFallbackAnalysis(fileName) {
-  return {
-    summary: {
-      overallAssessment:
-        'Automated analysis could not be completed. You can still review your report and use the app tools for disputes and next steps.',
-      potentialIssues: 0,
-      highPriorityItems: 0,
-      totalAccounts: 0,
-      automatedAnalysisIncomplete: true
-    },
-    findings: [
-      {
-        id: 'fallback-info',
-        type: 'info',
-        severity: 'low',
-        account: 'General',
-        issue:
-          'The server could not finish AI analysis. If this persists, try a PDF exported from the bureau site (searchable text, not scan-only).',
-        recommendation: 'Try again or continue with manual review.',
-        successLikelihood: 'N/A'
-      }
-    ],
-    positiveFactors: [],
-    crossBureauInconsistencies: [],
-    personalInfo: {},
-    _fallback: true,
-    _fileNameHint: typeof fileName === 'string' ? fileName.slice(0, 200) : ''
-  };
 }
 
 export async function POST(request) {
@@ -217,12 +188,8 @@ export async function POST(request) {
       console.log('[Analyze] Starting AI analysis...');
       
       if (!process.env.ANTHROPIC_API_KEY) {
-        console.error('[Analyze] ANTHROPIC_API_KEY not configured — returning fallback analysis');
-        return successResponse({
-          filesProcessed: [{ name: file.name, pages: pdfData.numpages || 1 }],
-          analysis: buildFallbackAnalysis(file.name),
-          remaining: 999
-        });
+        console.error('[Analyze] ANTHROPIC_API_KEY not configured');
+        return errorResponse("CONFIGURATION_ERROR", "Analysis service is not properly configured", 503);
       }
 
       // Truncate text to fit within token limits
@@ -246,7 +213,7 @@ export async function POST(request) {
       }, AI_TIMEOUT_MS);
 
       const response = await anthropic.messages.create({
-        model: "claude-3-sonnet-20240229",
+        model: AI_MODEL,
         max_tokens: 2000,
         messages: [
           {
@@ -293,21 +260,15 @@ RECOMMENDATIONS:
       // Validate AI response is not empty
       if (!aiResponse || aiResponse.trim().length < 20) {
         console.error('[Analyze] AI returned empty or minimal response:', aiResponse?.slice(0, 100));
-        analysisResult = buildFallbackAnalysis(file.name);
-        if (aiTimeout) clearTimeout(aiTimeout);
-        return successResponse({
-          filesProcessed: [{ name: file.name, pages: pdfData.numpages || 1 }],
-          analysis: analysisResult,
-          remaining: 999
-        });
+        return errorResponse("AI_UNAVAILABLE", "Analysis service returned incomplete results - please try again", 502);
       }
 
-      // Parse AI response into structured format (never throw to client)
+      // Parse AI response into structured format
       try {
-        analysisResult = parseAnalysisResponse(aiResponse, extractedText);
+        analysisResult = parseAnalysisResponse(aiResponse);
       } catch (parseErr) {
         console.error('[Analyze] parseAnalysisResponse failed:', parseErr?.stack || parseErr);
-        analysisResult = buildFallbackAnalysis(file.name);
+        return errorResponse("PROCESSING_FAILED", "Analysis could not be completed - please try again", 502);
       }
 
     } catch (err) {
@@ -315,25 +276,33 @@ RECOMMENDATIONS:
       
       // Clear timeout if it's still active
       if (aiTimeout) clearTimeout(aiTimeout);
+      const errorMessage = String(err?.message || '').toLowerCase();
       
-      // Handle specific error types — prefer 200 + fallback over 5xx for resilience
+      // Handle specific error types
       if (err.name === 'AbortError') {
-        return successResponse({
-          filesProcessed: [{ name: file.name, pages: pdfData.numpages || 1 }],
-          analysis: buildFallbackAnalysis(file.name),
-          remaining: 999
-        });
+        return errorResponse("AI_TIMEOUT", "Analysis took too long - please try again", 408);
       }
       
       if (err.status === 429) {
         return errorResponse("RATE_LIMITED", "Analysis service is currently busy - please try again in a moment", 429);
       }
-      
-      return successResponse({
-        filesProcessed: [{ name: file.name, pages: pdfData.numpages || 1 }],
-        analysis: buildFallbackAnalysis(file.name),
-        remaining: 999
-      });
+
+      if (
+        err.status === 401 ||
+        err.status === 403 ||
+        err.status === 404 ||
+        errorMessage.includes('authentication_error') ||
+        errorMessage.includes('invalid x-api-key') ||
+        errorMessage.includes('model:')
+      ) {
+        return errorResponse("CONFIGURATION_ERROR", "Analysis service is temporarily misconfigured. Please contact support.", 503);
+      }
+
+      if (err.status >= 500 || err.status === undefined) {
+        return errorResponse("AI_UNAVAILABLE", "Analysis service is temporarily unavailable - please try again later", 502);
+      }
+
+      return errorResponse("AI_UNAVAILABLE", "Analysis could not be completed - please try again", 502);
     }
 
     // =========================
@@ -353,17 +322,12 @@ RECOMMENDATIONS:
 
   } catch (err) {
     console.error('[Analyze] UNHANDLED ERROR in POST /api/analyze:', err?.stack || err);
-    // Never surface 500 to clients — return valid JSON + fallback so apps stay usable
-    return successResponse({
-      filesProcessed: [{ name: 'unknown', pages: 1 }],
-      analysis: buildFallbackAnalysis(''),
-      remaining: 999
-    });
+    return errorResponse("PROCESSING_FAILED", "An unexpected error occurred during analysis", 500);
   }
 }
 
 // Helper function to parse AI response into expected structure
-function parseAnalysisResponse(aiResponse, originalText) {
+function parseAnalysisResponse(aiResponse) {
   // Truncate AI response if excessively large (prevent memory issues)
   const maxResponseLength = 50000; // 50KB limit
   const truncatedResponse = aiResponse.length > maxResponseLength 

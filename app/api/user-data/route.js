@@ -21,7 +21,16 @@ export async function GET() {
       flaggedItems: data?.flaggedItems || []
     });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch data' }, { status: 500 });
+    console.error('[user-data GET]', error?.stack || error);
+    return NextResponse.json(
+      {
+        disputes: [],
+        auditLog: [],
+        flaggedItems: [],
+        degraded: true,
+      },
+      { status: 200 }
+    );
   }
 }
 
@@ -53,6 +62,7 @@ export async function POST(request) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    console.error('[user-data POST]', error?.stack || error);
     return NextResponse.json({ error: 'Failed to save data' }, { status: 500 });
   }
 }

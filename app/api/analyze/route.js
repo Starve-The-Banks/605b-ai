@@ -1,6 +1,6 @@
 import pdfParse from 'pdf-parse';
 import Anthropic from '@anthropic-ai/sdk';
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
 // Maximum file size (10MB in bytes)

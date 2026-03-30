@@ -19,6 +19,7 @@ const isProtectedRoute = createRouteMatcher([
   '/account(.*)',
   '/delete-account(.*)',
   '/api/account(.*)',
+  '/api/analyze(.*)',
   '/api/user-data(.*)',
   '/api/identity-theft(.*)',
   '/api/debug(.*)',

@@ -2,16 +2,7 @@ import { auth, currentUser } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { logError } from '@/lib/logging';
 import { getStripe } from '@/lib/stripe';
-
-// Lazy initialization
-let redis = null;
-function getRedis() {
-  if (!redis) {
-    const { Redis } = require('@upstash/redis');
-    redis = Redis.fromEnv();
-  }
-  return redis;
-}
+import { getRedis } from '@/lib/redis';
 
 
 

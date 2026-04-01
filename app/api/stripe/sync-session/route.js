@@ -1,19 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { getStripe } from '@/lib/stripe';
-
-// Lazy initialization to avoid build-time errors
-let redis = null;
-
-
-
-function getRedis() {
-  if (!redis) {
-    const { Redis } = require('@upstash/redis');
-    redis = Redis.fromEnv();
-  }
-  return redis;
-}
+import { getRedis } from '@/lib/redis';
 
 // Grant idempotency key prefix - MUST match webhook/route.js
 const GRANT_KEY_PREFIX = 'grant:session:';

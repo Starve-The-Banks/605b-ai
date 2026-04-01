@@ -1,19 +1,7 @@
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { getStripe, getStripePriceId } from '@/lib/stripe';
-
-// Lazy initialization
-let redis = null;
-
-
-
-function getRedis() {
-  if (!redis) {
-    const { Redis } = require('@upstash/redis');
-    redis = Redis.fromEnv();
-  }
-  return redis;
-}
+import { getRedis } from '@/lib/redis';
 
 // Tier features - must match other files
 const TIER_FEATURES = {

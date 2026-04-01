@@ -2,16 +2,7 @@ import { auth, currentUser } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { stripeCheckoutSchema, validateBody } from '@/lib/validation';
 import { getStripe, getStripePriceId } from '@/lib/stripe';
-
-let redis = null;
-
-function getRedis() {
-  if (!redis) {
-    const { Redis } = require('@upstash/redis');
-    redis = Redis.fromEnv();
-  }
-  return redis;
-}
+import { getRedis } from '@/lib/redis';
 
 // Disclaimer versions - stored server-side, only version sent to Stripe
 const DISCLAIMER_VERSIONS = {

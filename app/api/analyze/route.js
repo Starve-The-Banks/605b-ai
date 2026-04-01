@@ -30,12 +30,16 @@ function errorResponse(code, message, status = 200) {
 }
 
 function successResponse(data) {
-  return NextResponse.json({
+  const resp = {
     success: true,
     filesProcessed: data.filesProcessed || [],
     analysis: data.analysis || {},
-    remaining: data.remaining || 0
-  });
+    remaining: data.remaining || 0,
+  };
+  if (typeof data.pdfAnalysesUsed === 'number') {
+    resp.pdfAnalysesUsed = data.pdfAnalysesUsed;
+  }
+  return NextResponse.json(resp);
 }
 
 /** React Native often omits MIME or sends octet-stream; web may send application/pdf */
@@ -314,43 +318,44 @@ RECOMMENDATIONS:
     
     // Update user's analysis usage count
     let remaining = 0;
+    let newUsedCount = 1;
     try {
       const redisClient = getRedis();
       const tierKey = `user:${userId}:tier`;
       const tierRaw = await redisClient.get(tierKey);
       
+      let tierData;
       if (tierRaw) {
-        const tierData = typeof tierRaw === 'string' ? JSON.parse(tierRaw) : tierRaw;
-        const currentUsed = tierData.pdfAnalysesUsed || 0;
-        const maxAnalyses = tierData.features?.pdfAnalyses || 1;
-        
-        // Increment usage count
-        const newUsed = currentUsed + 1;
-        const updatedTierData = {
-          ...tierData,
-          pdfAnalysesUsed: newUsed,
-          pdfAnalysesRemaining: maxAnalyses === -1 ? -1 : Math.max(0, maxAnalyses - newUsed),
-        };
-        
-        // Save updated tier data
-        await redisClient.set(tierKey, JSON.stringify(updatedTierData));
-        remaining = updatedTierData.pdfAnalysesRemaining;
-        
-        console.log('[Analyze] Updated usage:', {
-          userId,
-          oldUsed: currentUsed,
-          newUsed,
-          maxAnalyses,
-          remaining
-        });
+        tierData = typeof tierRaw === 'string' ? JSON.parse(tierRaw) : tierRaw;
       } else {
-        console.warn('[Analyze] No tier data found for user:', userId);
-        remaining = 0;
+        // Fresh Redis or beta user with no tier key yet — seed with free defaults
+        tierData = { tier: 'free', features: { pdfAnalyses: 1 }, pdfAnalysesUsed: 0 };
+        console.warn('[Analyze] No tier data in Redis for user, seeding:', userId);
       }
+
+      const currentUsed = tierData.pdfAnalysesUsed || 0;
+      const maxAnalyses = tierData.features?.pdfAnalyses ?? 1;
+      const newUsed = currentUsed + 1;
+      newUsedCount = newUsed;
+
+      const updatedTierData = {
+        ...tierData,
+        pdfAnalysesUsed: newUsed,
+        pdfAnalysesRemaining: maxAnalyses === -1 ? -1 : Math.max(0, maxAnalyses - newUsed),
+      };
+
+      await redisClient.set(tierKey, JSON.stringify(updatedTierData));
+      remaining = updatedTierData.pdfAnalysesRemaining;
+
+      console.log('[Analyze] Updated usage:', {
+        userId,
+        oldUsed: currentUsed,
+        newUsed,
+        maxAnalyses,
+        remaining,
+      });
     } catch (usageErr) {
       console.error('[Analyze] Failed to update usage count:', usageErr);
-      // Continue with response - don't fail analysis due to usage tracking issue
-      remaining = 0;
     }
     
     return successResponse({
@@ -359,7 +364,8 @@ RECOMMENDATIONS:
         pages: pdfData.numpages || 1 
       }],
       analysis: analysisResult,
-      remaining: remaining === -1 ? 999 : remaining // Convert unlimited to large number for mobile
+      remaining: remaining === -1 ? 999 : remaining,
+      pdfAnalysesUsed: newUsedCount,
     });
 
   } catch (err) {

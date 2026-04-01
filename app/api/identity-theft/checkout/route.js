@@ -2,19 +2,7 @@ import { NextResponse } from 'next/server';
 import { LIMITS, rateLimit } from '@/lib/rateLimit';
 import { logError } from '@/lib/logging';
 import { getStripe, getStripePriceId } from '@/lib/stripe';
-
-// Lazy initialization to avoid build-time errors
-let redis = null;
-
-
-
-function getRedis() {
-  if (!redis) {
-    const { Redis } = require('@upstash/redis');
-    redis = Redis.fromEnv();
-  }
-  return redis;
-}
+import { getRedis } from '@/lib/redis';
 
 // Product configuration - NEVER accept priceId from client
 const PRODUCT_CONFIG = {

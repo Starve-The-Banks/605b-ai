@@ -3,19 +3,7 @@ import PDFDocument from 'pdfkit';
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { isBetaWhitelisted } from '@/lib/beta';
 import { getStripe } from '@/lib/stripe';
-
-// Lazy initialization
-let redis = null;
-
-
-
-function getRedis() {
-  if (!redis) {
-    const { Redis } = require('@upstash/redis');
-    redis = Redis.fromEnv();
-  }
-  return redis;
-}
+import { getRedis } from '@/lib/redis';
 
 // Bureau addresses
 const BUREAU_ADDRESSES = {

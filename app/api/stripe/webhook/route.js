@@ -1,19 +1,7 @@
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { getStripe } from '@/lib/stripe';
-
-// Lazy initialization to avoid build-time errors
-let redis = null;
-
-
-
-function getRedis() {
-  if (!redis) {
-    const { Redis } = require('@upstash/redis');
-    redis = Redis.fromEnv();
-  }
-  return redis;
-}
+import { getRedis } from '@/lib/redis';
 
 // Updated tier features to match new pricing structure
 const TIER_FEATURES = {

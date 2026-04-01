@@ -280,13 +280,28 @@ export async function GET(request) {
       isWhitelisted,
     });
 
+    const redisClient = getRedis();
+
     if (isWhitelisted) {
       console.log('[TIER] ✓ Granting beta access to:', userEmail, '(matched one of', allEmails.length, 'emails)');
+
+      // Read persisted usage from Redis so counts survive across requests
+      let pdfAnalysesUsed = 0;
+      try {
+        const existingRaw = await redisClient.get(`user:${userId}:tier`);
+        if (existingRaw) {
+          const existing = typeof existingRaw === 'string' ? JSON.parse(existingRaw) : existingRaw;
+          pdfAnalysesUsed = existing.pdfAnalysesUsed || 0;
+        }
+      } catch (e) {
+        console.warn('[TIER] Failed to read beta usage from Redis:', e?.message || e);
+      }
+
       const payload = {
         tierData: {
           tier: 'identity-theft',
           features: TIER_FEATURES['identity-theft'],
-          pdfAnalysesUsed: 0,
+          pdfAnalysesUsed,
           pdfAnalysesRemaining: -1,
           isBeta: true,
         },
@@ -295,7 +310,6 @@ export async function GET(request) {
       return NextResponse.json(payload);
     }
 
-    const redisClient = getRedis();
     const tierDataRaw = await redisClient.get(`user:${userId}:tier`);
 
     // If no tier data found, try to self-heal from Stripe (bounded time — never hang the client)
@@ -321,11 +335,11 @@ export async function GET(request) {
         return NextResponse.json(payload);
       }
 
+      // Redis empty + no Stripe recovery — omit pdfAnalysesUsed so client keeps local count
       const freePayload = {
         tierData: {
           tier: 'free',
           features: TIER_FEATURES.free,
-          pdfAnalysesUsed: 0,
           pdfAnalysesRemaining: 1,
         },
       };
@@ -342,7 +356,6 @@ export async function GET(request) {
         tierData: {
           tier: 'free',
           features: TIER_FEATURES.free,
-          pdfAnalysesUsed: 0,
           pdfAnalysesRemaining: 1,
         },
       };
@@ -365,7 +378,7 @@ export async function GET(request) {
       tierData: {
         tier: 'free',
         features: TIER_FEATURES.free,
-        pdfAnalysesUsed: 0,
+        // Omit pdfAnalysesUsed so client keeps its local (higher) count
         pdfAnalysesRemaining: 1,
       },
       degraded: true,

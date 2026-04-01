@@ -1,0 +1,153 @@
+import Anthropic from '@anthropic-ai/sdk';
+import { auth } from '@clerk/nextjs/server';
+import { NextResponse } from 'next/server';
+import { chatSchema, validateBody } from '@/lib/validation';
+import { rateLimit, LIMITS } from '@/lib/rateLimit';
+
+export const runtime = 'nodejs';
+export const maxDuration = 60;
+
+const AI_MODEL = process.env.ANTHROPIC_CHAT_MODEL || 'claude-3-sonnet-20240229';
+
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+});
+
+const DEFAULT_SYSTEM_PROMPT = `You are 605b.ai's FCRA credit dispute strategist. You help consumers understand their rights under the Fair Credit Reporting Act and related federal statutes.
+
+Key statutes you reference:
+- FCRA §611 (15 U.S.C. §1681i): Procedure for disputed accuracy — consumers may dispute incomplete or inaccurate information directly with consumer reporting agencies (CRAs), which must investigate within 30 days.
+- FCRA §605B (15 U.S.C. §1681c-2): Block of information resulting from identity theft — CRAs must block reported identity-theft items within 4 business days of receiving a proper identity theft report.
+- FCRA §623 (15 U.S.C. §1681s-2): Responsibilities of furnishers — data furnishers must investigate disputes forwarded by CRAs and correct or delete inaccurate information.
+- FCRA §609 (15 U.S.C. §1681g): Disclosures to consumers — consumers are entitled to full disclosure of all information in their file.
+- FCRA §605 (15 U.S.C. §1681c): Requirements relating to information contained in consumer reports — limits on reporting obsolete information (generally 7 years, 10 for bankruptcies).
+
+Guidelines for your responses:
+- Provide educational guidance on the dispute process, timelines, and consumer rights.
+- Explain which statutes or regulatory provisions may apply to a given situation.
+- Help the user understand what documentation or evidence may strengthen a dispute.
+- Suggest dispute letter language the user can adapt for their specific situation.
+- Be clear, concise, and actionable.
+
+You must NOT:
+- Provide legal advice or act as an attorney.
+- Promise any specific outcome (removal, score improvement, settlement, etc.).
+- Encourage misrepresentation, fabrication, or any fraudulent activity.
+- Request or reference full SSNs, account numbers, or other sensitive identifiers.
+
+Always remind the user that this is educational guidance and that they should consult a licensed attorney for legal advice specific to their situation.`;
+
+export async function POST(request) {
+  try {
+    let authResult;
+    try {
+      authResult = await auth();
+    } catch (authErr) {
+      console.error('[Chat] Clerk auth() threw:', authErr?.message);
+      return NextResponse.json(
+        { error: 'Authentication service unavailable' },
+        { status: 503 }
+      );
+    }
+
+    const { userId } = authResult;
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        { error: 'Invalid JSON body' },
+        { status: 400 }
+      );
+    }
+
+    const { data, error: validationError } = validateBody(chatSchema, body);
+    if (validationError) {
+      return NextResponse.json(
+        { error: validationError },
+        { status: 400 }
+      );
+    }
+
+    const { allowed, resetIn } = await rateLimit(userId, 'chat', LIMITS.chat);
+    if (!allowed) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded — try again later', resetIn },
+        { status: 429 }
+      );
+    }
+
+    if (!process.env.ANTHROPIC_API_KEY) {
+      console.error('[Chat] ANTHROPIC_API_KEY not configured');
+      return NextResponse.json(
+        { error: 'Chat service is not properly configured' },
+        { status: 503 }
+      );
+    }
+
+    const systemPrompt = data.systemPrompt || DEFAULT_SYSTEM_PROMPT;
+
+    const stream = await anthropic.messages.stream({
+      model: AI_MODEL,
+      max_tokens: 2000,
+      system: systemPrompt,
+      messages: data.messages.map(({ role, content }) => ({ role, content })),
+    });
+
+    const encoder = new TextEncoder();
+    const readable = new ReadableStream({
+      async start(controller) {
+        try {
+          for await (const event of stream) {
+            if (
+              event.type === 'content_block_delta' &&
+              event.delta?.type === 'text_delta'
+            ) {
+              controller.enqueue(encoder.encode(event.delta.text));
+            }
+          }
+          controller.close();
+        } catch (err) {
+          console.error('[Chat] Stream error:', err?.message);
+          controller.error(err);
+        }
+      },
+    });
+
+    return new Response(readable, {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'no-cache',
+        'Transfer-Encoding': 'chunked',
+      },
+    });
+  } catch (err) {
+    console.error('[Chat] Unhandled error:', err?.stack || err);
+
+    if (err?.status === 429) {
+      return NextResponse.json(
+        { error: 'AI service is busy — please try again in a moment' },
+        { status: 429 }
+      );
+    }
+
+    if (err?.status === 401 || err?.status === 403) {
+      return NextResponse.json(
+        { error: 'Chat service is temporarily misconfigured' },
+        { status: 503 }
+      );
+    }
+
+    return NextResponse.json(
+      { error: 'An unexpected error occurred' },
+      { status: 500 }
+    );
+  }
+}

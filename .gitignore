@@ -67,3 +67,6 @@ public/ads/**/*.mp4
 
 # Underwriting — generated screenshot run log
 underwriting-proof/screenshot-results.json
+
+# Cursor IDE state
+.cursor/

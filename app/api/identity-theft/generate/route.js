@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import PDFDocument from 'pdfkit';
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { isBetaWhitelisted } from '@/lib/beta';
+// Note: generate route uses isBetaWhitelisted (single email) because it
+// only has the primary email from currentUser(), not the full allEmails set.
 import { getStripe } from '@/lib/stripe';
 import { getRedis } from '@/lib/redis';
 

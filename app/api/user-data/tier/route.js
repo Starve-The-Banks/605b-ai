@@ -1,7 +1,7 @@
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { tierPostSchema, validateBody } from '@/lib/validation';
-import { isBetaWhitelisted, isBetaWhitelistedByUserId } from '@/lib/beta';
+import { isBetaUser } from '@/lib/beta';
 import { getStripe, getStripePriceId } from '@/lib/stripe';
 import { getRedis } from '@/lib/redis';
 
@@ -249,17 +249,7 @@ export async function GET(request) {
     const allEmailsRaw = [primary, ...fromArray, sessionEmail].filter(Boolean);
     const allEmails = [...new Set(allEmailsRaw.map(e => String(e).trim().toLowerCase()))];
     const userEmail = primary || fromArray[0] || sessionEmail;
-    let isWhitelisted = allEmails.some(email => isBetaWhitelisted(email));
-    // Explicit fallback for known beta email (in case Clerk shape or env differs)
-    if (!isWhitelisted && (userEmail || '').toLowerCase().includes('subs-tre@outlook.com')) {
-      isWhitelisted = true;
-      console.log('[TIER] Beta access via explicit fallback for subs-tre@outlook.com');
-    }
-    // UserId whitelist (works when Clerk email is missing, e.g. cross-instance)
-    if (!isWhitelisted && isBetaWhitelistedByUserId(userId)) {
-      isWhitelisted = true;
-      console.log('[TIER] Beta access via BETA_WHITELIST_USER_IDS for', userId);
-    }
+    const isWhitelisted = isBetaUser({ emails: allEmails, userId });
 
     const whitelistEnv = process.env.BETA_WHITELIST_EMAILS;
     const whitelistCount = whitelistEnv ? whitelistEnv.split(',').length : 0;

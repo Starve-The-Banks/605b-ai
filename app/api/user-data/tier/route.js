@@ -1,7 +1,7 @@
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { tierPostSchema, validateBody } from '@/lib/validation';
-import { isBetaUser } from '@/lib/beta';
+import { isBetaUser, getBetaAllowlistState } from '@/lib/beta';
 import { getStripe, getStripePriceId } from '@/lib/stripe';
 import { getRedis } from '@/lib/redis';
 
@@ -251,22 +251,21 @@ export async function GET(request) {
     const userEmail = primary || fromArray[0] || sessionEmail;
     const isWhitelisted = isBetaUser({ emails: allEmails, userId });
 
-    const whitelistEnv = process.env.BETA_WHITELIST_EMAILS;
-    const whitelistCount = whitelistEnv ? whitelistEnv.split(',').length : 0;
+    const allowlistState = getBetaAllowlistState();
     const debugPayload = debugMode ? {
       userId,
       userEmail: userEmail || null,
       allEmails,
       isWhitelisted,
-      whitelistCount,
-      hasWhitelistEnv: !!whitelistEnv,
+      allowlistEmails: allowlistState.emailAllowlist,
+      allowlistUserIds: allowlistState.userIdAllowlist,
     } : undefined;
 
     console.log('[TIER] Beta check:', {
       userId,
       userEmail,
       allEmails,
-      whitelistEnv: whitelistEnv ? `${whitelistCount} emails` : 'NOT SET',
+      allowlistEmails: allowlistState.emailAllowlist,
       isWhitelisted,
     });
 

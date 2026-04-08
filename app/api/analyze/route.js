@@ -19,6 +19,97 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
+const ANALYSIS_SYSTEM_PROMPT = `You are the most thorough credit report analysis system in the industry. You analyze consumer reports from ALL bureau types and produce exhaustive, actionable findings.
+
+REPORT TYPE DETECTION:
+First, identify the report source from content patterns:
+- Equifax, Experian, TransUnion (traditional credit bureaus)
+- ChexSystems (bank account closures, fraud flags, involuntary closures)
+- LexisNexis (insurance risk, employment history, address history, public records)
+- Early Warning Services / EWS (deposit account screening, fraud indicators)
+- Innovis (fourth credit bureau, similar to traditional bureaus)
+- SageStream (alternative credit data, thin-file consumers)
+- NCTUE (utility and telecom payment history)
+- If you cannot determine the source, use "Unknown"
+
+ANALYSIS DEPTH — for every account/item found:
+1. Identify the specific inaccuracy or concern
+2. Cite the exact FCRA statute that applies (§611, §605B, §623, §609, §605A, §604, §605)
+3. Assess severity: "high" (clear violation, strong dispute basis), "medium" (likely disputable), "low" (minor or informational)
+4. Provide a specific dispute recommendation (not generic advice)
+5. Estimate dispute success likelihood: "Strong" / "Moderate" / "Possible"
+6. Identify the reasoning (why this is disputable under law)
+
+WHAT TO LOOK FOR:
+- Accounts not belonging to the consumer (mixed files, identity theft)
+- Incorrect balances, credit limits, or high-balance amounts
+- Wrong payment history (late payments that were on time)
+- Incorrect account status (open vs closed, current vs delinquent)
+- Wrong dates (date opened, date of first delinquency, last activity)
+- Duplicate accounts (same debt reported by original creditor AND collector)
+- Re-aged debts (date of first delinquency moved forward to extend reporting)
+- Accounts past the 7-year reporting period (10 for bankruptcies)
+- Unauthorized hard inquiries
+- Incorrect personal information (names, addresses, employers, SSN variations)
+- For ChexSystems: involuntary closures that may be inaccurate, fraud flags you didn't cause
+- For LexisNexis: incorrect insurance scores, wrong employment/address data
+- For EWS: incorrect account closure reasons, fraud indicators that are wrong
+
+CROSS-BUREAU INCONSISTENCIES:
+If the report contains data from multiple bureaus or if accounts reference different bureau reporting, flag any inconsistencies (different balances, different statuses, different dates for the same account).
+
+POSITIVE FACTORS:
+Identify accounts in good standing, long payment histories, low utilization, and other positive elements.
+
+OUTPUT FORMAT — return ONLY a valid JSON object with this exact structure:
+{
+  "reportType": "Equifax" | "Experian" | "TransUnion" | "ChexSystems" | "LexisNexis" | "EWS" | "Innovis" | "SageStream" | "NCTUE" | "Unknown",
+  "summary": {
+    "overallAssessment": "2-3 paragraph comprehensive assessment",
+    "potentialIssues": <number>,
+    "highPriorityItems": <number>,
+    "reportDate": "extracted date if visible, or null"
+  },
+  "findings": [
+    {
+      "id": "finding-1",
+      "type": "accuracy" | "identity" | "timeliness" | "completeness" | "inquiry" | "personal-info",
+      "severity": "high" | "medium" | "low",
+      "account": "Creditor name or account identifier",
+      "issue": "Specific description of the problem found",
+      "statute": "FCRA §611" | "FCRA §605B" | "FCRA §623" | etc,
+      "recommendation": "Specific action to take",
+      "reasoning": "Why this is disputable under the cited statute",
+      "successLikelihood": "Strong" | "Moderate" | "Possible"
+    }
+  ],
+  "positiveFactors": ["Account X has 5 years of on-time payments", ...],
+  "crossBureauInconsistencies": [
+    {
+      "item": "Account or data point",
+      "details": "What differs and why it matters"
+    }
+  ],
+  "personalInfo": {
+    "namesFound": ["list of name variations found"],
+    "addressesFound": ["list of addresses found"],
+    "issues": ["any personal info discrepancies"]
+  },
+  "actionPlan": [
+    "Step 1: Priority action",
+    "Step 2: Next action",
+    ...
+  ]
+}
+
+CRITICAL RULES:
+- Return ONLY the JSON object. No markdown, no code fences, no explanation text before or after.
+- Every finding MUST have a specific statute citation.
+- Be exhaustive — do not skip items. Analyze every account and tradeline visible.
+- For specialty reports (ChexSystems, EWS, LexisNexis), adapt your analysis to their specific data formats.
+- Never promise outcomes. Use "may be disputable" or "potential violation" language.
+- Never request SSN, DOB, or other PII in your response.`;
+
 function errorResponse(code, message, status = 200) {
   return NextResponse.json(
     {
@@ -197,8 +288,8 @@ export async function POST(request) {
         return errorResponse("CONFIGURATION_ERROR", "Analysis service is not properly configured", 503);
       }
 
-      // Truncate text to fit within token limits
-      const maxTextLength = 12000; // Conservative limit for Claude
+      // Truncate text to fit within token limits — generous for deep analysis
+      const maxTextLength = 20000;
       const textToAnalyze = extractedText.length > maxTextLength 
         ? (() => {
             console.warn('[Analyze] Text truncated for analysis:', {
@@ -219,38 +310,12 @@ export async function POST(request) {
 
       const response = await anthropic.messages.create({
         model: AI_MODEL,
-        max_tokens: 2000,
+        max_tokens: 4000,
+        system: ANALYSIS_SYSTEM_PROMPT,
         messages: [
           {
             role: "user",
-            content: `You are a credit report analysis expert. Analyze this credit report and provide findings in a structured format.
-
-Focus on:
-- Potential inaccuracies or errors
-- Items that could be disputed under FCRA
-- Account status discrepancies
-- Personal information errors
-- High-priority issues
-
-Credit report text:
-${textToAnalyze}
-
-Please provide your analysis in this exact format:
-
-SUMMARY:
-[Brief overview of the report]
-
-HIGH PRIORITY ITEMS:
-[List items that should be disputed first]
-
-POTENTIAL ISSUES:
-[List all potential inaccuracies found]
-
-POSITIVE FACTORS:
-[List any positive elements]
-
-RECOMMENDATIONS:
-[Specific next steps]`
+            content: `Analyze this credit/consumer report and return ONLY valid JSON matching the schema described in your instructions.\n\nReport text:\n${textToAnalyze}`
           }
         ]
       }, {
@@ -374,83 +439,84 @@ RECOMMENDATIONS:
   }
 }
 
-// Helper function to parse AI response into expected structure
 function parseAnalysisResponse(aiResponse) {
-  // Truncate AI response if excessively large (prevent memory issues)
-  const maxResponseLength = 50000; // 50KB limit
-  const truncatedResponse = aiResponse.length > maxResponseLength 
-    ? aiResponse.slice(0, maxResponseLength) 
+  const maxResponseLength = 80000;
+  const text = aiResponse.length > maxResponseLength
+    ? aiResponse.slice(0, maxResponseLength)
     : aiResponse;
 
-  if (aiResponse.length > maxResponseLength) {
-    console.warn('[Analyze] AI response truncated for safety:', {
-      originalLength: aiResponse.length,
-      truncatedLength: maxResponseLength
-    });
+  // Strip markdown code fences if the model wrapped the JSON
+  const cleaned = text
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/\s*```\s*$/, '')
+    .trim();
+
+  try {
+    const parsed = JSON.parse(cleaned);
+    return {
+      reportType: parsed.reportType || 'Unknown',
+      summary: {
+        overallAssessment: parsed.summary?.overallAssessment || 'Analysis completed',
+        potentialIssues: typeof parsed.summary?.potentialIssues === 'number' ? parsed.summary.potentialIssues : (parsed.findings?.length || 0),
+        highPriorityItems: typeof parsed.summary?.highPriorityItems === 'number' ? parsed.summary.highPriorityItems : (parsed.findings?.filter(f => f.severity === 'high').length || 0),
+        reportDate: parsed.summary?.reportDate || null,
+      },
+      findings: (parsed.findings || []).slice(0, 30).map((f, i) => ({
+        id: f.id || `finding-${i}`,
+        type: f.type || 'accuracy',
+        severity: f.severity || 'medium',
+        account: f.account || 'Unknown Account',
+        issue: f.issue || '',
+        statute: f.statute || '',
+        recommendation: f.recommendation || '',
+        reasoning: f.reasoning || '',
+        successLikelihood: f.successLikelihood || 'Moderate',
+      })),
+      positiveFactors: (parsed.positiveFactors || []).slice(0, 15),
+      crossBureauInconsistencies: (parsed.crossBureauInconsistencies || []).slice(0, 10).map(c => ({
+        item: c.item || '',
+        details: c.details || '',
+      })),
+      personalInfo: parsed.personalInfo || {},
+      actionPlan: (parsed.actionPlan || []).slice(0, 10),
+    };
+  } catch (jsonErr) {
+    console.warn('[Analyze] JSON parse failed, falling back to text parsing:', jsonErr.message);
+    return fallbackTextParse(text);
   }
-  
-  // Simple parsing - could be enhanced with more sophisticated text processing
-  const sections = truncatedResponse.split(/(?:SUMMARY|HIGH PRIORITY|POTENTIAL ISSUES|POSITIVE FACTORS|RECOMMENDATIONS):/i);
-  
+}
+
+function fallbackTextParse(text) {
+  const sections = text.split(/(?:SUMMARY|HIGH PRIORITY|POTENTIAL ISSUES|POSITIVE FACTORS|RECOMMENDATIONS):/i);
+  const highPriority = (text.match(/HIGH PRIORITY ITEMS?:(.*?)(?:POTENTIAL|POSITIVE|$)/is)?.[1] || '')
+    .split('\n').filter(l => l.trim()).map((l, i) => ({
+      id: `high-${i}`, type: 'accuracy', severity: 'high',
+      account: 'Credit Report', issue: l.trim(),
+      statute: 'FCRA §611', recommendation: 'Dispute this item with the credit bureau',
+      reasoning: '', successLikelihood: 'Moderate',
+    }));
+  const potential = (text.match(/POTENTIAL ISSUES:(.*?)(?:POSITIVE|RECOMMENDATIONS|$)/is)?.[1] || '')
+    .split('\n').filter(l => l.trim()).map((l, i) => ({
+      id: `potential-${i}`, type: 'potential', severity: 'medium',
+      account: 'Credit Report', issue: l.trim(),
+      statute: 'FCRA §611', recommendation: 'Review and consider disputing',
+      reasoning: '', successLikelihood: 'Possible',
+    }));
+  const positiveFactors = (text.match(/POSITIVE FACTORS:(.*?)(?:RECOMMENDATIONS|$)/is)?.[1] || '')
+    .split('\n').map(l => l.trim()).filter(Boolean).slice(0, 10);
+
   return {
+    reportType: 'Unknown',
     summary: {
-      overallAssessment: sections[1]?.trim() || "Analysis completed",
-      potentialIssues: (truncatedResponse.match(/POTENTIAL ISSUES:(.*?)(?:POSITIVE|RECOMMENDATIONS|$)/is)?.[1] || '').split('\n').filter(line => line.trim()).length,
-      highPriorityItems: (truncatedResponse.match(/HIGH PRIORITY ITEMS:(.*?)(?:POTENTIAL|POSITIVE|$)/is)?.[1] || '').split('\n').filter(line => line.trim()).length
+      overallAssessment: sections[1]?.trim() || 'Analysis completed',
+      potentialIssues: potential.length,
+      highPriorityItems: highPriority.length,
+      reportDate: null,
     },
-    findings: extractFindings(truncatedResponse),
-    positiveFactors: extractPositiveFactors(truncatedResponse),
+    findings: [...highPriority, ...potential].slice(0, 20),
+    positiveFactors,
     crossBureauInconsistencies: [],
-    personalInfo: {} // Could extract personal info if needed
+    personalInfo: {},
+    actionPlan: [],
   };
-}
-
-function extractFindings(text) {
-  const findings = [];
-  const highPrioritySection = text.match(/HIGH PRIORITY ITEMS:(.*?)(?:POTENTIAL|POSITIVE|$)/is)?.[1] || '';
-  const potentialSection = text.match(/POTENTIAL ISSUES:(.*?)(?:POSITIVE|RECOMMENDATIONS|$)/is)?.[1] || '';
-  
-  // Extract high priority items
-  const highPriorityLines = highPrioritySection.split('\n').filter(line => line.trim() && !line.match(/^[-•*]/));
-  highPriorityLines.forEach((line, index) => {
-    if (line.trim()) {
-      findings.push({
-        id: `high-${index}`,
-        type: 'accuracy',
-        severity: 'high',
-        account: 'Credit Report',
-        issue: line.trim(),
-        recommendation: 'Dispute this item with the credit bureau',
-        successLikelihood: 'Medium to High'
-      });
-    }
-  });
-
-  // Extract potential issues
-  const potentialLines = potentialSection.split('\n').filter(line => line.trim() && !line.match(/^[-•*]/));
-  potentialLines.forEach((line, index) => {
-    if (line.trim()) {
-      findings.push({
-        id: `potential-${index}`,
-        type: 'potential',
-        severity: 'medium',
-        account: 'Credit Report', 
-        issue: line.trim(),
-        recommendation: 'Review and consider disputing',
-        successLikelihood: 'Medium'
-      });
-    }
-  });
-
-  return findings.slice(0, 20); // Limit to top 20 findings
-}
-
-function extractPositiveFactors(text) {
-  const positiveSection = text.match(/POSITIVE FACTORS:(.*?)(?:RECOMMENDATIONS|$)/is)?.[1] || '';
-  return positiveSection
-    .split('\n')
-    .filter(line => line.trim() && !line.match(/^[-•*]/))
-    .map(line => line.trim())
-    .filter(Boolean)
-    .slice(0, 10);
 }

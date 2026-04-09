@@ -10,8 +10,8 @@ const MAX_FILE_SIZE = 4 * 1024 * 1024;
 export const runtime = 'nodejs';
 export const maxDuration = 60;
 
-// AI analysis timeout (30 seconds)
-const AI_TIMEOUT_MS = 30 * 1000;
+// AI analysis timeout — allow 50s for deep analysis (Vercel maxDuration is 60s)
+const AI_TIMEOUT_MS = 50 * 1000;
 const AI_MODEL = process.env.ANTHROPIC_ANALYZE_MODEL || 'claude-sonnet-4-20250514';
 
 // Anthropic client instance
@@ -310,7 +310,7 @@ export async function POST(request) {
 
       const response = await anthropic.messages.create({
         model: AI_MODEL,
-        max_tokens: 4000,
+        max_tokens: 3000,
         system: ANALYSIS_SYSTEM_PROMPT,
         messages: [
           {

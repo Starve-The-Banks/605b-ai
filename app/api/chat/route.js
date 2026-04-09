@@ -7,8 +7,6 @@ import { rateLimit, LIMITS } from '@/lib/rateLimit';
 export const runtime = 'nodejs';
 export const maxDuration = 60;
 
-const AI_MODEL = process.env.ANTHROPIC_CHAT_MODEL || 'claude-3-sonnet-20240229';
-
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
@@ -36,6 +34,48 @@ You must NOT:
 - Request or reference full SSNs, account numbers, or other sensitive identifiers.
 
 Always remind the user that this is educational guidance and that they should consult a licensed attorney for legal advice specific to their situation.`;
+
+const FALLBACK_MODELS = [
+  process.env.ANTHROPIC_CHAT_MODEL,
+  'claude-sonnet-4-20250514',
+  'claude-3-7-sonnet-20250219',
+].filter(Boolean);
+
+function isModelAvailabilityError(err) {
+  const status = err?.status;
+  const message = String(err?.message || '').toLowerCase();
+  return (
+    status === 400 ||
+    status === 404 ||
+    message.includes('model') ||
+    message.includes('not found')
+  );
+}
+
+async function createStreamWithFallback(systemPrompt, messages) {
+  let lastError = null;
+
+  for (const model of FALLBACK_MODELS) {
+    try {
+      const stream = await anthropic.messages.stream({
+        model,
+        max_tokens: 2500,
+        system: systemPrompt,
+        messages,
+      });
+      return { stream, model };
+    } catch (err) {
+      lastError = err;
+      if (isModelAvailabilityError(err)) {
+        console.warn('[Chat] Model unavailable, trying fallback:', model, err?.message);
+        continue;
+      }
+      throw err;
+    }
+  }
+
+  throw lastError || new Error('No chat model available');
+}
 
 export async function POST(request) {
   try {
@@ -94,12 +134,8 @@ export async function POST(request) {
 
     const systemPrompt = data.systemPrompt || DEFAULT_SYSTEM_PROMPT;
 
-    const stream = await anthropic.messages.stream({
-      model: AI_MODEL,
-      max_tokens: 2000,
-      system: systemPrompt,
-      messages: data.messages.map(({ role, content }) => ({ role, content })),
-    });
+    const mappedMessages = data.messages.map(({ role, content }) => ({ role, content }));
+    const { stream, model } = await createStreamWithFallback(systemPrompt, mappedMessages);
 
     const encoder = new TextEncoder();
     const readable = new ReadableStream({
@@ -126,10 +162,18 @@ export async function POST(request) {
         'Content-Type': 'text/plain; charset=utf-8',
         'Cache-Control': 'no-cache',
         'Transfer-Encoding': 'chunked',
+        'x-chat-model': model,
       },
     });
   } catch (err) {
     console.error('[Chat] Unhandled error:', err?.stack || err);
+
+    if (isModelAvailabilityError(err)) {
+      return NextResponse.json(
+        { error: 'AI chat model is temporarily unavailable. Please try again in a moment.' },
+        { status: 503 }
+      );
+    }
 
     if (err?.status === 429) {
       return NextResponse.json(

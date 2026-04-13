@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/nextjs';
 import pdfParse from 'pdf-parse';
 import Anthropic from '@anthropic-ai/sdk';
 import { auth } from '@clerk/nextjs/server';
@@ -144,6 +145,13 @@ function isLikelyPdfFile(file) {
 }
 
 export async function POST(request) {
+  return Sentry.withScope(async (scope) => {
+    scope.setTag('route', 'api/analyze');
+    return _handleAnalyze(request);
+  });
+}
+
+async function _handleAnalyze(request) {
   const startTime = Date.now();
   const contentType = request.headers.get('content-type') || '';
   console.log('[Analyze] POST start', {
@@ -159,6 +167,7 @@ export async function POST(request) {
     try {
       authResult = await auth();
     } catch (authErr) {
+      Sentry.captureException(authErr, { tags: { route: 'api/analyze', stage: 'auth' } });
       console.error('[Analyze] Clerk auth() threw error:', authErr?.stack || authErr);
       return errorResponse("AUTH_ERROR", "Authentication service unavailable", 503);
     }
@@ -168,6 +177,7 @@ export async function POST(request) {
       console.warn('[Analyze] Unauthorized request - no userId');
       return errorResponse("AUTH_REQUIRED", "Authentication required", 401);
     }
+    Sentry.setUser({ id: userId });
 
     // =========================
     // 2. PARSE FORM DATA
@@ -342,20 +352,19 @@ export async function POST(request) {
       }
 
     } catch (err) {
-      console.error('[Analyze] AI analysis failed:', err?.stack || err);
-      
-      // Clear timeout if it's still active
       if (aiTimeout) clearTimeout(aiTimeout);
       const errorMessage = String(err?.message || '').toLowerCase();
-      
-      // Handle specific error types
+
       if (err.name === 'AbortError') {
+        Sentry.addBreadcrumb({ category: 'analyze', message: 'AI timeout', level: 'warning', data: { timeoutMs: AI_TIMEOUT_MS } });
         return errorResponse("AI_TIMEOUT", "Analysis took too long - please try again", 408);
       }
-      
       if (err.status === 429) {
+        Sentry.addBreadcrumb({ category: 'analyze', message: 'AI rate limited', level: 'warning' });
         return errorResponse("RATE_LIMITED", "Analysis service is currently busy - please try again in a moment", 429);
       }
+      Sentry.captureException(err, { tags: { route: 'api/analyze', stage: 'ai_call' }, extra: { model: AI_MODEL } });
+      console.error('[Analyze] AI analysis failed:', err?.stack || err);
 
       if (
         err.status === 401 ||
@@ -434,6 +443,7 @@ export async function POST(request) {
     });
 
   } catch (err) {
+    Sentry.captureException(err, { tags: { route: 'api/analyze', stage: 'unhandled' } });
     console.error('[Analyze] UNHANDLED ERROR in POST /api/analyze:', err?.stack || err);
     return errorResponse("PROCESSING_FAILED", "An unexpected error occurred during analysis", 500);
   }

@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/nextjs';
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { getStripe } from '@/lib/stripe';
@@ -526,9 +527,12 @@ export async function POST(request) {
       process.env.STRIPE_WEBHOOK_SECRET
     );
   } catch (err) {
+    Sentry.captureException(err, { tags: { route: 'stripe/webhook', stage: 'signature_verify' } });
     console.error('Webhook signature verification failed:', err.message);
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
   }
+
+  Sentry.addBreadcrumb({ category: 'stripe', message: `Webhook: ${event.type}`, level: 'info', data: { eventId: event.id } });
 
   // ATOMIC idempotency guard: Try to acquire lock for this event
   // Uses SET NX (set if not exists) - only one request can succeed
@@ -968,7 +972,10 @@ export async function POST(request) {
         console.log(`[UNHANDLED] Event type: ${event.type}`);
     }
   } catch (processingError) {
-    // Log error but still return 200 to prevent Stripe retries
+    Sentry.captureException(processingError, {
+      tags: { route: 'stripe/webhook', eventType: event?.type },
+      extra: { eventId: event?.id },
+    });
     console.error('[ERROR] Processing webhook event:', processingError);
   }
 

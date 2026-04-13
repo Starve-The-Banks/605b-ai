@@ -1,3 +1,5 @@
+import { withSentryConfig } from '@sentry/nextjs';
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -13,7 +15,7 @@ const nextConfig = {
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' data: blob: https://*.clerk.com https://img.clerk.com https://www.facebook.com",
       "font-src 'self' data: https://fonts.gstatic.com",
-      "connect-src 'self' https://clerk.605b.ai https://api.clerk.dev https://clerk.accounts.dev https://*.clerk.accounts.dev https://*.clerk.com https://accounts.google.com https://api.stripe.com https://api.elevenlabs.io https://api.anthropic.com wss://*.clerk.accounts.dev https://connect.facebook.net https://www.facebook.com",
+      "connect-src 'self' https://clerk.605b.ai https://api.clerk.dev https://clerk.accounts.dev https://*.clerk.accounts.dev https://*.clerk.com https://accounts.google.com https://api.stripe.com https://api.elevenlabs.io https://api.anthropic.com wss://*.clerk.accounts.dev https://connect.facebook.net https://www.facebook.com https://o4511209856499712.ingest.us.sentry.io",
       "frame-src 'self' https://accounts.google.com https://clerk.accounts.dev https://*.clerk.accounts.dev https://challenges.cloudflare.com https://js.stripe.com https://hooks.stripe.com",
       "worker-src 'self' blob:",
       "object-src 'none'",
@@ -99,4 +101,19 @@ const nextConfig = {
   },
 }
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  org: '605bai',
+  project: '605b-web',
+  // Silence non-error output in CI; show in local dev
+  silent: !process.env.CI,
+  // Upload source maps for readable stack traces in Sentry
+  widenClientFileUpload: true,
+  // Annotate React components for better error context
+  reactComponentAnnotation: { enabled: true },
+  // Tunnel Sentry traffic through our own domain — satisfies CSP, avoids blockers
+  tunnelRoute: '/monitoring',
+  // Don't expose source maps in the deployed bundle
+  hideSourceMaps: true,
+  // Tree-shake Sentry logger statements from the client bundle
+  disableLogger: true,
+});

@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/nextjs';
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { tierPostSchema, validateBody } from '@/lib/validation';
@@ -362,12 +363,12 @@ export async function GET(request) {
     return NextResponse.json(payload);
 
   } catch (error) {
+    Sentry.captureException(error, { tags: { route: 'api/user-data/tier', method: 'GET' } });
     console.error('Error fetching tier:', error?.stack || error);
     const fallback = {
       tierData: {
         tier: 'free',
         features: TIER_FEATURES.free,
-        // Omit pdfAnalysesUsed so client keeps its local (higher) count
         pdfAnalysesRemaining: 1,
       },
       degraded: true,

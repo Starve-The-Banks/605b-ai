@@ -223,6 +223,14 @@ export default function SignUpPage() {
                   socialButtonsIconBox: {
                     width: '20px',
                     height: '20px',
+                    opacity: 1,
+                  },
+                  socialButtonsProviderIcon: {
+                    filter: 'none',
+                    opacity: 1,
+                  },
+                  socialButtonsProviderIcon__apple: {
+                    filter: 'invert(1)',
                   },
                   footerActionLink: { color: '#FF6B35' },
                   headerTitle: { display: 'none' },

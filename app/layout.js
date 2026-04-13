@@ -87,6 +87,14 @@ const clerkAppearance = {
     socialButtonsIconBox: {
       width: '20px',
       height: '20px',
+      opacity: 1,
+    },
+    socialButtonsProviderIcon: {
+      filter: 'none',
+      opacity: 1,
+    },
+    socialButtonsProviderIcon__apple: {
+      filter: 'invert(1)',
     },
     card: {
       backgroundColor: '#141414',

@@ -79,9 +79,38 @@ const IDEMPOTENCY_TTL_SECONDS = 90 * 24 * 60 * 60; // 90 days
 const FAILED_GRANT_TTL_SECONDS = 30 * 24 * 60 * 60; // 30 days for retry queue
 
 /**
- * Atomically check and mark an event as processed using SET NX (set if not exists).
- * Returns true if this call acquired the lock (event was not yet processed).
- * Returns false if event was already processed by another request.
+ * Check whether an event was already successfully processed.
+ * Returns true only if the stored status is 'done' — a 'processing' or missing
+ * entry means the event is safe to retry.
+ */
+async function checkEventProcessed(redisClient, eventId) {
+  const key = `idempo:webhook:event:${eventId}`;
+  const raw = await redisClient.get(key);
+  if (!raw) return false;
+  try {
+    const record = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    return record.status === 'done';
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Mark an event as successfully processed AFTER all business logic succeeds.
+ * Called only on the success path — failures leave the key absent so Stripe can retry.
+ */
+async function markEventProcessed(redisClient, eventId, eventType) {
+  const key = `idempo:webhook:event:${eventId}`;
+  await redisClient.set(key, JSON.stringify({
+    processedAt: new Date().toISOString(),
+    eventType,
+    status: 'done',
+  }), { ex: IDEMPOTENCY_TTL_SECONDS });
+}
+
+/**
+ * Legacy: still used for per-grant idempotency inside checkout processing.
+ * Kept separate from event-level idempotency.
  */
 async function tryAcquireEventLock(redisClient, eventId, eventType) {
   const key = `idempo:webhook:event:${eventId}`;
@@ -90,12 +119,7 @@ async function tryAcquireEventLock(redisClient, eventId, eventType) {
     eventType: eventType,
     status: 'processing',
   });
-  
-  // SETNX: Set only if key does not exist (atomic operation)
-  // Upstash Redis supports this via set with nx option
   const result = await redisClient.set(key, value, { ex: IDEMPOTENCY_TTL_SECONDS, nx: true });
-  
-  // result is 'OK' if set succeeded (we got the lock), null if key already exists
   return result === 'OK';
 }
 
@@ -534,11 +558,12 @@ export async function POST(request) {
 
   Sentry.addBreadcrumb({ category: 'stripe', message: `Webhook: ${event.type}`, level: 'info', data: { eventId: event.id } });
 
-  // ATOMIC idempotency guard: Try to acquire lock for this event
-  // Uses SET NX (set if not exists) - only one request can succeed
-  const acquired = await tryAcquireEventLock(redisClient, event.id, event.type);
-  if (!acquired) {
-    console.log(`Event ${event.id} already being processed or completed, skipping`);
+  // Idempotency: check if this event was already successfully processed.
+  // We check BEFORE processing but only MARK as done AFTER success, so that
+  // a failure on the first delivery keeps the lock clear and Stripe can retry.
+  const alreadyProcessed = await checkEventProcessed(redisClient, event.id);
+  if (alreadyProcessed) {
+    console.log(`Event ${event.id} already successfully processed, skipping`);
     return NextResponse.json({ received: true, skipped: true });
   }
 
@@ -971,12 +996,18 @@ export async function POST(request) {
       default:
         console.log(`[UNHANDLED] Event type: ${event.type}`);
     }
+
+    // Processing succeeded — mark event as done so duplicate deliveries are skipped.
+    await markEventProcessed(redisClient, event.id, event.type);
+
   } catch (processingError) {
     Sentry.captureException(processingError, {
       tags: { route: 'stripe/webhook', eventType: event?.type },
       extra: { eventId: event?.id },
     });
     console.error('[ERROR] Processing webhook event:', processingError);
+    // Do NOT mark event as processed — re-throw so Stripe receives a 5xx and retries.
+    return NextResponse.json({ error: 'Webhook processing failed' }, { status: 500 });
   }
 
   return NextResponse.json({ received: true });

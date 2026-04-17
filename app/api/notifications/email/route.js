@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs/server';
+import { auth, currentUser } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { emailNotificationSchema, validateBody } from '@/lib/validation';
 import { LIMITS, rateLimit } from '@/lib/rateLimit';
@@ -52,7 +52,18 @@ export async function POST(request) {
       );
     }
 
-    // Validate request body with Zod
+    // Resolve recipient from Clerk — never trust email from request body.
+    const clerkUser = await currentUser();
+    const to = clerkUser?.primaryEmailAddress?.emailAddress
+      || clerkUser?.emailAddresses?.[0]?.emailAddress;
+    if (!to) {
+      return NextResponse.json(
+        { error: 'No verified email address on file for this account.' },
+        { status: 422 }
+      );
+    }
+
+    // Validate request body with Zod (email field removed from schema — see validation.js)
     const body = await request.json();
     const { data, error: validationError } = validateBody(emailNotificationSchema, body);
     if (validationError) {
@@ -62,7 +73,7 @@ export async function POST(request) {
       );
     }
 
-    const { notifications, email } = data;
+    const { notifications } = data;
 
     const urgentItems = notifications.filter(n => n.type === 'urgent');
     const warningItems = notifications.filter(n => n.type === 'warning');
@@ -75,7 +86,7 @@ export async function POST(request) {
 
     const { data: emailResult, error: sendError } = await resendClient.emails.send({
       from: '605b.ai <notifications@send.605b.ai>',
-      to: email,
+      to,
       subject: emailSubject,
       html: emailBody,
     });

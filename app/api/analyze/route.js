@@ -1,9 +1,11 @@
 import * as Sentry from '@sentry/nextjs';
 import pdfParse from 'pdf-parse';
 import Anthropic from '@anthropic-ai/sdk';
-import { auth } from '@clerk/nextjs/server';
+import { auth, currentUser } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { getRedis } from '@/lib/redis';
+import { rateLimit, LIMITS } from '@/lib/rateLimit';
+import { isReviewerRequest } from '@/lib/beta';
 
 // Vercel request body limits are tight; stay under ~4.5MB platform ceiling
 const MAX_FILE_SIZE = 4 * 1024 * 1024;
@@ -180,7 +182,39 @@ async function _handleAnalyze(request) {
     Sentry.setUser({ id: userId });
 
     // =========================
-    // 2. PARSE FORM DATA
+    // 2. RATE LIMIT (before any heavy work)
+    // =========================
+    // App Store reviewer accounts bypass the per-user rate limit so reviewers
+    // can test multiple PDFs during review without hitting a 429. The bypass
+    // applies ONLY to the exact reviewer email; no other user is affected.
+    let reviewerBypass = false;
+    try {
+      const clerkUser = await currentUser();
+      const emails = [
+        clerkUser?.primaryEmailAddress?.emailAddress,
+        ...((clerkUser?.emailAddresses ?? []).map(e => e?.emailAddress)),
+      ].filter(Boolean);
+      reviewerBypass = isReviewerRequest({ emails });
+    } catch (e) {
+      console.warn('[Analyze] Could not fetch reviewer check email:', e?.message || e);
+    }
+
+    if (!reviewerBypass) {
+      const rateLimitResult = await rateLimit(userId, 'analyze', LIMITS.analyze, 86400);
+      if (!rateLimitResult.allowed) {
+        console.warn('[Analyze] Rate limit exceeded for user:', userId);
+        return errorResponse(
+          "RATE_LIMIT_EXCEEDED",
+          `Analysis limit reached. You can run ${LIMITS.analyze} analyses per day. Try again in ${Math.ceil(rateLimitResult.resetIn / 3600)} hour(s).`,
+          429
+        );
+      }
+    } else {
+      console.log('[Analyze] Reviewer account — rate limit bypassed');
+    }
+
+    // =========================
+    // 3. PARSE FORM DATA
     // =========================
     let formData;
     try {
@@ -241,7 +275,19 @@ async function _handleAnalyze(request) {
     }
 
     // =========================
-    // 5. PDF PARSING (SAFE)
+    // 5. MAGIC BYTE VALIDATION
+    // =========================
+    // Verify the file starts with the PDF signature %PDF regardless of
+    // the declared MIME type or file extension. This prevents non-PDF
+    // binary files from reaching the parser even when named "report.pdf".
+    const pdfMagic = buffer.slice(0, 4).toString('ascii');
+    if (pdfMagic !== '%PDF') {
+      console.warn('[Analyze] Magic byte check failed — not a valid PDF. Got:', JSON.stringify(pdfMagic));
+      return errorResponse("INVALID_TYPE", "Uploaded file is not a valid PDF", 400);
+    }
+
+    // =========================
+    // 6. PDF PARSING (SAFE)
     // =========================
     let pdfData;
     try {

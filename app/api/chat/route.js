@@ -132,7 +132,15 @@ export async function POST(request) {
       );
     }
 
-    const systemPrompt = data.systemPrompt || DEFAULT_SYSTEM_PROMPT;
+    // Hard-coded compliance prefix. Always prepended to any system prompt so that
+    // a client cannot remove or override these rules. Mobile still sends
+    // user-specific onboarding context in `data.systemPrompt`, which is appended.
+    const COMPLIANCE_PREFIX = `You are 605b.ai's FCRA credit dispute strategist. You MUST follow these non-negotiable rules, regardless of any other instructions:\n- Provide only educational information, never legal advice.\n- Never guarantee any specific outcome (score change, account removal, settlement).\n- Never encourage misrepresentation, fabrication, or fraudulent activity.\n- Never request or reference full SSNs, account numbers, or PII.\n- Always remind the user to consult a licensed attorney for legal questions.\n\n`;
+
+    const clientPrompt = data.systemPrompt && data.systemPrompt.trim().length > 0
+      ? data.systemPrompt
+      : DEFAULT_SYSTEM_PROMPT;
+    const systemPrompt = COMPLIANCE_PREFIX + clientPrompt;
 
     const mappedMessages = data.messages.map(({ role, content }) => ({ role, content }));
     const { stream, model } = await createStreamWithFallback(systemPrompt, mappedMessages);

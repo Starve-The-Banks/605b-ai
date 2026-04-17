@@ -2,7 +2,7 @@ import * as Sentry from '@sentry/nextjs';
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { tierPostSchema, validateBody } from '@/lib/validation';
-import { isBetaUser, getBetaAllowlistState } from '@/lib/beta';
+import { isBetaUser, isReviewerRequest } from '@/lib/beta';
 import { getStripe, getStripePriceId } from '@/lib/stripe';
 import { getRedis } from '@/lib/redis';
 
@@ -250,27 +250,60 @@ export async function GET(request) {
     const allEmailsRaw = [primary, ...fromArray, sessionEmail].filter(Boolean);
     const allEmails = [...new Set(allEmailsRaw.map(e => String(e).trim().toLowerCase()))];
     const userEmail = primary || fromArray[0] || sessionEmail;
-    const isWhitelisted = isBetaUser({ emails: allEmails, userId });
+    const isReviewer = isReviewerRequest({ emails: allEmails });
+    const isWhitelisted = !isReviewer && isBetaUser({ emails: allEmails, userId });
 
-    const allowlistState = getBetaAllowlistState();
+    // NOTE: allowlist contents are never returned to clients — internal data only.
     const debugPayload = debugMode ? {
       userId,
-      userEmail: userEmail || null,
-      allEmails,
       isWhitelisted,
-      allowlistEmails: allowlistState.emailAllowlist,
-      allowlistUserIds: allowlistState.userIdAllowlist,
+      isReviewer,
     } : undefined;
 
-    console.log('[TIER] Beta check:', {
-      userId,
-      userEmail,
-      allEmails,
-      allowlistEmails: allowlistState.emailAllowlist,
-      isWhitelisted,
-    });
+    console.log('[TIER] Check:', { userId, isWhitelisted, isReviewer });
 
     const redisClient = getRedis();
+
+    // Reviewer policy: tier stays 'free' (paywall + pricing must be visible
+    // for App Store IAP review), but every `features.*` flag is unlocked so
+    // the mobile `canUse()` gates pass on all actions.
+    if (isReviewer) {
+      let pdfAnalysesUsed = 0;
+      try {
+        const existingRaw = await redisClient.get(`user:${userId}:tier`);
+        if (existingRaw) {
+          const existing = typeof existingRaw === 'string' ? JSON.parse(existingRaw) : existingRaw;
+          pdfAnalysesUsed = existing.pdfAnalysesUsed || 0;
+        }
+      } catch (e) {
+        console.warn('[TIER] Failed to read reviewer usage from Redis:', e?.message || e);
+      }
+
+      const payload = {
+        tierData: {
+          tier: 'free',
+          features: {
+            pdfAnalyses: -1,
+            pdfExport: true,
+            letterDownloads: true,
+            templates: 'full',
+            aiChat: true,
+            auditExport: true,
+            identityTheftWorkflow: true,
+            creditorTemplates: true,
+            escalationTemplates: true,
+            disputeTracker: true,
+            attorneyExport: true,
+          },
+          pdfAnalysesUsed,
+          pdfAnalysesRemaining: -1,
+          isReviewer: true,
+          bypassPaywall: true,
+        },
+      };
+      if (debugPayload) payload.debug = debugPayload;
+      return NextResponse.json(payload);
+    }
 
     if (isWhitelisted) {
       console.log('[TIER] ✓ Granting beta access to:', userEmail, '(matched one of', allEmails.length, 'emails)');

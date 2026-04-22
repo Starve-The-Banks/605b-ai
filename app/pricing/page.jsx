@@ -148,6 +148,51 @@ function makeCheckoutIntentId() {
   return `${hex.slice(0, 4).join('')}-${hex.slice(4, 6).join('')}-${hex.slice(6, 8).join('')}-${hex.slice(8, 10).join('')}-${hex.slice(10, 16).join('')}`;
 }
 
+// Checkout intents are stored in sessionStorage so they survive the Stripe
+// round-trip (Back from Checkout -> cancel_url -> full page reload), which
+// useRef cannot. Scoped to the tab (not cross-tab) and auto-wiped on close,
+// so a user starting a genuinely new purchase in a new tab gets a fresh
+// intent. Each entry also carries a createdAt timestamp so we can expire
+// stale intents after the Stripe session itself would have expired.
+const CHECKOUT_INTENT_KEY_PREFIX = '605b_checkout_intent:';
+const CHECKOUT_INTENT_MAX_AGE_MS = 30 * 60 * 1000; // 30 minutes
+
+function readCheckoutIntent(productKey) {
+  if (typeof window === 'undefined' || !window.sessionStorage) return null;
+  try {
+    const raw = window.sessionStorage.getItem(CHECKOUT_INTENT_KEY_PREFIX + productKey);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed.intentId !== 'string' || typeof parsed.createdAt !== 'number') {
+      return null;
+    }
+    if (Date.now() - parsed.createdAt > CHECKOUT_INTENT_MAX_AGE_MS) {
+      // Stale. Cannot reuse safely — the underlying Stripe session URL may
+      // be approaching expiry, and a retry this late is probably a genuinely
+      // new purchase attempt.
+      window.sessionStorage.removeItem(CHECKOUT_INTENT_KEY_PREFIX + productKey);
+      return null;
+    }
+    return parsed.intentId;
+  } catch {
+    return null;
+  }
+}
+
+function writeCheckoutIntent(productKey, intentId) {
+  if (typeof window === 'undefined' || !window.sessionStorage) return;
+  try {
+    window.sessionStorage.setItem(
+      CHECKOUT_INTENT_KEY_PREFIX + productKey,
+      JSON.stringify({ intentId, createdAt: Date.now() }),
+    );
+  } catch {
+    // Storage disabled / quota exceeded — fall back to in-memory only for
+    // this page load. Retries within the same mount still dedupe via the
+    // useRef map; cross-reload dedupe is best-effort.
+  }
+}
+
 const FAQS = [
   {
     q: 'Is this a subscription?',
@@ -198,18 +243,29 @@ export default function PricingPage() {
 
   // Stable checkout-intent UUIDs keyed by productKey (tier id / addon id).
   //
-  // Generated ONCE per product on first click. Reused verbatim on every retry
-  // (double-click, network blip, user backing out of Stripe and re-clicking)
-  // so the server builds the same Stripe idempotency key and Stripe returns
-  // the ORIGINAL checkout session instead of minting a new one. Resets
-  // naturally on page unload (successful redirect to Stripe, or navigate away).
+  // Persisted in sessionStorage so they survive the Stripe round-trip (Back
+  // from Checkout -> cancel_url reload), where useRef would be reset. This
+  // is the critical piece that makes "click -> Stripe -> back -> click" all
+  // land on the SAME cs_live_* session.
+  //
+  // The useRef map is just a per-render cache so we don't hit sessionStorage
+  // on every render, and so that a sessionStorage-disabled browser still
+  // gets in-mount dedup protection.
   const checkoutIntentsRef = useRef(new Map());
   const getOrCreateCheckoutIntent = (productKey) => {
-    const map = checkoutIntentsRef.current;
-    if (!map.has(productKey)) {
-      map.set(productKey, makeCheckoutIntentId());
+    const cache = checkoutIntentsRef.current;
+    if (cache.has(productKey)) return cache.get(productKey);
+
+    const persisted = readCheckoutIntent(productKey);
+    if (persisted) {
+      cache.set(productKey, persisted);
+      return persisted;
     }
-    return map.get(productKey);
+
+    const fresh = makeCheckoutIntentId();
+    cache.set(productKey, fresh);
+    writeCheckoutIntent(productKey, fresh);
+    return fresh;
   };
 
   // Track pricing page view

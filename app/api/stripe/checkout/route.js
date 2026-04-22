@@ -12,6 +12,15 @@ import { getRedis } from '@/lib/redis';
 // fresh session if the user walks away and comes back much later.
 const CHECKOUT_URL_CACHE_TTL_SEC = 15 * 60;
 
+// Server-side "pending session" shadow cache. Keyed on (userId, productType,
+// productId, priceId) so duplicate sessions become structurally impossible
+// regardless of what the client sends for intentId. 120s is short enough
+// that a genuinely new purchase attempt (abandoned, came back 5+ minutes
+// later) still gets a fresh session — long enough to cover every browser
+// back-button / double-click / stale-bundle failure mode we have observed
+// in production.
+const PENDING_SHADOW_TTL_SEC = 120;
+
 // Disclaimer versions - stored server-side, only version sent to Stripe
 const DISCLAIMER_VERSIONS = {
   v1: {
@@ -355,20 +364,33 @@ async function getOrCreateStripeCustomer(stripeClient, redisClient, user, userId
   return customerId;
 }
 
-// Create a Stripe Checkout Session, OR return the cached URL from a prior
-// identical (userId, intentId) request. Three layers of duplicate protection:
+// Read the user's pending-session shadow cache. This is the hard server-side
+// guarantee that duplicates cannot be created regardless of client state.
+async function readPendingShadow(redisClient, shadowKey) {
+  try {
+    const raw = await redisClient.get(shadowKey);
+    if (!raw) return null;
+    const payload = typeof raw === 'string' && raw.startsWith('{') ? JSON.parse(raw) : null;
+    if (!payload?.url) return null;
+    return payload;
+  } catch (err) {
+    console.warn('[CHECKOUT] shadow read failed:', err?.message || err);
+    return null;
+  }
+}
+
+// Create a Stripe Checkout Session, OR return a cached URL from a prior
+// equivalent request. Four layers of duplicate protection, checked in order:
 //
-//   1. Redis URL cache, keyed `checkout:{userId}:{intentId}` (TTL 15min) —
-//      fastest path: on retry, skip Stripe entirely and return cached URL.
-//   2. Stripe idempotency key `checkout-session:{userId}:{intentId}` —
-//      if two parallel requests race past the cache, Stripe itself serializes
-//      them and returns the SAME session to both.
-//   3. Same idempotency pattern on the dynamic upgrade-price create call so
-//      we never mint duplicate Prices for a retried upgrade.
-//
-// The intentId is client-owned (UUID generated on first click, reused across
-// retries), so these keys are stable for the lifetime of a single purchase
-// intent but unique across distinct intents.
+//   0. Per-(user, product, price) SHADOW cache (TTL 120s). Hard guarantee
+//      that rapid retries for the same product — regardless of what the
+//      client sends as intentId — collapse to the same session.
+//   1. Per-(user, intentId) URL cache (TTL 15min). Matches the client's
+//      explicit retry contract.
+//   2. Stripe idempotency key on checkout.sessions.create. If two parallel
+//      requests race past both caches, Stripe itself serializes them.
+//   3. Stripe idempotency key on the dynamic upgrade-price create call so
+//      we never mint duplicate Prices for a retried upgrade (upstream).
 async function createOrReuseCheckoutSession(
   stripeClient,
   redisClient,
@@ -380,24 +402,43 @@ async function createOrReuseCheckoutSession(
     throw new Error('Checkout is temporarily unavailable. Please try again later.');
   }
 
-  const cacheKey = `checkout:${userId}:${intentId}`;
+  const intentCacheKey = `checkout:${userId}:${intentId}`;
+  const shadowKey = `checkout:pending:${userId}:${productType}:${productId}:${priceId}`;
 
-  // Layer 1: Redis cache — cheapest retry path.
+  // Layer 0: per-product SHADOW cache — duplicates cannot exist even if the
+  // client sends a fresh intentId on every click.
+  const shadow = await readPendingShadow(redisClient, shadowKey);
+  if (shadow) {
+    console.log(
+      `[CHECKOUT] shadow hit ${userId}/${productType}:${productId} -> ${shadow.sessionId} (client intent ${intentId} mapped to original intent ${shadow.intentId})`
+    );
+    // Mirror into the client-intent cache so subsequent retries with this
+    // fresh intentId go through the faster Layer 1 path.
+    try {
+      await redisClient.set(
+        intentCacheKey,
+        JSON.stringify({ url: shadow.url, sessionId: shadow.sessionId, shadowed: true }),
+        { ex: CHECKOUT_URL_CACHE_TTL_SEC },
+      );
+    } catch { /* best-effort */ }
+    return { url: shadow.url, reused: true, source: 'shadow' };
+  }
+
+  // Layer 1: per-intent URL cache — cheapest retry path when the client
+  // correctly reuses an intentId.
   try {
-    const cached = await redisClient.get(cacheKey);
+    const cached = await redisClient.get(intentCacheKey);
     if (cached) {
       const cachedUrl = typeof cached === 'string' && cached.startsWith('{')
         ? (JSON.parse(cached).url || null)
         : cached;
       if (cachedUrl) {
-        console.log(`[CHECKOUT] Reusing cached session for ${userId}/${intentId}`);
-        return { url: cachedUrl, reused: true };
+        console.log(`[CHECKOUT] intent-cache hit for ${userId}/${intentId}`);
+        return { url: cachedUrl, reused: true, source: 'intent' };
       }
     }
   } catch (err) {
-    // Cache failures must NEVER block a real purchase. Log and fall through
-    // to Stripe — layer 2 idempotency will still prevent duplicates.
-    console.warn('[CHECKOUT] Redis read failed; proceeding without cache:', err?.message || err);
+    console.warn('[CHECKOUT] intent-cache read failed:', err?.message || err);
   }
 
   // Layer 2: Stripe idempotency key. Stable per (user, intent).
@@ -448,23 +489,32 @@ async function createOrReuseCheckoutSession(
     { idempotencyKey: sessionIdempotencyKey },
   );
 
-  // Best-effort cache write. If Redis is down, Stripe idempotency still
-  // protects us on the next retry.
+  // Populate BOTH caches atomically so subsequent retries (any flavor) hit.
   try {
-    await redisClient.set(
-      cacheKey,
-      JSON.stringify({ url: session.url, sessionId: session.id }),
-      { ex: CHECKOUT_URL_CACHE_TTL_SEC },
-    );
+    await Promise.all([
+      redisClient.set(
+        intentCacheKey,
+        JSON.stringify({ url: session.url, sessionId: session.id }),
+        { ex: CHECKOUT_URL_CACHE_TTL_SEC },
+      ),
+      redisClient.set(
+        shadowKey,
+        JSON.stringify({ url: session.url, sessionId: session.id, intentId }),
+        { ex: PENDING_SHADOW_TTL_SEC },
+      ),
+    ]);
   } catch (err) {
-    console.warn('[CHECKOUT] Redis write failed; retries will fall through to Stripe:', err?.message || err);
+    console.warn(
+      '[CHECKOUT] Redis write failed; retries will fall through to Stripe idempotency:',
+      err?.message || err,
+    );
   }
 
   console.log(
-    `[CHECKOUT] Created session ${session.id} for ${userId}/${intentId} (${productType}:${productId}${isUpgrade ? `, upgrade from ${upgradeFrom}` : ''})`
+    `[CHECKOUT] created session ${session.id} for ${userId}/${intentId} (${productType}:${productId}${isUpgrade ? `, upgrade from ${upgradeFrom}` : ''})`
   );
 
-  return { url: session.url, reused: false };
+  return { url: session.url, reused: false, source: 'stripe' };
 }
 
 export async function GET() {

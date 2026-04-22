@@ -106,18 +106,22 @@ export async function POST(request) {
 
     // Get or create Stripe customer (with proper dedup)
     const customerId = await getOrCreateStripeCustomer(stripeClient, redisClient, user, userId);
+    const userEmail = user?.emailAddresses?.[0]?.emailAddress || '';
 
     if (addonId) {
       const addon = ADDON_CONFIG[addonId];
-      
-      if (!addon.priceId) {
-        console.error(`Missing priceId for addon: ${addonId}`);
-        return NextResponse.json({ error: 'Configuration error' }, { status: 500 });
+
+      if (!addon || !addon.priceId) {
+        console.error(`[CONFIG ERROR] Missing priceId for addon: ${addonId}`);
+        return NextResponse.json({
+          error: 'This add-on is temporarily unavailable. Please try again later.'
+        }, { status: 503 });
       }
 
       const session = await createCheckoutSession(stripeClient, {
         customerId,
         userId,
+        userEmail,
         priceId: addon.priceId,
         productName: addon.name,
         productType: 'addon',
@@ -125,7 +129,7 @@ export async function POST(request) {
         disclaimerTimestamp,
       });
 
-      return NextResponse.json({ url: session.url });
+      return NextResponse.json({ success: true, url: session.url });
     }
 
     if (tierId) {
@@ -137,10 +141,12 @@ export async function POST(request) {
       }
 
       const tier = TIER_CONFIG[tierId];
-      
-      if (!tier.priceId) {
-        console.error(`Missing priceId for tier: ${tierId}`);
-        return NextResponse.json({ error: 'Configuration error' }, { status: 500 });
+
+      if (!tier || !tier.priceId) {
+        console.error(`[CONFIG ERROR] Missing priceId for tier: ${tierId}`);
+        return NextResponse.json({
+          error: 'This tier is temporarily unavailable. Please try again later.'
+        }, { status: 503 });
       }
 
       // Check if user has an existing tier (potential upgrade)
@@ -176,21 +182,32 @@ export async function POST(request) {
 
         console.log(`[UPGRADE] User ${userId}: ${currentTier} → ${tierId}, paid: ${amountAlreadyPaid}, difference: ${amountToCharge}`);
 
-        // Create a one-time price for the upgrade amount
-        const upgradePrice = await stripeClient.prices.create({
-          currency: 'usd',
-          unit_amount: amountToCharge,
-          product_data: {
-            name: `Upgrade: ${TIER_CONFIG[currentTier].name} → ${tier.name}`,
-            metadata: {
-              type: 'tier_upgrade',
-              fromTier: currentTier,
-              toTier: tierId,
-              originalPrice: tier.amount,
-              creditApplied: amountAlreadyPaid,
+        // Create a one-time price for the upgrade amount.
+        //
+        // IDEMPOTENCY: Keyed on user + tier transition + exact amount. If a
+        // client retries (network blip, double-submit) with the same intent,
+        // Stripe returns the ORIGINAL price resource instead of minting a
+        // duplicate. Keys are valid for 24h in Stripe.
+        const upgradePriceIdempotencyKey =
+          `upgrade-price:${userId}:${currentTier}->${tierId}:${amountToCharge}`;
+
+        const upgradePrice = await stripeClient.prices.create(
+          {
+            currency: 'usd',
+            unit_amount: amountToCharge,
+            product_data: {
+              name: `Upgrade: ${TIER_CONFIG[currentTier].name} → ${tier.name}`,
+              metadata: {
+                type: 'tier_upgrade',
+                fromTier: currentTier,
+                toTier: tierId,
+                originalPrice: tier.amount,
+                creditApplied: amountAlreadyPaid,
+              },
             },
           },
-        });
+          { idempotencyKey: upgradePriceIdempotencyKey },
+        );
 
         priceId = upgradePrice.id;
       } else if (currentTier && currentTierIndex >= newTierIndex) {
@@ -205,6 +222,7 @@ export async function POST(request) {
       const session = await createCheckoutSession(stripeClient, {
         customerId,
         userId,
+        userEmail,
         priceId,
         productName: tier.name,
         productType: 'tier',
@@ -215,15 +233,23 @@ export async function POST(request) {
         amountToCharge,
       });
 
-      return NextResponse.json({ url: session.url });
+      return NextResponse.json({ success: true, url: session.url });
     }
 
     return NextResponse.json({ error: 'No product specified' }, { status: 400 });
 
   } catch (error) {
-    console.error('Stripe checkout error:', error);
+    // Log full error server-side for debugging; return user-safe message client-side
+    console.error('[Stripe checkout] error:', error);
+
+    // Stripe-specific errors have a .type; surface safe message only
+    const isStripeError = error?.type?.startsWith?.('Stripe');
+    const safeMessage = isStripeError
+      ? 'We could not start checkout with our payment processor. Please try again.'
+      : 'Unable to complete purchase. Please try again.';
+
     return NextResponse.json(
-      { error: error.message || 'Failed to create checkout session' },
+      { error: safeMessage },
       { status: 500 }
     );
   }
@@ -307,61 +333,81 @@ async function getOrCreateStripeCustomer(stripeClient, redisClient, user, userId
   return customerId;
 }
 
-async function createCheckoutSession(stripeClient, { customerId, userId, priceId, productName, productType, productId, disclaimerTimestamp, isUpgrade, upgradeFrom, amountToCharge }) {
+async function createCheckoutSession(stripeClient, { customerId, userId, userEmail, priceId, productName, productType, productId, disclaimerTimestamp, isUpgrade, upgradeFrom, amountToCharge }) {
   // CRITICAL: Validate APP_URL is set
   const appUrl = process.env.NEXT_PUBLIC_APP_URL;
   if (!appUrl || !appUrl.startsWith('http')) {
     console.error('[CONFIG ERROR] NEXT_PUBLIC_APP_URL is not set or invalid:', appUrl);
-    throw new Error('Server configuration error: APP_URL not configured. Please contact support.');
+    // User-safe message; log has the real detail
+    throw new Error('Checkout is temporarily unavailable. Please try again later.');
   }
+
+  // IDEMPOTENCY: Keyed on user + product + disclaimer timestamp so retries
+  // of the same purchase intent (network blip, double-submit, browser
+  // back-forward) return the ORIGINAL session instead of creating duplicate
+  // Stripe sessions. A genuinely new purchase intent gets a new timestamp
+  // from the client and therefore a new key. Stripe idempotency keys are
+  // valid for 24h.
+  //
+  // If the client didn't send a timestamp (legacy / non-compliant caller),
+  // we fall back to a per-minute bucket so at least retries within ~60s
+  // dedupe instead of each creating a new session.
+  const timestampKeyPart =
+    disclaimerTimestamp ||
+    `auto-${Math.floor(Date.now() / 60_000)}`;
+  const sessionIdempotencyKey =
+    `checkout-session:${userId}:${productType}:${productId}:${timestampKeyPart}`;
 
   // Use Stripe Price ID as source of truth
   // CRITICAL: Include {CHECKOUT_SESSION_ID} for post-payment sync fallback
-  const session = await stripeClient.checkout.sessions.create({
-    customer: customerId,
-    client_reference_id: userId,
-    payment_method_types: ['card'],
-    mode: 'payment',
-    line_items: [
-      {
-        price: priceId,
-        quantity: 1,
+  const session = await stripeClient.checkout.sessions.create(
+    {
+      customer: customerId,
+      client_reference_id: userId,
+      payment_method_types: ['card'],
+      mode: 'payment',
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1,
+        },
+      ],
+      success_url: `${appUrl}/dashboard?success=true&session_id={CHECKOUT_SESSION_ID}&${productType}=${productId}${isUpgrade ? '&upgrade=true' : ''}`,
+      cancel_url: `${appUrl}/pricing?canceled=true`,
+      metadata: {
+        // CRITICAL: Canonical identity mapping
+        clerkUserId: userId,
+        userId: userId, // Duplicate for redundancy
+        userEmail: userEmail || '',
+        // Product info
+        productType: productType,
+        productId: productId,
+        // Disclaimer
+        disclaimerAccepted: 'true',
+        disclaimerVersion: CURRENT_DISCLAIMER_VERSION,
+        disclaimerTimestamp: disclaimerTimestamp || new Date().toISOString(),
+        // Upgrade info
+        isUpgrade: isUpgrade ? 'true' : 'false',
+        upgradeFrom: upgradeFrom || '',
+        amountCharged: amountToCharge ? String(amountToCharge) : '',
+        // Environment tracking for debugging
+        env: process.env.VERCEL_ENV || process.env.NODE_ENV || 'unknown',
+        stripeMode: process.env.STRIPE_SECRET_KEY?.startsWith('sk_live') ? 'live' : 'test',
       },
-    ],
-    success_url: `${appUrl}/dashboard?success=true&session_id={CHECKOUT_SESSION_ID}&${productType}=${productId}${isUpgrade ? '&upgrade=true' : ''}`,
-    cancel_url: `${appUrl}/pricing?canceled=true`,
-    metadata: {
-      // CRITICAL: Canonical identity mapping
-      clerkUserId: userId,
-      userId: userId, // Duplicate for redundancy
-      userEmail: user?.emailAddresses?.[0]?.emailAddress || '',
-      // Product info
-      productType: productType,
-      productId: productId,
-      // Disclaimer
-      disclaimerAccepted: 'true',
-      disclaimerVersion: CURRENT_DISCLAIMER_VERSION,
-      disclaimerTimestamp: disclaimerTimestamp || new Date().toISOString(),
-      // Upgrade info
-      isUpgrade: isUpgrade ? 'true' : 'false',
-      upgradeFrom: upgradeFrom || '',
-      amountCharged: amountToCharge ? String(amountToCharge) : '',
-      // Environment tracking for debugging
-      env: process.env.VERCEL_ENV || process.env.NODE_ENV || 'unknown',
-      stripeMode: process.env.STRIPE_SECRET_KEY?.startsWith('sk_live') ? 'live' : 'test',
-    },
-    invoice_creation: {
-      enabled: true,
-    },
-    allow_promotion_codes: true,
-    custom_text: {
-      submit: {
-        message: isUpgrade
-          ? `Upgrade from ${TIER_CONFIG[upgradeFrom]?.name || upgradeFrom} - you're only paying the difference!`
-          : 'By completing this purchase, you acknowledge that 605b.ai provides self-service software tools only and does not perform credit repair services on your behalf.',
+      invoice_creation: {
+        enabled: true,
+      },
+      allow_promotion_codes: true,
+      custom_text: {
+        submit: {
+          message: isUpgrade
+            ? `Upgrade from ${TIER_CONFIG[upgradeFrom]?.name || upgradeFrom} - you're only paying the difference!`
+            : 'By completing this purchase, you acknowledge that 605b.ai provides self-service software tools only and does not perform credit repair services on your behalf.',
+        },
       },
     },
-  });
+    { idempotencyKey: sessionIdempotencyKey },
+  );
 
   return session;
 }

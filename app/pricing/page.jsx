@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth, useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import {
@@ -129,6 +129,25 @@ const ADDONS = [
   },
 ];
 
+// Produce an RFC 4122 v4 UUID the server's Zod validator will accept.
+// Prefers native crypto.randomUUID() (all modern secure-context browsers);
+// falls back to crypto.getRandomValues (IE11+) when unavailable.
+function makeCheckoutIntentId() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  const bytes = new Uint8Array(16);
+  if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
+    crypto.getRandomValues(bytes);
+  } else {
+    for (let i = 0; i < 16; i += 1) bytes[i] = Math.floor(Math.random() * 256);
+  }
+  bytes[6] = (bytes[6] & 0x0f) | 0x40; // version 4
+  bytes[8] = (bytes[8] & 0x3f) | 0x80; // RFC 4122 variant
+  const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, '0'));
+  return `${hex.slice(0, 4).join('')}-${hex.slice(4, 6).join('')}-${hex.slice(6, 8).join('')}-${hex.slice(8, 10).join('')}-${hex.slice(10, 16).join('')}`;
+}
+
 const FAQS = [
   {
     q: 'Is this a subscription?',
@@ -176,6 +195,22 @@ export default function PricingPage() {
   const [currentTier, setCurrentTier] = useState('free');
   const [tierLoading, setTierLoading] = useState(false);
   const [upgradeInfo, setUpgradeInfo] = useState(null);
+
+  // Stable checkout-intent UUIDs keyed by productKey (tier id / addon id).
+  //
+  // Generated ONCE per product on first click. Reused verbatim on every retry
+  // (double-click, network blip, user backing out of Stripe and re-clicking)
+  // so the server builds the same Stripe idempotency key and Stripe returns
+  // the ORIGINAL checkout session instead of minting a new one. Resets
+  // naturally on page unload (successful redirect to Stripe, or navigate away).
+  const checkoutIntentsRef = useRef(new Map());
+  const getOrCreateCheckoutIntent = (productKey) => {
+    const map = checkoutIntentsRef.current;
+    if (!map.has(productKey)) {
+      map.set(productKey, makeCheckoutIntentId());
+    }
+    return map.get(productKey);
+  };
 
   // Track pricing page view
   useEffect(() => {
@@ -268,6 +303,9 @@ export default function PricingPage() {
         startedAt: new Date().toISOString(),
       }));
 
+      // Stable per-product intent → retries on this click dedupe at Stripe.
+      const intentId = getOrCreateCheckoutIntent(`tier:${tier.id}`);
+
       const response = await fetch('/api/stripe/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -275,6 +313,7 @@ export default function PricingPage() {
           tierId: tier.id,
           disclaimerAccepted: true,
           disclaimerTimestamp: new Date().toISOString(),
+          intentId,
         }),
       });
 
@@ -297,12 +336,14 @@ export default function PricingPage() {
 
     setLoading(addon.id);
     try {
+      const intentId = getOrCreateCheckoutIntent(`addon:${addon.id}`);
       const response = await fetch('/api/stripe/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           addonId: addon.id,
           disclaimerAccepted: true,
+          intentId,
         }),
       });
 

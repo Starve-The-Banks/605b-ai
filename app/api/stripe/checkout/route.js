@@ -1,8 +1,16 @@
+import { randomUUID } from 'crypto';
+
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { stripeCheckoutSchema, validateBody } from '@/lib/validation';
 import { getStripe, getStripePriceId } from '@/lib/stripe';
 import { getRedis } from '@/lib/redis';
+
+// Seconds a cached checkout-session URL stays valid in Redis. Stripe session
+// URLs are valid for 24h; 15 min is a conservative window that covers every
+// realistic retry pattern (double-click, back-button) while still forcing a
+// fresh session if the user walks away and comes back much later.
+const CHECKOUT_URL_CACHE_TTL_SEC = 15 * 60;
 
 // Disclaimer versions - stored server-side, only version sent to Stripe
 const DISCLAIMER_VERSIONS = {
@@ -92,7 +100,19 @@ export async function POST(request) {
       return NextResponse.json({ error: validationError }, { status: 400 });
     }
 
-    const { tierId, addonId, disclaimerAccepted, disclaimerTimestamp } = data;
+    const { tierId, addonId, disclaimerAccepted, disclaimerTimestamp, intentId: clientIntentId } = data;
+
+    // Client-owned intent UUID is the sole source of idempotency. If the
+    // client didn't send one (old bundle during a rolling deploy), we mint a
+    // server-side UUID so the request still succeeds — but that single
+    // request loses retry-dedup protection. We log it for visibility.
+    let intentId = clientIntentId;
+    if (!intentId) {
+      intentId = randomUUID();
+      console.warn(
+        `[CHECKOUT COMPAT] Missing intentId from client for user ${userId} (${tierId || addonId}); generated server-side UUID ${intentId}. Client should upgrade to send intentId.`
+      );
+    }
 
     // SERVER-SIDE ENFORCEMENT: Require disclaimer for paid products
     if ((tierId && tierId !== 'free') || addonId) {
@@ -118,7 +138,7 @@ export async function POST(request) {
         }, { status: 503 });
       }
 
-      const session = await createCheckoutSession(stripeClient, {
+      const { url, reused } = await createOrReuseCheckoutSession(stripeClient, redisClient, {
         customerId,
         userId,
         userEmail,
@@ -127,9 +147,10 @@ export async function POST(request) {
         productType: 'addon',
         productId: addonId,
         disclaimerTimestamp,
+        intentId,
       });
 
-      return NextResponse.json({ success: true, url: session.url });
+      return NextResponse.json({ success: true, url, reused });
     }
 
     if (tierId) {
@@ -219,7 +240,7 @@ export async function POST(request) {
         }, { status: 400 });
       }
 
-      const session = await createCheckoutSession(stripeClient, {
+      const { url, reused } = await createOrReuseCheckoutSession(stripeClient, redisClient, {
         customerId,
         userId,
         userEmail,
@@ -231,9 +252,10 @@ export async function POST(request) {
         isUpgrade,
         upgradeFrom,
         amountToCharge,
+        intentId,
       });
 
-      return NextResponse.json({ success: true, url: session.url });
+      return NextResponse.json({ success: true, url, reused });
     }
 
     return NextResponse.json({ error: 'No product specified' }, { status: 400 });
@@ -333,33 +355,54 @@ async function getOrCreateStripeCustomer(stripeClient, redisClient, user, userId
   return customerId;
 }
 
-async function createCheckoutSession(stripeClient, { customerId, userId, userEmail, priceId, productName, productType, productId, disclaimerTimestamp, isUpgrade, upgradeFrom, amountToCharge }) {
-  // CRITICAL: Validate APP_URL is set
+// Create a Stripe Checkout Session, OR return the cached URL from a prior
+// identical (userId, intentId) request. Three layers of duplicate protection:
+//
+//   1. Redis URL cache, keyed `checkout:{userId}:{intentId}` (TTL 15min) —
+//      fastest path: on retry, skip Stripe entirely and return cached URL.
+//   2. Stripe idempotency key `checkout-session:{userId}:{intentId}` —
+//      if two parallel requests race past the cache, Stripe itself serializes
+//      them and returns the SAME session to both.
+//   3. Same idempotency pattern on the dynamic upgrade-price create call so
+//      we never mint duplicate Prices for a retried upgrade.
+//
+// The intentId is client-owned (UUID generated on first click, reused across
+// retries), so these keys are stable for the lifetime of a single purchase
+// intent but unique across distinct intents.
+async function createOrReuseCheckoutSession(
+  stripeClient,
+  redisClient,
+  { customerId, userId, userEmail, priceId, productName, productType, productId, disclaimerTimestamp, isUpgrade, upgradeFrom, amountToCharge, intentId },
+) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL;
   if (!appUrl || !appUrl.startsWith('http')) {
     console.error('[CONFIG ERROR] NEXT_PUBLIC_APP_URL is not set or invalid:', appUrl);
-    // User-safe message; log has the real detail
     throw new Error('Checkout is temporarily unavailable. Please try again later.');
   }
 
-  // IDEMPOTENCY: Keyed on user + product + disclaimer timestamp so retries
-  // of the same purchase intent (network blip, double-submit, browser
-  // back-forward) return the ORIGINAL session instead of creating duplicate
-  // Stripe sessions. A genuinely new purchase intent gets a new timestamp
-  // from the client and therefore a new key. Stripe idempotency keys are
-  // valid for 24h.
-  //
-  // If the client didn't send a timestamp (legacy / non-compliant caller),
-  // we fall back to a per-minute bucket so at least retries within ~60s
-  // dedupe instead of each creating a new session.
-  const timestampKeyPart =
-    disclaimerTimestamp ||
-    `auto-${Math.floor(Date.now() / 60_000)}`;
-  const sessionIdempotencyKey =
-    `checkout-session:${userId}:${productType}:${productId}:${timestampKeyPart}`;
+  const cacheKey = `checkout:${userId}:${intentId}`;
 
-  // Use Stripe Price ID as source of truth
-  // CRITICAL: Include {CHECKOUT_SESSION_ID} for post-payment sync fallback
+  // Layer 1: Redis cache — cheapest retry path.
+  try {
+    const cached = await redisClient.get(cacheKey);
+    if (cached) {
+      const cachedUrl = typeof cached === 'string' && cached.startsWith('{')
+        ? (JSON.parse(cached).url || null)
+        : cached;
+      if (cachedUrl) {
+        console.log(`[CHECKOUT] Reusing cached session for ${userId}/${intentId}`);
+        return { url: cachedUrl, reused: true };
+      }
+    }
+  } catch (err) {
+    // Cache failures must NEVER block a real purchase. Log and fall through
+    // to Stripe — layer 2 idempotency will still prevent duplicates.
+    console.warn('[CHECKOUT] Redis read failed; proceeding without cache:', err?.message || err);
+  }
+
+  // Layer 2: Stripe idempotency key. Stable per (user, intent).
+  const sessionIdempotencyKey = `checkout-session:${userId}:${intentId}`;
+
   const session = await stripeClient.checkout.sessions.create(
     {
       customer: customerId,
@@ -375,22 +418,18 @@ async function createCheckoutSession(stripeClient, { customerId, userId, userEma
       success_url: `${appUrl}/dashboard?success=true&session_id={CHECKOUT_SESSION_ID}&${productType}=${productId}${isUpgrade ? '&upgrade=true' : ''}`,
       cancel_url: `${appUrl}/pricing?canceled=true`,
       metadata: {
-        // CRITICAL: Canonical identity mapping
         clerkUserId: userId,
-        userId: userId, // Duplicate for redundancy
+        userId: userId,
         userEmail: userEmail || '',
-        // Product info
         productType: productType,
         productId: productId,
-        // Disclaimer
         disclaimerAccepted: 'true',
         disclaimerVersion: CURRENT_DISCLAIMER_VERSION,
         disclaimerTimestamp: disclaimerTimestamp || new Date().toISOString(),
-        // Upgrade info
+        intentId: intentId,
         isUpgrade: isUpgrade ? 'true' : 'false',
         upgradeFrom: upgradeFrom || '',
         amountCharged: amountToCharge ? String(amountToCharge) : '',
-        // Environment tracking for debugging
         env: process.env.VERCEL_ENV || process.env.NODE_ENV || 'unknown',
         stripeMode: process.env.STRIPE_SECRET_KEY?.startsWith('sk_live') ? 'live' : 'test',
       },
@@ -409,7 +448,23 @@ async function createCheckoutSession(stripeClient, { customerId, userId, userEma
     { idempotencyKey: sessionIdempotencyKey },
   );
 
-  return session;
+  // Best-effort cache write. If Redis is down, Stripe idempotency still
+  // protects us on the next retry.
+  try {
+    await redisClient.set(
+      cacheKey,
+      JSON.stringify({ url: session.url, sessionId: session.id }),
+      { ex: CHECKOUT_URL_CACHE_TTL_SEC },
+    );
+  } catch (err) {
+    console.warn('[CHECKOUT] Redis write failed; retries will fall through to Stripe:', err?.message || err);
+  }
+
+  console.log(
+    `[CHECKOUT] Created session ${session.id} for ${userId}/${intentId} (${productType}:${productId}${isUpgrade ? `, upgrade from ${upgradeFrom}` : ''})`
+  );
+
+  return { url: session.url, reused: false };
 }
 
 export async function GET() {

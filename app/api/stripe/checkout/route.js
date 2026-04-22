@@ -364,13 +364,23 @@ async function getOrCreateStripeCustomer(stripeClient, redisClient, user, userId
   return customerId;
 }
 
+// Upstash's JS client auto-parses JSON on read. So a GET may return either
+// a string (legacy / non-Upstash clients) or an already-parsed object.
+// Normalize here so Layer 0 / Layer 1 cache hits actually fire.
+function parseRedisJson(raw) {
+  if (raw == null) return null;
+  if (typeof raw === 'string') {
+    try { return JSON.parse(raw); } catch { return null; }
+  }
+  if (typeof raw === 'object') return raw;
+  return null;
+}
+
 // Read the user's pending-session shadow cache. This is the hard server-side
 // guarantee that duplicates cannot be created regardless of client state.
 async function readPendingShadow(redisClient, shadowKey) {
   try {
-    const raw = await redisClient.get(shadowKey);
-    if (!raw) return null;
-    const payload = typeof raw === 'string' && raw.startsWith('{') ? JSON.parse(raw) : null;
+    const payload = parseRedisJson(await redisClient.get(shadowKey));
     if (!payload?.url) return null;
     return payload;
   } catch (err) {
@@ -427,15 +437,10 @@ async function createOrReuseCheckoutSession(
   // Layer 1: per-intent URL cache — cheapest retry path when the client
   // correctly reuses an intentId.
   try {
-    const cached = await redisClient.get(intentCacheKey);
-    if (cached) {
-      const cachedUrl = typeof cached === 'string' && cached.startsWith('{')
-        ? (JSON.parse(cached).url || null)
-        : cached;
-      if (cachedUrl) {
-        console.log(`[CHECKOUT] intent-cache hit for ${userId}/${intentId}`);
-        return { url: cachedUrl, reused: true, source: 'intent' };
-      }
+    const payload = parseRedisJson(await redisClient.get(intentCacheKey));
+    if (payload?.url) {
+      console.log(`[CHECKOUT] intent-cache hit for ${userId}/${intentId} -> ${payload.sessionId}`);
+      return { url: payload.url, reused: true, source: 'intent' };
     }
   } catch (err) {
     console.warn('[CHECKOUT] intent-cache read failed:', err?.message || err);

@@ -5,7 +5,14 @@
   "expectedSuspectedUncertain": false,
   "minActionableIssues": 2,
   "minExtractedCollections": 1,
-  "mustContainEvidence": ["Status: Collection", "60 days late"],
+  "mustContainEvidence": [
+    "Status: Collection",
+    "60 days late"
+  ],
   "forbidClean": true,
-  "expectedClassifications": { "highPriorityMin": 1, "actionableMin": 1 }
+  "expectedClassifications": {
+    "highPriorityMin": 1,
+    "actionableMin": 1
+  },
+  "expectedOperationalBlocks": []
 }

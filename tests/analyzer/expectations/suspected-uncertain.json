@@ -6,6 +6,11 @@
   "minActionableIssues": 0,
   "maxActionableIssues": 0,
   "forbidClean": true,
-  "mustContainEvidence": ["previously delinquent"],
-  "expectedClassifications": { "suspectedMin": 1 }
+  "mustContainEvidence": [
+    "previously delinquent"
+  ],
+  "expectedClassifications": {
+    "suspectedMin": 1
+  },
+  "expectedOperationalBlocks": []
 }

@@ -5,7 +5,13 @@
   "expectedSuspectedUncertain": false,
   "minActionableIssues": 1,
   "minExtractedBankingItems": 1,
-  "mustContainEvidence": ["Reported For: Account Abuse", "Source of Information: Metro Bank"],
+  "mustContainEvidence": [
+    "Reported For: Account Abuse",
+    "Source of Information: Metro Bank"
+  ],
   "forbidClean": true,
-  "expectedClassifications": { "highPriorityMin": 1 }
+  "expectedClassifications": {
+    "highPriorityMin": 1
+  },
+  "expectedOperationalBlocks": []
 }

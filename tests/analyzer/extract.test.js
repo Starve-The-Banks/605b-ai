@@ -95,3 +95,53 @@ describe('extractor (Stage 1)', () => {
     expect(aIds).toEqual(bIds);
   });
 });
+
+describe('extractor — fraud / operational markers', () => {
+  test('detects "Security freeze active" → type=freeze with high confidence', () => {
+    const out = extractReport('Experian Credit Report\nReport Date: 04/01/2026\n\nSecurity Freeze: Security freeze active on this file as of 03/14/2026.\n');
+    expect(out.fraudMarkers.length).toBeGreaterThanOrEqual(1);
+    const freeze = out.fraudMarkers.find((m) => m.type === 'freeze');
+    expect(freeze).toBeTruthy();
+    expect(freeze.confidence).toBeGreaterThanOrEqual(0.9);
+    expect(freeze.span.text.toLowerCase()).toContain('security freeze');
+  });
+
+  test('detects "Credit lock enabled" → type=lock', () => {
+    const out = extractReport('TransUnion Credit Report\nReport Date: 04/01/2026\n\nCredit lock enabled on this file.\n');
+    const lock = out.fraudMarkers.find((m) => m.type === 'lock');
+    expect(lock).toBeTruthy();
+  });
+
+  test('detects "Active fraud alert" → type=fraud_alert and not freeze', () => {
+    const out = extractReport('Equifax Credit Report\nReport Date: 04/01/2026\n\nActive fraud alert is on this file.\n');
+    const alert = out.fraudMarkers.find((m) => m.type === 'fraud_alert');
+    const freeze = out.fraudMarkers.find((m) => m.type === 'freeze');
+    expect(alert).toBeTruthy();
+    expect(freeze).toBeUndefined();
+  });
+
+  test('detects "Extended fraud alert" → type=extended_alert', () => {
+    const out = extractReport('Experian Credit Report\nReport Date: 04/01/2026\n\nExtended fraud alert remains in effect.\n');
+    const alert = out.fraudMarkers.find((m) => m.type === 'extended_alert');
+    expect(alert).toBeTruthy();
+  });
+
+  test('detects "Active duty military alert" → type=active_duty_alert', () => {
+    const out = extractReport('Equifax Credit Report\nReport Date: 04/01/2026\n\nActive duty military alert is in place.\n');
+    const alert = out.fraudMarkers.find((m) => m.type === 'active_duty_alert');
+    expect(alert).toBeTruthy();
+  });
+
+  test('detects restrictive consumer statement → type=consumer_statement', () => {
+    const out = extractReport('Experian Credit Report\nReport Date: 04/01/2026\n\nConsumer Statement: Do not extend credit without contacting consumer directly.\n');
+    const statement = out.fraudMarkers.find((m) => m.type === 'consumer_statement');
+    expect(statement).toBeTruthy();
+  });
+
+  test('regression: clean fixtures produce zero fraudMarkers', () => {
+    for (const name of ['clean-perfect-report.txt', 'clean-chexsystems-report.txt', 'clean-ews-report.txt', 'positive-accounts-only.txt']) {
+      const out = extractReport(fixture(name));
+      expect(out.fraudMarkers).toHaveLength(0);
+    }
+  });
+});

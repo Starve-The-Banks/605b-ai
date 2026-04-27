@@ -4,7 +4,12 @@
   "expectedStatus": "potential_issue",
   "expectedSuspectedUncertain": false,
   "minActionableIssues": 1,
-  "mustContainEvidence": ["30 days late reported for 11/2025"],
+  "mustContainEvidence": [
+    "30 days late reported for 11/2025"
+  ],
   "forbidClean": true,
-  "expectedClassifications": { "actionableMin": 1 }
+  "expectedClassifications": {
+    "actionableMin": 1
+  },
+  "expectedOperationalBlocks": []
 }

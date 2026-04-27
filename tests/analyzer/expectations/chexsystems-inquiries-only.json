@@ -6,5 +6,6 @@
   "minActionableIssues": 0,
   "maxActionableIssues": 0,
   "minReviewItems": 1,
-  "forbidClean": true
+  "forbidClean": true,
+  "expectedOperationalBlocks": []
 }

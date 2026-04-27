@@ -5,7 +5,13 @@
   "expectedSuspectedUncertain": false,
   "minActionableIssues": 1,
   "minExtractedCollections": 1,
-  "mustContainEvidence": ["Status: Collection", "Original Creditor: City Medical"],
+  "mustContainEvidence": [
+    "Status: Collection",
+    "Original Creditor: City Medical"
+  ],
   "forbidClean": true,
-  "expectedClassifications": { "highPriorityMin": 1 }
+  "expectedClassifications": {
+    "highPriorityMin": 1
+  },
+  "expectedOperationalBlocks": []
 }

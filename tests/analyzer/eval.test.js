@@ -121,6 +121,36 @@ describe('analyzer golden evaluator', () => {
       expect(typeof result.diagnostics.whyStatus).toBe('string');
       expect(result.diagnostics.whyStatus.length).toBeGreaterThan(0);
       expect(result.diagnostics.pipelineVersion).toMatch(/^\d+\.\d+\.\d+$/);
+      expect(Array.isArray(result.diagnostics.operationalBlocks)).toBe(true);
+      expect(Array.isArray(result.diagnostics.reasoningLog)).toBe(true);
+      expect(result.diagnostics.reasoningLog.length).toBeGreaterThan(0);
+
+      // Operational-blocks expectations (additive; defaults to []).
+      const expectedBlocks = expectation.expectedOperationalBlocks ?? [];
+      expect(result.diagnostics.operationalBlocks.length).toBe(expectedBlocks.length);
+      for (const expectedBlock of expectedBlocks) {
+        const found = result.diagnostics.operationalBlocks.find((b) => b.type === expectedBlock.type);
+        expect(found).toBeTruthy();
+        expect(found.detected).toBe(true);
+        expect(typeof found.confidence).toBe('number');
+      }
+
+      // Operational items must carry subtype + operationalGuidance and never
+      // appear in actionable findings.
+      const operationalReviewItems = result.reviewOnly.filter((f) => f.subtype === 'operational_blocker');
+      expect(operationalReviewItems.length).toBe(expectedBlocks.length);
+      for (const item of operationalReviewItems) {
+        expect(item.category).toBe('review_only');
+        expect(item.operationalGuidance).toBeTruthy();
+        expect(item.operationalGuidance.title.length).toBeGreaterThan(0);
+        expect(item.operationalGuidance.message.length).toBeGreaterThan(0);
+        expect(item.operationalGuidance.bureauInstructions.experian).toMatch(/temporarily lift|lift via/i);
+        // Compliance: never instruct the user to remove protection permanently.
+        const text = `${item.operationalGuidance.title} ${item.operationalGuidance.message} ${item.operationalGuidance.contextLine || ''} ${Object.values(item.operationalGuidance.bureauInstructions).join(' ')}`;
+        expect(text.toLowerCase()).not.toMatch(/\b(remove|removal|delete|deletion|permanent|permanently)\b/);
+      }
+      const operationalActionable = result.findings.filter((f) => f.subtype === 'operational_blocker');
+      expect(operationalActionable.length).toBe(0);
     });
   }
 
@@ -153,6 +183,32 @@ describe('analyzer golden evaluator', () => {
       (s) => s.itemId === 'it_fake_unknown_id' && s.reason === 'llm_introduced_unknown_item'
     );
     expect(introducedSuppression).toBeTruthy();
+  });
+
+  test('hard invariant: extractor finding fraud markers cannot return clean', async () => {
+    const text = readFileSync(
+      join(process.cwd(), 'tests/analyzer/fixtures/freeze-only.txt'),
+      'utf8'
+    );
+    const result = await runAnalyzerPipeline(text, { anthropic: await getClient(), model: 'mock' });
+    expect(result.summary.reportStatus).not.toBe('clean');
+    expect(result.cleanReport).toBe(false);
+    expect(result.summary.operationalBlocks).toBe(true);
+    expect(result.diagnostics.operationalBlocks.length).toBeGreaterThan(0);
+  });
+
+  test('hard invariant: freeze + collection keeps high_priority and adds operational review item', async () => {
+    const text = readFileSync(
+      join(process.cwd(), 'tests/analyzer/fixtures/freeze-and-collection.txt'),
+      'utf8'
+    );
+    const result = await runAnalyzerPipeline(text, { anthropic: await getClient(), model: 'mock' });
+    expect(result.summary.reportStatus).toBe('high_priority_issue');
+    const operational = result.reviewOnly.find((f) => f.subtype === 'operational_blocker');
+    expect(operational).toBeTruthy();
+    const collection = result.findings.find((f) => f.type === 'collection');
+    expect(collection).toBeTruthy();
+    expect(collection.category).toBe('high_priority_issue');
   });
 
   test('result preserves v1 mobile-compatible field shape', async () => {

@@ -67,3 +67,66 @@ describe('classifier (Stage 2)', () => {
     expect(ambiguous).toBeTruthy();
   });
 });
+
+describe('classifier — operational blockers', () => {
+  test('freeze fraudMarker → review_only with subtype operational_blocker', () => {
+    const ext = extractReport(newFixture('freeze-only.txt'));
+    const cls = classifyExtractedReport(ext);
+    const freeze = cls.find((c) => c.itemKind === 'fraud' && c.type === 'freeze');
+    expect(freeze).toBeTruthy();
+    expect(freeze.classification).toBe(CLASSIFICATIONS.REVIEW_ONLY);
+    expect(freeze.classifierRule).toBe('operational.freeze');
+    expect(freeze.subtype).toBe('operational_blocker');
+  });
+
+  test('fraud_alert fraudMarker → review_only with subtype operational_blocker', () => {
+    const ext = extractReport('Equifax Credit Report\nReport Date: 04/01/2026\n\nActive fraud alert in effect.\n');
+    const cls = classifyExtractedReport(ext);
+    const alert = cls.find((c) => c.itemKind === 'fraud' && c.type === 'fraud_alert');
+    expect(alert).toBeTruthy();
+    expect(alert.classification).toBe(CLASSIFICATIONS.REVIEW_ONLY);
+    expect(alert.classifierRule).toBe('operational.fraud_alert');
+    expect(alert.subtype).toBe('operational_blocker');
+  });
+
+  test('hard invariant: typed fraudMarker is never high_priority or actionable', () => {
+    for (const type of ['freeze', 'lock', 'fraud_alert', 'extended_alert', 'active_duty_alert', 'consumer_statement']) {
+      const ext = {
+        reportType: 'credit_bureau',
+        accounts: [], collections: [], inquiries: [], publicRecords: [],
+        bankingItems: [], remarks: [],
+        fraudMarkers: [{
+          itemId: `it_test_${type}`,
+          itemKind: 'fraud',
+          span: { start: 0, end: 4, text: 'test' },
+          bureau: 'Experian',
+          source: 'consumer report',
+          type,
+          marker: 'test',
+          context: 'test',
+          confidence: 0.9,
+          fields: { line: 'test' },
+        }],
+      };
+      const cls = classifyExtractedReport(ext);
+      const item = cls[0];
+      expect(item.classification).not.toBe(CLASSIFICATIONS.HIGH_PRIORITY);
+      expect(item.classification).not.toBe(CLASSIFICATIONS.ACTIONABLE);
+      expect(item.classification).toBe(CLASSIFICATIONS.REVIEW_ONLY);
+      expect(item.subtype).toBe('operational_blocker');
+    }
+  });
+
+  test('regression: collection still classifies as high_priority', () => {
+    const ext = extractReport(fixture('one-real-collection.txt'));
+    const cls = classifyExtractedReport(ext);
+    const collection = cls.find((c) => c.itemKind === 'collection');
+    expect(collection.classification).toBe(CLASSIFICATIONS.HIGH_PRIORITY);
+  });
+
+  test('regression: positive accounts still classify as positive', () => {
+    const ext = extractReport(fixture('positive-accounts-only.txt'));
+    const cls = classifyExtractedReport(ext);
+    expect(cls.some((c) => c.classification === CLASSIFICATIONS.POSITIVE)).toBe(true);
+  });
+});

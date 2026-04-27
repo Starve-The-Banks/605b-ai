@@ -1,0 +1,13 @@
+{
+  "fixture": "../fixtures/freeze-only.txt",
+  "expectedReportType": "credit_bureau",
+  "expectedStatus": "review_only",
+  "expectedSuspectedUncertain": false,
+  "minActionableIssues": 0,
+  "maxActionableIssues": 0,
+  "minReviewItems": 1,
+  "forbidClean": true,
+  "expectedOperationalBlocks": [{ "type": "freeze" }],
+  "mustContainEvidence": ["Security freeze active"],
+  "expectedClassifications": { "highPriorityMin": 0, "actionableMin": 0 }
+}

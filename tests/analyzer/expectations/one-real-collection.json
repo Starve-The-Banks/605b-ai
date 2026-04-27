@@ -1,0 +1,11 @@
+{
+  "fixture": "../../fixtures/analyze/one-real-collection.txt",
+  "expectedReportType": "credit_bureau",
+  "expectedStatus": "high_priority_issue",
+  "expectedSuspectedUncertain": false,
+  "minActionableIssues": 1,
+  "minExtractedCollections": 1,
+  "mustContainEvidence": ["Status: Collection", "Original Creditor: City Medical"],
+  "forbidClean": true,
+  "expectedClassifications": { "highPriorityMin": 1 }
+}

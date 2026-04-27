@@ -1,0 +1,9 @@
+{
+  "fixture": "../../fixtures/analyze/clean-ews-report.txt",
+  "expectedReportType": "early_warning_services",
+  "expectedStatus": "clean",
+  "expectedSuspectedUncertain": false,
+  "minActionableIssues": 0,
+  "maxActionableIssues": 0,
+  "forbidClean": false
+}

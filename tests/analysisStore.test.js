@@ -54,7 +54,7 @@ describe('analysis Redis store', () => {
     const latest = await getLatestAnalysis(redis, 'user_a');
 
     expect(saved.id).toBe('analysis_1');
-    expect(saved.schemaVersion).toBe(1);
+    expect(saved.schemaVersion).toBe(2);
     expect(saved.deletedAt).toBeNull();
     expect(latest.id).toBe('analysis_1');
     expect(latest.userId).toBe('user_a');

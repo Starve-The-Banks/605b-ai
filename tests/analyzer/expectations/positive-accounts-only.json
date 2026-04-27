@@ -1,0 +1,10 @@
+{
+  "fixture": "../../fixtures/analyze/positive-accounts-only.txt",
+  "expectedReportType": "credit_bureau",
+  "expectedStatus": "clean",
+  "expectedSuspectedUncertain": false,
+  "minActionableIssues": 0,
+  "maxActionableIssues": 0,
+  "minExtractedAccounts": 2,
+  "forbidClean": false
+}

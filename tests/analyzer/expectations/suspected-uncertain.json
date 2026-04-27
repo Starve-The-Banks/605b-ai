@@ -1,0 +1,11 @@
+{
+  "fixture": "../fixtures/suspected-uncertain.txt",
+  "expectedReportType": "credit_bureau",
+  "expectedStatus": "review_only",
+  "expectedSuspectedUncertain": true,
+  "minActionableIssues": 0,
+  "maxActionableIssues": 0,
+  "forbidClean": true,
+  "mustContainEvidence": ["previously delinquent"],
+  "expectedClassifications": { "suspectedMin": 1 }
+}

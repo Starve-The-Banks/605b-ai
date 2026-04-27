@@ -1,0 +1,14 @@
+{
+  "fixture": "../../fixtures/analyze/clean-perfect-report.txt",
+  "expectedReportType": "credit_bureau",
+  "expectedStatus": "clean",
+  "expectedSuspectedUncertain": false,
+  "minActionableIssues": 0,
+  "maxActionableIssues": 0,
+  "minExtractedAccounts": 1,
+  "minExtractedCollections": 0,
+  "maxExtractedCollections": 0,
+  "forbidClean": false,
+  "mustContainEvidence": [],
+  "expectedClassifications": { "highPriorityMin": 0, "actionableMin": 0 }
+}

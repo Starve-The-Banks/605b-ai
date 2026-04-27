@@ -1,0 +1,10 @@
+{
+  "fixture": "../../fixtures/analyze/inquiries-only.txt",
+  "expectedReportType": "credit_bureau",
+  "expectedStatus": "review_only",
+  "expectedSuspectedUncertain": false,
+  "minActionableIssues": 0,
+  "maxActionableIssues": 0,
+  "minReviewItems": 2,
+  "forbidClean": true
+}

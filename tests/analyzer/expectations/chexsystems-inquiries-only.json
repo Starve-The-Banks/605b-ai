@@ -1,0 +1,10 @@
+{
+  "fixture": "../../fixtures/analyze/chexsystems-inquiries-only.txt",
+  "expectedReportType": "chexsystems",
+  "expectedStatus": "review_only",
+  "expectedSuspectedUncertain": false,
+  "minActionableIssues": 0,
+  "maxActionableIssues": 0,
+  "minReviewItems": 1,
+  "forbidClean": true
+}

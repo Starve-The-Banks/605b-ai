@@ -7,11 +7,10 @@ import { getRedis } from '@/lib/redis';
 import { rateLimit, LIMITS } from '@/lib/rateLimit';
 import { isReviewerRequest } from '@/lib/beta';
 import {
-  ANALYSIS_SYSTEM_PROMPT,
   LOW_QUALITY_TEXT_MESSAGE,
   assessExtractedTextQuality,
-  parseAnalysisResponse,
 } from '@/lib/creditReportAnalysis';
+import { runAnalyzerPipeline } from '@/lib/analyzer/pipeline';
 import {
   hashRawText,
   saveAnalysisRecord,
@@ -277,9 +276,9 @@ async function _handleAnalyze(request) {
         return errorResponse("CONFIGURATION_ERROR", "Analysis service is not properly configured", 503);
       }
 
-      // Truncate text to fit within token limits — generous for deep analysis
+      // Truncate text to keep extractor + LLM enrichment within budget.
       const maxTextLength = 20000;
-      const textToAnalyze = extractedText.length > maxTextLength 
+      const textToAnalyze = extractedText.length > maxTextLength
         ? (() => {
             console.warn('[Analyze] Text truncated for analysis:', {
               originalLength: extractedText.length,
@@ -290,45 +289,27 @@ async function _handleAnalyze(request) {
           })()
         : extractedText;
 
-      // Create timeout controller for AI request
       aiController = new AbortController();
       aiTimeout = setTimeout(() => {
-        console.warn('[Analyze] AI request timeout after', AI_TIMEOUT_MS, 'ms');
+        console.warn('[Analyze] Pipeline timeout after', AI_TIMEOUT_MS, 'ms');
         aiController.abort();
       }, AI_TIMEOUT_MS);
 
-      const response = await anthropic.messages.create({
+      analysisResult = await runAnalyzerPipeline(textToAnalyze, {
+        anthropic,
         model: AI_MODEL,
-        max_tokens: 3000,
-        system: ANALYSIS_SYSTEM_PROMPT,
-        messages: [
-          {
-            role: "user",
-            content: `Analyze this credit/consumer report and return ONLY valid JSON matching the schema described in your instructions.\n\nReport text:\n${textToAnalyze}`
-          }
-        ]
-      }, {
-        signal: aiController.signal
+        signal: aiController.signal,
+        enrichTimeoutMs: AI_TIMEOUT_MS - 5_000,
       });
 
       if (aiTimeout) clearTimeout(aiTimeout);
 
-      const aiResponse = response.content?.[0]?.text || '';
-      console.log('[Analyze] AI analysis completed, response length:', aiResponse.length);
-
-      // Validate AI response is not empty
-      if (!aiResponse || aiResponse.trim().length < 20) {
-        console.error('[Analyze] AI returned empty or minimal response:', aiResponse?.slice(0, 100));
-        return errorResponse("AI_UNAVAILABLE", "Analysis service returned incomplete results - please try again", 502);
-      }
-
-      // Parse AI response into structured format
-      try {
-        analysisResult = parseAnalysisResponse(aiResponse, textToAnalyze);
-      } catch (parseErr) {
-        console.error('[Analyze] parseAnalysisResponse failed:', parseErr?.stack || parseErr);
-        return errorResponse("PROCESSING_FAILED", "Analysis could not be completed - please try again", 502);
-      }
+      console.log('[Analyze] Pipeline completed:', {
+        reportStatus: analysisResult?.summary?.reportStatus,
+        suspectedUncertain: analysisResult?.summary?.suspectedUncertain,
+        whyStatus: analysisResult?.diagnostics?.whyStatus,
+        pipelineMs: analysisResult?.diagnostics?.pipelineMs,
+      });
 
     } catch (err) {
       if (aiTimeout) clearTimeout(aiTimeout);
@@ -424,6 +405,10 @@ async function _handleAnalyze(request) {
         cleanReport: analysisResult.cleanReport,
         confidence: analysisResult.confidence,
         rawTextHash: hashRawText(extractedText),
+        extracted: analysisResult.extracted,
+        classifications: analysisResult.classifications,
+        diagnostics: analysisResult.diagnostics,
+        pipelineVersion: analysisResult.pipelineVersion,
       });
       console.log('[Analyze] Saved analysis record:', {
         userId,

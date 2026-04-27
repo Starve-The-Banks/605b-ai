@@ -1,0 +1,11 @@
+{
+  "fixture": "../fixtures/mixed-late-and-collection.txt",
+  "expectedReportType": "credit_bureau",
+  "expectedStatus": "high_priority_issue",
+  "expectedSuspectedUncertain": false,
+  "minActionableIssues": 2,
+  "minExtractedCollections": 1,
+  "mustContainEvidence": ["Status: Collection", "60 days late"],
+  "forbidClean": true,
+  "expectedClassifications": { "highPriorityMin": 1, "actionableMin": 1 }
+}

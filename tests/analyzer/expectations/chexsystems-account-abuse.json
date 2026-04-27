@@ -1,0 +1,11 @@
+{
+  "fixture": "../../fixtures/analyze/chexsystems-account-abuse.txt",
+  "expectedReportType": "chexsystems",
+  "expectedStatus": "high_priority_issue",
+  "expectedSuspectedUncertain": false,
+  "minActionableIssues": 1,
+  "minExtractedBankingItems": 1,
+  "mustContainEvidence": ["Reported For: Account Abuse", "Source of Information: Metro Bank"],
+  "forbidClean": true,
+  "expectedClassifications": { "highPriorityMin": 1 }
+}

@@ -1,0 +1,16 @@
+ChexSystems Consumer Disclosure
+Chex Systems, Inc.
+Consumer ID: 123456789
+Report Date: 04/01/2026
+
+Reported Information:
+Financial Institution: Metro Bank
+Reported For: Account Abuse
+Source of Information: Metro Bank
+Date Reported: 12/15/2025
+Amount Owed: $426
+Account Type: Checking account
+Status: Closed by financial institution
+
+Inquiries Viewed By Others:
+Metro Bank inquiry 12/10/2025

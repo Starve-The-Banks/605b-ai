@@ -24,6 +24,12 @@
     "ads:no-render": "node ads_automation/pipeline.mjs --no-render",
     "ads:check": "node ads_automation/pipeline.mjs --check"
   },
+  "jest": {
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "tests/purchase-pixel.*\\.spec\\.cjs$"
+    ]
+  },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",
     "@clerk/nextjs": "^5.0.0",

@@ -12,6 +12,10 @@ import {
   assessExtractedTextQuality,
   parseAnalysisResponse,
 } from '@/lib/creditReportAnalysis';
+import {
+  hashRawText,
+  saveAnalysisRecord,
+} from '@/lib/analysisStore';
 
 // Vercel request body limits are tight; stay under ~4.5MB platform ceiling
 const MAX_FILE_SIZE = 4 * 1024 * 1024;
@@ -45,6 +49,9 @@ function successResponse(data) {
     analysis: data.analysis || {},
     remaining: data.remaining || 0,
   };
+  if (data.analysisId) {
+    resp.analysisId = data.analysisId;
+  }
   if (typeof data.pdfAnalysesUsed === 'number') {
     resp.pdfAnalysesUsed = data.pdfAnalysesUsed;
   }
@@ -361,6 +368,7 @@ async function _handleAnalyze(request) {
     // =========================
     const duration = Date.now() - startTime;
     console.log('[Analyze] Analysis completed successfully in', duration, 'ms');
+    let savedAnalysis = null;
     
     // Update user's analysis usage count
     let remaining = 0;
@@ -403,12 +411,37 @@ async function _handleAnalyze(request) {
     } catch (usageErr) {
       console.error('[Analyze] Failed to update usage count:', usageErr);
     }
+
+    try {
+      const redisClient = getRedis();
+      savedAnalysis = await saveAnalysisRecord(redisClient, {
+        userId,
+        reportType: analysisResult.reportType,
+        filename: file.name || 'report.pdf',
+        summary: analysisResult.summary,
+        findings: analysisResult.findings,
+        reviewOnly: analysisResult.reviewOnly,
+        cleanReport: analysisResult.cleanReport,
+        confidence: analysisResult.confidence,
+        rawTextHash: hashRawText(extractedText),
+      });
+      console.log('[Analyze] Saved analysis record:', {
+        userId,
+        analysisId: savedAnalysis.id,
+        reportType: savedAnalysis.reportType,
+      });
+    } catch (storeErr) {
+      Sentry.captureException(storeErr, { tags: { route: 'api/analyze', stage: 'analysis_persistence' } });
+      console.error('[Analyze] Failed to persist analysis:', storeErr?.stack || storeErr);
+      return errorResponse("ANALYSIS_SAVE_FAILED", "Analysis completed but could not be saved. Please try again.", 503);
+    }
     
     return successResponse({
       filesProcessed: [{ 
         name: file.name, 
         pages: pdfData.numpages || 1 
       }],
+      analysisId: savedAnalysis?.id,
       analysis: analysisResult,
       remaining: remaining === -1 ? 999 : remaining,
       pdfAnalysesUsed: newUsedCount,

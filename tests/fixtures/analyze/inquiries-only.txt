@@ -1,0 +1,15 @@
+TransUnion Credit Report
+Report Date: 04/01/2026
+
+Account Summary:
+Open Accounts: 4
+Derogatory Accounts: 0
+Collections: None
+Late Payments: None
+
+Inquiries:
+Lender One hard inquiry 03/12/2026
+Auto Finance Marketplace hard inquiry 03/13/2026
+
+Fraud Alerts: None
+Consumer Disputes: None

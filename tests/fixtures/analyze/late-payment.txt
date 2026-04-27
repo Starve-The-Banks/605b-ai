@@ -1,0 +1,15 @@
+Equifax Credit Report
+Report Date: 04/01/2026
+
+Account: Northstar Auto Finance
+Bureau: Equifax
+Status: Open
+Payment Status: Current
+Payment History: 30 days late reported for 11/2025
+Past Due Amount: $0
+
+Account: Prime Bank Rewards Card
+Bureau: Equifax
+Status: Open / Current
+Payment Status: Pays as agreed
+Payment History: Never late

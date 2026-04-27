@@ -1,0 +1,23 @@
+Experian Credit Report
+Report Date: 04/01/2026
+
+Account: Prime Bank Rewards Card
+Bureau: Experian
+Status: Open / Current
+Payment Status: Pays as agreed
+Balance: $120
+Credit Limit: $10,000
+Payment History: Never late
+
+Account: Community Auto Loan
+Bureau: Experian
+Status: Closed
+Payment Status: Paid as agreed
+Balance: $0
+Payment History: Never late
+
+Public Records: None
+Collections: None
+Derogatory Accounts: None
+Fraud Alerts: None
+Consumer Statements: None

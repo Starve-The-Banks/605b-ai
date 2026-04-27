@@ -6,6 +6,12 @@ import { NextResponse } from 'next/server';
 import { getRedis } from '@/lib/redis';
 import { rateLimit, LIMITS } from '@/lib/rateLimit';
 import { isReviewerRequest } from '@/lib/beta';
+import {
+  ANALYSIS_SYSTEM_PROMPT,
+  LOW_QUALITY_TEXT_MESSAGE,
+  assessExtractedTextQuality,
+  parseAnalysisResponse,
+} from '@/lib/creditReportAnalysis';
 
 // Vercel request body limits are tight; stay under ~4.5MB platform ceiling
 const MAX_FILE_SIZE = 4 * 1024 * 1024;
@@ -21,97 +27,6 @@ const AI_MODEL = process.env.ANTHROPIC_ANALYZE_MODEL || 'claude-sonnet-4-2025051
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
-
-const ANALYSIS_SYSTEM_PROMPT = `You are the most thorough credit report analysis system in the industry. You analyze consumer reports from ALL bureau types and produce exhaustive, actionable findings.
-
-REPORT TYPE DETECTION:
-First, identify the report source from content patterns:
-- Equifax, Experian, TransUnion (traditional credit bureaus)
-- ChexSystems (bank account closures, fraud flags, involuntary closures)
-- LexisNexis (insurance risk, employment history, address history, public records)
-- Early Warning Services / EWS (deposit account screening, fraud indicators)
-- Innovis (fourth credit bureau, similar to traditional bureaus)
-- SageStream (alternative credit data, thin-file consumers)
-- NCTUE (utility and telecom payment history)
-- If you cannot determine the source, use "Unknown"
-
-ANALYSIS DEPTH — for every account/item found:
-1. Identify the specific inaccuracy or concern
-2. Cite the exact FCRA statute that applies (§611, §605B, §623, §609, §605A, §604, §605)
-3. Assess severity: "high" (clear violation, strong dispute basis), "medium" (likely disputable), "low" (minor or informational)
-4. Provide a specific dispute recommendation (not generic advice)
-5. Estimate dispute success likelihood: "Strong" / "Moderate" / "Possible"
-6. Identify the reasoning (why this is disputable under law)
-
-WHAT TO LOOK FOR:
-- Accounts not belonging to the consumer (mixed files, identity theft)
-- Incorrect balances, credit limits, or high-balance amounts
-- Wrong payment history (late payments that were on time)
-- Incorrect account status (open vs closed, current vs delinquent)
-- Wrong dates (date opened, date of first delinquency, last activity)
-- Duplicate accounts (same debt reported by original creditor AND collector)
-- Re-aged debts (date of first delinquency moved forward to extend reporting)
-- Accounts past the 7-year reporting period (10 for bankruptcies)
-- Unauthorized hard inquiries
-- Incorrect personal information (names, addresses, employers, SSN variations)
-- For ChexSystems: involuntary closures that may be inaccurate, fraud flags you didn't cause
-- For LexisNexis: incorrect insurance scores, wrong employment/address data
-- For EWS: incorrect account closure reasons, fraud indicators that are wrong
-
-CROSS-BUREAU INCONSISTENCIES:
-If the report contains data from multiple bureaus or if accounts reference different bureau reporting, flag any inconsistencies (different balances, different statuses, different dates for the same account).
-
-POSITIVE FACTORS:
-Identify accounts in good standing, long payment histories, low utilization, and other positive elements.
-
-OUTPUT FORMAT — return ONLY a valid JSON object with this exact structure:
-{
-  "reportType": "Equifax" | "Experian" | "TransUnion" | "ChexSystems" | "LexisNexis" | "EWS" | "Innovis" | "SageStream" | "NCTUE" | "Unknown",
-  "summary": {
-    "overallAssessment": "2-3 paragraph comprehensive assessment",
-    "potentialIssues": <number>,
-    "highPriorityItems": <number>,
-    "reportDate": "extracted date if visible, or null"
-  },
-  "findings": [
-    {
-      "id": "finding-1",
-      "type": "accuracy" | "identity" | "timeliness" | "completeness" | "inquiry" | "personal-info",
-      "severity": "high" | "medium" | "low",
-      "account": "Creditor name or account identifier",
-      "issue": "Specific description of the problem found",
-      "statute": "FCRA §611" | "FCRA §605B" | "FCRA §623" | etc,
-      "recommendation": "Specific action to take",
-      "reasoning": "Why this is disputable under the cited statute",
-      "successLikelihood": "Strong" | "Moderate" | "Possible"
-    }
-  ],
-  "positiveFactors": ["Account X has 5 years of on-time payments", ...],
-  "crossBureauInconsistencies": [
-    {
-      "item": "Account or data point",
-      "details": "What differs and why it matters"
-    }
-  ],
-  "personalInfo": {
-    "namesFound": ["list of name variations found"],
-    "addressesFound": ["list of addresses found"],
-    "issues": ["any personal info discrepancies"]
-  },
-  "actionPlan": [
-    "Step 1: Priority action",
-    "Step 2: Next action",
-    ...
-  ]
-}
-
-CRITICAL RULES:
-- Return ONLY the JSON object. No markdown, no code fences, no explanation text before or after.
-- Every finding MUST have a specific statute citation.
-- Be exhaustive — do not skip items. Analyze every account and tradeline visible.
-- For specialty reports (ChexSystems, EWS, LexisNexis), adapt your analysis to their specific data formats.
-- Never promise outcomes. Use "may be disputable" or "potential violation" language.
-- Never request SSN, DOB, or other PII in your response.`;
 
 function errorResponse(code, message, status = 200) {
   return NextResponse.json(
@@ -329,6 +244,17 @@ async function _handleAnalyze(request) {
       return errorResponse("IMAGE_ONLY_PDF", "This PDF appears to be a scanned image without text. Please use a PDF with searchable text.", 422);
     }
 
+    const textQuality = assessExtractedTextQuality(extractedText);
+    if (!textQuality.analyzable) {
+      console.warn('[Analyze] PDF text quality too weak for analysis:', {
+        reason: textQuality.reason,
+        textLength: extractedText.length,
+        wordsFound,
+        fileName: file.name,
+      });
+      return errorResponse("LOW_QUALITY_TEXT", LOW_QUALITY_TEXT_MESSAGE, 422);
+    }
+
     // =========================
     // 6. AI ANALYSIS (SAFE)
     // =========================
@@ -391,7 +317,7 @@ async function _handleAnalyze(request) {
 
       // Parse AI response into structured format
       try {
-        analysisResult = parseAnalysisResponse(aiResponse);
+        analysisResult = parseAnalysisResponse(aiResponse, textToAnalyze);
       } catch (parseErr) {
         console.error('[Analyze] parseAnalysisResponse failed:', parseErr?.stack || parseErr);
         return errorResponse("PROCESSING_FAILED", "Analysis could not be completed - please try again", 502);
@@ -493,86 +419,4 @@ async function _handleAnalyze(request) {
     console.error('[Analyze] UNHANDLED ERROR in POST /api/analyze:', err?.stack || err);
     return errorResponse("PROCESSING_FAILED", "An unexpected error occurred during analysis", 500);
   }
-}
-
-function parseAnalysisResponse(aiResponse) {
-  const maxResponseLength = 80000;
-  const text = aiResponse.length > maxResponseLength
-    ? aiResponse.slice(0, maxResponseLength)
-    : aiResponse;
-
-  // Strip markdown code fences if the model wrapped the JSON
-  const cleaned = text
-    .replace(/^```(?:json)?\s*/i, '')
-    .replace(/\s*```\s*$/, '')
-    .trim();
-
-  try {
-    const parsed = JSON.parse(cleaned);
-    return {
-      reportType: parsed.reportType || 'Unknown',
-      summary: {
-        overallAssessment: parsed.summary?.overallAssessment || 'Analysis completed',
-        potentialIssues: typeof parsed.summary?.potentialIssues === 'number' ? parsed.summary.potentialIssues : (parsed.findings?.length || 0),
-        highPriorityItems: typeof parsed.summary?.highPriorityItems === 'number' ? parsed.summary.highPriorityItems : (parsed.findings?.filter(f => f.severity === 'high').length || 0),
-        reportDate: parsed.summary?.reportDate || null,
-      },
-      findings: (parsed.findings || []).slice(0, 30).map((f, i) => ({
-        id: f.id || `finding-${i}`,
-        type: f.type || 'accuracy',
-        severity: f.severity || 'medium',
-        account: f.account || 'Unknown Account',
-        issue: f.issue || '',
-        statute: f.statute || '',
-        recommendation: f.recommendation || '',
-        reasoning: f.reasoning || '',
-        successLikelihood: f.successLikelihood || 'Moderate',
-      })),
-      positiveFactors: (parsed.positiveFactors || []).slice(0, 15),
-      crossBureauInconsistencies: (parsed.crossBureauInconsistencies || []).slice(0, 10).map(c => ({
-        item: c.item || '',
-        details: c.details || '',
-      })),
-      personalInfo: parsed.personalInfo || {},
-      actionPlan: (parsed.actionPlan || []).slice(0, 10),
-    };
-  } catch (jsonErr) {
-    console.warn('[Analyze] JSON parse failed, falling back to text parsing:', jsonErr.message);
-    return fallbackTextParse(text);
-  }
-}
-
-function fallbackTextParse(text) {
-  const sections = text.split(/(?:SUMMARY|HIGH PRIORITY|POTENTIAL ISSUES|POSITIVE FACTORS|RECOMMENDATIONS):/i);
-  const highPriority = (text.match(/HIGH PRIORITY ITEMS?:(.*?)(?:POTENTIAL|POSITIVE|$)/is)?.[1] || '')
-    .split('\n').filter(l => l.trim()).map((l, i) => ({
-      id: `high-${i}`, type: 'accuracy', severity: 'high',
-      account: 'Credit Report', issue: l.trim(),
-      statute: 'FCRA §611', recommendation: 'Dispute this item with the credit bureau',
-      reasoning: '', successLikelihood: 'Moderate',
-    }));
-  const potential = (text.match(/POTENTIAL ISSUES:(.*?)(?:POSITIVE|RECOMMENDATIONS|$)/is)?.[1] || '')
-    .split('\n').filter(l => l.trim()).map((l, i) => ({
-      id: `potential-${i}`, type: 'potential', severity: 'medium',
-      account: 'Credit Report', issue: l.trim(),
-      statute: 'FCRA §611', recommendation: 'Review and consider disputing',
-      reasoning: '', successLikelihood: 'Possible',
-    }));
-  const positiveFactors = (text.match(/POSITIVE FACTORS:(.*?)(?:RECOMMENDATIONS|$)/is)?.[1] || '')
-    .split('\n').map(l => l.trim()).filter(Boolean).slice(0, 10);
-
-  return {
-    reportType: 'Unknown',
-    summary: {
-      overallAssessment: sections[1]?.trim() || 'Analysis completed',
-      potentialIssues: potential.length,
-      highPriorityItems: highPriority.length,
-      reportDate: null,
-    },
-    findings: [...highPriority, ...potential].slice(0, 20),
-    positiveFactors,
-    crossBureauInconsistencies: [],
-    personalInfo: {},
-    actionPlan: [],
-  };
 }

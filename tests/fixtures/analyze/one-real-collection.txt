@@ -1,0 +1,19 @@
+TransUnion Credit Report
+Report Date: 04/01/2026
+
+Account: Prime Bank Rewards Card
+Bureau: TransUnion
+Status: Open / Current
+Payment Status: Pays as agreed
+Payment History: Never late
+
+Account: ABC Collections
+Bureau: TransUnion
+Account Type: Collection account
+Original Creditor: City Medical
+Status: Collection
+Balance: $842
+Date Assigned: 02/14/2025
+Payment Status: Collection/Derogatory
+
+Public Records: None

@@ -11,13 +11,13 @@ const isPublicRoute = createRouteMatcher([
   '/terms(.*)',
   '/contact(.*)',
   '/support(.*)',
+  '/delete-account(.*)',
   '/api/stripe/webhook(.*)',
 ]);
 
 const isProtectedRoute = createRouteMatcher([
   '/dashboard(.*)',
   '/account(.*)',
-  '/delete-account(.*)',
   '/api/account(.*)',
   '/api/analyze(.*)',
   '/api/user-data(.*)',

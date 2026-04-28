@@ -195,6 +195,88 @@ describe('analyzer golden evaluator', () => {
     expect(result.cleanReport).toBe(false);
     expect(result.summary.operationalBlocks).toBe(true);
     expect(result.diagnostics.operationalBlocks.length).toBeGreaterThan(0);
+    // Diagnostics sanity: reasoningLog must explain why the report isn't
+    // clean. For an operational-only fixture, that's the operational marker.
+    expect(result.diagnostics.reasoningLog.join(' ')).toMatch(/operational|freeze|review_only/i);
+  });
+
+  test('clean report containing "Fraud Alerts: None" does not trigger operational blocker', async () => {
+    const text = readFileSync(
+      join(process.cwd(), 'tests/fixtures/analyze/clean-perfect-report.txt'),
+      'utf8'
+    );
+    const result = await runAnalyzerPipeline(text, { anthropic: await getClient(), model: 'mock' });
+    expect(result.summary.operationalBlocks).toBe(false);
+    expect(result.diagnostics.operationalBlocks).toEqual([]);
+    expect(result.summary.reportStatus).toBe('clean');
+    // No operational suppression entries should fire on a clean fixture.
+    const operationalSuppressions = result.diagnostics.suppressions.filter(
+      (s) => typeof s.reason === 'string' && s.reason.startsWith('operational_'),
+    );
+    expect(operationalSuppressions).toHaveLength(0);
+  });
+
+  test('operational LLM contextLine without safe-action phrase falls back to template default', async () => {
+    const text = readFileSync(
+      join(process.cwd(), 'tests/analyzer/fixtures/freeze-only.txt'),
+      'utf8'
+    );
+    const driftAnthropic = {
+      messages: {
+        create: async ({ messages }) => {
+          const last = messages[messages.length - 1]?.content || '';
+          const arrayMatch = last.match(/\[\s*\{[\s\S]*\}\s*\]/);
+          const items = arrayMatch ? JSON.parse(arrayMatch[0]) : [];
+          // The LLM "drifts" — returns a contextLine without a safe-action phrase.
+          const annotations = items.map((it) => ({
+            itemId: it.itemId,
+            contextLine: 'There is a freeze on this file.',
+          }));
+          return { content: [{ text: JSON.stringify(annotations) }] };
+        },
+      },
+    };
+    const result = await runAnalyzerPipeline(text, { anthropic: driftAnthropic, model: 'mock' });
+    const operational = result.reviewOnly.find((f) => f.subtype === 'operational_blocker');
+    expect(operational).toBeTruthy();
+    expect(operational.operationalGuidance.contextLine.toLowerCase()).toMatch(
+      /temporarily lift|temporarily unlock|restore it afterward/,
+    );
+    const fallback = result.diagnostics.suppressions.find(
+      (s) => s.reason === 'operational_context_line_missing_safe_phrase',
+    );
+    expect(fallback).toBeTruthy();
+  });
+
+  test('operational LLM contextLine with forbidden words falls back to template default', async () => {
+    const text = readFileSync(
+      join(process.cwd(), 'tests/analyzer/fixtures/freeze-only.txt'),
+      'utf8'
+    );
+    const dangerousAnthropic = {
+      messages: {
+        create: async ({ messages }) => {
+          const last = messages[messages.length - 1]?.content || '';
+          const arrayMatch = last.match(/\[\s*\{[\s\S]*\}\s*\]/);
+          const items = arrayMatch ? JSON.parse(arrayMatch[0]) : [];
+          const annotations = items.map((it) => ({
+            itemId: it.itemId,
+            contextLine: 'Remove this freeze permanently before applying for credit.',
+          }));
+          return { content: [{ text: JSON.stringify(annotations) }] };
+        },
+      },
+    };
+    const result = await runAnalyzerPipeline(text, { anthropic: dangerousAnthropic, model: 'mock' });
+    const operational = result.reviewOnly.find((f) => f.subtype === 'operational_blocker');
+    expect(operational).toBeTruthy();
+    expect(operational.operationalGuidance.contextLine.toLowerCase()).not.toMatch(
+      /\b(remove|removal|delete|deletion|permanent|permanently)\b/,
+    );
+    const fallback = result.diagnostics.suppressions.find(
+      (s) => s.reason === 'operational_context_line_forbidden_word',
+    );
+    expect(fallback).toBeTruthy();
   });
 
   test('hard invariant: freeze + collection keeps high_priority and adds operational review item', async () => {

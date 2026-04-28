@@ -144,4 +144,50 @@ describe('extractor — fraud / operational markers', () => {
       expect(out.fraudMarkers).toHaveLength(0);
     }
   });
+
+  // Phrase coverage matrix derived from real-world report variations.
+  // We embed each candidate line in a minimal but analyzable credit-bureau
+  // report so the pipeline doesn't short-circuit on text-quality.
+  const REPORT_HEADER = 'Experian Credit Report\nReport Date: 04/27/2026\n\nAccount: Prime Bank Rewards Card\nBureau: Experian\nStatus: Open / Current\nPayment Status: Pays as agreed\nBalance: $120\nPayment History: Never late\n\n';
+
+  const POSITIVE_PHRASES = [
+    { line: 'Security Freeze: ACTIVE on this file as of 03/14/2026', type: 'freeze' },
+    { line: 'Security Freeze Active', type: 'freeze' },
+    { line: 'Credit Freeze: Active', type: 'freeze' },
+    { line: 'Credit file is frozen', type: 'freeze' },
+    { line: 'File is frozen', type: 'freeze' },
+    { line: 'Frozen file present', type: 'freeze' },
+    { line: 'Credit Lock: Enabled', type: 'lock' },
+    { line: 'Credit report is locked', type: 'lock' },
+    { line: 'Fraud Alert: Active', type: 'fraud_alert' },
+    { line: 'Extended Fraud Alert in effect', type: 'extended_alert' },
+    { line: 'Active Duty Alert is in place', type: 'active_duty_alert' },
+  ];
+
+  for (const { line, type } of POSITIVE_PHRASES) {
+    test(`positive coverage: detects "${line}" → type=${type}`, () => {
+      const out = extractReport(`${REPORT_HEADER}${line}\n`);
+      const marker = out.fraudMarkers.find((m) => m.type === type);
+      expect(marker).toBeTruthy();
+      expect(marker.span.text.toLowerCase()).toContain(line.split(':')[0].toLowerCase().split(/\s/)[0]);
+    });
+  }
+
+  const NEGATION_PHRASES = [
+    'Fraud Alerts: None',
+    'Security Freeze: None',
+    'Credit Freeze: Not Active',
+    'Credit Lock: Not Enabled',
+    'No freeze on file',
+    'No fraud alert reported',
+    'Security Freeze - None',
+    'Consumer Statements: N/A',
+  ];
+
+  for (const line of NEGATION_PHRASES) {
+    test(`negation coverage: "${line}" produces zero fraudMarkers`, () => {
+      const out = extractReport(`${REPORT_HEADER}${line}\n`);
+      expect(out.fraudMarkers).toHaveLength(0);
+    });
+  }
 });

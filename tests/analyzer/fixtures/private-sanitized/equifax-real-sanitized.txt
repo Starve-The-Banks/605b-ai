@@ -1,0 +1,971 @@
+CREDIT REPORT
+[NAME] [NAME]
+Report Confirmation
+[NUMBER-3267]
+
+Dear [NAME] [NAME]:
+Thank you for requesting your Equifax credit report. Your credit report contains information received primarily from companies which
+have granted you credit. Great care has been taken to report this information correctly. Please help us in achieving even greater
+accuracy by reviewing all of the enclosed material carefully.
+If there are items you believe to be incorrect, you may
+•Initiate an investigation request via the Internet 24 hours a day, 7 days a week at:
+https://www.equifax.com/personal/credit-report-services/credit-dispute/
+•Please mail the dispute information to:
+Equifax Information Services LLC
+P.O. Box 740241
+Atlanta, GA 30374
+•Call us at [PHONE]
+Please note, when you provide documents, including a letter, to Equifax as part of your dispute, the documents may be submitted to one
+or more companies whose information are the subject of your dispute.
+You have the right to request and obtain a copy of your credit score. To obtain a copy of your credit score, please call our automated
+ordering system at: 1-877-SCORE-11.
+[NAME] [NAME] | Mar 15, 2025Page 2 of 44
+
+1. Summary
+Review this summary for a quick view of key information contained in your Equifax Credit Report.
+Report DateMar 15, 2025
+Credit File StatusNo fraud indicator on file
+Alert Contacts0 Records Found
+Average Account Age6 Years, 6 Months
+Length of Credit History22 Years, 10 Months
+Accounts with Negative Information4
+Oldest AccountWELLS FARGO CARD SERV (Opened May 01, 2002)
+Most Recent AccountCHIMEFIN/STRIDE BANK (Opened Nov 16, 2024)
+Credit Accounts
+Your credit report includes information about activity on your credit accounts that may affect your credit score and rating.
+Account TypeOpenWith BalanceTotal BalanceAvailableCredit LimitDebt-to-CreditPayment
+Revolving40$0$46,530$46,5300.0%$0
+Mortgage
+Installment00
+Other00
+Total40$0$46,530$46,5300.0%$0
+Other Items
+Your credit report includes your Personal Information and, if applicable, Consumer Statements, and could include other items that may
+affect your credit score and rating.
+Consumer Statements0 Statements Found
+Personal Information9 Items Found
+Inquiries69 Inquiries Found
+Most Recent InquiryCREDIT KARMA, INC Mar 13, 2025
+Public Records0 Records Found
+Collections0 Collections Found
+[NAME] [NAME] | Mar 15, 2025Page 3 of 44
+
+2. Revolving Accounts
+Revolving accounts are those that generally include a credit limit and require a minimum monthly payment, such as credit cards.
+2.1 WELLS FARGO CARD SERV (CLOSED)
+Summary
+Your debt-to-credit ratio represents the amount of credit you're using and generally makes up a percentage of your credit score. It's
+calculated by dividing an account's reported balance by its credit limit.
+Account Number: xxxxxxxxxxxx 5709 Reported Balance$0
+Account StatusPAYS_AS_AGREED Available Credit$21,000
+The tables below show up to 24 months historical data. If a table is blank, this data was not provided to Equifax.
+Payment History
+View up to 7 years of monthly payment history on this account. The numbers indicated in each month represent the number of days a
+payment was past due; the letters indicate other account events, such as bankruptcy or collections.
+YearJanFebMarAprMayJunJulAugSepOctNovDec
+2025
+2024
+2023
+2022
+2021
+2020
+2019
+[ADDRESS]
+[ADDRESS]
+COCharge-OffBIncluded in BankruptcyRRepossessionTNToo New to RateNo Data Available
+Account Details
+[NAME] [NAME] | Mar 15, 2025Page 4 of 44
+
+View detailed information about this account. Contact the creditor or lender if you have any questions about it.
+High Credit$17,161Payment ResponsibilityUNDESIGNATED
+Credit Limit$21,000Account TypeREVOLVING
+Terms FrequencyMONTHLYTerm Duration
+Balance$0Date OpenedMay 01, 2002
+Amount Past DueDate ReportedMar 11, 2025
+Actual Payment AmountDate of Last PaymentDec 2024
+Date of Last ActivityDec 2024Scheduled Payment Amount
+Months Reviewed45Delinquency First Reported
+Activity DesignatorPAID_AND_CLOSEDCreditor ClassificationUNKNOWN
+Deferred Payment Start DateCharge Off Amount
+Balloon Payment DateBalloon Payment Amount
+Loan TypeFlexible Spending Credit CardDate ClosedNov 2024
+Date of First Delinquency
+Comments
+Account closed at consumer’s request
+Contact
+WELLS FARGO CARD SERV
+CREDIT BUREAU DISPUTE RESOLUTI
+DES MOINES, IA  50306
+([PHONE]
+[NAME] [NAME] | Mar 15, 2025Page 5 of 44
+
+2.2 WELLS FARGO CARD SERV
+Summary
+Your debt-to-credit ratio represents the amount of credit you're using and generally makes up a percentage of your credit score. It's
+calculated by dividing an account's reported balance by its credit limit.
+Account Number: xxxxxxxxxxxx 9273 Reported Balance$0
+Account StatusPAYS_AS_AGREED Available Credit$20,000
+The tables below show up to 24 months historical data. If a table is blank, this data was not provided to Equifax.
+Payment History
+View up to 7 years of monthly payment history on this account. The numbers indicated in each month represent the number of days a
+payment was past due; the letters indicate other account events, such as bankruptcy or collections.
+YearJanFebMarAprMayJunJulAugSepOctNovDec
+2025
+2024
+2023
+[ADDRESS]
+[ADDRESS]
+COCharge-OffBIncluded in BankruptcyRRepossessionTNToo New to RateNo Data Available
+Account Details
+View detailed information about this account. Contact the creditor or lender if you have any questions about it.
+High Credit$8,876Payment ResponsibilityUNDESIGNATED
+Credit Limit$20,000Account TypeREVOLVING
+Terms FrequencyMONTHLYTerm Duration
+Balance$0Date OpenedDec 09, 2022
+Amount Past DueDate ReportedMar 07, 2025
+Actual Payment AmountDate of Last PaymentOct 2024
+[NAME] [NAME] | Mar 15, 2025Page 6 of 44
+
+Date of Last ActivityOct 2024Scheduled Payment Amount
+Months Reviewed26Delinquency First Reported
+Activity DesignatorCreditor ClassificationUNKNOWN
+Deferred Payment Start DateCharge Off Amount
+Balloon Payment DateBalloon Payment Amount
+Loan TypeCredit CardDate Closed
+Date of First Delinquency
+CommentsContact
+WELLS FARGO CARD SERV
+CREDIT BUREAU DISPUTE RESOLUTI
+DES MOINES, IA  50306
+([PHONE]
+[NAME] [NAME] | Mar 15, 2025Page 7 of 44
+
+2.3 SIREN WSFS UNICORN
+Summary
+Your debt-to-credit ratio represents the amount of credit you're using and generally makes up a percentage of your credit score. It's
+calculated by dividing an account's reported balance by its credit limit.
+Account Number: xxxxxxxx 5512 Reported Balance$0
+Account StatusPAYS_AS_AGREED Available Credit$1,500
+The tables below show up to 24 months historical data. If a table is blank, this data was not provided to Equifax.
+Payment History
+View up to 7 years of monthly payment history on this account. The numbers indicated in each month represent the number of days a
+payment was past due; the letters indicate other account events, such as bankruptcy or collections.
+YearJanFebMarAprMayJunJulAugSepOctNovDec
+2025
+[ADDRESS]
+[ADDRESS]
+COCharge-OffBIncluded in BankruptcyRRepossessionTNToo New to RateNo Data Available
+Account Details
+View detailed information about this account. Contact the creditor or lender if you have any questions about it.
+High Credit$1,230Payment ResponsibilityINDIVIDUAL
+Credit Limit$1,500Account TypeREVOLVING
+Terms FrequencyMONTHLYTerm Duration
+Balance$0Date OpenedFeb 08, 2024
+Amount Past DueDate ReportedMar 01, 2025
+Actual Payment AmountDate of Last PaymentJan 2025
+Date of Last ActivityJan 2025Scheduled Payment Amount
+Months Reviewed12Delinquency First Reported
+[NAME] [NAME] | Mar 15, 2025Page 8 of 44
+
+Activity DesignatorCreditor ClassificationUNKNOWN
+Deferred Payment Start DateCharge Off Amount
+Balloon Payment DateBalloon Payment Amount
+Loan TypeCredit CardDate Closed
+Date of First Delinquency
+CommentsContact
+SIREN WSFS UNICORN
+ATTN UNICORN FCRA DISPUTES P O BOX 30281
+PHILADELPHIA, PA  19103
+([PHONE]
+[NAME] [NAME] | Mar 15, 2025Page 9 of 44
+
+2.4 CAPITAL ONE BANK USA NA (CLOSED)
+Summary
+Your debt-to-credit ratio represents the amount of credit you're using and generally makes up a percentage of your credit score. It's
+calculated by dividing an account's reported balance by its credit limit.
+Account Number: xxxxxxxxxxxx 4934 Reported Balance$185
+Account StatusCHARGE_OFF Available Credit$316
+The tables below show up to 24 months historical data. If a table is blank, this data was not provided to Equifax.
+Payment History
+View up to 7 years of monthly payment history on this account. The numbers indicated in each month represent the number of days a
+payment was past due; the letters indicate other account events, such as bankruptcy or collections.
+YearJanFebMarAprMayJunJulAugSepOctNovDec
+2025CO
+2024COCOCOCOCOCOCOCOCOCOCOCO
+2023COCOCOCOCOCOCOCOCOCOCOCO
+2022606090120150COCOCOCOCOCO
+[ADDRESS]
+[ADDRESS]
+COCharge-OffBIncluded in BankruptcyRRepossessionTNToo New to RateNo Data Available
+Account Details
+View detailed information about this account. Contact the creditor or lender if you have any questions about it.
+High CreditPayment ResponsibilityINDIVIDUAL
+Credit Limit$501Account TypeREVOLVING
+Terms FrequencyMONTHLYTerm Duration
+Balance$185Date OpenedAug 04, 2021
+Amount Past Due$185Date ReportedFeb 18, 2025
+[NAME] [NAME] | Mar 15, 2025Page 10 of 44
+
+Actual Payment AmountDate of Last PaymentSep 2021
+Date of Last ActivityScheduled Payment Amount
+Months Reviewed42Delinquency First ReportedJul 2022
+Activity DesignatorCLOSEDCreditor ClassificationUNKNOWN
+Deferred Payment Start DateCharge Off Amount$185
+Balloon Payment DateBalloon Payment Amount
+Loan TypeCredit CardDate Closed
+Date of First DelinquencyDec 09, 2021
+Comments
+Charged off account
+Account closed by credit grantor
+Contact
+CAPITAL ONE BANK USA NA
+[ADDRESS]
+Salt Lake City, UT  84131-1293
+([PHONE]
+[NAME] [NAME] | Mar 15, 2025Page 11 of 44
+
+2.5 CHIMEFIN/STRIDE BANK
+Summary
+Your debt-to-credit ratio represents the amount of credit you're using and generally makes up a percentage of your credit score. It's
+calculated by dividing an account's reported balance by its credit limit.
+Account Number: xxxxxxxxxxx 8806 Reported Balance$0
+Account StatusPAYS_AS_AGREED Available Credit
+The tables below show up to 24 months historical data. If a table is blank, this data was not provided to Equifax.
+Payment History
+View up to 7 years of monthly payment history on this account. The numbers indicated in each month represent the number of days a
+payment was past due; the letters indicate other account events, such as bankruptcy or collections.
+YearJanFebMarAprMayJunJulAugSepOctNovDec
+2025
+[ADDRESS]
+[ADDRESS]
+COCharge-OffBIncluded in BankruptcyRRepossessionTNToo New to RateNo Data Available
+Account Details
+View detailed information about this account. Contact the creditor or lender if you have any questions about it.
+High Credit$30Payment ResponsibilityINDIVIDUAL
+Credit LimitAccount TypeREVOLVING
+Terms FrequencyMONTHLYTerm Duration
+Balance$0Date OpenedNov 16, 2024
+Amount Past DueDate ReportedFeb 03, 2025
+Actual Payment Amount$30Date of Last PaymentJan 2025
+Date of Last ActivityJan 2025Scheduled Payment Amount
+Months Reviewed2Delinquency First Reported
+[NAME] [NAME] | Mar 15, 2025Page 12 of 44
+
+Activity DesignatorCreditor ClassificationUNKNOWN
+Deferred Payment Start DateCharge Off Amount
+Balloon Payment DateBalloon Payment Amount
+Loan TypeSecured Credit CardDate Closed
+Date of First Delinquency
+Comments
+Fixed rate
+Contact
+CHIMEFIN/STRIDE BANK
+[ADDRESS]
+ENID, OK  73702-3448
+([PHONE]
+[NAME] [NAME] | Mar 15, 2025Page 13 of 44
+
+2.6 CAPITAL ONE BANK USA NA (CLOSED)
+Summary
+Your debt-to-credit ratio represents the amount of credit you're using and generally makes up a percentage of your credit score. It's
+calculated by dividing an account's reported balance by its credit limit.
+Account Number: xxxxxxxxxxxx 3168 Reported Balance$892
+Account StatusNOT_MORE_THAN_TWO_PAYMENTS_PAST_DUE Available Credit-$92
+The tables below show up to 24 months historical data. If a table is blank, this data was not provided to Equifax.
+Payment History
+View up to 7 years of monthly payment history on this account. The numbers indicated in each month represent the number of days a
+payment was past due; the letters indicate other account events, such as bankruptcy or collections.
+YearJanFebMarAprMayJunJulAugSepOctNovDec
+2025
+[ADDRESS]
+[ADDRESS]
+COCharge-OffBIncluded in BankruptcyRRepossessionTNToo New to RateNo Data Available
+Account Details
+View detailed information about this account. Contact the creditor or lender if you have any questions about it.
+High Credit$892Payment ResponsibilityINDIVIDUAL
+Credit Limit$800Account TypeREVOLVING
+Terms FrequencyMONTHLYTerm Duration
+Balance$892Date OpenedDec 06, 2024
+Amount Past Due$25Date ReportedFeb 15, 2025
+Actual Payment AmountDate of Last Payment
+Date of Last ActivityScheduled Payment Amount$68
+Months Reviewed2Delinquency First Reported
+[NAME] [NAME] | Mar 15, 2025Page 14 of 44
+
+Activity DesignatorCLOSEDCreditor ClassificationUNKNOWN
+Deferred Payment Start DateCharge Off Amount
+Balloon Payment DateBalloon Payment Amount
+Loan TypeCredit CardDate ClosedDec 2024
+Date of First DelinquencyFeb 12, 2025
+Comments
+Account closed by credit grantor
+Contact
+CAPITAL ONE BANK USA NA
+[ADDRESS]
+Salt Lake City, UT  84131-1293
+([PHONE]
+[NAME] [NAME] | Mar 15, 2025Page 15 of 44
+
+2.7 USAA SAVINGS BANK
+Summary
+Your debt-to-credit ratio represents the amount of credit you're using and generally makes up a percentage of your credit score. It's
+calculated by dividing an account's reported balance by its credit limit.
+Account Number: xxxxxxxxxxxx 5003 Reported Balance$0
+Account StatusPAYS_AS_AGREED Available Credit$25,000
+The tables below show up to 24 months historical data. If a table is blank, this data was not provided to Equifax.
+Payment History
+View up to 7 years of monthly payment history on this account. The numbers indicated in each month represent the number of days a
+payment was past due; the letters indicate other account events, such as bankruptcy or collections.
+YearJanFebMarAprMayJunJulAugSepOctNovDec
+2025
+2024
+2023
+2022
+2021
+2020
+2019
+[ADDRESS]
+[ADDRESS]
+COCharge-OffBIncluded in BankruptcyRRepossessionTNToo New to RateNo Data Available
+Account Details
+View detailed information about this account. Contact the creditor or lender if you have any questions about it.
+High Credit$13,131Payment ResponsibilityUNDESIGNATED
+Credit Limit$25,000Account TypeREVOLVING
+[NAME] [NAME] | Mar 15, 2025Page 16 of 44
+
+Terms FrequencyMONTHLYTerm Duration
+Balance$0Date OpenedDec 27, 2011
+Amount Past DueDate ReportedFeb 16, 2025
+Actual Payment AmountDate of Last PaymentJun 2024
+Date of Last ActivityJun 2024Scheduled Payment Amount
+Months Reviewed48Delinquency First Reported
+Activity DesignatorCreditor ClassificationUNKNOWN
+Deferred Payment Start DateCharge Off Amount
+Balloon Payment DateBalloon Payment Amount
+Loan TypeFlexible Spending Credit CardDate Closed
+Date of First Delinquency
+CommentsContact
+USAA SAVINGS BANK
+[ADDRESS]
+SAN ANTONIO, TX  78265
+([PHONE]
+[NAME] [NAME] | Mar 15, 2025Page 17 of 44
+
+2.8 CAPITAL ONE BANK USA NA (CLOSED)
+Summary
+Your debt-to-credit ratio represents the amount of credit you're using and generally makes up a percentage of your credit score. It's
+calculated by dividing an account's reported balance by its credit limit.
+Account Number: xxxxxxxxxxxx 2421 Reported Balance$0
+Account StatusPAYS_AS_AGREED Available Credit$300
+The tables below show up to 24 months historical data. If a table is blank, this data was not provided to Equifax.
+Payment History
+View up to 7 years of monthly payment history on this account. The numbers indicated in each month represent the number of days a
+payment was past due; the letters indicate other account events, such as bankruptcy or collections.
+YearJanFebMarAprMayJunJulAugSepOctNovDec
+2022
+2021
+2020
+2019
+2018
+2017
+[ADDRESS]
+[ADDRESS]
+COCharge-OffBIncluded in BankruptcyRRepossessionTNToo New to RateNo Data Available
+Account Details
+View detailed information about this account. Contact the creditor or lender if you have any questions about it.
+High Credit$0Payment ResponsibilityINDIVIDUAL
+Credit Limit$300Account TypeREVOLVING
+Terms FrequencyMONTHLYTerm Duration
+[NAME] [NAME] | Mar 15, 2025Page 18 of 44
+
+Balance$0Date OpenedJun 06, 2016
+Amount Past DueDate ReportedSep 06, 2022
+Actual Payment AmountDate of Last Payment
+Date of Last ActivityScheduled Payment Amount
+Months Reviewed74Delinquency First Reported
+Activity DesignatorPAID_AND_CLOSEDCreditor ClassificationUNKNOWN
+Deferred Payment Start DateCharge Off Amount
+Balloon Payment DateBalloon Payment Amount
+Loan TypeCredit CardDate ClosedAug 2022
+Date of First Delinquency
+Comments
+Account closed by credit grantor
+Contact
+CAPITAL ONE BANK USA NA
+[ADDRESS]
+Salt Lake City, UT  84131-1293
+([PHONE]
+[NAME] [NAME] | Mar 15, 2025Page 19 of 44
+
+2.9 EXTRA (CLOSED)
+Summary
+Your debt-to-credit ratio represents the amount of credit you're using and generally makes up a percentage of your credit score. It's
+calculated by dividing an account's reported balance by its credit limit.
+Account Number: xxxxx Reported Balance$0
+Account StatusPAYS_AS_AGREED Available Credit$900
+The tables below show up to 24 months historical data. If a table is blank, this data was not provided to Equifax.
+Payment History
+View up to 7 years of monthly payment history on this account. The numbers indicated in each month represent the number of days a
+payment was past due; the letters indicate other account events, such as bankruptcy or collections.
+YearJanFebMarAprMayJunJulAugSepOctNovDec
+2022
+[ADDRESS]
+[ADDRESS]
+COCharge-OffBIncluded in BankruptcyRRepossessionTNToo New to RateNo Data Available
+Account Details
+View detailed information about this account. Contact the creditor or lender if you have any questions about it.
+High Credit$40Payment ResponsibilityINDIVIDUAL
+Credit Limit$900Account TypeREVOLVING
+Terms FrequencyMONTHLYTerm Duration
+Balance$0Date OpenedMar 23, 2021
+Amount Past DueDate ReportedMay 31, 2022
+Actual Payment AmountDate of Last PaymentSep 2021
+Date of Last ActivitySep 2021Scheduled Payment Amount
+Months Reviewed14Delinquency First Reported
+[NAME] [NAME] | Mar 15, 2025Page 20 of 44
+
+Activity DesignatorPAID_AND_CLOSEDCreditor ClassificationUNKNOWN
+Deferred Payment Start DateCharge Off Amount
+Balloon Payment DateBalloon Payment Amount
+Loan TypeLine of CreditDate ClosedApr 2022
+Date of First Delinquency
+Comments
+Account closed due to inactivity
+Contact
+EXTRA
+[ADDRESS]
+LOS ANGELES, CA  90012-4238
+([PHONE]
+[NAME] [NAME] | Mar 15, 2025Page 21 of 44
+
+2.10 USAA SAVINGS BANK (CLOSED)
+Summary
+Your debt-to-credit ratio represents the amount of credit you're using and generally makes up a percentage of your credit score. It's
+calculated by dividing an account's reported balance by its credit limit.
+Account Number: xxxxxxxxxxxx 2098 Reported Balance$0
+Account StatusPAYS_AS_AGREED Available Credit$1,500
+The tables below show up to 24 months historical data. If a table is blank, this data was not provided to Equifax.
+Payment History
+View up to 7 years of monthly payment history on this account. The numbers indicated in each month represent the number of days a
+payment was past due; the letters indicate other account events, such as bankruptcy or collections.
+YearJanFebMarAprMayJunJulAugSepOctNovDec
+2021
+2020
+2019
+2018
+2017
+2016
+2015
+[ADDRESS]
+[ADDRESS]
+COCharge-OffBIncluded in BankruptcyRRepossessionTNToo New to RateNo Data Available
+Account Details
+View detailed information about this account. Contact the creditor or lender if you have any questions about it.
+High Credit$1,713Payment ResponsibilityINDIVIDUAL
+Credit Limit$1,500Account TypeREVOLVING
+[NAME] [NAME] | Mar 15, 2025Page 22 of 44
+
+Terms FrequencyMONTHLYTerm Duration
+Balance$0Date OpenedOct 01, 2013
+Amount Past DueDate ReportedJul 18, 2021
+Actual Payment Amount$200Date of Last PaymentOct 2017
+Date of Last ActivityOct 2017Scheduled Payment Amount$0
+Months Reviewed72Delinquency First Reported
+Activity DesignatorPAID_AND_CLOSEDCreditor ClassificationUNKNOWN
+Deferred Payment Start DateCharge Off Amount
+Balloon Payment DateBalloon Payment Amount
+Loan TypeCredit CardDate ClosedJan 2017
+Date of First Delinquency
+CommentsContact
+USAA SAVINGS BANK
+[ADDRESS]
+SAN ANTONIO, TX  78265
+([PHONE]
+[NAME] [NAME] | Mar 15, 2025Page 23 of 44
+
+3. Mortgage Accounts
+Mortgage accounts are real estate loans that require payment on a monthly basis until the loan is paid off.
+You currently do not have any Mortgage Accounts in your file.
+[NAME] [NAME] | Mar 15, 2025Page 24 of 44
+
+4. Installment Accounts
+Installment accounts are loans that require payment on a monthly basis until the loan is paid off, such as auto or student loans.
+4.1 SANTANDER CONSUMER USA (CLOSED)
+Summary
+Your debt-to-credit ratio represents the amount of credit you're using and generally makes up a percentage of your credit score. It's
+calculated by dividing an account's reported balance by its credit limit.
+Account Number: xxxxxxxxxxxxx 1000 Reported Balance$3,649
+Account StatusCHARGE_OFF Available Credit
+The tables below show up to 24 months historical data. If a table is blank, this data was not provided to Equifax.
+Payment History
+View up to 7 years of monthly payment history on this account. The numbers indicated in each month represent the number of days a
+payment was past due; the letters indicate other account events, such as bankruptcy or collections.
+YearJanFebMarAprMayJunJulAugSepOctNovDec
+2022COCOCO
+2021COCOCOCOCOCOCOCO
+2020COCOCOCOCOCOCOCOCOCOCO
+2019COCOCOCOCOCOCOCOCOCOCOCO
+20186090COCOCOCO
+Paid on Time3030 Days Past Due6060 Days Past Due9090 Days Past Due120120 Days Past Due
+[ADDRESS]
+COCharge-OffBIncluded in BankruptcyRRepossessionTNToo New to RateNo Data Available
+Account Details
+View detailed information about this account. Contact the creditor or lender if you have any questions about it.
+High CreditPayment ResponsibilityINDIVIDUAL
+Credit LimitAccount TypeINSTALLMENT
+[NAME] [NAME] | Mar 15, 2025Page 25 of 44
+
+Terms FrequencyMONTHLYTerm Duration54 MONTHS
+Balance$3,649Date OpenedApr 12, 2018
+Amount Past Due$3,649Date ReportedApr 30, 2022
+Actual Payment AmountDate of Last PaymentJan 2019
+Date of Last ActivityScheduled Payment Amount
+Months Reviewed43Delinquency First ReportedJun 2018
+Activity DesignatorCreditor ClassificationUNKNOWN
+Deferred Payment Start DateCharge Off Amount$22,118
+Balloon Payment DateBalloon Payment Amount
+Loan TypeAutoDate Closed
+Date of First DelinquencyJun 2018
+Comments
+Charged off account
+Contact
+SANTANDER CONSUMER USA
+REPORTING DISPUTES PO BOX 961211
+FORT WORTH, TX  76161
+([PHONE]
+[NAME] [NAME] | Mar 15, 2025Page 26 of 44
+
+5. Other Accounts
+Other accounts are those that are not already identified as Revolving, Mortgage or Installment Accounts such as child support
+obligations or rental agreements.
+5.1 JEFFERSON CAPITAL LLC (CLOSED)
+Summary
+Your debt-to-credit ratio represents the amount of credit you're using and generally makes up a percentage of your credit score. It's
+calculated by dividing an account's reported balance by its credit limit.
+Account Number: xxxxxx 5926 Reported Balance$926
+Account StatusCOLLECTION Available Credit
+The tables below show up to 24 months historical data. If a table is blank, this data was not provided to Equifax.
+Payment History
+View up to 7 years of monthly payment history on this account. The numbers indicated in each month represent the number of days a
+payment was past due; the letters indicate other account events, such as bankruptcy or collections.
+YearJanFebMarAprMayJunJulAugSepOctNovDec
+2025C
+2024CCCCCCCCCCCC
+2023CCCCCCCCCCCC
+2022C
+[ADDRESS]
+[ADDRESS]
+COCharge-OffBIncluded in BankruptcyRRepossessionTNToo New to RateNo Data Available
+Account Details
+View detailed information about this account. Contact the creditor or lender if you have any questions about it.
+High Credit$926Payment ResponsibilityINDIVIDUAL
+Credit LimitAccount TypeOTHER
+[NAME] [NAME] | Mar 15, 2025Page 27 of 44
+
+Terms FrequencyUNKNOWNTerm Duration
+Balance$926Date OpenedJun 21, 2021
+Amount Past Due$926Date ReportedMar 01, 2025
+Actual Payment AmountDate of Last Payment
+Date of Last ActivityScheduled Payment Amount
+Months Reviewed41Delinquency First ReportedOct 2021
+Activity DesignatorCreditor ClassificationFINANCIAL
+Deferred Payment Start DateCharge Off Amount
+Balloon Payment DateBalloon Payment Amount
+Loan TypeDebt Buyer AccountDate Closed
+Date of First DelinquencyJun 04, 2018
+Comments
+Consumer disputes this account information
+Collection account
+Contact
+JEFFERSON CAPITAL LLC
+[ADDRESS]
+Saint Cloud, MN  56303-2198
+([PHONE]
+[NAME] [NAME] | Mar 15, 2025Page 28 of 44
+
+6. Consumer Statements
+Consumer Statements are explanations of up to 100 words you can attach to your credit file to provide more information on an item you
+may disagree with or would like to provide details on. Consumer statements are voluntary and have no impact on your credit score.
+You currently do not have any Consumer Statements in your file.
+[NAME] [NAME] | Mar 15, 2025Page 29 of 44
+
+7. Personal Information
+Creditors use your personal information primarily to identify you. This information has no impact on your credit score.
+Identification
+Identification is the information in your credit file that indicates your current identification as reported to Equifax. It does not affect your
+credit score or rating.
+Name: [NAME]
+Formerly known [NAME]  [NAME] 
+Social Security Number: [SSN]
+Age or Date of Birth: [DOB]
+Other Identification
+You currently do not have any Other Identifications in your file.
+Alert Contact Information
+You currently do not have any Alert Contacts in your file.
+Contact Information
+Contact information is the information in your credit file that indicates your former and current addresses as reported to Equifax. It does
+not affect your credit score or rating.
+AddressStatusDate Reported
+[ADDRESS]
+OCEANSIDE, CA  92054
+CurrentMar 07, 2025
+[ADDRESS]
+SAN DIEGO, CA  92108
+FormerSep 08, 2022
+[ADDRESS]
+COLUMBUS, OH  43215
+FormerSep 26, 2019
+[ADDRESS]
+IOWA CITY, IA  52240
+FormerSep 08, 2017
+[ADDRESS]
+IOWA CITY, IA  52246
+FormerNov 20, 2010
+[ADDRESS]
+IOWA CITY, IA  52245
+FormerNov 20, 2010
+[NAME] [NAME] | Mar 15, 2025Page 30 of 44
+
+Employment History
+Employment history is the information in your credit file that indicates your current and former employment as reported to Equifax. It
+does not affect your credit score or rating.
+CompanyOccupation
+UNEMPLOYED
+[NAME] [NAME] | Mar 15, 2025Page 31 of 44
+
+8. Inquiries
+A request for your credit history is called an inquiry. There are two types of inquiries - those that may impact your credit rating/score and
+those that do not.
+Hard Inquiries
+Inquiries that may impact your credit rating/score
+These are inquiries made by companies with whom you have applied for a loan or credit. They may remain on your file up to 2 years.
+DateCompanyRequest Originator
+Nov 17, 2024CAPITAL ONE BANK USA NA
+[ADDRESS]
+Richmond, VA  23238-1119
+([PHONE]
+Oct 24, 2024CCF INTERMEDIATE HOLDINGS LLC
+5165 EMERALD PKWY
+DUBLIN, OH  43017
+([PHONE]
+Feb 26, 2024CAPITAL ONE BANK USA NA
+[ADDRESS]
+Richmond, VA  23238-1119
+([PHONE]
+Jan 23, 2024US BANCORP
+[ADDRESS]
+FARGO, ND  58125
+Jan 23, 2024CAPITAL ONE BANK USA NA
+[ADDRESS]
+Richmond, VA  23238-1119
+([PHONE]
+Soft Inquiries
+Inquiries that do not impact your credit rating/score
+These are inquiries, for example, from companies making promotional offers of credit, periodic account reviews by an existing creditor
+or your own requests to check your credit file. They may remain on your file for up to 2 years.
+DateCompanyRequest OriginatorDescription
+[NAME] [NAME] | Mar 15, 2025Page 32 of 44
+
+Mar 13, 2025CREDIT KARMA, INCDirect to Consumer Report
+Feb 19, 2025CAPITAL ONE NATIONAL ASSOCAccount Review Inquiry
+Jan 28, 2025CAPITAL ONE AUTO FINANCEPromotional Inquiry
+Dec 31, 2024CAPITAL ONE AUTO FINANCEPromotional Inquiry
+Dec 28, 2024PENTAGON FCU-ALEXANDRIAPrequalification for Installment (not Mortgage,
+Auto, Home Equity)
+Dec 28, 2024EQUIFAX - DITID Report
+Dec 18, 2024FMR, LLC DBA FIDELITYDTEC Inquiry
+Dec 11, 2024FMR, LLC DBA FIDELITYDTEC Inquiry
+Dec 11, 2024CREDIT KARMA, INCDirect to Consumer Report
+Dec 02, 2024CALIFORNIA CREDIT UNIONCredit Report
+Nov 26, 2024CAPITAL ONE AUTO FINANCEPromotional Inquiry
+Nov 21, 2024KEYBANKCredit Report
+Nov 21, 2024EQUIFAX - DITID Report
+Nov 21, 2024PENTAGON FCU-ALEXANDRIAPrequalification for Installment (not Mortgage,
+Auto, Home Equity)
+Nov 21, 2024EQUIFAX CONSUMER SERVICESDirect to Consumer Report
+Nov 19, 2024CREDIT KARMA, INC.Promotional Inquiry
+Nov 17, 2024CAPITAL ONE US CARDPrequalification for Credit Card
+Nov 16, 2024WELLS FARGO BANKAccount Review Inquiry
+Nov 16, 2024CHARLES SCHWAB BANKCredit Report
+Nov 15, 2024CHARLES SCHWAB BANKCredit Report
+Nov 12, 2024CREDIT KARMA, INC.Promotional Inquiry
+Nov 05, 2024CREDIT KARMA, INC.Promotional Inquiry
+Oct 30, 2024CHARLES SCHWAB BANKCredit Report
+Oct 29, 2024CREDIT KARMA, INC.Promotional Inquiry
+Oct 22, 2024CREDIT KARMA, INC.Promotional Inquiry
+Oct 15, 2024CREDIT KARMA, INC.Promotional Inquiry
+Oct 08, 2024CREDIT KARMA, INC.Promotional Inquiry
+Oct 01, 2024CREDIT KARMA, INC.Promotional Inquiry
+Oct 01, 2024EQUIFAX CONSUMER SERVICESDirect to Consumer Report
+[NAME] [NAME] | Mar 15, 2025Page 33 of 44
+
+Oct 01, 2024EQUIFAX - DITID Report
+Sep 24, 2024CAPITAL ONE AUTO FINANCEPromotional Inquiry
+Sep 24, 2024CREDIT KARMA, INC.Promotional Inquiry
+Sep 17, 2024CREDIT KARMA, INC.Promotional Inquiry
+Sep 10, 2024CREDIT KARMA, INC.Promotional Inquiry
+Sep 03, 2024CREDIT KARMA, INC.Promotional Inquiry
+Sep 02, 2024WEBBANK/ONEMAINPromotional Inquiry
+Sep 02, 2024ONEMAINPromotional Inquiry
+Aug 27, 2024CREDIT KARMA, INC.Promotional Inquiry
+Aug 20, 2024CREDIT KARMA, INC.Promotional Inquiry
+Aug 13, 2024CREDIT KARMA, INC.Promotional Inquiry
+Aug 09, 2024EQUIFAX-INSTATOUCHDirect to Consumer Report
+Aug 09, 2024EQUIFAX INC.Direct to Consumer Report
+Aug 09, 2024EQUIFAX-INSTATOUCHDirect to Consumer Report
+Aug 09, 2024EQUIFAX - DITID Report
+Aug 09, 2024EQUIFAX INC.Direct to Consumer Report
+Aug 09, 2024FORWARD LENDING, INC.Direct to Consumer Report
+Aug 08, 2024MARINER FINANCEPrequalification for Installment (not Mortgage,
+Auto, Home Equity)
+Aug 06, 2024CREDIT KARMA, INCDirect to Consumer Report
+Aug 06, 2024CREDIT KARMA, INC.Credit Report
+Jul 16, 2024FAIR ISAAC CORP.Direct to Consumer Report
+Jul 10, 2024EQUIFAX - DITID Report
+Jul 10, 2024EQUIFAX INC.Direct to Consumer Report
+Jul 10, 2024EQUIFAX-INSTATOUCHDirect to Consumer Report
+Jul 07, 2024CREDIT KARMA, INCDirect to Consumer Report
+Jul 04, 2024EQUIFAX CONSUMER SERVICESDirect to Consumer Report
+Jul 03, 2024CREDIT KARMA, INCDirect to Consumer Report
+Jun 30, 2024EQUIFAX - DITID Report
+Jun 24, 2024ONEMAINPromotional Inquiry
+Jun 20, 2024CAPITAL ONE NATIONAL ASSOCAccount Review Inquiry
+[NAME] [NAME] | Mar 15, 2025Page 34 of 44
+
+Jun 11, 2024CREDIT KARMA, INCDirect to Consumer Report
+May 08, 2024CREDIT KARMA, INCDirect to Consumer Report
+Apr 15, 2024ONEMAINPromotional Inquiry
+Mar 03, 2024MARINER FINANCEDirect to Consumer Report
+Jan 10, 2024EQUIFAXCredit Report
+[NAME] [NAME] | Mar 15, 2025Page 35 of 44
+
+9. Public Records
+This section includes public record items Equifax obtained from local, state and federal courts through a third party vendor, LexisNexis.
+They can be contacted at: https://equifaxconsumers.lexisnexis.com
+LexisNexis Consumer Center
+P.O. Box 105615
+Atlanta, GA 30348-5108
+Bankruptcies
+Bankruptcies are a legal status granted by a federal court that indicates you are unable to pay off outstanding debt. Bankruptcies stay
+on your credit report for up to 10 years, depending on the chapter of bankruptcy you file for. They generally have a negative impact on
+your credit score.
+You currently do not have any Bankruptcies in your file.
+Judgments
+Judgments are a legal status granted by a court that indicates you must pay back an outstanding debt. Judgments stay on your credit
+report up to 7 years from the date filed and generally have a negative impact on your credit score.
+You currently do not have any Judgments in your file.
+Liens
+A lien is a legal claim on an asset, and Equifax only collects tax related liens. Liens stay on your credit report up to 10 years and
+generally have a negative impact on your credit score.
+You currently do not have any Liens in your file.
+[NAME] [NAME] | Mar 15, 2025Page 36 of 44
+
+10. Collections
+Collections are accounts with outstanding debt that have been placed by a creditor with a collection agency. Collections stay on your
+credit report for up to 7 years from the date the account first became past due. They generally have a negative impact on your credit
+score.
+You currently do not have any Collections in your file.
+[NAME] [NAME] | Mar 15, 2025Page 37 of 44
+
+11. Dispute File Information
+If you believe that any of the information found on this report is incorrect, there are 3 ways to launch an investigation about the
+information in this report.
+When you file a dispute, the credit bureau you contact is required to investigate your dispute within 30 days. They will not remove
+accurate data unless it is outdated or cannot be verified.
+To initiate a dispute online please visit https://www.equifax.com/personal/credit-report-services/credit-dispute/
+To check the status or view the results of your dispute please visit https://www.equifax.com/personal/credit-report-services/credit-
+dispute/
+[NAME] [NAME] | Mar 15, 2025Page 38 of 44
+
+Para información en español, visite www.consumerfinance.gov/learnmore o escribe a la
+Consumer Financial Protection Bureau, 1700 G Street N.W., Washington, DC 20552.
+12. A Summary of Your Rights Under the Fair Credit Reporting Act
+The federal Fair Credit Reporting Act (FCRA) promotes the accuracy, fairness, and privacy of information in the files of consumer
+reporting agencies. There are many types of consumer reporting agencies, including credit bureaus and specialty agencies (such as
+agencies that sell information about check writing histories, medical records, and rental history records). Here is a summary of your
+major rights under FCRA. For more information, including information about additional rights, go to www.consumerfinance.gov/
+learnmore or write to: Consumer Financial Protection Bureau, 1700 G Street N.W., Washington, DC 20552.
+•You must be told if information in your file has been used against you. Anyone who uses a credit report or another type
+of consumer report to deny your application for credit, insurance, or employment – or to take another adverse action against
+you – must tell you, and must give you the name, address, and phone number of the agency that provided the information.
+•You have the right to know what is in your file.  You may request and obtain all the information about you in the files of a
+consumer reporting agency (your “file disclosure”). You will be required to provide proper identification, which may include your
+Social Security number: [SSN]
+oa person has taken adverse action against you because of information in your credit report;
+oyou are the victim of identity theft and place a fraud alert in your file;
+oyour file contains inaccurate information as a result of fraud;
+oyou are on public assistance;
+oyou are unemployed but expect to apply for employment within 60 days.
+In addition, all consumers are entitled to one free disclosure every 12 months upon request from each nationwide credit bureau and
+from nationwide specialty consumer reporting agencies. See www.consumerfinance.gov/learnmore for additional information.
+•You have the right to ask for a credit score.  Credit scores are numerical summaries of your credit-worthiness based on
+information from credit bureaus. You may request a credit score from consumer reporting agencies that create scores or
+distribute scores used in residential real property loans, but you will have to pay for it. In some mortgage transactions, you will
+receive credit score information for free from the mortgage lender.
+•You have the right to dispute incomplete or inaccurate information.If you identify information in your file that is incomplete
+or inaccurate, and report it to the consumer reporting agency, the agency must investigate unless your dispute is frivolous. See
+www.consumerfinance.gov/learnmore for an explanation of dispute procedures.
+•Consumer reporting agencies must correct or delete inaccurate, incomplete, or unverifiable information. Inaccurate,
+incomplete, or unverifiable information must be removed or corrected, usually within 30 days. However, a consumer reporting
+agency may continue to report information it has verified as accurate.
+•Consumer reporting agencies may not report outdated negative information. In most cases, a consumer reporting
+agency may not report negative information that is more than seven years old, or bankruptcies that are more than 10 years old.
+•Access to your file is limited. A consumer reporting agency may provide information about you only to people with a valid
+need – usually to consider an application with a creditor, insurer, employer, landlord, or other business. The FCRA specifies
+those with a valid need for access.
+•You must give your consent for reports to be provided to employers.A consumer reporting agency may not give out
+information about you to your employer, or a potential employer, without your written consent given to the employer. Written
+consent generally is not required in the trucking industry. For more information, go to www.consumerfinance.gov/learnmore.
+•You may limit “prescreened” offers of credit and insurance you get based on information in your credit report.
+Unsolicited “prescreened” offers for credit and insurance must include a toll-free phone number you can call if you choose to
+remove your name and address form the lists these offers are based on. You may opt out with the nationwide credit bureaus at
+1-888-5-OPTOUT ([PHONE]).
+[NAME] [NAME] | Mar 15, 2025Page 39 of 44
+
+•The following FCRA right applies with respect to nationwide consumer reporting agencies:
+CONSUMERS HAVE THE RIGHT TO OBTAIN A SECURITY FREEZE
+You have a right to place a “security freeze” on your credit report, which will prohibit a consumer reporting agency
+from releasing information in your credit report without your express authorization. The security freeze is designed to
+prevent credit, loans, and services from being approved in your name without your consent. However, you should be aware
+that using a security freeze to take control over who gets access to the personal and financial information in your credit report
+may delay, interfere with, or prohibit the timely approval of any subsequent request or application you make regarding a new
+loan, credit, mortgage, or any other account involving the extension of credit.
+As an alternative to a security freeze, you have the right to place an initial or extended fraud alert on your credit file at no
+cost. An initial fraud alert is a 1-year alert that is placed on a consumer’s credit file. Upon seeing a fraud alert display on a
+consumer’s credit file, a business is required to take steps to verify the consumer’s identity before extending new credit. If you
+are a victim of identity theft, you are entitled to an extended fraud alert, which is a fraud alert lasting 7 years.
+A security freeze does not apply to a person or entity, or its affiliates, or collection agencies acting on behalf of the person or
+entity, with which you have an existing account that requests information in your credit report for the purposes of reviewing
+or collecting the account. Reviewing the account includes activities related to account maintenance, monitoring, credit line
+increases, and account upgrades and enhancements.
+•You may seek damages from violators. If a consumer reporting agency, or, in some cases, a user of consumer reports or a
+furnisher of information to a consumer reporting agency violates the FCRA, you may be able to sue in state or federal court.
+•Identity theft victims and active duty military personnel have additional rights. For more information,
+www.consumerfinance.gov/learnmore
+States may enforce the FCRA, and many states have their own consumer reporting laws. In
+some cases, you may have more rights under state law. For more information, contact your
+state or local consumer protection agency or your state Attorney General. For information
+about your federal rights, contact (see next page):
+[NAME] [NAME] | Mar 15, 2025Page 40 of 44
+
+TYPE OF BUSINESS:CONTACT:
+1.a. Banks, savings associations, and credit unions with total assets of
+over $10 billion and their affiliates
+b. Such affiliates that are not banks, savings associations, or credit
+unions also should list, in addition to the CFPB:
+a.Consumer Financial Protection Bureau
+[ADDRESS]
+Washington, DC 20552
+b.Federal Trade Commission
+Consumer Response Center
+[ADDRESS]
+Washington, DC 20580
+([PHONE]
+2.To the extent not included in item 1 above:
+a.National banks, federal savings associations, and federal branches
+and federal agencies of foreign banks
+b.State member banks, branches and agencies of foreign banks (other
+than federal branches, federal agencies, and Insured State Branches
+of Foreign Banks), commercial lending companies owned or controlled
+by foreign banks, and organizations operating under section 25 or 25A
+of the Federal Reserve Act.
+c.Nonmember Insured Banks, Insured State Branches of Foreign
+Banks, and insured state savings associations
+d.Federal Credit Unions
+a.Office of the Comptroller of the Currency
+Customer Assistance Group
+P.O. Box 53570
+Houston, TX 77052
+b.Federal Reserve Consumer Help Center
+P.O. Box 1200
+Minneapolis, MN 55480
+c.Division of Depositor and Consumer Protection
+National Center for Consumer and Depositor Assistance
+Federal Deposit Insurance Corporation
+[ADDRESS]
+Kansas City, MO 64106
+d.National Credit Union Administration
+Office of Consumer Financial Protection (OCFP)
+[ADDRESS]
+Alexandria, VA 22314
+3.Air carriersAsst. General Counsel for Office of Aviation Consumer Protection
+Department of Transportation
+[ADDRESS]
+Washington, DC 20590
+4.Creditors Subject to the Surface Transportation BoardOffice of Public Assistance, Governmental Affairs, and Compliance
+Surface Transportation Board
+[ADDRESS]
+Washington, DC 20423
+5.Creditors Subject to the Packers and Stockyards Act, 1921Nearest Packers and Stockyards Division Regional Office
+6.Small Business Investment CompaniesAssociate Administrator, Office of Capital Access
+United States Small Business Administration
+[ADDRESS]
+Washington, DC 20416
+7.Brokers and DealersSecurities and Exchange Commission
+[ADDRESS]
+Washington, DC 20549
+8.Institutions that are members of the Farm Credit SystemFarm Credit Administration
+[ADDRESS]
+McLean, VA 22102-5090
+[NAME] [NAME] | Mar 15, 2025Page 41 of 44
+
+9.Retailers, Finance Companies, and All Other Creditors Not Listed
+Above
+Federal Trade Commission
+Consumer Response Center
+[ADDRESS]
+Washington, DC 20580
+([PHONE]
+[NAME] [NAME] | Mar 15, 2025Page 42 of 44
+
+Your Rights Under State Law
+STATE OF CALIFORNIA - Consumer Credit Reporting Agencies Act
+You have a right to obtain a copy of your credit file from a consumer credit reporting agency. You may be charged a reasonable fee not
+exceeding eight dollars ($8.00). There is no fee, however, if you have been turned down for credit, employment, insurance, or a rental
+dwelling because of information in your credit report within the preceding 60 days. The consumer credit reporting agency must provide
+someone to help you interpret the information in your credit file.
+You have a right to dispute inaccurate information by contacting the consumer credit reporting agency directly. However, neither you nor
+any credit repair company or credit service organization has the right to have accurate, current, and verifiable information removed from
+your credit report. Under the Federal Fair Credit Reporting Act, the consumer credit reporting agency must remove accurate, negative
+information from your report only if it is over seven (7) years old. Bankruptcy information can be reported for ten (10) years.
+If you have notified a consumer credit reporting agency in writing that you dispute the accuracy of information in your file, the consumer
+credit reporting agency must then, within 30 business days, reinvestigate and modify or remove inaccurate information. The consumer
+credit reporting agency may not charge a fee for this service. Any pertinent information and copies of all documents you have
+concerning an error should be given to the consumer credit reporting agency.
+If reinvestigation does not resolve the dispute to your satisfaction, you may send a brief statement to the consumer credit reporting
+agency to keep in your file, explaining why you think the record is inaccurate. The consumer credit reporting agency must include your
+statement about disputed information in a report it issues about you.
+You have a right to receive a record of all inquiries relating to a credit transaction initiated in 12 months preceding your request. This
+record shall include the recipients of any consumer credit report.
+[NAME]
+You have a right to place a "security alert" in your credit report, which will warn anyone who receives information in your credit report
+that your identity may have been used without your consent. Recipients of your credit report are required to take reasonable steps,
+including contacting you at the telephone number you may provide with your security alert, to verify your identity prior to lending money,
+extending credit, or completing the purchase, lease, or rental of goods or services. The security alert may prevent credit, loans, and
+services from being approved in your name without your consent. However, you should be aware that taking advantage of this right may
+delay or interfere with the timely approval of any subsequent request or application you make regarding a new loan, credit, mortgage, or
+cellular phone or other new account, including an extension of credit at point of sale. If you place a security alert on your credit report,
+you have a right to obtain a free copy of your credit report at the time the initial one year security alert period expires. A security alert
+may be requested by calling the following toll-free telephone number: [PHONE].
+You have a right to bring civil action against anyone, including a consumer credit reporting agency, who improperly obtains access to a
+file, knowingly or willfully misuses file data, or fails to correct inaccurate file data.
+If you are a victim of identity theft and provide to a consumer credit reporting agency a copy of a valid police report or a valid
+investigative report made by a Department of Motor Vehicles investigator with peace officer status describing your circumstances, the
+following shall apply:
+You have a right to have any information you list on the report as allegedly fraudulent promptly blocked so that the information cannot
+be reported. The information will be unblocked only if (A) the information you provide is a material misrepresentation of the facts, (B) you
+agree that the information is blocked in error, or (C) you knowingly obtained possession of goods, services, or moneys as result of the
+blocked transactions. If blocked information is unblocked, you will be promptly notified.
+You have a right to receive, free of charge and upon request, one copy of your credit report each month for up to 12 consecutive
+months.
+If you have requested the credit file and not the credit score, you may request and obtain a credit score. The charge for the credit score
+is $7.95. To obtain a credit score from Equifax call [PHONE].
+You may also mail your request to:
+[NAME] [NAME] | Mar 15, 2025Page 43 of 44
+
+Equifax
+P.O. Box 105379
+Atlanta, GA 30348-5379
+Using any other address may delay the processing of your request. Please enclose a check for $7.95 payable to Equifax Information
+Services LLC with your request. Also include your complete name, complete address, social security number: [SSN]
+[NAME] [NAME] | Mar 15, 2025Page 44 of 44

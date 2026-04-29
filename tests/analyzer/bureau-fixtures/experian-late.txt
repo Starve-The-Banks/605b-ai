@@ -1,0 +1,15 @@
+Experian Information Solutions
+Experian Credit Report
+Report Date: 04/29/2026
+
+Creditor Name: Northstar Auto Finance
+Account Number: 000000001234
+Account Type: Auto Loan
+Account Status: Open
+Pay Status: 60 days late
+Balance: $3,400
+Past Due: $240
+Date Opened: 02/01/2024
+Date Reported: 04/01/2026
+Payment History: 60 days late reported 03/2026
+Remarks: Account past due

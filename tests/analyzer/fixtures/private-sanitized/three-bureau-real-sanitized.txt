@@ -1,0 +1,818 @@
+i
+Below is your personal information as it appears in your credit file. This information includes your legal name, current
+and previous addresses, employment information and other details.
+i
+Your Credit Score is a representation of your overall credit health. Most lenders utilize some form of credit scoring to
+help determine your credit worthiness.
+Triple Bureau Credit Report
+Report Date:   8/11/2025
+Personal Profile
+ExperianTransunionEquifax
+Name: [NAME]
+Date Of Birth: [DOB]
+Current Addresses: [ADDRESS]
+[ADDRESS]
+[ADDRESS]
+[ADDRESS]
+[ADDRESS]
+[ADDRESS]
+Previous Addresses: [ADDRESS]
+[ADDRESS]
+[ADDRESS]
+[ADDRESS]
+[ADDRESS]
+[ADDRESS]
+[ADDRESS]
+[ADDRESS]
+[ADDRESS]
+[ADDRESS]
+[ADDRESS]
+[ADDRESS]
+[ADDRESS]
+[ADDRESS]
+[ADDRESS]
+[ADDRESS]
+[ADDRESS]
+[ADDRESS]
+[ADDRESS]
+[ADDRESS]
+[ADDRESS]
+[ADDRESS]
+[ADDRESS]
+[ADDRESS]
+Employer:COINSPEND
+AU FAIT INVESTMENTS
+HOME SHIELD PROTECTION
+COINSPEND
+UNEMPLOYED
+Credit Score
+ExperianTransunionEquifax
+Credit Score:[NUMBER-6592]
+Lender Rank:WeakWeakWeak
+Score Scale:300-850300-850300-850
+Score Factors
+8/11/25, 12:03 PMPrivacyGuard - Credit Gateway Classic View
+https://www.privacyguard.com/CreditGateWayLegacyView.html1/17
+
+i
+The score(s) on your PrivacyGuard credit report (using the VantageScore® 3.0 model) are provided as a tool to help
+you understand how lenders may view the data contained in your credit reports and evaluate your credit risk. We
+provide these scores solely for educational purposes. PrivacyGuard does not offer credit; delivery of these scores does
+not qualify you for any loan. The scoring model your lender uses may be different than the VantageScore® 3.0. As a
+result, the score and score factors we have delivered may show differences when compared to the score and score
+factors produced by your lender's scoring model. Please also understand that lenders use multiple sources of
+information when underwriting a loan and making lending decisions. Credit scores are just one factor that may be used
+and each lender will have different criteria they consider.
+PrivacyGuard provides informational materials along with your credit report(s) and score(s) these materials are
+educational in nature and intended to broaden your understanding of how credit scoring works. They should not be
+construed as advice in handling your financial problems or making financial decisions. If you are having trouble keeping
+up with your bill payments or experiencing other financial difficulties, please contact a non-profit credit counseling
+service for assistance. These materials are for educational purposes only.
+i
+Below is an overview of your present and past credit status including open and closed accounts and balance
+information.
+Summary By Account Type
+Experian
+Positive Factors
+You have few or no accounts that were opened recently
+Lack of sufficient relevant installment account information
+The balances on your accounts are not too high compared to loan limits
+Total of all balances on bankcard or revolving accounts is not too high
+Negative Factors
+The number of inquiries was also a factor, but effect was not significant
+You have too many collection agency accounts that are unpaid
+Too many bankcard or revolving accounts with delinquent or derogatory status
+Lack of sufficient relevant real estate account information
+Lack of sufficient credit history
+TransUnion
+Positive Factors
+You have few or no accounts that were opened recently
+Lack of sufficient relevant installment account information
+The balances on your accounts are not too high compared to loan limits
+Total of all balances on bankcard or revolving accounts is not too high
+Negative Factors
+You have too many collection agency accounts that are unpaid
+You have too many delinquent or derogatory accounts
+Lack of sufficient relevant real estate account information
+Lack of sufficient credit history
+Equifax
+Positive Factors
+You have few or no accounts that were opened recently
+Lack of sufficient relevant installment account information
+The balances on your accounts are not too high compared to loan limits
+Total of all balances on bankcard or revolving accounts is not too high
+Negative Factors
+You have too many collection agency accounts that are unpaid
+You have too many delinquent or derogatory accounts
+Lack of sufficient relevant real estate account information
+Lack of sufficient credit history
+8/11/25, 12:03 PMPrivacyGuard - Credit Gateway Classic View
+https://www.privacyguard.com/CreditGateWayLegacyView.html2/17
+
+Revolving Credit AccountsExperianTransunionEquifax
+Count10910
+Balance$1,237.00$1,237.00$1,212.00
+Payments$59.00$59.00$34.00
+Open433
+Closed667
+Deferred/Unknown000
+Installment Credit AccountsExperianTransunionEquifax
+Count000
+Balance$0.00$0.00$0.00
+Payment$0.00$0.00$0.00
+Open000
+Closed000
+Deferred/Unknown000
+Real Estate Credit AccountsExperianTransunionEquifax
+Count000
+Balance$0.00$0.00$0.00
+Payment$0.00$0.00$0.00
+Open000
+Closed000
+Deferred/Unknown000
+Open AccountsExperianTransunionEquifax
+Count433
+Balance$25.00$25.00$0.00
+Payment$25.00$25.00$0.00
+Open---
+Closed---
+Deferred/Unknown---
+Collection AccountsExperianTransunionEquifax
+Count101
+Balance$950.00$0.00$950.00
+Payment$0.00$0.00$0.00
+8/11/25, 12:03 PMPrivacyGuard - Credit Gateway Classic View
+https://www.privacyguard.com/CreditGateWayLegacyView.html3/17
+
+i
+Information on accounts you have opened in the past is displayed below.
+Open000
+Closed000
+Deferred/Unknown101
+Other AccountsExperianTransunionEquifax
+Count000
+Balance$0.00$0.00$0.00
+Payment$0.00$0.00$0.00
+Open000
+Closed000
+Deferred/Unknown000
+Account History
+Account 1ExperianTransunionEquifax
+AccountWSFS UNICORNSIREN WSFS USIREN WSFS UNICORN
+Account Holder368064XXXXXX368064XX368064XXXXXX
+Account TypeRevolvingRevolvingRevolving
+Account ConditionClosedClosedClosed
+Date Opened2/8/20242/8/20242/8/2024
+High Balance$1,230.00$1,230.00$1,230.00
+Monthly Payment$0.00$0.00$0.00
+Account Balance$0.00$0.00$0.00
+Last Reported4/9/20254/9/20255/1/2025
+Amount Past Due$0.00$0.00$0.00
+Limit$1,500.00$1,500.00$1,500.00
+[NAME]
+Grantor
+ResponsibilityIndividualIndividual AccountIndividual Account
+Past Due - 30 Days000
+Past Due - 60 Days000
+Past Due - 90 Days000
+24-Month Payment History
+MonthSONDJFMAMJJASONDJFMAMJJA
+Year232323232424242424242424242424242525252525252525
+8/11/25, 12:03 PMPrivacyGuard - Credit Gateway Classic View
+https://www.privacyguard.com/CreditGateWayLegacyView.html4/17
+
+Experian
+                                    OKOKOKOKOKOKOKOKOKOKOKOKOKOK                        
+Transunion
+                                    OKOKOKOKOKOKOKOKOKOKOKOKOK                              
+Equifax
+NANANANANAOKOKOKOKOKOKOKOKOKOKOKOKOKOKOK                        
+Account 2ExperianTransunionEquifax
+AccountWFBNA CARDWFBNA CARDWELLS FARGO CARD SER
+Account Holder414718XXXX414718XXXXXX414718XXXXXXXXXX
+Account TypeRevolvingRevolvingRevolving
+Account ConditionOpenOpenOpen
+Date Opened12/9/202212/9/202212/9/2022
+High Balance$8,876.00$8,876.00$8,876.00
+Monthly Payment$25.00$25.00$0.00
+Account Balance$25.00$25.00$0.00
+Last Reported7/8/20257/8/20258/8/2025
+Amount Past Due$0.00$0.00$0.00
+Limit$20,000.00$20,000.00$20,000.00
+[NAME]
+ResponsibilityAuthorized UserAuthorized AccountAuthorized User
+Past Due - 30 Days000
+Past Due - 60 Days000
+Past Due - 90 Days000
+24-Month Payment History
+MonthSONDJFMAMJJASONDJFMAMJJA
+Year232323232424242424242424242424242525252525252525
+Experian
+OKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOK      
+Transunion
+OKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOK            
+Equifax
+OKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOK      
+Account 3ExperianTransunionEquifax
+AccountWFBNA CARDWFBNA CARDWELLS FARGO CARD SER
+Account Holder414718XXXX414718XXXXXX414718XXXXXXXXXX
+OKCurrent3030 Days Late6060 Days Late9090 Days Late120120 Days Late150
+150 Days
+Late
+180180 Days LatePPPayment PlanRF
+Reposession
+Foreclosure
+CO
+Collection
+Charge Off
+NGNegativeNANot Available
+OKCurrent3030 Days Late6060 Days Late9090 Days Late120120 Days Late150
+150 Days
+Late
+180180 Days LatePPPayment PlanRF
+Reposession
+Foreclosure
+CO
+Collection
+Charge Off
+NGNegativeNANot Available
+8/11/25, 12:03 PMPrivacyGuard - Credit Gateway Classic View
+https://www.privacyguard.com/CreditGateWayLegacyView.html5/17
+
+Account TypeRevolvingRevolvingRevolving
+Account ConditionClosedClosedClosed
+Date Opened5/1/20025/1/20025/1/2002
+High Balance$17,161.00$17,161.00$17,161.00
+Monthly Payment$0.00$0.00$0.00
+Account Balance$0.00$0.00$0.00
+Last Reported12/3/202412/3/20244/10/2025
+Amount Past Due$0.00$0.00$0.00
+Limit$21,000.00$21,000.00$21,000.00
+[NAME]
+Consumer’s Request
+Account Closed At
+Consumer’s Request
+Account Closed By
+Consumer
+ResponsibilityAuthorized UserAuthorized AccountAuthorized User
+Past Due - 30 Days000
+Past Due - 60 Days000
+Past Due - 90 Days000
+24-Month Payment History
+MonthSONDJFMAMJJASONDJFMAMJJA
+Year232323232424242424242424242424242525252525252525
+Experian
+OKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOK                                                
+Transunion
+OKOKOKOKOKOKOKOKOKOKOKOKOKOKOK                                                      
+Equifax
+OKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOK                              
+Account 4ExperianTransunionEquifax
+AccountUSAA FEDERAL SAVINGS BUSAA FSBUSAA FEDERAL SAVINGS
+Account Holder427082XX427082XXXXXX427082XXXXXXXXXX
+Account TypeRevolvingRevolvingRevolving
+Account ConditionOpenOpenOpen
+Date Opened12/27/201112/27/201112/27/2011
+High Balance$13,131.00$13,131.00$13,131.00
+Monthly Payment$0.00$0.00$0.00
+Account Balance$0.00$0.00$0.00
+Last Reported7/18/20257/18/20257/18/2025
+OKCurrent3030 Days Late6060 Days Late9090 Days Late120120 Days Late150
+150 Days
+Late
+180180 Days LatePPPayment PlanRF
+Reposession
+Foreclosure
+CO
+Collection
+Charge Off
+NGNegativeNANot Available
+8/11/25, 12:03 PMPrivacyGuard - Credit Gateway Classic View
+https://www.privacyguard.com/CreditGateWayLegacyView.html6/17
+
+Amount Past Due$0.00$0.00$0.00
+Limit$25,000.00$25,000.00$25,000.00
+[NAME]
+ResponsibilityAuthorized UserAuthorized AccountAuthorized User
+Past Due - 30 Days000
+Past Due - 60 Days000
+Past Due - 90 Days000
+24-Month Payment History
+MonthSONDJFMAMJJASONDJFMAMJJA
+Year232323232424242424242424242424242525252525252525
+Experian
+OKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOK      
+Transunion
+OKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOK            
+Equifax
+OKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOK            
+Account 5ExperianTransunionEquifax
+AccountUSAA FEDERAL SAVINGS BUSAA FSBUSAA FEDERAL SAVINGS
+Account Holder427082XX427082XXXXXX427082XXXXXXXXXX
+Account TypeRevolvingRevolvingRevolving
+Account ConditionClosedClosedClosed
+Date Opened10/1/201310/1/201310/1/2013
+High Balance$1,713.00$1,713.00$1,713.00
+Monthly Payment$0.00$0.00$0.00
+Account Balance$0.00$0.00$0.00
+Last Reported10/13/201710/29/20197/18/2021
+Amount Past Due$0.00$0.00$0.00
+Limit$1,500.00$1,500.00$1,500.00
+[NAME]
+By Grantor
+-
+ResponsibilityIndividualIndividual AccountIndividual Account
+Past Due - 30 Days000
+Past Due - 60 Days000
+Past Due - 90 Days000
+24-Month Payment History
+MonthSONDJFMAMJJASONDJFMAMJJA
+OKCurrent3030 Days Late6060 Days Late9090 Days Late120120 Days Late150
+150 Days
+Late
+180180 Days LatePPPayment PlanRF
+Reposession
+Foreclosure
+CO
+Collection
+Charge Off
+NGNegativeNANot Available
+8/11/25, 12:03 PMPrivacyGuard - Credit Gateway Classic View
+https://www.privacyguard.com/CreditGateWayLegacyView.html7/17
+
+Year232323232424242424242424242424242525252525252525
+Experian
+                                                                                                                                                
+Transunion
+                                                                                                                                                
+Equifax
+                                                                                                                                                
+Account 6ExperianTransunionEquifax
+AccountCAPITAL ONECAPITAL ONECAPITAL ONE BANK USA
+Account Holder517805XXXXXX517805XXXXXX517805XXXXXX
+Account TypeRevolvingRevolvingRevolving
+Account ConditionClosedClosedClosed
+Date Opened6/6/20166/6/20166/6/2016
+High Balance$0.00$0.00$0.00
+Monthly Payment$0.00$0.00$0.00
+Account Balance$0.00$0.00$0.00
+Last Reported8/9/20229/6/20229/6/2022
+Amount Past Due$0.00$0.00$0.00
+Limit$300.00$300.00$300.00
+[NAME]
+Grantor
+ResponsibilityIndividualIndividual AccountIndividual Account
+Past Due - 30 Days000
+Past Due - 60 Days000
+Past Due - 90 Days000
+24-Month Payment History
+MonthSONDJFMAMJJASONDJFMAMJJA
+Year232323232424242424242424242424242525252525252525
+Experian
+                                                                                                                                                
+Transunion
+                                                                                                                                                
+Equifax
+                                                                                                                                                
+Account 7ExperianTransunionEquifax
+AccountCAPITAL ONECAPITAL ONECAPITAL ONE BANK USA
+OKCurrent3030 Days Late6060 Days Late9090 Days Late120120 Days Late150
+150 Days
+Late
+180180 Days LatePPPayment PlanRF
+Reposession
+Foreclosure
+CO
+Collection
+Charge Off
+NGNegativeNANot Available
+OKCurrent3030 Days Late6060 Days Late9090 Days Late120120 Days Late150
+150 Days
+Late
+180180 Days LatePPPayment PlanRF
+Reposession
+Foreclosure
+CO
+Collection
+Charge Off
+NGNegativeNANot Available
+8/11/25, 12:03 PMPrivacyGuard - Credit Gateway Classic View
+https://www.privacyguard.com/CreditGateWayLegacyView.html8/17
+
+Account Holder517805XXXXXX517805XXXXXX517805XXXXXX
+Account TypeRevolvingRevolvingRevolving
+Account ConditionClosedClosedClosed
+Date Opened12/6/202412/6/202412/6/2024
+High Balance$1,027.00$1,027.00$1,027.00
+Monthly Payment$34.00$34.00$34.00
+Account Balance$1,027.00$1,027.00$1,027.00
+Last Reported6/18/20256/18/20256/18/2025
+Amount Past Due$251.00$251.00$251.00
+Limit$800.00$800.00$800.00
+[NAME]
+Grantor
+ResponsibilityIndividualIndividual AccountIndividual Account
+Past Due - 30 Days111
+Past Due - 60 Days111
+Past Due - 90 Days322
+24-Month Payment History
+MonthSONDJFMAMJJASONDJFMAMJJA
+Year232323232424242424242424242424242525252525252525
+Experian
+                                                                                          OKOK306090120120            
+Transunion
+                                                                                                OK306090120                  
+Equifax
+NANANANANANANANANANANANANANANAOKOK306090120                  
+Account 8ExperianTransunionEquifax
+AccountCAPITAL ONECAPITAL ONECAPITAL ONE BANK USA
+Account Holder517805XXXXXX517805XXXXXX517805XXXXXX
+Account TypeRevolvingRevolvingRevolving
+Account ConditionClosedClosedClosed
+Date Opened8/4/20218/4/20218/4/2021
+High Balance$0.00$564.00$0.00
+Monthly Payment$0.00$0.00$0.00
+Account Balance$185.00$185.00$185.00
+Last Reported6/17/20257/15/20257/15/2025
+OKCurrent3030 Days Late6060 Days Late9090 Days Late120120 Days Late150
+150 Days
+Late
+180180 Days LatePPPayment PlanRF
+Reposession
+Foreclosure
+CO
+Collection
+Charge Off
+NGNegativeNANot Available
+8/11/25, 12:03 PMPrivacyGuard - Credit Gateway Classic View
+https://www.privacyguard.com/CreditGateWayLegacyView.html9/17
+
+Amount Past Due$185.00$185.00$185.00
+Limit$501.00$501.00$501.00
+[NAME]
+Account Closed By Credit
+Grantor
+ResponsibilityIndividualIndividual AccountIndividual Account
+Past Due - 30 Days101
+Past Due - 60 Days202
+Past Due - 90 Days3039
+24-Month Payment History
+MonthSONDJFMAMJJASONDJFMAMJJA
+Year232323232424242424242424242424242525252525252525
+Experian
+NANANANANANANANANANANANANANANANANANANANANANA            
+Transunion
+                                                                                                                                                
+Equifax
+COCOCOCOCOCOCOCOCOCOCOCOCOCOCOCOCOCOCOCOCOCO            
+Account 9ExperianTransunionEquifax
+AccountCHIME/THE BANCORP BANKCHIMEFINALCHIMEFIN/STRIDE BANK
+Account Holder727465XXXXXXXXX727465XXXXX727465XXXXXXXXX
+Account TypeRevolvingRevolvingRevolving
+Account ConditionOpenOpenOpen
+Date Opened11/16/202411/16/202411/16/2024
+High Balance$285.00$285.00$30.00
+Monthly Payment$0.00$0.00$0.00
+Account Balance$0.00$0.00$0.00
+Last Reported7/4/20257/4/20255/4/2025
+Amount Past Due$0.00$0.00$0.00
+Limit$0.00$0.00$0.00
+[NAME]
+ResponsibilityIndividualIndividual AccountIndividual Account
+Past Due - 30 Days000
+Past Due - 60 Days000
+Past Due - 90 Days000
+24-Month Payment History
+OKCurrent3030 Days Late6060 Days Late9090 Days Late120120 Days Late150
+150 Days
+Late
+180180 Days LatePPPayment PlanRF
+Reposession
+Foreclosure
+CO
+Collection
+Charge Off
+NGNegativeNANot Available
+8/11/25, 12:03 PMPrivacyGuard - Credit Gateway Classic View
+https://www.privacyguard.com/CreditGateWayLegacyView.html10/17
+
+MonthSONDJFMAMJJASONDJFMAMJJA
+Year232323232424242424242424242424242525252525252525
+Experian
+                                                                                          OKOKOKOKOKOKOKOK      
+Transunion
+                                                                                          OKOKOKOKOKOKOK            
+Equifax
+NANANANANANANANANANANANANANAOKOKOKOKOKOK                        
+Account 10ExperianTransunionEquifax
+Account-MIDLAND CREDIT MANAG
+Account Holder330844XXX-330844XXX
+Account TypeCollection-Collection
+Account ConditionCollection-Collection
+Date Opened12/26/2024-12/26/2024
+High Balance$0.00-$950.00
+Monthly Payment$0.00-$0.00
+Account Balance$950.00-$950.00
+Last Reported8/2/2025-8/2/2025
+Amount Past Due$950.00-$950.00
+Limit$0.00-$0.00
+[NAME]
+ResponsibilityIndividual-Individual Account
+Past Due - 30 Days0-0
+Past Due - 60 Days0-0
+Past Due - 90 Days0-1
+24-Month Payment History
+MonthSONDJFMAMJJASONDJFMAMJJA
+Year232323232424242424242424242424242525252525252525
+Experian
+                                                                                                                                          NA
+Transunion
+                                                                                                                                                
+Equifax
+NANANANANANANANANANANANANANANAOKOKOKOKOKOKOKNA      
+Account 11ExperianTransunionEquifax
+AccountEXTRA--
+OKCurrent3030 Days Late6060 Days Late9090 Days Late120120 Days Late150
+150 Days
+Late
+180180 Days LatePPPayment PlanRF
+Reposession
+Foreclosure
+CO
+Collection
+Charge Off
+NGNegativeNANot Available
+OKCurrent3030 Days Late6060 Days Late9090 Days Late120120 Days Late150
+150 Days
+Late
+180180 Days LatePPPayment PlanRF
+Reposession
+Foreclosure
+CO
+Collection
+Charge Off
+NGNegativeNANot Available
+8/11/25, 12:03 PMPrivacyGuard - Credit Gateway Classic View
+https://www.privacyguard.com/CreditGateWayLegacyView.html11/17
+MIDLAND CREDIT MANAGEM
+
+Account Holder1XXXX--
+Account TypeRevolving--
+Account ConditionOpen--
+Date Opened3/23/2021--
+High Balance$40.00--
+Monthly Payment$0.00--
+Account Balance$0.00--
+Last Reported4/30/2022--
+Amount Past Due$0.00--
+Limit$900.00--
+[NAME]
+ResponsibilityIndividual--
+Past Due - 30 Days0--
+Past Due - 60 Days0--
+Past Due - 90 Days0--
+24-Month Payment History
+MonthSONDJFMAMJJASONDJFMAMJJA
+Year232323232424242424242424242424242525252525252525
+Experian
+                                                                                                                                                
+Transunion
+                                                                                                                                                
+Equifax
+                                                                                                                                                
+Account 12ExperianTransunionEquifax
+Account-MIDLAND CRED-
+Account Holder-330844XXX-
+Account Type-Collection-
+Account Condition-Collection-
+Date Opened-12/26/2024-
+High Balance-$0.00-
+Monthly Payment-$0.00-
+Account Balance-$950.00-
+Last Reported-8/2/2025-
+Amount Past Due-$0.00-
+OKCurrent3030 Days Late6060 Days Late9090 Days Late120120 Days Late150
+150 Days
+Late
+180180 Days LatePPPayment PlanRF
+Reposession
+Foreclosure
+CO
+Collection
+Charge Off
+NGNegativeNANot Available
+8/11/25, 12:03 PMPrivacyGuard - Credit Gateway Classic View
+https://www.privacyguard.com/CreditGateWayLegacyView.html12/17
+
+Limit-$0.00-
+[NAME]
+Responsibility-Individual Account-
+Past Due - 30 Days-0-
+Past Due - 60 Days-0-
+Past Due - 90 Days-0-
+24-Month Payment History
+MonthSONDJFMAMJJASONDJFMAMJJA
+Year232323232424242424242424242424242525252525252525
+Experian
+                                                                                                                                                
+Transunion
+                                                                                                                                                
+Equifax
+                                                                                                                                                
+Account 13ExperianTransunionEquifax
+Account--THE ALIGNED COMPANY/
+Account Holder--1XXXX
+Account Type--Revolving
+Account Condition--Closed
+Date Opened--3/23/2021
+High Balance--$40.00
+Monthly Payment--$0.00
+Account Balance--$0.00
+Last Reported--5/31/2022
+Amount Past Due--$0.00
+Limit--$900.00
+[NAME]
+Responsibility--Individual Account
+Past Due - 30 Days--0
+Past Due - 60 Days--0
+Past Due - 90 Days--0
+24-Month Payment History
+MonthSONDJFMAMJJASONDJFMAMJJA
+Year232323232424242424242424242424242525252525252525
+OKCurrent3030 Days Late6060 Days Late9090 Days Late120120 Days Late150
+150 Days
+Late
+180180 Days LatePPPayment PlanRF
+Reposession
+Foreclosure
+CO
+Collection
+Charge Off
+NGNegativeNANot Available
+8/11/25, 12:03 PMPrivacyGuard - Credit Gateway Classic View
+https://www.privacyguard.com/CreditGateWayLegacyView.html13/17
+
+i
+Information that may affect your credit rating.
+Experian
+                                                                                                                                                
+Transunion
+                                                                                                                                                
+Equifax
+                                                                                                                                                
+Derogatory Information
+Account 1ExperianTransunionEquifax
+AccountCAPITAL ONECAPITAL ONECAPITAL ONE BANK USA
+Account Holder517805XXXXXX517805XXXXXX517805XXXXXX
+Account TypeRevolvingRevolvingRevolving
+Account ConditionClosedClosedClosed
+Date Opened8/4/20218/4/20218/4/2021
+High Balance$0.00$564.00$0.00
+Monthly Payment$0.00$0.00$0.00
+Account Balance$185.00$185.00$185.00
+Last Reported6/17/20257/15/20257/15/2025
+Amount Past Due$185.00$185.00$185.00
+Limit$501.00$501.00$501.00
+[NAME]
+Account Closed By Credit
+Grantor
+ResponsibilityIndividualIndividual AccountIndividual Account
+Past Due - 30 Days101
+Past Due - 60 Days202
+Past Due - 90 Days3039
+24-Month Payment History
+MonthSONDJFMAMJJASONDJFMAMJJA
+Year232323232424242424242424242424242525252525252525
+Experian
+NANANANANANANANANANANANANANANANANANANANANANA            
+Transunion
+                                                                                                                                                
+Equifax
+COCOCOCOCOCOCOCOCOCOCOCOCOCOCOCOCOCOCOCOCOCO            
+OKCurrent3030 Days Late6060 Days Late9090 Days Late120120 Days Late150
+150 Days
+Late
+180180 Days LatePPPayment PlanRF
+Reposession
+Foreclosure
+CO
+Collection
+Charge Off
+NGNegativeNANot Available
+8/11/25, 12:03 PMPrivacyGuard - Credit Gateway Classic View
+https://www.privacyguard.com/CreditGateWayLegacyView.html14/17
+
+i
+Below are the names of people and/or organizations who have obtained a copy of your Credit Report. Inquiries such as
+these can remain on your credit file for up to two years.
+Account 2ExperianTransunionEquifax
+AccountMIDLAND CREDIT MANAGEM-MIDLAND CREDIT MANAG
+Account Holder330844XXX-330844XXX
+Account TypeCollection-Collection
+Account ConditionCollection-Collection
+Date Opened12/26/2024-12/26/2024
+High Balance$0.00-$950.00
+Monthly Payment$0.00-$0.00
+Account Balance$950.00-$950.00
+Last Reported8/2/2025-8/2/2025
+Amount Past Due$950.00-$950.00
+Limit$0.00-$0.00
+[NAME]
+ResponsibilityIndividual-Individual Account
+Past Due - 30 Days0-0
+Past Due - 60 Days0-0
+Past Due - 90 Days0-1
+24-Month Payment History
+MonthSONDJFMAMJJASONDJFMAMJJA
+Year232323232424242424242424242424242525252525252525
+Experian
+                                                                                                                                          NA
+Transunion
+                                                                                                                                                
+Equifax
+NANANANANANANANANANANANANANANAOKOKOKOKOKOKOKNA      
+Inquiries
+Creditor NameType of BusinessDate of InquiryCredit Bureau
+CREDIT ONE BANK NABank Credit Cards4/17/2025Experian
+OKCurrent3030 Days Late6060 Days Late9090 Days Late120120 Days Late150
+150 Days
+Late
+180180 Days LatePPPayment PlanRF
+Reposession
+Foreclosure
+CO
+Collection
+Charge Off
+NGNegativeNANot Available
+OKCurrent3030 Days Late6060 Days Late9090 Days Late120120 Days Late150
+150 Days
+Late
+180180 Days LatePPPayment PlanRF
+Reposession
+Foreclosure
+CO
+Collection
+Charge Off
+NGNegativeNANot Available
+8/11/25, 12:03 PMPrivacyGuard - Credit Gateway Classic View
+https://www.privacyguard.com/CreditGateWayLegacyView.html15/17
+
+i
+Below is an overview of your public records and can include details of bankruptcy filings, court records, tax liens and
+other monetary judgments. Public records typically remain on your Credit Report for 7 - 10 years.
+i
+The names of people and/or organizations who have obtained a copy of your credit report are listed below.
+EFFECTIV/PRIMEWAY FCUCredit Unions12/12/2024Experian
+DISCOVERCBank Credit Cards11/18/2024Experian
+CAP ONE NABank Credit Cards11/17/2024Experian
+ONEMAIN FINANCIAL SERVPersonal Loan Companies11/14/2024Experian
+NAVY FCUFinance other than personal12/28/2024Transunion
+CAPITAL ONEBanks and S&Ls11/17/2024Transunion
+ONEMAINFinance, personal11/14/2024Transunion
+CREDITONEBKBanks and S&Ls8/5/2024Transunion
+FEB/DESTINYBanks and S&Ls2/29/2024Transunion
+CREDITONEBKBanks and S&Ls1/27/2024Transunion
+CAPITAL ONE BANK USAAll Banks11/17/2024Equifax
+CCF INTERMEDIATE HOLPersonal Loans Companies10/24/2024Equifax
+CAPITAL ONE BANK USAAll Banks2/26/2024Equifax
+US BANCORPAll Banks1/23/2024Equifax
+CAPITAL ONE BANK USAAll Banks1/23/2024Equifax
+Public Information
+No Public Records Available.
+Creditor Contacts
+Creditor NameAddressPhone Number
+CREDIT ONE BANK NAPO BOX 98875
+[ADDRESS]
+([PHONE]
+EFFECTIV/PRIMEWAY FCU12811 NORTHWEST FWY
+[ADDRESS]
+([PHONE]
+DISCOVERC12 READS WAY
+[ADDRESS]
+bymailonly
+CAP ONE NAPO BOX 30281
+[ADDRESS]
+([PHONE]
+ONEMAIN FINANCIAL SERVPO BOX 1010
+[ADDRESS]
+([PHONE]
+CAPITAL ONE BANK USA15000 CAPITAL ONE DR PO# US364401
+[ADDRESS]
+([PHONE]
+CCF INTERMEDIATE HOL5165 EMERALD PKWY
+[ADDRESS]
+([PHONE]
+8/11/25, 12:03 PMPrivacyGuard - Credit Gateway Classic View
+https://www.privacyguard.com/CreditGateWayLegacyView.html16/17
+
+CAPITAL ONE BANK USA15000 CAPITAL ONE DR PO# US364401
+[ADDRESS]
+([PHONE]
+US BANCORP4325 17TH AVE SOUTHWEST FG-ND-S1AI
+[ADDRESS]
+([PHONE]
+CAPITAL ONE BANK USA15000 CAPITAL ONE DR PO# US364401
+[ADDRESS]
+([PHONE]
+8/11/25, 12:03 PMPrivacyGuard - Credit Gateway Classic View
+https://www.privacyguard.com/CreditGateWayLegacyView.html17/17

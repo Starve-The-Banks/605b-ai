@@ -1,0 +1,14 @@
+TransUnion Credit Report
+Report Date: 04/29/2026
+
+Furnisher: Regional Bank Visa
+Account Number: 12344321
+Account Type: Credit Card
+Account Status: Charged Off
+Payment Rating: Charge-off
+Current Balance: $1,340
+Amount Past Due: $1,340
+Date Opened: 04/01/2022
+Date Reported: 04/02/2026
+Payment Record: 120 days late
+Remark: Profit and loss write-off

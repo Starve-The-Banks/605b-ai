@@ -1,0 +1,26 @@
+Merged 3 Bureau Credit Report
+
+Experian
+Creditor Name: Northstar Auto Finance
+Account Type: Auto Loan
+Account Status: Open
+Pay Status: 30 days late
+Balance: $2,100
+Past Due: $150
+Payment History: 30 days late
+
+Equifax
+Account Name: Prime Bank Card
+Type: Credit Card
+Status: Open
+Payment Status: Pays as agreed
+Balance: $0
+Payment History: Never late
+
+TransUnion
+Furnisher: Regional Bank Visa
+Account Type: Credit Card
+Account Status: Charged Off
+Payment Rating: Charge-off
+Current Balance: $900
+Remark: Charged off account

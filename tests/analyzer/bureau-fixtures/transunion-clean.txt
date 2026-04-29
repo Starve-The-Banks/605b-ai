@@ -1,0 +1,14 @@
+TransUnion Credit Report
+Report Date: 04/29/2026
+
+Furnisher: Prime Rewards Bank
+Account Number: 99998888
+Account Type: Credit Card
+Account Status: Open
+Payment Rating: Current
+Current Balance: $0
+Amount Past Due: $0
+Date Opened: 09/01/2021
+Date Reported: 04/02/2026
+Payment Record: Never late
+Remark: Account in good standing

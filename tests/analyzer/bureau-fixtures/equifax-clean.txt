@@ -1,0 +1,14 @@
+Equifax Credit Report
+Report Date: 04/29/2026
+
+Account Name: Community Auto Loan
+Account Number: 88776655
+Type: Auto Loan
+Status: Closed
+Payment Status: Paid as agreed
+Balance: $0
+Past Due Amount: $0
+Date Opened: 01/11/2020
+Date Reported: 03/31/2026
+Payment History: Never late
+Comments: Closed paid account

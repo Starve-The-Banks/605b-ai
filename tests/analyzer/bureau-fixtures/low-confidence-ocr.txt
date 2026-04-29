@@ -1,0 +1,5 @@
+Experian Credit Report
+acct crdtr bal stat pay hist
+PR1M3 BNK ?? 04/?? $??? curr
+N0RTH STR ? late?? ?? balance unknown
+lines broken unreadable account details missing

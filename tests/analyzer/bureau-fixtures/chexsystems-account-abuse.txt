@@ -1,0 +1,12 @@
+Chex Systems, Inc.
+Consumer ID: 12345
+Report Date: 04/29/2026
+
+Source of Information:
+Financial Institution: Example Bank
+Reported For: Account Abuse
+Status: Closed by financial institution
+Amount Owed: $225
+Suspected Fraud: Yes
+Account Abuse: Yes
+Date Reported: 04/01/2026

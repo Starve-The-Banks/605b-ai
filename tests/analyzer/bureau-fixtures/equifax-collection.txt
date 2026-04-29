@@ -1,0 +1,13 @@
+Equifax Credit Report
+Report Date: 04/29/2026
+
+Account Name: ABC Collections
+Account Number: 444433332222
+Type: Collection
+Status: Collection
+Payment Status: Collection/Derogatory
+Balance: $780
+Past Due Amount: $780
+Date Opened: 08/01/2025
+Date Reported: 04/01/2026
+Comments: Placed for collection by original creditor

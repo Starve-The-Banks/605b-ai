@@ -1,0 +1,12 @@
+Early Warning Services
+Banking history report
+Report Date: 04/29/2026
+
+Financial Institution: Community Bank
+Account Type: Checking account
+Status: Good standing
+Unpaid Balance: $0
+Suspected Fraud: None
+Account Abuse: None
+
+Participating bank inquiry 04/01/2026 Community Bank

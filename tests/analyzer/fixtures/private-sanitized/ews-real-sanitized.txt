@@ -1,0 +1,2109 @@
+r! 
+EARLY 
+WARNING 
+5801 
+N 
+Pima Road 
+Scottsdale, 
+AZ 85250 
+[NAME] [NAME] 
+[ADDRESS]
+Oceanside, CA 92054 
+
+EARLY 
+WARNING' 
+5801 N Pima 
+Road 
+Scottsdale, AZ 85250 
+[PHONE] 
+[PHONE] 
+[EMAIL] 
+[NAME] 
+[NAME] 
+[ADDRESS]
+Oceanside, CA 92054 
+File Disclosure 
+ConsumerlD: 1361798 
+This report 
+was prepared for [NAME] 
+[NAME] on 2/9/2026. 
+Please 
+provide this Consumer ID: Number, along with 
+your Name, Social Security Number: [SSN]
+number, in any future 
+contact with 
+Early Warning. 
+Information You Provided 
+This section 
+displays the information you provided Early 
+Warning for the purpose of preparing this File 
+Disclosure. 
+Name: [NAME]
+[NAME] [NAME] 
+Address: [ADDRESS]
+[ADDRESS]
+[ADDRESS]
+Date of 
+Birth: 7/22/1987 
+SSN: [SSN]
+ID Type: 
+Driver's License 
+ID Number: F4656874 
+The 
+personal information you provide to Early Warning will only be 
+used to respond to your request for a consumer file 
+disclosure. 
+Information in Your File Disclosure 
+This file disclosure contains the information that 
+has been furnished to Early Warning by its participating 
+financial 
+institutions, which is maintained by Early Warning 
+in its databases. If you believe any information in your file 
+to be 
+inaccurate or incomplete, you may dispute 
+that information as outlined in this disclosure. 
+File Disclosure 
+©2026 Early VVarning 
+[NAME]
+owners. 
+
+Reported Information 
+The records listed in this 
+section are associated with accounts that 
+may not have been handled in a manner 
+consistent with 
+bank policy. These records may 
+negatively impact your ability to 
+open accounts. 
+Contributor: KEY BANK - QUICKSHOT 
+Name: [NAME]
+SSN: [SSN]
+SSN: [SSN]
+Phone: [PHONE] 
+Email: 
+[NAME]:[NAME]@OUTLOOKCOM 
+Address: [ADDRESS]
+92054-4118 USA 
+Date of Birth: [DOB]
+Contribution Ref #: 
+2912DDA00000000298622933430001 
+Bank Routing #: 
+[NUMBER-1039] Account #: [ACCOUNT-3430] Account Type: Primary 
+signer 
+Incident Date: 12/12/2024 
+Principal Loss: Fee Reversal: 
+Paid/UnPaid/Settled: Unpaid 
+Contribution Reason: 
+Checking Account Fraud 
+Combined Loss & Fee 
+Reversal: 
+Account Ownership 
+The following section refers to account ownership, account status, balances, and 
+associated transactions related to your bank 
+account(s). 
+Account Information 
+Bank 
+Name: [NAME]
+Bank Routing #: [NUMBER-1184] Account #: [ACCOUNT-1215] 
+Open Date: 12/5/2024 Close Date: 1/8/2025 
+Current Account Status: 
+Closed Previous Account Status: Post No Debits 
+Date of Last Status Change: 01/09/2025 
+Name: [NAME]
+Address: [ADDRESS]
+SSN: [SSN]
+Account Information 
+Bank Name: DISCOVER 
+Bank Routing #: 
+[NUMBER-0649] Account #: [ACCOUNT-1411] 
+Open Date: 07/29/2021 
+Current Account Status: 
+Present Previous Account Status: Overdrawn 
+Date of Last Status Change: 12/16/2025 
+Name: [NAME]
+Phone: [PHONE] 
+Address: [ADDRESS]
+USA 
+SSN: [SSN]
+Email Addresses: 
+[EMAIL] 
+Account Status History 
+File Disclosure 
+©2026 Early Warning Services, LLC. 
+All Rights Reserved. Confidential and proprietary. 
+Page 2 
+of 19 
+
+Status as of 12/16/2025: 
+Status as of 12/15/2025: 
+Status as of 05/28/2024: 
+Status as 
+of 11/15/2023: 
+Status as of 01/25/2022: 
+Status as of 
+11/26/2021: 
+Status as of 
+09/27/2021: 
+Status as of 08/05/2021: 
+Status as of 08/04/2021: 
+Present 
+Overdrawn 
+Present 
+Post No Debits 
+Present 
+New 
+Account 
+New 
+Account 
+New 
+Account 
+New Account 
+Return 
+Transactions 
+Tran 
+Type Date 
+Account Number: Check 
+Number Amount 
+Return 
+Reason 
+ACH 
+12/15/2025 [NUMBER-1411] 
+$300.93 
+Insufficient Funds 
+ACH 
+01/19/2024 [NUMBER-1411] 
+$0.84 
+Post No Debits 
+Transactions 
+Tran 
+Type 
+Date 
+Account Number: Check 
+Number Amount 
+Information 
+Reported By 
+ACH 12/-15/2025 
+[NUMBER-1411] 
+$300.93 
+Wells Fargo Central 
+Region 
+ACH 
+01/19/2024 
+[NUMBER-1411] 
+$0.84 
+Wells Fargo Central 
+Region 
+Account Information 
+Bank Name: FIDELITY 
+INVESTMENTS 
+Bank 
+Routing #: [NUMBER-5681] Account #: [ACCOUNT-2055] 
+Open 
+Date: 12/11/2024 Close Date: 
+04/16/2025 Consumer Removed 
+Date: 04/20/2025 
+Current Account 
+Status: New Account Previous 
+Account Status: New Account 
+Date of Last Status 
+Change: 04/10/2025 
+Name: [NAME]
+[NAME], Scott 
+Phone: [PHONE] 
+Address: [ADDRESS]
+SSN: [SSN]
+07/22/1987 
+ID #: '"   ID State:
+Email 
+Addresses: [ADDRESS]
+Status as of 04/10/2025: 
+Status as of 02/10/2025: 
+Status 
+as of 12/18/2024: 
+Status as of 12/11/2024: 
+New Account 
+New Account 
+New Account 
+New 
+Account 
+Account Status 
+History 
+Account 
+Information 
+File Disclosure 
+©2026 Early INarning Services, LLC. All 
+Rights Reserved. Confidential and proprietary. 
+Page 3 of 
+19 
+
+Bank Name: GOLDEN 1 CREDIT UNION 
+Bank Routing #: [NUMBER-5261] 
+Account #: [ACCOUNT-3483] 
+Open Date: 09/20/2021 Close Date: 
+07/11/2024 
+Current 
+Account Status: Savings Closed Previous Account Status: Savings 
+Pending Closed 
+Date of Last Status Change: 
+07/12/2024 
+Name: [NAME]
+[NAME],[NAME],Scott, 
+Phone: 
+[PHONE] 
+Address: [ADDRESS]
+SSN: [SSN]
+Email Addresses: 
+[EMAIL] 
+Account Status History 
+Status as of 
+07/12/2024: 
+Status as of 07/11/2024: 
+Status as of 07/09/2024: 
+Status as of 03/21/2022: 
+Status as of 01/18/2022: 
+Status as of 11/19/2021: 
+Status as of 09/27/2021: 
+Status as of 
+09/20/2021:,
+Savings Closed 
+Savings Pending Closed 
+Savings Post No Debits 
+Savings Present 
+Savings New Account 
+Savings New 
+Account 
+Savings New Account 
+Savings 
+New Account 
+Account Information 
+Bank Name: GOLDEN 1 CREDIT UNION 
+Bank Routing #: [NUMBER-5261] Account #: [ACCOUNT-3715] 
+Open Date: 09/20/2021 Close Date: 05/23/2024 
+Current Account Status: Closed For Cause Previous Account Status: Overdrawn 
+Date 
+of Last Status Change: 05/23/2024 
+Name: [NAME]
+[NAME],[NAME],Scott, 
+Phone: [PHONE] 
+Address: [ADDRESS]
+SSN: [SSN]
+Email Addresses: [EMAIL] 
+Status as of 
+05/23/2024: 
+Status as of 04/16/2024: 
+Status as of 
+04/08/2024: 
+Status as of 03/21/2022: 
+Status as 
+of 01/18/2022: 
+Status as of 
+11/19/2021: 
+Status as of 09/27/2021: 
+Status as of 09/20/2021: 
+Tran Type 
+ACH 
+ACH 
+ACH 
+Closed For Cause 
+Overdrawn 
+Overdrawn 
+Present 
+New 
+Account 
+New 
+Account 
+New 
+Account 
+New Account 
+Date Account 
+Number 
+05/28/2024 80573715 
+05/28/2024 80573715 
+05/20/2024 80573715 
+Account Status History 
+Return Transactions 
+File Disclosure 
+©2026 Early VVarning Services, LLC. All 
+Rights Reserved. Confidential and proprietary. 
+Check Number 
+Amount 
+$12.83 
+$4.50 
+$12.83 
+Return Reason 
+Account Closed 
+Account Closed 
+Insufficient Funds 
+Page 4 
+of 19 
+
+ACH 
+ACH 
+ACH 
+05/17/2024 
+05/14/2024 
+05/13/2024 
+80573715 
+80573715 
+80573715 
+$4.50 
+$12.83 
+$4.50 
+Insufficient Funds 
+Insufficient Funds 
+Insufficient Funds 
+Transactions 
+Tran Type 
+Date Account 
+Number Check 
+Number Amount 
+Information 
+Reported By 
+ACH 
+05/28/2024 80573715 
+$12.83 
+Golden 1 
+Credit Union 
+ACH 
+05/28/2024 80573715 
+$4.50 
+Golden 1 
+Credit Union 
+ACH 05/20/2024 
+80573715 
+$12.83 
+Golden 1 
+Credit Union 
+ACH 05/17/2024 80573715 
+$4.50 
+Golden 1 Credit Union 
+ACH 05/14/2024 80573715 
+$12.83 
+Golden 1 Credit Union 
+ACH 05/13/2024 80573715 
+$4.50 
+Golden 1 Credit Union 
+ACH 04/16/2024 80573715 
+$99.99 
+Golden 1 Credit Union 
+ACH 
+04/15/2024 80573715 
+$12.99 Golden 1 
+Credit Union 
+ACH 
+04/15/2024 80573715 
+$4.98 
+Golden 1 
+Credit Union 
+ACH 04/15/2024 80573715 
+$12.83 Golden 1 
+Credit Union 
+ACH 04/11/2024 80573715 
+$4.50 Golden 1 
+Credit Union 
+AC 04/09/2024 80573715 
+$3.99 
+Golden 1 Credit Union 
+ACH 04/08/2024 80573715 
+$8.99 
+Golden 1 Credit Union 
+ACH 
+04/08/2024 80573715 
+$99.99 
+Golden 1 Credit 
+Union 
+ACH 04/08/2024 80573715 
+$5.98 Golden 1 
+Credit Union 
+ACH 02/09/2024 80573715 
+$20.00 Golden 
+1 Credit Union 
+ACH 01/23/2024 
+80573715 
+$0.08 
+Golden 1 Credit Union 
+ACH 
+10/30/2023 80573715 
+$10.00 
+Golden 1 Credit Union 
+Account Information 
+Bank Name: MORGAN STANLEY PRIVATE BANK NA 
+Bank Routing #: [NUMBER-2691] 
+Account #: [ACCOUNT-8328] 
+Open Date: 01/01/2020 Close Date: 11/20/2023 
+Consumer Removed Date: 07/20/2025 
+Current Account Status: Savings Closed
+-Purged Previous Account Status: Savings 
+Closed 
+Date of Last Status Change: 07/18/2025 
+Name: [NAME]
+[NAME],[NAME]„ 
+Address: [ADDRESS]
+SSN: [SSN]
+ID #: '"' ID 
+State:
+Email Addresses:
+Account Status History 
+Status as of 07/18/2025: 
+Status as of 11/21/2023: 
+Status as 
+of 11/20/2023: 
+Status as of 10/30/2023: 
+Savings 
+Closed-Purged 
+Savings Closed 
+Savings Pending Closed 
+Savings 
+Present 
+Account Information 
+File Disclosure 
+C2026 Early 
+Warning Services, LLC. All Rights 
+Reserved. Confidential and proprietary. 
+Page 5 of 19 
+
+Bank Name: 
+MORGAN STANLEY 
+PRIVATE BANK NA 
+Bank Routing 
+#: [NUMBER-2691] 
+Account #: [ACCOUNT-8037] 
+Open Date: 
+12/11/2024 Close Date: 
+01/09/2025 
+Current Account Status: Savings 
+Closed Previous Account Status: Savings 
+Pending Closed 
+Date of Last Status 
+Change: 01/10/2025 
+Name: [NAME]
+[NAME],[NAME]„ 
+Address: [ADDRESS]
+Oceanside, CA 92054 USA 
+SSN: [SSN]
+Birth: 07/22/1987 
+ID #: "" 
+ID State:
+Email Addresses:
+Account Status History 
+Status as of 
+01/10/2025: 
+Status as of 
+01/09/2025: 
+Status as of 
+12/18/2024: 
+Status as 
+.of 12/11/2024: 
+Savings Closed 
+Savings Pending Closed 
+Savings New Account 
+Savings New Account 
+Account 
+Information 
+Bank Name: MORGAN STANLEY 
+PRIVATE BANK NA 
+Bank 
+Routing #: [NUMBER-2691] Account #: [ACCOUNT-8045] 
+Open Date: 12/11/2024 
+Close Date: 01/09/2025 
+Current Account Status: 
+Closed Previous Account Slatus: Pending Closed 
+Date of 
+Last Status Change: 01/10/2025 
+Name: [NAME]
+Address: [ADDRESS]
+92054 USA 
+-SSN: [SSN]
+ID #: "" ID State:
+Email Addresses:
+Status as of 01/10/2025: 
+Status as of 01/09/2025: 
+Status as of 12/18/2024: 
+Status as of 12/11/2024: 
+Closed 
+Pending Closed 
+New Account 
+New Account 
+Account Status 
+History 
+Return 
+Transactions 
+Tran Type Date 
+Account Number: Check 
+Number 
+Amount 
+Return Reason 
+Check 03/26/2025 
+[NUMBER-8045] 1 
+$600.00 
+Account Closed 
+Transactions 
+Tran Type Date Account Number: Check Number 
+Amount 
+Information 
+Reported By 
+Check 03/25/2025 [NUMBER-8045] 1 
+$600.00 
+Navy 
+Federal Credit 
+Union 
+Account Information 
+File Disclosure 
+©2026 Early 
+Warning Services, LLC. All Rights Reserved. Confidential and proprietary. 
+Page 6 of 
+19 
+
+Bank Name: 
+MORGAN STANLEY SMITH 
+BARNEY 
+Bank Routing #: 
+[NUMBER-3573] Account #: [ACCOUNT-9600] 
+Open Date; 
+12/10/2024 
+Current Account Status: 
+Savings Present 
+Previous Account 
+Status: Savings New 
+Account 
+Date of Last Status Change: 
+06/09/2025 
+Name: [NAME]
+Address: [ADDRESS]
+Freeman St Oceanside, CA 
+92054 USA 
+SSN: [SSN]
+Birth: 07/22/1987 
+ID #: "" ID 
+State:
+Email 
+Addresses: [ADDRESS]
+Account 
+Status History 
+Status as of 06/09/2025: 
+Status as of 
+04/09/2025: 
+Status as of 
+03/25/2025: 
+Status as of 02/10/2025: 
+Status as of 12/17/2024: 
+Status as of 12/11/2024: 
+Savings Present 
+Savings 
+New Account 
+Savings 
+New Account 
+New Account 
+New Account 
+New 
+Account 
+Account Information 
+Bank Name: NAVY FEDERAL CREDIT UNION 
+Bank Routing #: [NUMBER-4974] Account #: [ACCOUNT-3196] 
+Open Date: 
+12/02/2024 Close Date: 
+01/09/2026 Consumer Removed 
+Date: 01/17/2026 
+Previous 
+Account Status: Savings 
+Pending Closed 
+Current Account Status: 
+Savings Closed 
+Date of Last 
+Status Change: 01/12/2026 
+Name: [NAME]
+Phone: [PHONE] - 
+Addi'ess: 627 S 
+Freeman St Oceanside, CA 
+92054 USA 
+SS N: [SSN]
+Date of Birth: [DOB]
+ID #:F4656874 
+ID Type: 
+DRIVERS_LICENSE_US ID State: 
+CAUSA 
+ID Expire Date: 07/22/2027 
+Email Addresses: 
+[EMAIL] 
+Status as of 
+01/12/2026: 
+Status as of 01/09/2026: 
+Status as of 
+04/08/2025: 
+Status as of 
+04/01/2025: 
+Status as of 
+01/31/2025: 
+Status as of 12/09/2024: 
+Status as of 
+12/02/2024: 
+Account 
+Status History 
+Savings Closed 
+Savings 
+Pending Closed 
+Savings 
+Post No Debits 
+Savings New 
+Account 
+Savings New 
+Account 
+Savings New Account 
+Savings New 
+Account 
+Account 
+Information 
+File 
+Disclosure 
+©2026 Early VVaming Services, LLC. 
+All Rights Reserved. 
+Confidential and proprietary. 
+Page 
+7 of 19 
+
+Bank Name: NAVY 
+FEDERAL CREDIT UNION 
+Bank Routing #: 
+[NUMBER-4974] Account #: [ACCOUNT-1545] 
+Open 
+Date: 12/02/2024 Close Date: 06/09/2025 
+Consumer Removed Date: 06/22/2025 
+Current Account Status: Closed For 
+Cause-Purged Previous Account Status: 
+Closed For Cause 
+Date of Last Status 
+Change: 07/10/2025 
+Name: [NAME]
+Phone: 
+[PHONE] 
+Address: [ADDRESS]
+Oceanside, CA 92054 USA 
+SSN: [SSN]
+ID #: F4656874 
+ID Type: DRIVERS_LICENSE_US ID 
+State: CAUSA 
+ID Expire Date: 07/22/2027 
+Email Addresses: 
+[EMAIL] 
+Account Status History 
+Status as of 07/10/2025: 
+Status as of 06/09/2025: 
+Status as of 
+04/08/2025: 
+Status as of 
+04/07/2025: 
+Status as of 
+04/01/2025: 
+Status as of 
+03/17/2025: 
+Status as of 
+03/14/2025: 
+Status as of 
+03/10/2025: 
+Status 
+as of 02/26/2025: 
+Status as of 
+02/25/2025: 
+Status as of 01/31/2025: 
+Status as of 01/28/2025: 
+Status as of 01/27/2025: 
+Status as of 12/11/2024: 
+Status as of 
+12/09/2024: 
+Status as of 12/04/2024: 
+Status as of 12/03/2024: 
+Status as of 
+12/02/2024: 
+Closed For Cause-Purged 
+Closed For 
+Cause 
+Post No Debits 
+Overdrawn 
+New Account 
+New Account 
+Overdrawn 
+Overdrawn 
+New Account 
+Overdrawn 
+New Account 
+New Account 
+Overdrawn 
+New Account 
+New Account 
+Overdrawn New Account 
+New Account 
+Overdrawn New Account 
+New 
+Account 
+Return Transactions 
+Tran 
+Type 
+Date 
+Account Number: Check 
+Number 
+Amount Return Reason 
+ACH 
+03/24/2025 
+[NUMBER-1545] 
+$41.97 Insufficient Funds 
+ACH 
+03/21/2025 [NUMBER-1545] 
+$41.18 
+Insufficient Funds 
+ACH 03/18/2025 
+[NUMBER-1545] 
+$41.97 Insufficient Funds 
+ACH 
+12/09/2024 [NUMBER-1545] $500.00 Insufficient Funds 
+Transactions 
+Tran 
+Type Date 
+Account Number: Check 
+Number 
+Amount Information Reported 
+By 
+ACH 03/24/2025 
+[NUMBER-1545] 
+$41.97 Navy Federal Credit 
+Union 
+AQH 03/21/2025 
+[NUMBER-1545] $41.18 JPMorgan Chase NE 
+ACH 
+03/18/2025 
+[NUMBER-1545] $41.97 Navy Federal Credit 
+Union 
+ACH 
+03/03/2025 
+[NUMBER-1545] $5,184.15 Navy Federal Credit 
+Union 
+File 
+Disclosure 
+©2026 Early 
+INarning Services, LLC. All Rights Reserved. Confidential and 
+proprietary. 
+Page 8 of 19 
+
+ACH 
+02/27/2025 
+[NUMBER-1545] 
+$2,075.82 
+Navy 
+Federal Credit 
+Union 
+ACH 
+02/26/2025 
+[NUMBER-1545] 
+$2,127.23 
+Navy 
+Federal Credit 
+Union 
+ACH 
+02/18/2025 
+[NUMBER-1545] 
+$45.98 
+JPMorgan 
+Chase NE 
+ACH 
+02/18/2025 
+[NUMBER-1545] 
+$263.87 
+JPMorgan Chase 
+NE 
+ACH 
+02/18/2025 
+[NUMBER-1545] 
+$1,085.07 
+Navy 
+Federal Credit 
+Union 
+ACH 
+02/18/2025 
+[NUMBER-1545] 
+$181.62 
+JPMorgan Chase NE 
+ACH 
+02/14/2025 
+[NUMBER-1545] 
+$92.69 
+JPMorgan 
+Chase NE 
+ACH 
+01/09/2025 
+[NUMBER-1545] 
+$0.04 
+BMO 
+Bank N.A. 
+ACH 
+01/09/2025 
+[NUMBER-1545] 
+$0.20 
+BMO 
+Bank N.A. 
+ACH 
+12/31/2024 
+[NUMBER-1545] 
+$0.04 
+BMO 
+Bank N.A. 
+ACH 
+12/31/2024 
+[NUMBER-1545] 
+$0.20 
+BMO 
+Bank N.A. 
+ACH 
+12/09/2024 
+[NUMBER-1545] 
+$500.00 
+Navy Federal 
+Credit 
+Union 
+Account 
+Information 
+Bank 
+Name: [NAME]
+SACHS GROUP INC 
+Bank 
+Routing #: [NUMBER-5260] 
+Account #: [ACCOUNT-8604] 
+Open 
+Date: 07/29/2021 
+Current Account 
+Status: Savings 
+Dormant/Inactive 
+Previous Account 
+Status: Savings 
+Present 
+Date of 
+Last Status Change: 
+10/24/2025 
+Name: [NAME]
+Address: [ADDRESS]
+St. None Oceanside, CA 
+92054 US 
+SSN: [SSN]
+Birth: 07/22/1987 
+ID #: "" 
+ID State: 
+Email 
+Addresses: [ADDRESS]
+[EMAIL] 
+Account 
+Status History 
+Status as of 10/24/2025: 
+Status as of 
+10/30/2023: 
+Status as of 
+10/23/2023: 
+Status as 
+of 10/14/2022: 
+Status as of 09/06/2022: 
+Status as 
+of 01/26/2022: 
+Status as of 
+11/26/2021: 
+Status as of 
+09/27/2021: 
+Status as of 07/29/2021: 
+Savings 
+Dormant/Inactive 
+Savings Present 
+Savings 
+Dormant/Inactive 
+Savings Present 
+Savings 
+Dormant/Inactive 
+Savings Present 
+Savings New 
+Account 
+Savings New 
+Account 
+Savings 
+New Account 
+Account 
+Information 
+Bank 
+Name: [NAME]
+Bank 
+Routing #: [NUMBER-4269] 
+Account #: [ACCOUNT-4708] 
+Open 
+Date: 07/08/2014 
+Consumer Removed Date: 
+12/11/2017 
+Name: [NAME]
+[NAME],[NAME],S 
+Address: [ADDRESS]
+[ADDRESS]
+103 San Diego, CA 
+92108-1006 
+SSN: [SSN]
+Date of Birth: [DOB]
+Email 
+Addresses: [ADDRESS]
+[EMAIL] 
+File 
+Disclosure 
+©2026 
+Early VVaming Services, 
+LLC. All Rights Reserved. 
+Confidential and 
+proprietary. 
+Page 9 
+of 19 
+
+Account Information 
+Bank Name: USBANK 
+WESTERN 
+Bank Routing #: [NUMBER-0220] Account #: [ACCOUNT-8210] 
+Open Date: 07/13/2021 Close Date: 11/26/2021 
+Consumer Removed Date: 09/05/2023 
+Current Account Status: Savings Closed For Cause-Purged Previous Account Status: Savings Closed For Cause 
+Date of Last Status Change: 08/28/2023 
+Name: [NAME]
+[NAME],[NAME] 
+Phone: 
+[PHONE] 
+Address: [ADDRESS]
+SSN: [SSN]
+Account Status 
+History 
+Status as of 08/28/2023: 
+Status as of 11/26/2021: 
+Status as of 
+11/10/2021: 
+Status as 
+of 09/13/2021: 
+Status as of 
+07/20/2021: 
+Status 
+as of 07/13/2021: 
+Savings Closed For Cause-Purged 
+Savings Closed For Cause 
+Savings New 
+Account 
+Savings New Account 
+Savings New Account 
+Savings New Account 
+Account Information 
+Bank Name: WELLS FARGO - CALIFORNIA 
+Bank Routing #: [NUMBER-3232] Account #: [ACCOUNT-7162] 
+Open Date: 11/27/2020 Close Date: 06/17/2021 Consumer Removed Date: 03/03/2025 
+Current Account Status: Closed For Cause-Purged Previous Account Status: Closed For Cause 
+Date of Last Status Change:, 02/24/2025 
+Name: [NAME]
+Address: [ADDRESS]
+Freeman 
+St 
+Oceanside, CA 92054-4118
+SSN: [SSN]
+ID #: " ID State:
+Email Addresses: [EMAIL] 
+Status as of 02/24/2025: 
+Status as of 06/17/2021: 
+Status as of 05/26/2021: 
+Status as of 
+05/20/2021: 
+Status as of 05/14/2021: 
+Status as of 04/26/2021: 
+Status as of 04/23/2021: 
+Status as of 
+04/20/2021: 
+Status as of 04/19/2021: 
+Status as of 
+03/29/2021: 
+Date 
+Account Status Hietory 
+Closed For Cause-Purged 
+Closed For Cause 
+Present 
+New 
+Account 
+Overdrawn 
+New Account 
+Overdrawn 
+New 
+Account 
+Overdrawn 
+New Account 
+Balance 
+Balance Information 
+Interest 
+File Disclosure 
+©2026 Early Warning Services, LLC. All Rights 
+Reserved. Confidential and proprietary. 
+Page 10 of 
+19 
+
+05/25/2021 
+$2,309.23 
+$0.00 
+04/30/2021 
+$370.29 
+$0.00 
+03/31/2021 
+$2.40 
+$0.00 
+02/26/2021 
+$211.84 
+$0.00 
+01/29/2021 
+$62.73 
+$0.00 
+12/28/2020 
+($2.17) 
+$0.00 
+Account 
+Information 
+Bank Name: 
+WELLS FARGO 
+- CALIFORNIA 
+Bank Routing 
+#: [NUMBER-3232] 
+Account #: [ACCOUNT-1770] 
+Open 
+Date: 
+11/27/2020 Close 
+Date: 06/08/2021 
+Consumer 
+Removed 
+Date: 03/30/2025 
+Current Account 
+Status: Savings 
+Closed For 
+Cause-Purged 
+Previous 
+Account Status: 
+Savings Closed 
+For Cause 
+Date of 
+Last Status 
+Change: 
+03/24/2025 
+Name: [NAME]
+S [NAME] 
+Address: [ADDRESS]
+Freeman St 
+Oceanside, CA 
+92054-4118
+SSN: [SSN]
+Date of Birth: [DOB]
+ID 
+#: "" ID 
+State:
+Email 
+Addresses: [ADDRESS]
+[EMAIL] 
+Account Status 
+History 
+Status as 
+of 03/24/2025: 
+Status as of 
+06/08/2021: 
+Status as 
+of 05/26/2021: 
+Status as of 
+03/29/2021: 
+Status as 
+of 03/24/2021: 
+Status 
+as of 
+03/23/2021: 
+Date 
+Savings 
+Closed For 
+Cause-Purged 
+Savings 
+Closed For Cause 
+Savings 
+Present 
+Savings New 
+Account 
+Savings New 
+Account 
+Savings 
+Overdrawn 
+Balance 
+Balance 
+Information 
+Interest 
+06/23/2021 
+$0.00 
+$0.00 
+05/25/2021 
+$345.72 
+$0.00 
+04/30/2021 
+$17.15 
+$0.00 
+03/24/2021 
+$10.15 
+$0.00 
+02/24/2021 
+($3.85) 
+$0.00 
+12/31/2020 
+$5.00 
+$0.00 
+11/27/2020 
+$0.00 
+$0.00 
+Account Information 
+Bank 
+Name: [NAME]
+WELLS FARGO - 
+CALIFORNIA 
+Bank 
+Routing #: 
+[NUMBER-3232] Account 
+#: [ACCOUNT-0225] 
+Open 
+Date: 11/19/2024 
+Close Date: 
+12/05/2024 
+Current Account 
+Status: Closed 
+Previous Account 
+Status: 
+Pending Closed 
+Date of 
+Last Status 
+Change: 12/06/2024 
+Name: [NAME]
+[NAME] S 
+[NAME] 
+Address: [ADDRESS]
+Freeman St 
+Oceanside, CA 
+92054-4118
+SSN: [SSN]
+Date of Birth: [DOB]
+ID #: " ID 
+State:
+Email 
+Addresses: [ADDRESS]
+[EMAIL] 
+File 
+Disclosure 
+©2026 Early 
+Warning Services, LLC. 
+All Rights Reserved, 
+Confidential and 
+proprietary. 
+Page 11 01 19 
+
+rt 
+Account Status History 
+Status as of 
+12/06/2024: 
+Status as of 
+12/05/2024: 
+Status as of 
+11/26/2024: 
+Status as 
+of 11/19/2024: 
+Date 
+12/16/2024 
+11/20/2024 
+Closed 
+Pending 
+Closed 
+New Account 
+New Account 
+Balance 
+$0.00 
+$20.00 
+Balance Information 
+Interest 
+$0.00 
+$0.00 
+Scored Account 
+The following transactions were reported to Early 
+Warning by the financial institution that received /processed the check or ACH 
+transaction. 
+Bank Routing #: 
+[NUMBER-1334] 
+Account #: [ACCOUNT-6869] 
+Transactions 
+Tran. 
+Type 
+Date 
+Check # Amount Return Reason Information Reported By: 
+ACH 
+2/2/2026 
+$24.72 
+N/A Wells Fargo Central Region 
+ACH 
+1/28/2026 $20.00 N/A Wells Fargo Central Region 
+ACH 
+11/4/2025 $200.00 N/A BMO Bank N.A. 
+ACH _ 
+10/27/2025 $200.00 N/A BMO Bank N.A. 
+ACH 
+10/27/2025 $5.00 N/A Wells Fargo Central Region 
+ACH 
+10/14/2025 $0.18 N/A Wells Fargo Central Region 
+ACH 
+10/14/2025-$0.32 N/A Wells Fargo Central Region 
+ACH 
+10/14/2025 
+$0.50 
+N/A 
+Wells Fargo Central Region 
+ACH 
+4/14/2025 
+$3.00 
+N/A 
+BMO 
+Bank N.A. 
+Inquiries 
+The entities listed below received a consumer report in connection 
+with an attempt to open a new account, make a payment, 
+or obtain another service. 
+Inquiry # Inquirer Name 
+Inquirer Date 
+1 PNC 
+Bank 01/19/2026 
+2 SOH 
+01/01/2026 
+3 
+JP Morgan Chase 
+12/31/2025 
+4 SOF! 
+12/28/2025 
+5 
+Santander 
+Holdings USA formerly Sovereign 11/05/2025 
+[ADDRESS]
+Corp 04/11/2025 
+7 Goldman Sachs 
+03/26/2025 
+8 JPMC Service on 
+behalf of Sardine AL 
+02/24/2025 
+9 
+USAA 
+12/29/2024 
+10 
+Citibank 
+12/06/2024 
+11 
+Citibank 12/05/2024 
+File 
+Disclosure 
+©2026 
+Early VVarning Services, LLC. All 
+Rights Reserved. Confidential and 
+proprietary. 
+Page 12 of 19 
+
+Inquiry 
+# Inquirer Name 
+Inquirer Date 
+12 Navy Federal Credit Union 
+12/01/2024 
+13 Key Bank 
+11/22/2024 
+14 Key Bank - QuickShot 
+11/22/2024 
+15 Wells Fargo 
+Bank 11/20/2024 
+16 JP Morgan Chase 11/20/2024 
+17 
+Wells Fargo 
+11/16/2024 
+18 JP Morgan Chase 
+11/14/2024 
+19 
+USAA 
+03/09/2024 
+20 
+Credit One Bank 
+01/28/2024 
+21 
+JP Morgan 
+Chase 01/10/2024 
+File 
+Disclosure 
+©2026 
+Early VVaming Services, LLC. All Rights Reserved. Confidential and proprietary. 
+Page 13 of 19 
+co" 
+
+To Dispute 
+Inaccurate Information 
+If 
+you believe the information contained in your File Disclosure is inaccurate or 
+incomplete, you have the right to dispute such 
+information. A written dispute can be sent by mail, fax or 
+uploaded to our secure Transfer Portal and must include in 
+detail 
+the reasons for the dispute. Written 
+disputes will be submitted to the furnishing financial 
+institution for reinvestigation. To 
+avoid delays in processing, please use the 
+Dispute Checklist to ensure each item being disputed 
+includes all necessary 
+information. 
+Dispute 
+Checklist (be sure to include the 
+following items): 
+0 
+Consumer ID: Number 
+0  Description 
+of the specific information you are disputing. Such as the bank routing and account number: s, or the 
+contribution reference 
+number. 
+0  A detailed reason for disputing the information (i.e., why you believe the information is 
+inaccurate or incomplete) 
+0 Each dispute should be listed separately. 
+0 Copies of all supporting 
+documentation attached to each request. 
+Rebuttal Statement 
+If you have already disputed information contained in your file and been 
+informed by Early Warning that the information is 
+accurate and complete and will remain in Early Warning's database, you may file a 
+brief rebuttal statement setting forth why 
+you disagree with the outcome of the 
+reinvestigation. An Early Warning Consumer Services Representative can assist you 
+with the length of 
+the statement upon request. Your statement must not include the names of other 
+individuals or 
+businesses, and may not contain profanity. 
+Your statement must pertain to the information contained in your file. You may 
+mail, fax or upload your written statement to our 
+Secure Transfer Portal indicated in the Contact Information section of this 
+report. Please 
+include your Consumer ID: Number and indicate the specific information to which you want to add the 
+rebuttal 
+statement. 
+Contact 
+Information 
+Address: [ADDRESS]
+FAX Number: 
+Early Warning [PHONE] 
+[ADDRESS]
+Scottsdale, 
+AZ 85250 
+To 
+communicate electronically with us, via the Secure 
+Transfer Portal, go to 
+https://consumerservices.earlywarninq.com.
+When prompted for 
+the Early Warning email address, enter consumerservicesearlvwarninq.com. 
+Follow the instructions 
+on the screen to create 
+your User ID and password, and to upload the documents to be transmitted to 
+Early Warning. If you 
+need 
+technical assistance with the Secure Transfer Portal please call 
+[PHONE]. 
+Please call [PHONE] if you wish to discuss your file disclosure, or to schedule an appointment to meet with a 
+Consumer 
+Services representative at our office in Scottsdale, 
+Arizona. 
+File Disclosure 
+©2026 Early VVarning Services, 
+LLC. All Rights Reserved. 
+Confidential and proprietary. 
+Page 14 of 19 
+
+Definitions of terms used to create this file: 
+Account Abuse - An 
+activity resulting in the forced 
+or involuntary closure of an 
+Account or placement of an 
+Account in 
+Preclosure Status by a 
+Contributor, via a manual or 
+automated process, due to a lciss 
+taken by the Contributor with 
+respect 
+to which the 
+Participant either: (a) 
+conducted no investigation; or (b) 
+conducted an investigation 
+but was unable to conclude 
+that the loss involved 
+Fraud. 
+Automated 
+Clearing House (ACH) - A 
+nationwide funds transfer network 
+that enables participating financial 
+institutions to 
+electronically credit, 
+debit and settle entries to bank accounts. 
+Balance 
+- The amount of money in the account as 
+of the date reported from the 
+Contributor. 
+Card Fraud - Using, or attempting to use, a 
+stolen or fictitious credit, debit, or ATM 
+card. 
+Checking/Transaction Account Fraud - Transacting 
+or attempting to transact, with an 
+Account in a fraudulent manner, 
+including, but not limited to, the 
+passing of forged, altered, closed 
+account, or stolen checks, or kiting 
+(including drawing 
+on: (a) a 
+counterfeit or insufficient check 
+deposit; (b) an empty ATM envelope 
+deposit; (0) non-negotiable items; and/or 
+(d) willful misrepresentation of the 
+transaction amount. 
+Closed - The account is closed. This 
+does not convey a negative situation. 
+Closed for Cause - The account is closed 
+because the account was not handled in a 
+manner consistent with bank policy. 
+Closed for Cause/Purged - 
+The account is closed because the 
+account was not handled in a manner 
+consistent with bank 
+policy. The term "purged" is used once 
+the bank has deleted the account record from its 
+files. 
+Closed/Purged - The account is 
+closed. This does not convey a negative 
+situation. The term "purged" is used once 
+the bank 
+has deleted the account record from its files. 
+Consumer Removed Date - The date the 
+Furnisher (financial institution) no 
+longer contributes information about the 
+record 
+to 
+Early Warning Services. 
+Dormant/Inactive - The account has been inactive 
+for a period of time, as determined by the 
+financial institution. 
+Fraud Victim - A Consumer who 
+has been unknowingly or 
+unwillingly involved in an event involving 
+unauthorized use of 
+identification or account takeover. 
+Funds Transfer Fraud - 
+Completing, or attempting to complete, the 
+unauthorized use of fund transfer 
+capabilities (including 
+but not limited to wire transfers, ACH, on-us transfers). 
+Identity Fraud - Obtaining, or attempting to 
+obtain, a new relationship or take over an existing 
+relationship using: (a) all or 
+part of another individual's identity 
+and/or_credentials; or (b) a fictitious identity and/or 
+credentials. 
+Loan 
+Fraud - The deliberate falsification, 
+omission or misrepresentation of loan documents 
+or material facts (i.e. financial 
+status, collateral). 
+NSF - Non
+-sufficient funds. Available balance less 
+than zero. Demand for a payment 
+cannot be honored because there 
+are 
+not enough funds 
+in the account to do so. 
+NSF/OD - Non
+-sufficient Funds/Overdrawn. There are 
+not enough funds in the account 
+to make a payment or the account 
+balance is less than zero 
+(0). 
+Pending Closed - The account will be 
+closed after all transactions have cleared 
+and the account has zero (0) 
+balance. 
+Post No Debits - 
+Account will not accept any debit activity. 
+'Post No Checks - Account will not 
+accept any checks. 
+Present - 
+Account is present and contains no other status 
+information. Typically, these are accounts with 
+positive balances. 
+Return Transaction - A return 
+happens when the account cannot post the 
+transaction. Generally, this is due to 
+insufficient 
+funds needed to cover a transaction, but it can be due to other 
+reasons. 
+Scored Account - These transactions may 
+reflect a check or ACH transaction initiated 
+with a financial institution that does 
+not 
+report to Early Warning but where the fi
+nancial institution that 
+receives/processes the check or ACH transaction 
+does 
+report to Early Warning. 
+Transaction - A record of money moving in and out of the account. 
+Uncollected Funds - The Financial Institution is 
+reporting that a balance is owed on the 
+account from the time of account 
+closure and up to the Date of Last Status 
+Change. 
+Early Warning is not a collection agency, 
+and this file disclosure is not an attempt to 
+collect on a debt. 
+File 
+Disclosure 
+©2026 Early 1Narning Services, LLC. 
+All Rights Reserved. Confidential and proprietary. 
+Page 15 of 19 
+
+Para informacion en esparzol, visite 
+www.consumerfinance.gov/learnmore  o escribe a la Consumer Financial 
+Protection Bureau, 1700 G Street N. 
+W. Washington, DC 20552. 
+A Summary of Your Rights Under the Fair Credit Reporting Act 
+The federal Fair Credit Reporting Act 
+(FCRA) promotes the accuracy, fairness, and privacy of information in 
+the files of consumer reporting agencies. There are many types of 
+consumer reporting agencies, including credit 
+bureaus and specialty agencies (such as agencies that sell information about check writing histories, medical 
+records, and 
+rental history records). Here is a summary of your major rights under the FCRA. For more 
+information, including information about additional rights, go 
+to www.consumerfinance.gov/learnmore or 
+write to: Consumer Financial Protection Bureau, 1700 G 
+Street N.W., Washington, DC 20552. 
+• You must be told if information in your file has been used against you. Anyone who uses a credit 
+report or another type of 
+consumer report to deny your application for credit, insurance, or employment - or 
+to take another adverse action against you - must tell you, and 
+must give you the name, address, and phone 
+number of the agency that provided the 
+information. 
+• You have the right to know what is in your file. You may request and obtain all the information about 
+you in the files of a consumer reporting agency (your "file disclosure"). You will be required to provide 
+proper identification, which may include your Social Security number: [SSN]
+free. You are entitled to 
+a free file disclosure if: 
+• a person has taken adverse action against you because of 
+information in your credit report; 
+• 
+you are the victim of identify theft and place a fraud alert in your file; 
+• 
+your file contains inaccurate information as a result of fraud; 
+• you are on public assistance; 
+• you are unemployed but expect to apply for employment within 60 days. 
+In addition, all consumers are entitled to one free disclosure every 12 months upon request from each 
+nationwide credit bureau and from nationwide specialty consumer reporting agencies. See 
+www.consumerfinance.govilearnmore for additional information. 
+• You have the right to ask for a credit score. Credit scores are numerical summaries of your 
+credit
+-worthiness based on information from credit bureaus. You may request a credit score from consumer 
+reporting agencies that create scores or distribute scores used in residential real property 
+loans, but you will 
+have to pay for it. In some mortgage transactions, you will receive credit score information for free from the 
+mortgage lender. 
+• You 
+have the right to dispute incomplete or inaccurate information. If you identify information in your 
+file that is incomplete or inaccurate, and report it to the consumer reporting agency, the agency must 
+investigate unless your dispute is frivolous. See 
+www.consumerfinance.govileammore for an explanation 
+of 
+dispute procedures. 
+• Consumer reporting agencies must correct 
+or delete inaccurate, incomplete, or unverifiable 
+information. Inaccurate, incomplete or unverifiable information must be removed or corrected, usually 
+within 30 days. However, a consumer reporting agency may continue to report information it has verified as 
+accurate. 
+• Consumer 
+reporting agencies may not report outdated negative information. In most cases, a 
+consumer reporting agency may not report negative information 
+that is more than seven years old, or 
+bankruptcies that are more 
+than 10 years old. 
+• Access to your file is limited. A 
+consumer reporting agency may provide information about you only to 
+
+'Ir• A 
+people 
+with a valid 
+need -- usually to 
+consider an 
+application with a 
+creditor, insurer, 
+employer, landlord, 
+or 
+other 
+business. The FCRA 
+specifies those with 
+a valid need for 
+access. 
+• You must 
+give your 
+consent for reports to 
+be provided to 
+employers. A 
+consumer 
+reporting agency may 
+not give out 
+information 
+about you to your employer, 
+or a 
+potential employer, 
+without your 
+written consent 
+given to the 
+employer. 
+Written consent 
+generally is not 
+required in the 
+trucking industry. 
+For more 
+information, 
+go to 
+wwvv.consumerfinance.gov/learnmore.
+• You 
+may limit 
+"prescreened" 
+offers of credit and 
+insurance you 
+get based on 
+information in 
+your 
+credit 
+report. 
+Unsolicited 
+"prescreened" offers for 
+credit and insurance 
+must include a 
+toll-free phone 
+number you 
+can call if you 
+choose to remove 
+your name and
+-address from the 
+lists these offers' 
+are based 
+on. You may 
+opt-out with the
+-nationwide 
+credit bureaus at 
+1-888-5-OPTOUT 
+([PHONE]). 
+• 
+The following 
+FCRA right 
+applies with respect 
+to nationwide 
+consumer 
+reporting agencies: 
+CONSUMERS HAVE 
+THE RIGHT TO 
+OBTAIN A 
+SECURITY FREEZE 
+You have a right to 
+place a "security 
+freeze" on your 
+credit report, which 
+will prohibit a 
+consumer 
+reporting 
+agency from 
+releasing information 
+in your credit 
+report without your 
+express 
+authorization. 
+The 
+security freeze is 
+designed to prevent 
+credit, loans, and 
+services faim being 
+approved in your name 
+without 
+your consent. 
+However, you should 
+be aware that 
+using a security freeze 
+to take control 
+over who gets 
+access 
+to the personal 
+and financial 
+information in your 
+credit report may 
+delay, interfere with, 
+or prohibit the 
+timely 
+approval 
+of any subsequent 
+request or 
+application you make 
+regarding a new loan, 
+credit, mortgage, 
+or any 
+other account 
+involving the 
+extension of credit. 
+As an 
+alternative to a 
+security freeze, you 
+have the right to 
+place an initial or 
+extended fraud 
+alert on your credit 
+file 
+at no cost. An 
+initial fraud alert is a 1
+-year alert that is 
+placed on a 
+consumer's credit file. 
+Upon seeing a 
+fraud alert 
+display on a 
+consumer's credit file, a 
+business is 
+required to take steps to 
+verify the 
+consumer's 
+identity before 
+extending new credit. If 
+you are a victim 
+of identity theft, 
+you are entitled to 
+an extended fraud 
+alert, which 
+is a fraud alert 
+lasting 7 years. 
+A security 
+freeze does not 
+apply to a person or 
+entity, or its 
+affiliaies, &collection 
+agencies acting 
+on behalf of 
+the 
+person or entity, with 
+which you have 
+an existing 
+account that requests 
+information in 
+your credit report 
+for 
+the purposes 
+of reviewing or 
+collecting the 
+account. Reviewing 
+the account 
+includes activities 
+related to 
+account 
+maintenance, 
+monitoring, creditline 
+increases, and 
+account upgrades and 
+enhancements. 
+• You 
+may seek damages 
+from violators. 
+If a consumer 
+reporting agency, 
+or, in some cases, 
+a user of 
+consumer reports or a 
+furnisher of 
+information to a 
+consumer reporting 
+agency violates 
+the FCRA, you 
+may 
+be able to sue 
+in state or federal 
+court. 
+• 
+Identity theft victims, 
+survivors of 
+human 
+trafficking, and active 
+duty military 
+personnel have 
+additional 
+rights. For more 
+information, visit 
+www.consumerfinance.govilearnmore.
+States 
+may enforce the 
+FCRA, and many 
+states have 
+their own consumer 
+reporting laws. 
+In some cases, 
+you 
+may have more 
+rights under 
+state law. For more 
+information, 
+contact your state or 
+local consumer 
+protection 
+agency or your 
+state Attorney 
+General. For 
+information about your 
+Federal rights, 
+contact: 
+
+r
+TYPE OF BUSINESS 
+CONTACT: 
+1a. Banks, 
+savings associations, 
+and credit unions with 
+total assets of over 
+$10 billion and their affiliates 
+b. Such 
+affiliates that are not banks, 
+savings associations, or 
+credit unions 
+also 
+should list, in addition to 
+the CFPB: 
+,,, 
+a. Consumer 
+Financial Protection Bureau 
+[ADDRESS]
+Washington, DC 20552 
+b. 
+Federal Trade 
+Commission 
+Consumer Response 
+Center 
+600 
+Pennsylvania 
+Avenue NW 
+Washington, DC 20580 
+(877)382-4357 
+2. To the extent not 
+included in item 1 above. 
+a. National banks, 
+federal savings associations, 
+and federal branches and 
+federal agencies of 
+foreign banks 
+b. State 
+member banks, branches 
+and agencies of foreign 
+banks (other than 
+federal 
+branches, federal 
+agencies, and Insured State 
+Branches of Foreign 
+Banks), commercial lending 
+companies owned or controlled 
+by foreign banks, 
+and organizations 
+operating under section 25 or 25A 
+of the Federal Reserve 
+Act 
+c. 
+Nonmember Insured Banks, Insured 
+State Branches of Foreign 
+Banks, and 
+insured state savings associations 
+d. Federal Credit Unions 
+a. Office of the 
+Comptroller of the 
+Currency 
+Customer Assistance 
+Group 
+P.O. Box 53570 
+Houston, 
+TX 77052 
+b. 
+Federal Reserve 
+Consumer Help Center 
+P.O. Box 1200, 
+Minneapolis, MN 55480 
+c. Division of Depositor 
+and Consumer 
+Protection 
+National Center for 
+Consumer and Depositor 
+Assistance 
+Federal Deposit 
+Insurance Corporation 
+[ADDRESS]
+Kansas City, 
+MO 64106 
+d. National Credit 
+Union Administration 
+Office of 
+Consumer Financial 
+Protection 
+1775 Duke 
+Street 
+Alexandria, VA 22314 
+3. Air Carriers 
+Assistant 
+General Counsel for Office 
+of Aviation 
+Protection 
+Department of Transportation 
+1200 New 
+Jersey Avenue SE 
+Washington, DC 20590 
+4. Creditors Subject to the 
+Surface Transportation Board 
+Office of Public 
+Assistance, 
+Governmental Affairs, and 
+Compliance 
+Surface Transportation Board 
+395 E 
+Street SW 
+Washington, DC 20423 
+, 
+5. 
+Creditors Subject to the Packers and 
+Stockyards Act, 1921 
+Nearest Packers and 
+Stockyards Division 
+Regional Office 
+6. Small Business 
+Investment Companies 
+Associate 
+Administrator, Office of Capital 
+Access 
+United States 
+Small Business 
+Administration 
+[ADDRESS]
+Street SW, Suite 8200 
+Washington, 
+DC 20416 
+7. Brokers and Dealers 
+Securities and 
+Exchange Commission 
+[ADDRESS]
+Washington, DC 
+20549 
+TYPE OF BUSINESS 
+CONTACT: 
+8. Institutions 
+that are members of the Farm 
+Credit System 
+Farm Credit 
+Administration 
+[ADDRESS]
+McLean, VA 22102-5090 
+9. Retailers, Finance Companies, and 
+All Other Creditors Not LiMed 
+Above 
+Federal Trade Commission 
+Consumer 
+Response Center 
+[ADDRESS]
+Washington, DC 20580 
+(877)382-4357 
+
+STATE OF 
+CALIFORNIA 
+SUMMARY OF YOUR RIGHTS 
+You have a 
+right to obtain a copy of your credit fi
+le from a consumer credit reporting 
+agency. 
+You may be charged 
+a reasonable fee not exceeding eight 
+dollars ($8). There is no fee, 
+however, if you have been 
+turned down for credit, employment, 
+insurance, or a rental dwelling 
+because of information in your 
+credit report 
+within the 
+preceding 60 days. The consumer 
+credit Nporting agency must provide 
+someone to help you interpret 
+the information in your credit 
+file. 
+You 
+have a right to dispute inaccurate 
+information by contacting the 
+consumer credit reporting agency 
+directly. 
+However, neither you nor any 
+credit repair company or credit service 
+organization has the right to have 
+accurate, 
+current and verifiable information 
+removed from your credit report. Under the 
+Federal Fair Credit Reporting Act, 
+the consumer 
+credit reporting agency must remove 
+accurate, negative information from your report only 
+if it is 
+over seven years old. 
+Bankruptcy information can be reported for 10 
+years. 
+If you have notified a consumer 
+credit reporting agency in writing that you 
+dispute the accuracy of information in 
+your 
+file, the consumer credit reporting agency must 
+then, within 30 business days, reinvestigate 
+and modify or 
+remove 
+inaccurate information. The consumer 
+credit 'reporting agency may not charge a fee for 
+this service. Any 
+pertinent information and copies of 
+all documents you have concerning an 
+error should be given to the consumer 
+credit 
+reporting agency. 
+If reinvestigation does 
+not resolve the dispute to your satisfaction, 
+you may send a brief statement to the 
+consumer credit reporting 
+agency to keep in your file, explaining why you think 
+the record is inaccurate. The 
+consumer credit reporting agency 
+must include your statement about disputed 
+information in a report it issues 
+about you. 
+You have a 
+right to receive a record of all inquiries relating to a 
+credit transaction initiated in the 12 months 
+preceding your 
+request. This record shall include the recipients of any 
+consumer credit report. 
+You may request in writing that 
+the iniQrmation contained in your file not be provided to a 
+third party for 
+[NAME]
+You have a right 
+to bring civil action against anyone, including a consumer 
+credit agency, who improperly obtains 
+access to a file, 
+knowingly or willfully misuses file data, or fails to 
+correct inaccurate file data. 
+If you are a victim of identity theft and 
+provide to a consumer credit reporting agency a copy of a valid 
+police 
+report or a valid investigative report made by a Department of 
+Motor Vehicles investigator with peace officer 
+status describing your 
+circumstances, the following shall apply: 
+1) You have a right to have any information you list on the report as allegedly fraudulent 
+promptly blocked 
+so that the information cannot 
+be reported. The information will be unblocked only if (A) the 
+information you provide is a material misrepresentation of the facts, (B) you agree that the information 
+is 
+blocked in error, or (C) you knowingly 
+obtained possession of goods, services, or moneys as result of the 
+blocked transactions. If 
+blocked information is unblocked, you will be promptly notified. 
+2) Beginning July 1, 2003, you have a right to receive, free of charge and upon 
+request, one copy of your 
+credit 
+report each month for up to 12 consecutive months.

@@ -1,0 +1,15 @@
+Experian Information Solutions
+Experian Credit Report
+Report Date: 04/29/2026
+
+Creditor Name: Prime Bank Card
+Account Number: 1111222233334444
+Account Type: Credit Card
+Account Status: Open
+Pay Status: Current
+Balance: $0
+Past Due: $0
+Date Opened: 01/01/2020
+Date Reported: 04/01/2026
+Payment History: Never late
+Remarks: Pays as agreed

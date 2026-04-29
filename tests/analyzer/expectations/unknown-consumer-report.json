@@ -1,10 +1,10 @@
 {
   "fixture": "../../fixtures/analyze/unknown-consumer-report.txt",
   "expectedReportType": "unknown_consumer_report",
-  "expectedStatus": "clean",
-  "expectedSuspectedUncertain": false,
+  "expectedStatus": "needs_review",
+  "expectedSuspectedUncertain": true,
   "minActionableIssues": 0,
   "maxActionableIssues": 0,
-  "forbidClean": false,
+  "forbidClean": true,
   "expectedOperationalBlocks": []
 }

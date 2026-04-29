@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useUserTier } from '@/lib/useUserTier';
 import { 
@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { SUPPORT_EMAIL, SUPPORT_MAILTO } from '@/lib/constants';
+import CheckoutErrorModal from '@/app/components/CheckoutErrorModal';
 
 const TIERS = [
   {
@@ -76,17 +77,92 @@ const TIERS = [
 
 const TIER_ORDER = ['free', 'toolkit', 'advanced', 'identity-theft'];
 
+const CHECKOUT_INTENT_KEY_PREFIX = '605b_checkout_intent:';
+const CHECKOUT_INTENT_MAX_AGE_MS = 30 * 60 * 1000;
+
+function makeCheckoutIntentId() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+
+  const bytes = new Uint8Array(16);
+  if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
+    crypto.getRandomValues(bytes);
+  } else {
+    for (let i = 0; i < 16; i += 1) bytes[i] = Math.floor(Math.random() * 256);
+  }
+
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, '0'));
+  return `${hex.slice(0, 4).join('')}-${hex.slice(4, 6).join('')}-${hex.slice(6, 8).join('')}-${hex.slice(8, 10).join('')}-${hex.slice(10, 16).join('')}`;
+}
+
+function readCheckoutIntent(productKey) {
+  if (typeof window === 'undefined' || !window.sessionStorage) return null;
+
+  try {
+    const raw = window.sessionStorage.getItem(CHECKOUT_INTENT_KEY_PREFIX + productKey);
+    if (!raw) return null;
+
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed.intentId !== 'string' || typeof parsed.createdAt !== 'number') {
+      return null;
+    }
+
+    if (Date.now() - parsed.createdAt > CHECKOUT_INTENT_MAX_AGE_MS) {
+      window.sessionStorage.removeItem(CHECKOUT_INTENT_KEY_PREFIX + productKey);
+      return null;
+    }
+
+    return parsed.intentId;
+  } catch {
+    return null;
+  }
+}
+
+function writeCheckoutIntent(productKey, intentId) {
+  if (typeof window === 'undefined' || !window.sessionStorage) return;
+
+  try {
+    window.sessionStorage.setItem(
+      CHECKOUT_INTENT_KEY_PREFIX + productKey,
+      JSON.stringify({ intentId, createdAt: Date.now() }),
+    );
+  } catch {
+    // Best effort only; the in-memory ref still covers this page load.
+  }
+}
+
 export default function AccountPage() {
   const { user } = useUser();
   const { tier, tierName, tierColor, getUsageStats, loading: tierLoading } = useUserTier();
   const [upgradeLoading, setUpgradeLoading] = useState(null);
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
   const [showDisclaimerError, setShowDisclaimerError] = useState(false);
+  const [checkoutError, setCheckoutError] = useState(null);
+  const checkoutIntentsRef = useRef(new Map());
 
   const usageStats = getUsageStats();
   const currentTierIndex = TIER_ORDER.indexOf(tier);
   const currentTierInfo = TIERS.find(t => t.id === tier);
   const availableUpgrades = TIERS.filter((_, index) => index > currentTierIndex);
+
+  const getOrCreateCheckoutIntent = (productKey) => {
+    const cache = checkoutIntentsRef.current;
+    if (cache.has(productKey)) return cache.get(productKey);
+
+    const persisted = readCheckoutIntent(productKey);
+    if (persisted) {
+      cache.set(productKey, persisted);
+      return persisted;
+    }
+
+    const fresh = makeCheckoutIntentId();
+    cache.set(productKey, fresh);
+    writeCheckoutIntent(productKey, fresh);
+    return fresh;
+  };
 
   const handleUpgrade = async (targetTier) => {
     if (!disclaimerAccepted) {
@@ -97,14 +173,20 @@ export default function AccountPage() {
 
     setUpgradeLoading(targetTier.id);
     try {
+      const intentId = getOrCreateCheckoutIntent(`tier:${targetTier.id}`);
+      localStorage.setItem('605b_payment_pending', JSON.stringify({
+        tier: targetTier.id,
+        startedAt: new Date().toISOString(),
+      }));
+
       const response = await fetch('/api/stripe/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           tierId: targetTier.id,
-          upgradeFrom: tier,
           disclaimerAccepted: true,
           disclaimerTimestamp: new Date().toISOString(),
+          intentId,
         }),
       });
 
@@ -113,7 +195,11 @@ export default function AccountPage() {
       if (url) window.location.href = url;
     } catch (error) {
       console.error('Upgrade error:', error);
-      alert('Something went wrong. Please try again.');
+      setCheckoutError(
+        error instanceof Error && error.message
+          ? error.message
+          : 'Unable to start checkout. Please try again.'
+      );
     } finally {
       setUpgradeLoading(null);
     }
@@ -129,6 +215,7 @@ export default function AccountPage() {
 
   return (
     <div style={{ width: '100%' }}>
+      <CheckoutErrorModal message={checkoutError} onClose={() => setCheckoutError(null)} />
       <div style={{ marginBottom: '24px' }}>
         <h1 style={{ fontSize: '24px', fontWeight: 600, marginBottom: '4px' }}>Account & Plan</h1>
         <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>Manage your subscription and view usage</p>

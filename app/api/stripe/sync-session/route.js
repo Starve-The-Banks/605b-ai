@@ -125,8 +125,7 @@ export async function POST(request) {
     } catch (stripeError) {
       console.error(`[SYNC] Failed to retrieve session ${sessionId}:`, stripeError.message);
       return NextResponse.json({
-        error: 'Session not found',
-        details: stripeError.message
+        error: 'Session not found'
       }, { status: 404 });
     }
 
@@ -297,7 +296,7 @@ export async function POST(request) {
   } catch (error) {
     console.error('[SYNC] Error syncing session:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to sync session' },
+      { error: 'Failed to sync session' },
       { status: 500 }
     );
   }

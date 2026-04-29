@@ -4,12 +4,12 @@ import { useState } from 'react';
 import { Shield, FileText, Clock, AlertTriangle, Building, Scale, Download, Eye, Search } from 'lucide-react';
 
 const CATEGORIES = [
-  { id: 'all', label: 'All Templates', count: 62 },
-  { id: 'identity', label: 'Identity Theft', count: 8, icon: Shield },
-  { id: 'disputes', label: 'Bureau Disputes', count: 12, icon: FileText },
-  { id: 'collections', label: 'Debt Collection', count: 10, icon: AlertTriangle },
-  { id: 'specialty', label: 'Specialty Bureaus', count: 6, icon: Building },
-  { id: 'escalation', label: 'Escalation', count: 8, icon: Scale },
+  { id: 'all', label: 'All Templates', count: 8 },
+  { id: 'identity', label: 'Identity Theft', count: 2, icon: Shield },
+  { id: 'disputes', label: 'Bureau Disputes', count: 3, icon: FileText },
+  { id: 'collections', label: 'Debt Collection', count: 1, icon: AlertTriangle },
+  { id: 'specialty', label: 'Specialty Bureaus', count: 1, icon: Building },
+  { id: 'escalation', label: 'Escalation', count: 1, icon: Scale },
 ];
 
 const TEMPLATES = [
@@ -20,7 +20,6 @@ const TEMPLATES = [
     category: 'identity',
     description: 'The nuclear option. Forces bureaus to block fraudulent accounts within 4 business days. Requires FTC Identity Theft Report.',
     tags: ['FCRA 605B', 'Identity Theft', '4-Day Deadline', 'FTC Report'],
-    stats: { success: '94%', response: '3 days', uses: '2,847' },
     featured: true
   },
   {
@@ -30,7 +29,6 @@ const TEMPLATES = [
     category: 'disputes',
     description: 'Standard dispute for inaccurate information. Triggers mandatory 30-day investigation period.',
     tags: ['FCRA 611', '30-Day Deadline', 'General Disputes'],
-    stats: { success: '72%', response: '21 days', uses: '8,234' }
   },
   {
     id: 3,
@@ -39,7 +37,6 @@ const TEMPLATES = [
     category: 'collections',
     description: 'Demand proof from debt collectors. They must cease collection until they validate the debt.',
     tags: ['FDCPA 809', 'Collections', 'Debt Validation'],
-    stats: { success: '68%', response: 'Varies', uses: '5,102' }
   },
   {
     id: 4,
@@ -48,7 +45,6 @@ const TEMPLATES = [
     category: 'disputes',
     description: 'Request documentation of how the bureau verified disputed information. Powerful follow-up tool.',
     tags: ['FCRA 609', 'Verification', 'Follow-up'],
-    stats: { success: '61%', response: '15 days', uses: '3,891' }
   },
   {
     id: 5,
@@ -57,7 +53,6 @@ const TEMPLATES = [
     category: 'specialty',
     description: 'Dispute errors on your ChexSystems report that may be blocking bank account access.',
     tags: ['ChexSystems', 'Banking', 'Account Access'],
-    stats: { success: '58%', response: '30 days', uses: '1,203' }
   },
   {
     id: 6,
@@ -66,7 +61,6 @@ const TEMPLATES = [
     category: 'escalation',
     description: 'Escalate unresolved disputes to the Consumer Financial Protection Bureau.',
     tags: ['CFPB', 'Escalation', 'Federal Complaint'],
-    stats: { success: '81%', response: '15 days', uses: '2,156' }
   },
   {
     id: 7,
@@ -75,7 +69,6 @@ const TEMPLATES = [
     category: 'identity',
     description: 'Official FTC affidavit required for 605B disputes and police reports.',
     tags: ['FTC', 'Affidavit', 'Required Document'],
-    stats: { success: 'N/A', response: 'Immediate', uses: '4,521' }
   },
   {
     id: 8,
@@ -84,7 +77,6 @@ const TEMPLATES = [
     category: 'disputes',
     description: 'Dispute directly with the creditor reporting inaccurate information.',
     tags: ['FCRA 623', 'Direct Dispute', 'Furnisher'],
-    stats: { success: '65%', response: '30 days', uses: '2,876' }
   },
 ];
 
@@ -374,37 +366,6 @@ export default function TemplatesTab({ logAction, addDispute }) {
           color: var(--accent);
         }
         
-        .card-stats {
-          display: flex;
-          gap: 20px;
-          padding-top: 14px;
-          border-top: 1px solid var(--border-subtle);
-        }
-        
-        .stat {
-          display: flex;
-          flex-direction: column;
-          gap: 2px;
-        }
-        
-        .stat-label {
-          font-size: 10px;
-          color: var(--text-muted);
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        }
-        
-        .stat-value {
-          font-size: 14px;
-          font-weight: 600;
-          color: var(--text-primary);
-          font-family: 'JetBrains Mono', monospace;
-        }
-        
-        .stat-value.success {
-          color: var(--success);
-        }
-        
         .card-actions {
           display: flex;
           gap: 8px;
@@ -592,21 +553,6 @@ export default function TemplatesTab({ logAction, addDispute }) {
                   {template.tags.map((tag, i) => (
                     <span key={i} className={`tag ${i === 0 ? 'highlight' : ''}`}>{tag}</span>
                   ))}
-                </div>
-                
-                <div className="card-stats">
-                  <div className="stat">
-                    <span className="stat-label">Success</span>
-                    <span className="stat-value success">{template.stats.success}</span>
-                  </div>
-                  <div className="stat">
-                    <span className="stat-label">Response</span>
-                    <span className="stat-value">{template.stats.response}</span>
-                  </div>
-                  <div className="stat">
-                    <span className="stat-label">Used</span>
-                    <span className="stat-value">{template.stats.uses}x</span>
-                  </div>
                 </div>
                 
                 <div className="card-actions">

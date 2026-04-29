@@ -293,6 +293,44 @@ describe('analyzer golden evaluator', () => {
     expect(collection.category).toBe('high_priority_issue');
   });
 
+  test('slow LLM enrichment returns deterministic fast-path result without timing out', async () => {
+    const text = readFileSync(
+      join(process.cwd(), 'tests/analyzer/fixtures/freeze-only.txt'),
+      'utf8'
+    );
+    const slowAnthropic = {
+      messages: {
+        create: async (_payload, options = {}) => {
+          await new Promise((resolve, reject) => {
+            const timeout = setTimeout(resolve, 13_000);
+            options.signal?.addEventListener('abort', () => {
+              clearTimeout(timeout);
+              const err = new Error('aborted');
+              err.name = 'AbortError';
+              reject(err);
+            }, { once: true });
+          });
+          return { content: [{ text: '[]' }] };
+        },
+      },
+    };
+    const startedAt = Date.now();
+    const result = await runAnalyzerPipeline(text, {
+      anthropic: slowAnthropic,
+      model: 'mock',
+      budgetMs: 12_000,
+    });
+    expect(Date.now() - startedAt).toBeLessThan(12_500);
+    expect(result.summary.fastPath).toBe(true);
+    expect(result.summary.reportStatus).toBe('review_only');
+    expect(result.summary.operationalBlocks).toBe(true);
+    expect(result.diagnostics.suppressions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ stage: 'llm', reason: 'llm_skipped_fast_path' }),
+      ]),
+    );
+  });
+
   test('result preserves v1 mobile-compatible field shape', async () => {
     const text = readFileSync(
       join(process.cwd(), 'tests/fixtures/analyze/one-real-collection.txt'),

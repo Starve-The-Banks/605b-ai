@@ -10,7 +10,7 @@ import {
   LOW_QUALITY_TEXT_MESSAGE,
   assessExtractedTextQuality,
 } from '@/lib/creditReportAnalysis';
-import { runAnalyzerPipeline } from '@/lib/analyzer/pipeline';
+import { runAnalyzerPipeline, stripLLMEnrichment } from '@/lib/analyzer/pipeline';
 import {
   hashRawText,
   saveAnalysisRecord,
@@ -22,8 +22,8 @@ const MAX_FILE_SIZE = 4 * 1024 * 1024;
 export const runtime = 'nodejs';
 export const maxDuration = 60;
 
-// AI analysis timeout — allow 50s for deep analysis (Vercel maxDuration is 60s)
-const AI_TIMEOUT_MS = 50 * 1000;
+const ANALYZE_BUDGET_MS = 12 * 1000;
+const LLM_ENRICH_TIMEOUT_MS = 3 * 1000;
 const AI_MODEL = process.env.ANTHROPIC_ANALYZE_MODEL || 'claude-sonnet-4-20250514';
 
 // Anthropic client instance
@@ -283,15 +283,12 @@ async function _handleAnalyze(request) {
     // 6. AI ANALYSIS (SAFE)
     // =========================
     let analysisResult;
-    let aiTimeout;
-    let aiController;
     
     try {
       console.log('[Analyze] Starting AI analysis...');
       
       if (!process.env.ANTHROPIC_API_KEY) {
-        console.error('[Analyze] ANTHROPIC_API_KEY not configured');
-        return errorResponse("CONFIGURATION_ERROR", "Analysis service is not properly configured", 503);
+        console.warn('[Analyze] ANTHROPIC_API_KEY not configured — running deterministic analyzer only');
       }
 
       // Truncate text to keep extractor + LLM enrichment within budget.
@@ -307,20 +304,25 @@ async function _handleAnalyze(request) {
           })()
         : extractedText;
 
-      aiController = new AbortController();
-      aiTimeout = setTimeout(() => {
-        console.warn('[Analyze] Pipeline timeout after', AI_TIMEOUT_MS, 'ms');
-        aiController.abort();
-      }, AI_TIMEOUT_MS);
-
+      const analyzerStart = Date.now();
       analysisResult = await runAnalyzerPipeline(textToAnalyze, {
-        anthropic,
+        anthropic: process.env.ANTHROPIC_API_KEY ? anthropic : null,
         model: AI_MODEL,
-        signal: aiController.signal,
-        enrichTimeoutMs: AI_TIMEOUT_MS - 5_000,
+        budgetMs: ANALYZE_BUDGET_MS,
+        enrichTimeoutMs: LLM_ENRICH_TIMEOUT_MS,
       });
 
-      if (aiTimeout) clearTimeout(aiTimeout);
+      const elapsed = Date.now() - analyzerStart;
+      let fastPath = analysisResult?.summary?.fastPath === true || elapsed > ANALYZE_BUDGET_MS;
+      if (elapsed > ANALYZE_BUDGET_MS) {
+        analysisResult = stripLLMEnrichment(analysisResult);
+        fastPath = true;
+      }
+      analysisResult.summary = {
+        ...(analysisResult.summary || {}),
+        ...(fastPath ? { fastPath: true } : {}),
+      };
+      console.log('[ANALYZE TIME]', { ms: elapsed, fastPath });
 
       console.log('[Analyze] Pipeline completed:', {
         reportStatus: analysisResult?.summary?.reportStatus,
@@ -330,12 +332,11 @@ async function _handleAnalyze(request) {
       });
 
     } catch (err) {
-      if (aiTimeout) clearTimeout(aiTimeout);
       const errorMessage = String(err?.message || '').toLowerCase();
 
       if (err.name === 'AbortError') {
-        Sentry.addBreadcrumb({ category: 'analyze', message: 'AI timeout', level: 'warning', data: { timeoutMs: AI_TIMEOUT_MS } });
-        return errorResponse("AI_TIMEOUT", "Analysis took too long - please try again", 408);
+        Sentry.addBreadcrumb({ category: 'analyze', message: 'Analyzer aborted', level: 'warning', data: { budgetMs: ANALYZE_BUDGET_MS } });
+        return errorResponse("AI_UNAVAILABLE", "Analysis service is temporarily unavailable - please try again later", 502);
       }
       if (err.status === 429) {
         Sentry.addBreadcrumb({ category: 'analyze', message: 'AI rate limited', level: 'warning' });
@@ -416,12 +417,18 @@ async function _handleAnalyze(request) {
       savedAnalysis = await saveAnalysisRecord(redisClient, {
         userId,
         reportType: analysisResult.reportType,
+        reportSource: analysisResult.reportSource,
         filename: file.name || 'report.pdf',
         summary: analysisResult.summary,
         findings: analysisResult.findings,
         reviewOnly: analysisResult.reviewOnly,
         cleanReport: analysisResult.cleanReport,
         confidence: analysisResult.confidence,
+        evidenceQuotes: analysisResult.evidenceQuotes,
+        positiveFactors: analysisResult.positiveFactors,
+        crossBureauInconsistencies: analysisResult.crossBureauInconsistencies,
+        personalInfo: analysisResult.personalInfo,
+        actionPlan: analysisResult.actionPlan,
         rawTextHash: hashRawText(extractedText),
         extracted: analysisResult.extracted,
         classifications: analysisResult.classifications,

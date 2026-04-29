@@ -30,8 +30,9 @@ export async function GET(request) {
     try {
       session = await stripeClient.checkout.sessions.retrieve(sessionId);
     } catch (stripeError) {
+      console.error('[stripe/session] Failed to retrieve session:', stripeError);
       return NextResponse.json(
-        { error: 'Session not found', details: stripeError.message },
+        { error: 'Session not found' },
         { status: 404 }
       );
     }

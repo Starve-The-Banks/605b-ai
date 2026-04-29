@@ -36,7 +36,7 @@ export default function GlobalError({ error, reset }) {
         ⚠
       </div>
       <h1 style={{ fontSize: '22px', fontWeight: 700, marginBottom: '8px', letterSpacing: '-0.02em' }}>
-        Something went wrong
+        We hit an unexpected problem
       </h1>
       <p style={{ fontSize: '14px', color: '#888', marginBottom: '32px', maxWidth: '340px', lineHeight: 1.6 }}>
         An unexpected error occurred. Please try again.

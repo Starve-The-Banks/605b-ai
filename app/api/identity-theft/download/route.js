@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
 import PDFDocument from 'pdfkit';
 import { auth, currentUser } from '@clerk/nextjs/server';
-import { isBetaWhitelisted } from '@/lib/beta';
-// Note: download route uses isBetaWhitelisted (single email) because it
-// only has the primary email from currentUser(), not the full allEmails set.
+import { isBetaUser } from '@/lib/beta';
 import { getStripe } from '@/lib/stripe';
 import { getRedis } from '@/lib/redis';
 
@@ -49,8 +47,8 @@ export async function GET(request) {
     let isBeta = false;
     if (userId) {
       const user = await currentUser();
-      const userEmail = user?.emailAddresses?.[0]?.emailAddress;
-      isBeta = isBetaWhitelisted(userEmail);
+      const allEmails = (user?.emailAddresses ?? []).map(e => e?.emailAddress).filter(Boolean);
+      isBeta = isBetaUser({ emails: allEmails, userId });
     }
 
     let intakeData;
@@ -67,6 +65,9 @@ export async function GET(request) {
       }
 
       intakeData = typeof intakeDataRaw === 'string' ? JSON.parse(intakeDataRaw) : intakeDataRaw;
+      if (intakeData.userId !== userId) {
+        return NextResponse.json({ error: 'Intake data does not belong to this user' }, { status: 403 });
+      }
     } else {
       // Normal flow: require session ID and Stripe verification
       if (!sessionId) {

@@ -313,8 +313,7 @@ export async function POST(request) {
   } catch (error) {
     console.error('[RECONCILE] Error:', error);
     return NextResponse.json({
-      error: error.message || 'Reconciliation failed',
-      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+      error: 'Reconciliation failed',
     }, { status: 500 });
   }
 }
@@ -386,6 +385,6 @@ export async function GET() {
 
   } catch (error) {
     console.error('[RECONCILE] Error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'Unable to check reconciliation status' }, { status: 500 });
   }
 }

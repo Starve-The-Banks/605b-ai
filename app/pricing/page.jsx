@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { trackViewPricing, trackInitiateCheckout } from '@/lib/tracking';
 import SiteFooter from '@/app/components/SiteFooter';
+import CheckoutErrorModal from '@/app/components/CheckoutErrorModal';
 
 // Tier hierarchy for comparisons
 const TIER_LEVELS = {
@@ -240,6 +241,7 @@ export default function PricingPage() {
   const [currentTier, setCurrentTier] = useState('free');
   const [tierLoading, setTierLoading] = useState(false);
   const [upgradeInfo, setUpgradeInfo] = useState(null);
+  const [checkoutError, setCheckoutError] = useState(null);
 
   // Stable checkout-intent UUIDs keyed by productKey (tier id / addon id).
   //
@@ -333,7 +335,7 @@ export default function PricingPage() {
 
     // Block if user already owns this tier or higher
     if (ownsTierOrHigher(tier.id)) {
-      alert('You already own this tier or a higher tier.');
+      setCheckoutError('You already own this tier or a higher tier.');
       return;
     }
 
@@ -378,7 +380,11 @@ export default function PricingPage() {
       if (url) window.location.href = url;
     } catch (error) {
       console.error('Checkout error:', error);
-      alert('Something went wrong. Please try again.');
+      setCheckoutError(
+        error instanceof Error && error.message
+          ? error.message
+          : 'Unable to start checkout. Please try again.'
+      );
     } finally {
       setLoading(null);
     }
@@ -408,7 +414,11 @@ export default function PricingPage() {
       if (url) window.location.href = url;
     } catch (error) {
       console.error('Checkout error:', error);
-      alert('Something went wrong. Please try again.');
+      setCheckoutError(
+        error instanceof Error && error.message
+          ? error.message
+          : 'Unable to start checkout. Please try again.'
+      );
     } finally {
       setLoading(null);
     }
@@ -416,6 +426,7 @@ export default function PricingPage() {
 
   return (
     <>
+      <CheckoutErrorModal message={checkoutError} onClose={() => setCheckoutError(null)} />
       <style jsx global>{`
         .pricing-page {
           min-height: 100vh;

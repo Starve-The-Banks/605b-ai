@@ -320,7 +320,7 @@ export default function AIStrategistPage() {
 
       if (!response.ok) {
         const contentType = response.headers.get('content-type');
-        let errorMessage = 'Something went wrong';
+        let errorMessage = 'The AI Strategist is temporarily unavailable.';
 
         if (contentType?.includes('application/json')) {
           const errorData = await response.json();

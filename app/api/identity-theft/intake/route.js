@@ -20,6 +20,19 @@ const REQUIRED_FIELDS = [
 
 const INTAKE_TTL_SECONDS = 86400 * 7;
 
+function getTierId(tierData) {
+  if (!tierData) return null;
+  if (typeof tierData === 'string') {
+    try {
+      const parsed = JSON.parse(tierData);
+      return parsed?.tier || tierData;
+    } catch {
+      return tierData;
+    }
+  }
+  return tierData?.tier || null;
+}
+
 export async function POST(request) {
   try {
     const { userId } = await auth();
@@ -33,13 +46,12 @@ export async function POST(request) {
     const redisClient = getRedis();
 
     const user = await currentUser();
-    const userEmail = user?.emailAddresses?.[0]?.emailAddress;
     const allEmails = (user?.emailAddresses ?? []).map(e => e?.emailAddress).filter(Boolean);
     const betaWhitelisted = isBetaUser({ emails: allEmails, userId });
 
     if (!betaWhitelisted) {
-      const tier = await redisClient.get(`user:${userId}:tier`);
-      if (tier !== 'identity-theft') {
+      const tierData = await redisClient.get(`user:${userId}:tier`);
+      if (getTierId(tierData) !== 'identity-theft') {
         return NextResponse.json(
           {
             success: false,

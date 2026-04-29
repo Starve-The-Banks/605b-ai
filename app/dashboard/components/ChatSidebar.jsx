@@ -218,7 +218,7 @@ export default function ChatSidebar({ logAction, onClose }) {
       setMessages(prev => [...prev, { 
         id: Date.now() + 1, 
         role: 'assistant', 
-        content: `Something went wrong. Please try again.`,
+        content: `I could not load a response right now. Please try again.`,
         isError: true 
       }]);
     } finally {

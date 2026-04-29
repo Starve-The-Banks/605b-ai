@@ -1,0 +1,26 @@
+Experian Credit Report
+Report Date: 04/29/2026
+
+Credit Accounts
+Creditor Name: Northstar Auto Finance
+Account Number: 123456789
+Account Status: Open
+Pay Status: 60 days late
+Balance: $1,243
+Remarks: Account past due
+Creditor Name: Regional Bank Visa
+Account Number: 987654321
+Status: Charged Off
+Payment Status: Charge-off
+Balance: $842
+Comments: Placed for collection
+Creditor Name: Prime Bank Rewards Card
+Account Number: 555555555
+Account Status: Closed
+Payment Status: Paid as agreed
+Balance: $0
+Payment History: Never late
+
+Public Records: None
+Collections: None
+Fraud Alerts: None

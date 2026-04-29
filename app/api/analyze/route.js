@@ -445,6 +445,14 @@ async function _handleAnalyze(request) {
       console.error('[Analyze] Failed to persist analysis:', storeErr?.stack || storeErr);
       return errorResponse("ANALYSIS_SAVE_FAILED", "Analysis completed but could not be saved. Please try again.", 503);
     }
+
+    console.log('[ANALYZE DEBUG]', {
+      accounts: analysisResult.extracted?.accounts?.length ?? 0,
+      collections: analysisResult.extracted?.collections?.length ?? 0,
+      inquiries: analysisResult.extracted?.inquiries?.length ?? 0,
+      issues: analysisResult.findings?.length ?? 0,
+      reportStatus: analysisResult.summary?.reportStatus,
+    });
     
     return successResponse({
       filesProcessed: [{ 

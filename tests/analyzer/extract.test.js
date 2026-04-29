@@ -87,6 +87,22 @@ describe('extractor (Stage 1)', () => {
     expect(late).toBeTruthy();
   });
 
+  test('real-world dense tradelines extract accounts, status, balances, payment history, and remarks', () => {
+    const out = extractReport(newFixture('real-world-dense-tradelines.txt'));
+    expect(out.accounts.length + out.collections.length).toBeGreaterThanOrEqual(3);
+    const late = out.accounts.find((a) => /northstar/i.test(a.accountName || ''));
+    expect(late).toBeTruthy();
+    expect(late.status).toMatch(/open/i);
+    expect(late.paymentStatus).toMatch(/60 days late/i);
+    expect(late.paymentHistory).toMatch(/60 days late|past due/i);
+    expect(late.balance).toBe('$1,243');
+    expect(late.remarks).toMatch(/past due/i);
+
+    const chargedOff = out.collections.find((a) => /regional bank/i.test(a.accountName || ''));
+    expect(chargedOff).toBeTruthy();
+    expect(chargedOff.status).toMatch(/charged off/i);
+  });
+
   test('itemIds are stable across runs for the same input', () => {
     const a = extractReport(fixture('one-real-collection.txt'));
     const b = extractReport(fixture('one-real-collection.txt'));

@@ -66,6 +66,17 @@ describe('classifier (Stage 2)', () => {
     const ambiguous = cls.find((c) => c.classification === CLASSIFICATIONS.SUSPECTED_UNCERTAIN);
     expect(ambiguous).toBeTruthy();
   });
+
+  test('real-world dense tradelines classify late/past-due as actionable and charge-off as high_priority', () => {
+    const ext = extractReport(newFixture('real-world-dense-tradelines.txt'));
+    const cls = classifyExtractedReport(ext);
+    const late = cls.find((c) => /northstar/i.test(c.accountName || ''));
+    expect(late).toBeTruthy();
+    expect(late.classification).toBe(CLASSIFICATIONS.ACTIONABLE);
+    const chargedOff = cls.find((c) => /regional bank/i.test(c.accountName || ''));
+    expect(chargedOff).toBeTruthy();
+    expect(chargedOff.classification).toBe(CLASSIFICATIONS.HIGH_PRIORITY);
+  });
 });
 
 describe('classifier — operational blockers', () => {

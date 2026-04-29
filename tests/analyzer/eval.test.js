@@ -293,6 +293,18 @@ describe('analyzer golden evaluator', () => {
     expect(collection.category).toBe('high_priority_issue');
   });
 
+  test('real-world dense tradelines with late and charge-off never return clean', async () => {
+    const text = readFileSync(
+      join(process.cwd(), 'tests/analyzer/fixtures/real-world-dense-tradelines.txt'),
+      'utf8'
+    );
+    const result = await runAnalyzerPipeline(text, { anthropic: await getClient(), model: 'mock' });
+    expect(result.summary.reportStatus).toBe('high_priority_issue');
+    expect(result.cleanReport).toBe(false);
+    expect(result.findings.length).toBeGreaterThanOrEqual(2);
+    expect(result.diagnostics.negativeMarkerCount).toBeGreaterThan(0);
+  });
+
   test('slow LLM enrichment returns deterministic fast-path result without timing out', async () => {
     const text = readFileSync(
       join(process.cwd(), 'tests/analyzer/fixtures/freeze-only.txt'),

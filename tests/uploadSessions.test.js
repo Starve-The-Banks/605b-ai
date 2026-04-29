@@ -2,9 +2,13 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 
 import {
+  acquireFinalizationLock,
   createUploadSession,
   finalizeUpload,
   getChunks,
+  getUploadSessionStatus,
+  MAX_UPLOAD_BYTES,
+  MAX_TOTAL_CHUNKS,
   storeChunk,
   validateOwnership,
 } from '../lib/analyze/uploadSessions.js';
@@ -16,7 +20,10 @@ function createRedisMock() {
     async get(key) {
       return store.get(key) ?? null;
     },
-    async set(key, value) {
+    async set(key, value, opts = {}) {
+      if (opts?.nx && store.has(key)) {
+        return null;
+      }
       store.set(key, value);
       return 'OK';
     },
@@ -34,7 +41,7 @@ describe('analyze upload sessions', () => {
     const session = await createUploadSession('user_a', { redisClient: redis, now: 1_700_000_000_000 });
 
     expect(session.uploadId).toEqual(expect.any(String));
-    expect(session.expiresAt).toBe('2023-11-14T22:28:20.000Z');
+    expect(session.expiresAt).toBe('2023-11-14T22:58:20.000Z');
     await expect(validateOwnership(session.uploadId, 'user_a', { redisClient: redis, now: 1_700_000_001_000 })).resolves.toMatchObject({
       uploadId: session.uploadId,
       userId: 'user_a',
@@ -76,10 +83,104 @@ describe('analyze upload sessions', () => {
     await expect(
       validateOwnership(session.uploadId, 'user_a', {
         redisClient: redis,
-        now: 1_700_001_000_000,
+        now: 1_700_002_701_000,
       })
     ).rejects.toMatchObject({
-      code: 'UPLOAD_EXPIRED',
+      code: 'SESSION_EXPIRED',
+    });
+  });
+
+  test('rejects upload sessions over the PDF size limit', async () => {
+    const redis = createRedisMock();
+
+    await expect(
+      createUploadSession('user_a', {
+        redisClient: redis,
+        fileSize: MAX_UPLOAD_BYTES + 1,
+      })
+    ).rejects.toMatchObject({
+      code: 'FILE_TOO_LARGE',
+    });
+  });
+
+  test('rejects inconsistent totalChunks instead of silently changing upload shape', async () => {
+    const redis = createRedisMock();
+    const session = await createUploadSession('user_a', { redisClient: redis });
+
+    await storeChunk(session.uploadId, 0, Buffer.from('%PDF-1').toString('base64'), {
+      redisClient: redis,
+      totalChunks: 2,
+    });
+
+    await expect(
+      storeChunk(session.uploadId, 1, Buffer.from('PDF-2').toString('base64'), {
+        redisClient: redis,
+        totalChunks: 3,
+      })
+    ).rejects.toMatchObject({
+      code: 'CHUNK_MISMATCH',
+    });
+  });
+
+  test('rejects unusually high chunk counts before storing data', async () => {
+    const redis = createRedisMock();
+    const session = await createUploadSession('user_a', { redisClient: redis });
+
+    await expect(
+      storeChunk(session.uploadId, 0, Buffer.from('%PDF').toString('base64'), {
+        redisClient: redis,
+        totalChunks: MAX_TOTAL_CHUNKS + 1,
+      })
+    ).rejects.toMatchObject({
+      code: 'CHUNK_MISMATCH',
+    });
+  });
+
+  test('duplicate chunk overwrites safely without incrementing receivedChunks twice', async () => {
+    const redis = createRedisMock();
+    const session = await createUploadSession('user_a', { redisClient: redis });
+
+    const first = await storeChunk(session.uploadId, 0, Buffer.from('bad').toString('base64'), {
+      redisClient: redis,
+      totalChunks: 1,
+    });
+    const second = await storeChunk(session.uploadId, 0, Buffer.from('%PDF').toString('base64'), {
+      redisClient: redis,
+      totalChunks: 1,
+    });
+    const chunks = await getChunks(session.uploadId, { redisClient: redis });
+    const status = await getUploadSessionStatus(session.uploadId, 'user_a', { redisClient: redis });
+
+    expect(first.receivedChunks).toBe(1);
+    expect(second.receivedChunks).toBe(1);
+    expect(status.receivedIndexes).toEqual([0]);
+    expect(status.complete).toBe(true);
+    expect(Buffer.concat(chunks).toString()).toBe('%PDF');
+  });
+
+  test('rejects reconstruction when the manifest is incomplete', async () => {
+    const redis = createRedisMock();
+    const session = await createUploadSession('user_a', { redisClient: redis });
+
+    await storeChunk(session.uploadId, 0, Buffer.from('%PDF-1').toString('base64'), {
+      redisClient: redis,
+      totalChunks: 2,
+    });
+
+    await expect(getChunks(session.uploadId, { redisClient: redis })).rejects.toMatchObject({
+      code: 'INCOMPLETE_UPLOAD',
+    });
+  });
+
+  test('finalization lock prevents duplicate reconstruction', async () => {
+    const redis = createRedisMock();
+    const session = await createUploadSession('user_a', { redisClient: redis });
+
+    await expect(acquireFinalizationLock(session.uploadId, { redisClient: redis })).resolves.toMatchObject({
+      locked: true,
+    });
+    await expect(acquireFinalizationLock(session.uploadId, { redisClient: redis })).rejects.toMatchObject({
+      code: 'DUPLICATE_FINALIZATION',
     });
   });
 
@@ -100,6 +201,7 @@ describe('analyze upload sessions', () => {
     expect(uploadSessionRoute).toContain('createUploadSession');
     expect(uploadSessionRoute).toContain('uploadUrl');
     expect(chunkRoute).toContain('storeChunk');
+    expect(chunkRoute).toContain('getUploadSessionStatus');
     expect(chunkRoute).toContain('totalChunks');
     expect(fromUploadRoute).toContain('getChunks');
     expect(fromUploadRoute).toContain('finalizeUpload');

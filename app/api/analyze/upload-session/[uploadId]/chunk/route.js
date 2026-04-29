@@ -1,6 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import {
+  getUploadSessionStatus,
   storeChunk,
   validateOwnership,
   UploadSessionError,
@@ -24,6 +25,29 @@ async function getUserId() {
   }
 }
 
+export async function GET(_request, { params }) {
+  const userId = await getUserId();
+  if (!userId) {
+    return errorResponse('AUTH_REQUIRED', 'Authentication required', 401);
+  }
+
+  const uploadId = params?.uploadId;
+  if (!uploadId) {
+    return errorResponse('ANALYZE_UPLOAD_NOT_FOUND', 'Upload session was not found. Please try again.', 404);
+  }
+
+  try {
+    const status = await getUploadSessionStatus(uploadId, userId);
+    return NextResponse.json({ success: true, ...status });
+  } catch (err) {
+    console.error('[UPLOAD FLOW ERROR]', err);
+    if (err instanceof UploadSessionError) {
+      return errorResponse(err.code, err.message, err.status);
+    }
+    return errorResponse('UPLOAD_SESSION_FAILED', 'Upload session status could not be loaded', 500);
+  }
+}
+
 export async function POST(request, { params }) {
   const userId = await getUserId();
   if (!userId) {
@@ -44,11 +68,17 @@ export async function POST(request, { params }) {
 
   try {
     await validateOwnership(uploadId, userId);
+    console.log('[CHUNK RECEIVED]', {
+      uploadId,
+      index: body?.index,
+      size: typeof body?.chunk === 'string' ? body.chunk.length : 0,
+    });
     const result = await storeChunk(uploadId, body?.index, body?.chunk, {
       totalChunks: body?.totalChunks,
     });
     return NextResponse.json({ success: true, ...result });
   } catch (err) {
+    console.error('[UPLOAD FLOW ERROR]', err);
     if (err instanceof UploadSessionError) {
       return errorResponse(err.code, err.message, err.status);
     }

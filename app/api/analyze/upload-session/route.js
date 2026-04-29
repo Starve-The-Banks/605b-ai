@@ -38,6 +38,7 @@ export async function POST(request) {
       filename: body?.filename,
       fileSize: body?.fileSize,
     });
+    console.log('[UPLOAD SESSION CREATED]', { uploadId: session.uploadId, userId });
 
     return NextResponse.json({
       uploadId: session.uploadId,
@@ -46,6 +47,7 @@ export async function POST(request) {
       expiresAt: session.expiresAt,
     });
   } catch (err) {
+    console.error('[UPLOAD FLOW ERROR]', err);
     if (err instanceof UploadSessionError) {
       return errorResponse(err.code, err.message, err.status);
     }

@@ -2,6 +2,7 @@ import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { POST as analyzePost } from '../route.js';
 import {
+  acquireFinalizationLock,
   finalizeUpload,
   getChunks,
   validateOwnership,
@@ -47,9 +48,14 @@ export async function POST(request) {
 
   let shouldCleanup = false;
   try {
+    console.log('[RECONSTRUCT START]', { uploadId });
     const meta = await validateOwnership(uploadId, userId);
+    await getChunks(uploadId);
+    await acquireFinalizationLock(uploadId);
     const chunks = await getChunks(uploadId);
+    console.log('[CHUNKS FOUND]', { count: chunks.length });
     const buffer = Buffer.concat(chunks);
+    console.log('[RECONSTRUCT COMPLETE]', { byteSize: buffer.length });
     shouldCleanup = true;
 
     const formData = new FormData();
@@ -63,6 +69,7 @@ export async function POST(request) {
 
     return await analyzePost(analyzeRequest);
   } catch (err) {
+    console.error('[UPLOAD FLOW ERROR]', err);
     if (err instanceof UploadSessionError) {
       return errorResponse(err.code, err.message, err.status);
     }

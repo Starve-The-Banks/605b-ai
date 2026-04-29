@@ -1,0 +1,20 @@
+Equifax Credit Report
+Report Date: 04/29/2026
+
+Credit Accounts
+CAPITAL ONE BANK USA
+Account Number: ********4934
+Account Type: Credit Card
+Status: Charge Off
+Balance: $1,054
+Amount Past Due: $1,054
+Payment History: 30 days late, 60 days late, 90 days late, charge off
+
+SYNCB AMAZON
+Account Number: ********9911
+Account Type: Revolving
+Status: Pays As Agreed
+Balance: $0
+
+Collections: None
+Public Records: None

@@ -71,6 +71,12 @@ function isLikelyPdfFile(file) {
   return false;
 }
 
+function previewExtractedText(text) {
+  return String(text || '')
+    .replace(/\s+/g, ' ')
+    .slice(0, 240);
+}
+
 export async function POST(request) {
   // Temporary triage log — greppable in Vercel runtime logs to confirm POST reaches Node.
   console.log('[ANALYZE POST HIT]', {
@@ -232,7 +238,11 @@ async function _handleAnalyze(request) {
     try {
       console.log('[Analyze] Starting PDF parsing...');
       pdfData = await pdfParse(buffer);
-      console.log('[Analyze] PDF parsed successfully, text length:', pdfData.text?.length || 0);
+      console.log('[Analyze] PDF parsed successfully', {
+        textLength: pdfData.text?.length || 0,
+        pages: pdfData.numpages || 0,
+        preview: previewExtractedText(pdfData.text),
+      });
     } catch (err) {
       console.error('[Analyze] PDF parsing failed:', err);
       
@@ -247,14 +257,18 @@ async function _handleAnalyze(request) {
         return errorResponse("CORRUPT_PDF", "PDF file appears to be corrupted", 422);
       }
       
-      return errorResponse("INVALID_PDF", "Could not read PDF file - please try another file", 422);
+      return errorResponse("TEXT_EXTRACTION_FAILED", "Could not extract readable text from this PDF. Please try another file.", 422);
     }
 
     const extractedText = pdfData.text || '';
     
     if (extractedText.length < 50) {
-      console.warn('[Analyze] PDF text too short:', extractedText.length);
-      return errorResponse("EMPTY_PDF", "PDF appears to have no readable text content", 422);
+      console.warn('[Analyze] PDF text too short:', {
+        textLength: extractedText.length,
+        pages: pdfData.numpages || 0,
+        preview: previewExtractedText(extractedText),
+      });
+      return errorResponse("REPORT_TEXT_TOO_SHORT", "PDF text was too short to analyze reliably. Please upload a clearer report.", 422);
     }
 
     // Check for scanned PDFs with no text layer (image-only PDFs)
@@ -265,7 +279,7 @@ async function _handleAnalyze(request) {
         wordsFound,
         fileName: file.name 
       });
-      return errorResponse("IMAGE_ONLY_PDF", "This PDF appears to be a scanned image without text. Please use a PDF with searchable text.", 422);
+      return errorResponse("TEXT_EXTRACTION_FAILED", "This PDF appears to be a scanned image without readable text. Please use a searchable PDF.", 422);
     }
 
     const textQuality = assessExtractedTextQuality(extractedText);

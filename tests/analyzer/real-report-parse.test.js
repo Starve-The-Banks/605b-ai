@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { runAnalyzerPipeline } from '../../lib/analyzer/pipeline.js';
 
 const REALISTIC_CAPITAL_ONE_REPORT = `
@@ -67,5 +70,27 @@ describe('real credit report parser', () => {
 
     const accountLabels = allFindings.map((finding) => finding.account).filter(Boolean);
     expect(new Set(accountLabels).size).toBe(accountLabels.length);
+  });
+
+  test('known suspicious fixture never returns clean/no issues', async () => {
+    const text = readFileSync(join(process.cwd(), 'tests/analyzer/fixtures/known-suspicious-report.txt'), 'utf8');
+    const result = await runAnalyzerPipeline(text, { budgetMs: 12_000 });
+
+    expect(result.cleanReport).toBe(false);
+    expect(result.summary.reportStatus).toBe('high_priority_issue');
+    expect(result.findings.length).toBeGreaterThanOrEqual(1);
+    expect(result.findings.some((finding) =>
+      /capital one/i.test(`${finding.account || ''} ${finding.creditor || ''}`) &&
+      finding.category === 'high_priority_issue'
+    )).toBe(true);
+  });
+
+  test('empty extraction never returns a clean/no-issues result', async () => {
+    const result = await runAnalyzerPipeline('', { budgetMs: 12_000 });
+
+    expect(result.cleanReport).toBe(false);
+    expect(result.summary.reportStatus).toBe('needs_review');
+    expect(result.needsManualReview).toBe(true);
+    expect(result.summary.overallAssessment).toMatch(/could not confidently read/i);
   });
 });

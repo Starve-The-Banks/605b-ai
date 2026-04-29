@@ -5,7 +5,7 @@ import { useUser } from '@clerk/nextjs';
 import {
   Clock, Plus, CheckCircle, AlertCircle, Hourglass, X,
   Calendar, Building2, FileText, Bell, Mail, Trash2,
-  ChevronDown, AlertTriangle, Loader2
+  ChevronDown, AlertTriangle, Loader2, Eye, Copy, Download
 } from 'lucide-react';
 import { useUserTier } from '@/lib/useUserTier';
 import { UpgradePrompt } from '../components/UpgradePrompt';
@@ -26,6 +26,7 @@ export default function TrackerPage() {
   const { tier, hasFeature, loading: tierLoading } = useUserTier();
   const [disputes, setDisputes] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [selectedTemplateDraft, setSelectedTemplateDraft] = useState(null);
   const [notifications, setNotifications] = useState([]);
   const [isMobile, setIsMobile] = useState(false);
   const [settings, setSettings] = useState({
@@ -157,6 +158,14 @@ export default function TrackerPage() {
     if (confirm('Are you sure you want to delete this dispute?')) {
       saveDisputes(disputes.filter(d => d.id !== id));
     }
+  };
+
+  const updateDisputeDraft = (id, letterDraft) => {
+    const updated = disputes.map(d =>
+      d.id === id ? { ...d, letterDraft, updatedAt: new Date().toISOString() } : d
+    );
+    saveDisputes(updated);
+    setSelectedTemplateDraft(updated.find(d => d.id === id) || null);
   };
 
   const stats = {
@@ -399,6 +408,25 @@ export default function TrackerPage() {
                   </div>
 
                   <div style={{ display: 'flex', gap: '8px' }}>
+                    {dispute.letterDraft ? (
+                      <button
+                        onClick={() => setSelectedTemplateDraft(dispute)}
+                        style={{
+                          padding: '8px 12px',
+                          background: 'var(--orange-dim)',
+                          border: '1px solid rgba(255, 107, 53, 0.3)',
+                          borderRadius: '6px',
+                          color: 'var(--orange)',
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                        }}
+                      >
+                        <Eye size={16} />
+                        Open
+                      </button>
+                    ) : null}
                     <select
                       value={dispute.status}
                       onChange={(e) => updateDisputeStatus(dispute.id, e.target.value)}
@@ -482,6 +510,22 @@ export default function TrackerPage() {
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: '8px' }}>
+                  {dispute.letterDraft ? (
+                    <button
+                      onClick={() => setSelectedTemplateDraft(dispute)}
+                      title="Open template draft"
+                      style={{
+                        padding: '6px',
+                        background: 'var(--orange-dim)',
+                        border: '1px solid rgba(255, 107, 53, 0.3)',
+                        borderRadius: '6px',
+                        color: 'var(--orange)',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <Eye size={14} />
+                    </button>
+                  ) : null}
                   <select
                     value={dispute.status}
                     onChange={(e) => updateDisputeStatus(dispute.id, e.target.value)}
@@ -573,8 +617,142 @@ export default function TrackerPage() {
           isMobile={isMobile}
         />
       )}
+      {selectedTemplateDraft && (
+        <TemplateDraftModal
+          dispute={selectedTemplateDraft}
+          onClose={() => setSelectedTemplateDraft(null)}
+          onSave={updateDisputeDraft}
+          isMobile={isMobile}
+        />
+      )}
     </>
   );
+}
+
+function downloadTextFile(filename, text) {
+  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+function TemplateDraftModal({ dispute, onClose, onSave, isMobile }) {
+  const [draft, setDraft] = useState(dispute.letterDraft || '');
+  const [status, setStatus] = useState('');
+
+  const copyDraft = async () => {
+    try {
+      await navigator.clipboard.writeText(draft);
+      setStatus('Copied');
+    } catch {
+      setStatus('Copy failed');
+    }
+  };
+
+  const downloadDraft = () => {
+    downloadTextFile(`${(dispute.templateTitle || dispute.type || 'template').replace(/[^a-z0-9]+/gi, '-').toLowerCase()}.txt`, draft);
+    setStatus('Downloaded');
+  };
+
+  return (
+    <div style={{
+      position: 'fixed',
+      inset: 0,
+      background: 'rgba(0, 0, 0, 0.8)',
+      display: 'flex',
+      alignItems: isMobile ? 'flex-end' : 'center',
+      justifyContent: 'center',
+      zIndex: 1000,
+      padding: isMobile ? 0 : 20,
+    }}>
+      <div style={{
+        background: 'var(--bg-card)',
+        border: '1px solid var(--border)',
+        borderRadius: isMobile ? '16px 16px 0 0' : 16,
+        width: '100%',
+        maxWidth: isMobile ? '100%' : 760,
+        maxHeight: '90vh',
+        overflow: 'auto',
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '20px 24px',
+          borderBottom: '1px solid var(--border)',
+        }}>
+          <div>
+            <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 4 }}>
+              {dispute.templateTitle || dispute.type}
+            </h2>
+            <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+              {dispute.status} • Created {new Date(dispute.createdAt || dispute.dateSent).toLocaleDateString()}
+            </p>
+          </div>
+          <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+            <X size={20} />
+          </button>
+        </div>
+        <div style={{ padding: 24 }}>
+          <textarea
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            aria-label="Template draft"
+            style={{
+              width: '100%',
+              minHeight: 420,
+              padding: 14,
+              background: 'var(--bg-secondary)',
+              border: '1px solid var(--border)',
+              borderRadius: 10,
+              color: '#fafafa',
+              fontSize: 13,
+              lineHeight: 1.6,
+              fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+            }}
+          />
+          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 10 }}>
+            Self-service document draft. Review facts, replace bracketed fields, and decide how you want to send it.
+          </p>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 18 }}>
+            <button type="button" onClick={copyDraft} style={modalButtonStyle('secondary')}>
+              <Copy size={16} /> Copy
+            </button>
+            <button type="button" onClick={downloadDraft} style={modalButtonStyle('secondary')}>
+              <Download size={16} /> Download
+            </button>
+            <button type="button" onClick={() => onSave(dispute.id, draft)} style={modalButtonStyle('primary')}>
+              Save Changes
+            </button>
+            <button type="button" onClick={onClose} style={modalButtonStyle('secondary')}>
+              Close
+            </button>
+          </div>
+          {status ? <div style={{ marginTop: 10, color: 'var(--orange)', fontSize: 12 }}>{status}</div> : null}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function modalButtonStyle(variant) {
+  return {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 8,
+    padding: '10px 14px',
+    borderRadius: 8,
+    border: variant === 'primary' ? 'none' : '1px solid var(--border)',
+    background: variant === 'primary' ? 'var(--orange)' : 'var(--bg-secondary)',
+    color: variant === 'primary' ? 'white' : 'var(--text-secondary)',
+    cursor: 'pointer',
+    fontWeight: 600,
+  };
 }
 
 function AddDisputeModal({ onClose, onAdd, isMobile }) {

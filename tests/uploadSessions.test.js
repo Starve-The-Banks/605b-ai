@@ -86,7 +86,7 @@ describe('analyze upload sessions', () => {
         now: 1_700_002_701_000,
       })
     ).rejects.toMatchObject({
-      code: 'SESSION_EXPIRED',
+      code: 'UPLOAD_EXPIRED',
     });
   });
 
@@ -185,6 +185,11 @@ describe('analyze upload sessions', () => {
   });
 
   test('new routes expose upload session, chunk upload, and from-upload analysis', () => {
+    const middleware = readFileSync(join(process.cwd(), 'middleware.js'), 'utf8');
+    const analyzeRoute = readFileSync(
+      join(process.cwd(), 'app/api/analyze/route.js'),
+      'utf8'
+    );
     const uploadSessionRoute = readFileSync(
       join(process.cwd(), 'app/api/analyze/upload-session/route.js'),
       'utf8'
@@ -199,13 +204,18 @@ describe('analyze upload sessions', () => {
     );
 
     expect(uploadSessionRoute).toContain('createUploadSession');
+    expect(middleware).toContain('AUTH_EXPIRED');
+    expect(analyzeRoute).toContain('AUTH_EXPIRED');
+    expect(uploadSessionRoute).toContain('AUTH_EXPIRED');
     expect(uploadSessionRoute).toContain('uploadUrl');
     expect(chunkRoute).toContain('storeChunk');
     expect(chunkRoute).toContain('getUploadSessionStatus');
     expect(chunkRoute).toContain('totalChunks');
+    expect(chunkRoute).toContain('AUTH_EXPIRED');
     expect(fromUploadRoute).toContain('getChunks');
     expect(fromUploadRoute).toContain('finalizeUpload');
     expect(fromUploadRoute).toContain('analyzePost');
+    expect(fromUploadRoute).toContain('AUTH_EXPIRED');
     expect(fromUploadRoute).toContain('POST');
   });
 });

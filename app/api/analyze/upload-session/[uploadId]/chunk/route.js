@@ -28,7 +28,7 @@ async function getUserId() {
 export async function GET(_request, { params }) {
   const userId = await getUserId();
   if (!userId) {
-    return errorResponse('AUTH_REQUIRED', 'Authentication required', 401);
+    return errorResponse('AUTH_EXPIRED', 'Authentication expired. Please reconnect.', 401);
   }
 
   const uploadId = params?.uploadId;
@@ -51,7 +51,7 @@ export async function GET(_request, { params }) {
 export async function POST(request, { params }) {
   const userId = await getUserId();
   if (!userId) {
-    return errorResponse('AUTH_REQUIRED', 'Authentication required', 401);
+    return errorResponse('AUTH_EXPIRED', 'Authentication expired. Please reconnect.', 401);
   }
 
   const uploadId = params?.uploadId;

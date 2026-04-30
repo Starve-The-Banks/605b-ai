@@ -27,6 +27,7 @@ const isProtectedRoute = createRouteMatcher([
 ]);
 
 const isApiRoute = createRouteMatcher(['/api(.*)']);
+const isAnalyzeApiRoute = createRouteMatcher(['/api/analyze(.*)']);
 
 export default clerkMiddleware(async (auth, req) => {
   const { userId, redirectToSignIn } = await auth();
@@ -36,10 +37,11 @@ export default clerkMiddleware(async (auth, req) => {
   if (isProtectedRoute(req) && !userId) {
     // For API routes, return JSON error instead of redirecting
     if (isApiRoute(req)) {
+      const authCode = isAnalyzeApiRoute(req) ? 'AUTH_EXPIRED' : 'AUTH_REQUIRED';
       return NextResponse.json(
         { 
           success: false, 
-          error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } 
+          error: { code: authCode, message: 'Authentication required' } 
         },
         { status: 401 }
       );

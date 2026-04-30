@@ -23,7 +23,7 @@ async function getUserId() {
 export async function POST(request) {
   const userId = await getUserId();
   if (!userId) {
-    return errorResponse('AUTH_REQUIRED', 'Authentication required', 401);
+    return errorResponse('AUTH_EXPIRED', 'Authentication expired. Please reconnect.', 401);
   }
 
   let body = {};

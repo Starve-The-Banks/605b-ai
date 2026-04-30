@@ -1,10 +1,11 @@
 import * as Sentry from '@sentry/nextjs';
-import { auth, currentUser } from '@clerk/nextjs/server';
+import { currentUser } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { tierPostSchema, validateBody } from '@/lib/validation';
 import { isBetaUser, isReviewerRequest } from '@/lib/beta';
 import { getStripe, getStripePriceId } from '@/lib/stripe';
 import { getRedis } from '@/lib/redis';
+import { authExpiredResponse, resolveApiAuth } from '@/lib/apiAuth';
 
 const STRIPE_RECOVERY_BUDGET_MS = 10_000;
 
@@ -226,20 +227,21 @@ export async function GET(request) {
   const debugMode = request?.url ? new URL(request.url).searchParams.get('debug') === '1' : false;
 
   try {
-    const authObj = await auth();
-    const { userId } = authObj;
+    const { userId, authResult: authObj } = await resolveApiAuth(request, 'GET /api/user-data/tier');
 
     if (!userId) {
-      const payload = {
-        tierData: {
-          tier: 'free',
-          features: TIER_FEATURES.free,
-          pdfAnalysesUsed: 0,
-          pdfAnalysesRemaining: 1,
-        },
-      };
-      if (debugMode) payload.debug = { reason: 'not_authenticated', userId: null };
-      return NextResponse.json(payload);
+      if (debugMode) {
+        return NextResponse.json({
+          tierData: {
+            tier: 'free',
+            features: TIER_FEATURES.free,
+            pdfAnalysesUsed: 0,
+            pdfAnalysesRemaining: 1,
+          },
+          debug: { reason: 'not_authenticated', userId: null },
+        });
+      }
+      return authExpiredResponse('AUTH_REQUIRED');
     }
 
     // Check for beta whitelist access (check ALL emails: primary + all from array + session)
@@ -412,10 +414,10 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
-    const { userId } = await auth();
+    const { userId } = await resolveApiAuth(request, 'POST /api/user-data/tier');
 
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return authExpiredResponse('AUTH_REQUIRED');
     }
 
     // Validate request body with Zod

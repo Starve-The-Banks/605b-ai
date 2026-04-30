@@ -1,7 +1,8 @@
-import { auth, currentUser } from '@clerk/nextjs/server';
+import { currentUser } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { runAnalysisPipeline } from '../route.js';
 import { isReviewerRequest } from '@/lib/beta';
+import { authExpiredResponse, resolveApiAuth } from '@/lib/apiAuth';
 import {
   acquireFinalizationLock,
   finalizeUpload,
@@ -26,16 +27,10 @@ export async function POST(request) {
   // ============================================================
   // 1. AUTH — validated once here; NOT re-checked in runAnalysisPipeline
   // ============================================================
-  let userId;
-  try {
-    const result = await auth();
-    userId = result?.userId ?? null;
-  } catch {
-    userId = null;
-  }
+  const { userId } = await resolveApiAuth(request, 'POST /api/analyze/from-upload');
   if (!userId) {
     console.warn('[FromUpload] AUTH_EXPIRED at entry');
-    return errorResponse('AUTH_EXPIRED', 'Authentication expired. Please reconnect.', 401);
+    return authExpiredResponse('AUTH_EXPIRED');
   }
 
   // ============================================================

@@ -214,8 +214,11 @@ describe('analyze upload sessions', () => {
     expect(chunkRoute).toContain('AUTH_EXPIRED');
     expect(fromUploadRoute).toContain('getChunks');
     expect(fromUploadRoute).toContain('finalizeUpload');
-    expect(fromUploadRoute).toContain('analyzePost');
+    expect(fromUploadRoute).toContain('runAnalysisPipeline');
+    expect(fromUploadRoute).not.toContain('analyzePost');
     expect(fromUploadRoute).toContain('AUTH_EXPIRED');
     expect(fromUploadRoute).toContain('POST');
+    expect(middleware).toContain('pass_bearer_to_route');
+    expect(middleware).toContain('[API AUTH DEBUG]');
   });
 });

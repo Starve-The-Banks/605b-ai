@@ -1,15 +1,15 @@
-import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { getRedis } from '@/lib/redis';
 import { userDataSchema, validateBody } from '@/lib/validation';
+import { authExpiredResponse, resolveApiAuth } from '@/lib/apiAuth';
 
 // Get user data
-export async function GET() {
+export async function GET(request) {
   try {
-    const { userId } = await auth();
+    const { userId } = await resolveApiAuth(request, 'GET /api/user-data');
 
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return authExpiredResponse('AUTH_REQUIRED');
     }
 
     const redisClient = getRedis();
@@ -37,10 +37,10 @@ export async function GET() {
 // Save user data
 export async function POST(request) {
   try {
-    const { userId } = await auth();
+    const { userId } = await resolveApiAuth(request, 'POST /api/user-data');
 
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return authExpiredResponse('AUTH_REQUIRED');
     }
 
     // Validate request body with Zod

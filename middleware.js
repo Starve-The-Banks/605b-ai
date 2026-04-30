@@ -30,13 +30,55 @@ const isApiRoute = createRouteMatcher(['/api(.*)']);
 const isAnalyzeApiRoute = createRouteMatcher(['/api/analyze(.*)']);
 
 export default clerkMiddleware(async (auth, req) => {
-  const { userId, redirectToSignIn } = await auth();
+  let userId = null;
+  let redirectToSignIn;
+  let authError = null;
+  try {
+    const authResult = await auth();
+    userId = authResult.userId;
+    redirectToSignIn = authResult.redirectToSignIn;
+  } catch (error) {
+    authError = error;
+  }
   const { pathname } = req.nextUrl;
+  const authorization = req.headers.get('authorization') || '';
+  const hasAuthHeader = Boolean(authorization);
+  const authHeaderFormat = authorization
+    ? authorization.toLowerCase().startsWith('bearer ')
+      ? 'bearer'
+      : 'other'
+    : 'missing';
+
+  if (isProtectedRoute(req)) {
+    console.warn('[API AUTH DEBUG]', {
+      route: `middleware ${pathname}`,
+      hasAuthHeader,
+      authHeaderFormat,
+      userId,
+      authErrorType: authError?.name || null,
+      host: req.headers.get('host') || null,
+      forwardedHost: req.headers.get('x-forwarded-host') || null,
+      origin: req.headers.get('origin') || null,
+    });
+  }
 
   // Protect all dashboard and API routes
   if (isProtectedRoute(req) && !userId) {
     // For API routes, return JSON error instead of redirecting
     if (isApiRoute(req)) {
+      // Mobile sends Clerk session JWTs as Authorization: Bearer <token>.
+      // Let Node route handlers validate Bearer requests so middleware does
+      // not falsely reject valid mobile tokens before route-level diagnostics.
+      if (authHeaderFormat === 'bearer') {
+        console.warn('[API AUTH DEBUG]', {
+          route: `middleware ${pathname}`,
+          action: 'pass_bearer_to_route',
+          hasAuthHeader: true,
+          authHeaderFormat,
+          userId: null,
+        });
+        return NextResponse.next();
+      }
       const authCode = isAnalyzeApiRoute(req) ? 'AUTH_EXPIRED' : 'AUTH_REQUIRED';
       return NextResponse.json(
         { 
@@ -47,7 +89,10 @@ export default clerkMiddleware(async (auth, req) => {
       );
     }
     // Redirect unauthenticated users to sign-in, preserving intended destination
-    return redirectToSignIn({ returnBackUrl: req.url });
+    if (redirectToSignIn) {
+      return redirectToSignIn({ returnBackUrl: req.url });
+    }
+    return NextResponse.redirect(new URL('/sign-in', req.url));
   }
 
   // Prevent authenticated users from accessing auth pages (avoids loop)

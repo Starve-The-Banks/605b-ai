@@ -1,6 +1,6 @@
-import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { createUploadSession, UploadSessionError } from '@/lib/analyze/uploadSessions';
+import { authExpiredResponse, resolveApiAuth } from '@/lib/apiAuth';
 
 export const runtime = 'nodejs';
 
@@ -11,19 +11,10 @@ function errorResponse(code, message, status = 400) {
   );
 }
 
-async function getUserId() {
-  try {
-    const { userId } = await auth();
-    return userId;
-  } catch {
-    return null;
-  }
-}
-
 export async function POST(request) {
-  const userId = await getUserId();
+  const { userId } = await resolveApiAuth(request, 'POST /api/analyze/upload-session');
   if (!userId) {
-    return errorResponse('AUTH_EXPIRED', 'Authentication expired. Please reconnect.', 401);
+    return authExpiredResponse('AUTH_EXPIRED');
   }
 
   let body = {};

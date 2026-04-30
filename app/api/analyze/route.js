@@ -1,11 +1,12 @@
 import * as Sentry from '@sentry/nextjs';
 import pdfParse from 'pdf-parse';
 import Anthropic from '@anthropic-ai/sdk';
-import { auth, currentUser } from '@clerk/nextjs/server';
+import { currentUser } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { getRedis } from '@/lib/redis';
 import { rateLimit, LIMITS } from '@/lib/rateLimit';
 import { isReviewerRequest } from '@/lib/beta';
+import { authExpiredResponse, resolveApiAuth } from '@/lib/apiAuth';
 import {
   LOW_QUALITY_TEXT_MESSAGE,
   assessExtractedTextQuality,
@@ -358,19 +359,13 @@ async function _handleAnalyze(request) {
     // =========================
     // 1. AUTHENTICATION
     // =========================
-    let authResult;
-    try {
-      authResult = await auth();
-    } catch (authErr) {
-      Sentry.captureException(authErr, { tags: { route: 'api/analyze', stage: 'auth' } });
-      console.error('[Analyze] Clerk auth() threw error:', authErr?.stack || authErr);
-      return errorResponse('AUTH_EXPIRED', 'Authentication expired. Please reconnect.', 401);
-    }
-
-    const { userId } = authResult;
+    const { userId, authResult, error: authErr } = await resolveApiAuth(request, 'POST /api/analyze');
     if (!userId) {
+      if (authErr) {
+        Sentry.captureException(authErr, { tags: { route: 'api/analyze', stage: 'auth' } });
+      }
       console.warn('[Analyze] Unauthorized request - no userId');
-      return errorResponse('AUTH_EXPIRED', 'Authentication expired. Please reconnect.', 401);
+      return authExpiredResponse('AUTH_EXPIRED');
     }
     Sentry.setUser({ id: userId });
 

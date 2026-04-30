@@ -63,6 +63,25 @@ function serverMisconfigured() {
   return NextResponse.json({ error: 'server misconfigured' }, { status: 503 });
 }
 
+function authExpired() {
+  return NextResponse.json(
+    { success: false, error: { code: 'AUTH_EXPIRED', message: 'Authentication expired. Please reconnect.' } },
+    { status: 401 }
+  );
+}
+
+function parseStoredJson(rawValue) {
+  if (!rawValue) return null;
+  if (typeof rawValue === 'string') {
+    try {
+      return JSON.parse(rawValue);
+    } catch {
+      return null;
+    }
+  }
+  return rawValue;
+}
+
 async function safeJson(request) {
   try {
     return await request.json();
@@ -99,7 +118,7 @@ export async function POST(request) {
 
     const { userId } = await safeAuth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return authExpired();
     }
 
     if (
@@ -123,12 +142,13 @@ export async function POST(request) {
     const idempotencyKey = `idempo:iap:${transactionId}`;
     const existing = await redisClient.get(idempotencyKey);
     if (existing) {
+      const parsedExisting = parseStoredJson(existing);
       console.info(`[IAP Validate] Idempotent hit for txn=${transactionId}`);
       return NextResponse.json({
         success: true,
         granted: true,
         tier,
-        tierData: existing,
+        tierData: parsedExisting || {},
         transactionId,
       });
     }
@@ -176,10 +196,10 @@ export async function POST(request) {
       aiCreditsRemaining: features.aiChat ? -1 : 0,
     };
 
-    await redisClient.set(`user:${userId}:tier`, tierData);
+    await redisClient.set(`user:${userId}:tier`, JSON.stringify(tierData));
 
     // Store idempotency record (7 days)
-    await redisClient.set(idempotencyKey, tierData, { ex: 604800 });
+    await redisClient.set(idempotencyKey, JSON.stringify(tierData), { ex: 604800 });
 
     console.info(`[IAP Validate] Granted ${tier} to userId=${userId} (verified=${verification.valid})`);
 

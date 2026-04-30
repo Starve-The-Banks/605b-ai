@@ -71,12 +71,6 @@ function isLikelyPdfFile(file) {
   return false;
 }
 
-function previewExtractedText(text) {
-  return String(text || '')
-    .replace(/\s+/g, ' ')
-    .slice(0, 240);
-}
-
 export async function POST(request) {
   // Temporary triage log — greppable in Vercel runtime logs to confirm POST reaches Node.
   console.log('[ANALYZE POST HIT]', {
@@ -103,13 +97,13 @@ async function _handleAnalyze(request) {
     } catch (authErr) {
       Sentry.captureException(authErr, { tags: { route: 'api/analyze', stage: 'auth' } });
       console.error('[Analyze] Clerk auth() threw error:', authErr?.stack || authErr);
-      return errorResponse("AUTH_ERROR", "Authentication service unavailable", 503);
+      return errorResponse("AUTH_EXPIRED", "Authentication expired. Please reconnect.", 401);
     }
 
     const { userId } = authResult;
     if (!userId) {
       console.warn('[Analyze] Unauthorized request - no userId');
-      return errorResponse("AUTH_REQUIRED", "Authentication required", 401);
+      return errorResponse("AUTH_EXPIRED", "Authentication expired. Please reconnect.", 401);
     }
     Sentry.setUser({ id: userId });
 
@@ -132,12 +126,7 @@ async function _handleAnalyze(request) {
       console.warn('[Analyze] Could not fetch reviewer check email:', e?.message || e);
     }
 
-    const primaryEmail = emails[0] ?? '';
-    const isDevBypass =
-      process.env.NODE_ENV !== 'production' ||
-      primaryEmail === 'reviewer@605b.ai' ||
-      emails.some((e) => typeof e === 'string' && e.includes('seek')) ||
-      true; // TEMPORARY HARD BYPASS — remove before production tightening
+    const isDevBypass = process.env.NODE_ENV !== 'production';
 
     const skipRateLimit = reviewerBypass || isDevBypass;
 
@@ -152,10 +141,37 @@ async function _handleAnalyze(request) {
         );
       }
     } else {
-      console.log('[RATE LIMIT BYPASSED]', { userId, email: primaryEmail || null });
+      console.log('[RATE LIMIT BYPASSED]', { userId });
       if (reviewerBypass) {
         console.log('[Analyze] Reviewer account — rate limit bypassed');
       }
+    }
+
+    // Plan-level usage limit gate (independent of per-day abuse rate limit).
+    // This prevents expensive parsing/analyzer work when user entitlement is exhausted.
+    try {
+      const redisClient = getRedis();
+      const tierKey = `user:${userId}:tier`;
+      const tierRaw = await redisClient.get(tierKey);
+      const tierData = tierRaw
+        ? (typeof tierRaw === 'string' ? JSON.parse(tierRaw) : tierRaw)
+        : { tier: 'free', features: { pdfAnalyses: 1 }, pdfAnalysesUsed: 0 };
+      const maxAnalyses = Number.isFinite(tierData?.features?.pdfAnalyses)
+        ? Number(tierData.features.pdfAnalyses)
+        : 1;
+      const used = Number.isFinite(tierData?.pdfAnalysesUsed)
+        ? Number(tierData.pdfAnalysesUsed)
+        : 0;
+
+      if (!reviewerBypass && maxAnalyses !== -1 && used >= maxAnalyses) {
+        return errorResponse(
+          "ANALYSIS_LIMIT_REACHED",
+          "Analysis limit reached for your current plan. Please upgrade or try again after your quota resets.",
+          403
+        );
+      }
+    } catch (tierErr) {
+      console.warn('[Analyze] Tier pre-check failed; continuing with analysis path:', tierErr?.message || tierErr);
     }
 
     // =========================
@@ -181,17 +197,13 @@ async function _handleAnalyze(request) {
       console.log('[Analyze] Found file in \'file\' field instead of \'files\'');
     }
 
-    console.log('[Analyze] File received:', {
-      name: file.name,
-      type: file.type,
-      size: file.size
-    });
+    console.log('[Analyze] File received:', { type: file.type, size: file.size });
 
     // =========================
     // 3. VALIDATE FILE
     // =========================
     if (!isLikelyPdfFile(file)) {
-      console.warn('[Analyze] Invalid file type:', file.type, file.name);
+      console.warn('[Analyze] Invalid file type:', file.type);
       return errorResponse("INVALID_TYPE", "Only PDF files are supported", 400);
     }
 
@@ -241,7 +253,6 @@ async function _handleAnalyze(request) {
       console.log('[Analyze] PDF parsed successfully', {
         textLength: pdfData.text?.length || 0,
         pages: pdfData.numpages || 0,
-        preview: previewExtractedText(pdfData.text),
       });
     } catch (err) {
       console.error('[Analyze] PDF parsing failed:', err);
@@ -266,7 +277,6 @@ async function _handleAnalyze(request) {
       console.warn('[Analyze] PDF text too short:', {
         textLength: extractedText.length,
         pages: pdfData.numpages || 0,
-        preview: previewExtractedText(extractedText),
       });
       return errorResponse("REPORT_TEXT_TOO_SHORT", "PDF text was too short to analyze reliably. Please upload a clearer report.", 422);
     }
@@ -277,7 +287,6 @@ async function _handleAnalyze(request) {
       console.warn('[Analyze] PDF appears to be image-only (no text layer):', { 
         textLength: extractedText.length, 
         wordsFound,
-        fileName: file.name 
       });
       return errorResponse("TEXT_EXTRACTION_FAILED", "This PDF appears to be a scanned image without readable text. Please use a searchable PDF.", 422);
     }
@@ -288,7 +297,6 @@ async function _handleAnalyze(request) {
         reason: textQuality.reason,
         textLength: extractedText.length,
         wordsFound,
-        fileName: file.name,
       });
       return errorResponse("LOW_QUALITY_TEXT", LOW_QUALITY_TEXT_MESSAGE, 422);
     }
@@ -312,7 +320,6 @@ async function _handleAnalyze(request) {
             console.warn('[Analyze] Text truncated for analysis:', {
               originalLength: extractedText.length,
               truncatedLength: maxTextLength,
-              fileName: file.name
             });
             return extractedText.slice(0, maxTextLength) + '\n\n[Content truncated for analysis]';
           })()

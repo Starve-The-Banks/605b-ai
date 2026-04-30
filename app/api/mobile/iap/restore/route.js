@@ -59,6 +59,13 @@ function serverMisconfigured() {
   return NextResponse.json({ error: 'server misconfigured' }, { status: 503 });
 }
 
+function authExpired() {
+  return NextResponse.json(
+    { success: false, error: { code: 'AUTH_EXPIRED', message: 'Authentication expired. Please reconnect.' } },
+    { status: 401 }
+  );
+}
+
 async function safeJson(request) {
   try {
     return await request.json();
@@ -95,7 +102,7 @@ export async function POST(request) {
 
     const { userId } = await safeAuth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return authExpired();
     }
 
     if (
@@ -153,7 +160,7 @@ export async function POST(request) {
         restoredTransactions.push(verification.transactionId || receipt.transactionId);
 
         // Cache idempotency for this transaction (7 days)
-        await redisClient.set(idempKey, { tier, verified: true }, { ex: 604800 });
+        await redisClient.set(idempKey, JSON.stringify({ tier, verified: true }), { ex: 604800 });
       } else {
         console.warn(`[IAP Restore] Verification failed for ${receipt.productId}: ${verification.error}`);
       }
@@ -183,7 +190,7 @@ export async function POST(request) {
       aiCreditsRemaining: features.aiChat ? -1 : 0,
     };
 
-    await redisClient.set(`user:${userId}:tier`, tierData);
+    await redisClient.set(`user:${userId}:tier`, JSON.stringify(tierData));
 
     console.info(`[IAP Restore] Granted ${highestTier} to userId=${userId} (${restoredTransactions.length} verified)`);
 

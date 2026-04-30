@@ -118,62 +118,80 @@ export default function AnalyzeTab({ logAction, addFlaggedItem }) {
     setFiles(prev => prev.filter((_, i) => i !== index));
   };
 
+  const toSeverity = (category = '') => {
+    if (category === 'high_priority_issue') return 'high';
+    if (category === 'potential_issue') return 'medium';
+    return 'low';
+  };
+
+  const mapAnalysisToDashboard = (analysis) => {
+    const extracted = analysis?.extracted || {};
+    const findings = Array.isArray(analysis?.findings) ? analysis.findings : [];
+    const issues = findings.map((finding, index) => ({
+      id: finding.id || `finding-${index}`,
+      severity: toSeverity(finding.category),
+      title: finding.issue || finding.account || finding?.operationalGuidance?.title || 'Potential issue',
+      description: finding.reason || finding.reasoning || finding.evidence_quote || 'Review this item for accuracy.',
+      bureau: finding.bureau || finding.source || 'Report',
+      recommendation:
+        finding.recommendation ||
+        finding?.operationalGuidance?.message ||
+        'Review details and prepare a dispute draft if this information is inaccurate.',
+    }));
+
+    return {
+      summary: {
+        totalAccounts: Array.isArray(extracted.accounts) ? extracted.accounts.length : 0,
+        negativeItems: issues.filter((issue) => issue.severity === 'high' || issue.severity === 'medium').length,
+        inquiries: Array.isArray(extracted.inquiries) ? extracted.inquiries.length : 0,
+        collections: Array.isArray(extracted.collections) ? extracted.collections.length : 0,
+      },
+      issues,
+    };
+  };
+
   const analyzeReports = async () => {
     if (files.length === 0) return;
-    
+
     setAnalyzing(true);
     logAction?.('ANALYZE_STARTED', { fileCount: files.length });
-    
-    // Simulate analysis
-    await new Promise(resolve => setTimeout(resolve, 2500));
-    
-    const mockResults = {
-      summary: {
-        totalAccounts: 23,
-        negativeItems: 4,
-        inquiries: 7,
-        collections: 2
-      },
-      issues: [
-        { 
-          id: 1,
-          severity: 'high', 
-          title: 'Unrecognized Collection Account',
-          description: 'MIDLAND CREDIT MGMT showing $2,847 collection from 2023. May be result of identity theft.',
-          bureau: 'Experian',
-          recommendation: 'File 605B identity theft dispute with FTC report'
-        },
-        { 
-          id: 2,
-          severity: 'high', 
-          title: 'Duplicate Account Reporting',
-          description: 'Same Capital One account appears twice with different account numbers.',
-          bureau: 'TransUnion',
-          recommendation: 'Dispute duplicate under 611 for inaccurate reporting'
-        },
-        { 
-          id: 3,
-          severity: 'medium', 
-          title: 'Outdated Address Information',
-          description: 'Report shows address from 2019 as current. Could indicate mixed file.',
-          bureau: 'Equifax',
-          recommendation: 'Request correction and verify no mixed file issues'
-        },
-        { 
-          id: 4,
-          severity: 'low', 
-          title: 'High Inquiry Count',
-          description: '7 hard inquiries in last 12 months may be impacting score.',
-          bureau: 'All Bureaus',
-          recommendation: 'Dispute any unauthorized inquiries'
-        }
-      ]
-    };
-    
-    setResults(mockResults);
-    setAnalyzing(false);
-    logAction?.('ANALYZE_COMPLETED', { issuesFound: mockResults.issues.length });
-    persistSnapshot(mockResults, files);
+
+    try {
+      const formData = new FormData();
+      // Current backend contract accepts one file under `files`.
+      formData.append('files', files[0]);
+
+      const response = await fetch('/api/analyze', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      });
+
+      const payload = await response.json().catch(() => null);
+      if (!response.ok || !payload?.success) {
+        const message =
+          payload?.error?.message ||
+          payload?.error ||
+          'Analysis could not be completed. Please try again.';
+        throw new Error(message);
+      }
+
+      const mappedResults = mapAnalysisToDashboard(payload.analysis);
+      setResults(mappedResults);
+      logAction?.('ANALYZE_COMPLETED', {
+        issuesFound: mappedResults.issues.length,
+        analysisId: payload.analysisId || null,
+      });
+      persistSnapshot(mappedResults, files);
+    } catch (err) {
+      console.error('[AnalyzeTab] analysis failed:', err);
+      logAction?.('ANALYZE_FAILED', { message: err?.message || 'Unknown error' });
+      if (typeof window !== 'undefined') {
+        window.alert(err?.message || 'Analysis could not be completed. Please try again.');
+      }
+    } finally {
+      setAnalyzing(false);
+    }
   };
 
   const flagItem = (issue) => {

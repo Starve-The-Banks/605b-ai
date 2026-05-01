@@ -220,5 +220,12 @@ describe('analyze upload sessions', () => {
     expect(fromUploadRoute).toContain('POST');
     expect(middleware).toContain('pass_bearer_to_route');
     expect(middleware).toContain('[API AUTH DEBUG]');
+    expect(analyzeRoute).toContain('isBetaUser');
+    expect(analyzeRoute).toContain('quotaBypass');
+    expect(analyzeRoute.indexOf('quotaBypass')).toBeLessThan(
+      analyzeRoute.indexOf('ANALYSIS_LIMIT_REACHED')
+    );
+    expect(fromUploadRoute).toContain('isBetaUser');
+    expect(fromUploadRoute).toContain('quotaBypass');
   });
 });

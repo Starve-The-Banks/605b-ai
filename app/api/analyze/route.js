@@ -5,7 +5,7 @@ import { currentUser } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { getRedis } from '@/lib/redis';
 import { rateLimit, LIMITS } from '@/lib/rateLimit';
-import { isReviewerRequest } from '@/lib/beta';
+import { isBetaUser, isReviewerRequest } from '@/lib/beta';
 import { authExpiredResponse, resolveApiAuth } from '@/lib/apiAuth';
 import {
   LOW_QUALITY_TEXT_MESSAGE,
@@ -35,11 +35,11 @@ const AI_MODEL = process.env.ANTHROPIC_ANALYZE_MODEL || 'claude-sonnet-4-2025051
  * @param {Buffer} buffer      - Raw PDF bytes (already validated ≤ MAX_FILE_SIZE)
  * @param {string} filename    - Original filename (for display / storage only)
  * @param {string} userId      - Clerk user ID, already authenticated by the caller
- * @param {{ reviewerBypass?: boolean }} opts
+ * @param {{ quotaBypass?: boolean }} opts
  * @returns {Promise<import('next/server').NextResponse>}
  */
 export async function runAnalysisPipeline(buffer, filename, userId, opts = {}) {
-  const { reviewerBypass = false } = opts;
+  const { quotaBypass = false } = opts;
   const startTime = Date.now();
 
   try {
@@ -47,7 +47,7 @@ export async function runAnalysisPipeline(buffer, filename, userId, opts = {}) {
     // 1. RATE LIMIT
     // ============================================================
     const isDevBypass = process.env.NODE_ENV !== 'production';
-    const skipRateLimit = reviewerBypass || isDevBypass;
+    const skipRateLimit = quotaBypass || isDevBypass;
 
     if (!skipRateLimit) {
       const rateLimitResult = await rateLimit(userId, 'analyze', LIMITS.analyze, 86400);
@@ -80,7 +80,7 @@ export async function runAnalysisPipeline(buffer, filename, userId, opts = {}) {
         ? Number(tierData.pdfAnalysesUsed)
         : 0;
 
-      if (!reviewerBypass && maxAnalyses !== -1 && used >= maxAnalyses) {
+      if (!quotaBypass && maxAnalyses !== -1 && used >= maxAnalyses) {
         return errorResponse(
           'ANALYSIS_LIMIT_REACHED',
           'Analysis limit reached for your current plan. Please upgrade or try again after your quota resets.',
@@ -224,12 +224,12 @@ export async function runAnalysisPipeline(buffer, filename, userId, opts = {}) {
       }
       const currentUsed = tierData.pdfAnalysesUsed || 0;
       const maxAnalyses = tierData.features?.pdfAnalyses ?? 1;
-      const newUsed = currentUsed + 1;
+      const newUsed = quotaBypass ? currentUsed : currentUsed + 1;
       newUsedCount = newUsed;
       const updatedTierData = {
         ...tierData,
         pdfAnalysesUsed: newUsed,
-        pdfAnalysesRemaining: maxAnalyses === -1 ? -1 : Math.max(0, maxAnalyses - newUsed),
+        pdfAnalysesRemaining: quotaBypass || maxAnalyses === -1 ? -1 : Math.max(0, maxAnalyses - newUsed),
       };
       await redisClient.set(tierKey, JSON.stringify(updatedTierData));
       remaining = updatedTierData.pdfAnalysesRemaining;
@@ -372,17 +372,22 @@ async function _handleAnalyze(request) {
     // =========================
     // 2. REVIEWER BYPASS CHECK
     // =========================
-    let reviewerBypass = false;
+    let quotaBypass = false;
+    const sessionEmail = authResult?.sessionClaims?.email || authResult?.sessionClaims?.primary_email;
+    let emails = [sessionEmail].filter(Boolean);
     try {
       const clerkUser = await currentUser();
-      const emails = [
+      emails = [
         clerkUser?.primaryEmailAddress?.emailAddress,
         ...((clerkUser?.emailAddresses ?? []).map(e => e?.emailAddress)),
+        sessionEmail,
       ].filter(Boolean);
-      reviewerBypass = isReviewerRequest({ emails });
     } catch (e) {
       console.warn('[Analyze] Could not fetch reviewer check email:', e?.message || e);
     }
+    const reviewerBypass = isReviewerRequest({ emails });
+    const betaBypass = !reviewerBypass && isBetaUser({ emails, userId });
+    quotaBypass = reviewerBypass || betaBypass;
 
     // =========================
     // 3. PARSE FORM DATA + BUILD BUFFER
@@ -427,7 +432,7 @@ async function _handleAnalyze(request) {
       return errorResponse('FILE_READ_ERROR', 'Could not read uploaded file', 422);
     }
 
-    return runAnalysisPipeline(buffer, file.name, userId, { reviewerBypass });
+    return runAnalysisPipeline(buffer, file.name, userId, { quotaBypass });
 
   } catch (err) {
     Sentry.captureException(err, { tags: { route: 'api/analyze', stage: 'unhandled' } });

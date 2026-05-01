@@ -1,7 +1,7 @@
 import { currentUser } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { runAnalysisPipeline } from '../route.js';
-import { isReviewerRequest } from '@/lib/beta';
+import { isBetaUser, isReviewerRequest } from '@/lib/beta';
 import { authExpiredResponse, resolveApiAuth } from '@/lib/apiAuth';
 import {
   acquireFinalizationLock,
@@ -27,7 +27,7 @@ export async function POST(request) {
   // ============================================================
   // 1. AUTH — validated once here; NOT re-checked in runAnalysisPipeline
   // ============================================================
-  const { userId } = await resolveApiAuth(request, 'POST /api/analyze/from-upload');
+  const { userId, authResult } = await resolveApiAuth(request, 'POST /api/analyze/from-upload');
   if (!userId) {
     console.warn('[FromUpload] AUTH_EXPIRED at entry');
     return authExpiredResponse('AUTH_EXPIRED');
@@ -36,17 +36,22 @@ export async function POST(request) {
   // ============================================================
   // 2. REVIEWER BYPASS CHECK
   // ============================================================
-  let reviewerBypass = false;
+  let quotaBypass = false;
+  const sessionEmail = authResult?.sessionClaims?.email || authResult?.sessionClaims?.primary_email;
+  let emails = [sessionEmail].filter(Boolean);
   try {
     const clerkUser = await currentUser();
-    const emails = [
+    emails = [
       clerkUser?.primaryEmailAddress?.emailAddress,
       ...((clerkUser?.emailAddresses ?? []).map(e => e?.emailAddress)),
+      sessionEmail,
     ].filter(Boolean);
-    reviewerBypass = isReviewerRequest({ emails });
   } catch (e) {
     console.warn('[FromUpload] Could not fetch reviewer check email:', e?.message || e);
   }
+  const reviewerBypass = isReviewerRequest({ emails });
+  const betaBypass = !reviewerBypass && isBetaUser({ emails, userId });
+  quotaBypass = reviewerBypass || betaBypass;
 
   // ============================================================
   // 3. PARSE REQUEST BODY
@@ -93,7 +98,7 @@ export async function POST(request) {
   // ============================================================
   try {
     console.log('[FromUpload] ANALYSIS START', { uploadId, ms: Date.now() - t0 });
-    const response = await runAnalysisPipeline(buffer, filename, userId, { reviewerBypass });
+    const response = await runAnalysisPipeline(buffer, filename, userId, { quotaBypass });
     analysisSucceeded = response.status >= 200 && response.status < 300;
     console.log('[FromUpload] ANALYSIS COMPLETE', { uploadId, status: response.status, ms: Date.now() - t0 });
     return response;

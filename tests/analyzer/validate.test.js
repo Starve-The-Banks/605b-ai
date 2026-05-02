@@ -128,3 +128,79 @@ describe('validator — operational blocker invariants', () => {
     expect(unknownSuppression).toBeTruthy();
   });
 });
+
+describe('validator — account context display', () => {
+  test('finding preserves creditor/tradeline context and title does not use parser labels', () => {
+    const item = {
+      itemId: 'it_collection_context',
+      itemKind: 'collection',
+      span: {
+        start: 0,
+        end: 'JEFFERSON CAPITAL\nAccount Type: Debt Buyer\nAccount Number: 12345926\nStatus: Collection\nBalance: $842'.length,
+        text: 'JEFFERSON CAPITAL\nAccount Type: Debt Buyer\nAccount Number: 12345926\nStatus: Collection\nBalance: $842',
+      },
+      bureau: 'TransUnion',
+      source: 'TransUnion',
+      accountName: 'TypeDebt Buyer',
+      furnisher: 'Jefferson Capital',
+      accountType: 'Debt Buyer',
+      status: 'Collection',
+      balance: '$842',
+      accountNumberSuffix: '5926',
+      fields: {
+        'Account Type': 'Debt Buyer',
+        'Account Number': '12345926',
+        Status: 'Collection',
+        Balance: '$842',
+      },
+      classification: CLASSIFICATIONS.HIGH_PRIORITY,
+      classifierConfidence: 0.96,
+      classifierRule: 'collection.is_collection',
+      classifierReason: 'Account is reported as a collection account.',
+      isNegativeMarker: true,
+    };
+
+    const out = buildValidatedFindings({ classified: [item], annotations: new Map() });
+    const finding = out.findings[0];
+
+    expect(finding.account).toBe('Jefferson Capital');
+    expect(finding.account).not.toMatch(/TypeDebt Buyer/);
+    expect(finding.accountContext).toMatchObject({
+      furnisherName: 'Jefferson Capital',
+      accountType: 'Debt Buyer',
+      accountNumberMasked: '****5926',
+      status: 'Collection',
+      balance: '$842',
+      sourceSection: 'TransUnion',
+    });
+    expect(finding.accountContext.evidenceSnippet).toContain('JEFFERSON CAPITAL');
+  });
+
+  test('finding falls back to unidentified review title instead of parser garbage', () => {
+    const item = {
+      itemId: 'it_unknown_context',
+      itemKind: 'account',
+      span: {
+        start: 0,
+        end: 'TypeSecured Loan\nStatus: Collection'.length,
+        text: 'TypeSecured Loan\nStatus: Collection',
+      },
+      bureau: 'Experian',
+      source: 'Experian',
+      accountName: 'TypeSecured Loan',
+      fields: { Type: 'Secured Loan', Status: 'Collection' },
+      classification: CLASSIFICATIONS.HIGH_PRIORITY,
+      classifierConfidence: 0.9,
+      classifierRule: 'account.collection',
+      classifierReason: 'Account status indicates a collection.',
+      isNegativeMarker: true,
+    };
+
+    const out = buildValidatedFindings({ classified: [item], annotations: new Map() });
+    const finding = out.findings[0];
+
+    expect(finding.account).toBe('Account needing review');
+    expect(finding.account).not.toMatch(/TypeSecured Loan/);
+    expect(finding.accountContext.accountType).toBe('Secured Loan');
+  });
+});

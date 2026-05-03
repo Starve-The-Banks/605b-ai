@@ -30,77 +30,97 @@ const isApiRoute = createRouteMatcher(['/api(.*)']);
 const isAnalyzeApiRoute = createRouteMatcher(['/api/analyze(.*)']);
 
 export default clerkMiddleware(async (auth, req) => {
-  let userId = null;
-  let redirectToSignIn;
-  let authError = null;
   try {
-    const authResult = await auth();
-    userId = authResult.userId;
-    redirectToSignIn = authResult.redirectToSignIn;
-  } catch (error) {
-    authError = error;
-  }
-  const { pathname } = req.nextUrl;
-  const authorization = req.headers.get('authorization') || '';
-  const hasAuthHeader = Boolean(authorization);
-  const authHeaderFormat = authorization
-    ? authorization.toLowerCase().startsWith('bearer ')
-      ? 'bearer'
-      : 'other'
-    : 'missing';
+    const { pathname } = req.nextUrl;
+    const authorization = req.headers.get('authorization') || '';
+    const hasAuthHeader = Boolean(authorization);
+    const authHeaderFormat = authorization
+      ? authorization.toLowerCase().startsWith('bearer ')
+        ? 'bearer'
+        : 'other'
+      : 'missing';
 
-  if (isProtectedRoute(req)) {
-    console.warn('[API AUTH DEBUG]', {
-      route: `middleware ${pathname}`,
-      hasAuthHeader,
-      authHeaderFormat,
-      userId,
-      authErrorType: authError?.name || null,
-      host: req.headers.get('host') || null,
-      forwardedHost: req.headers.get('x-forwarded-host') || null,
-      origin: req.headers.get('origin') || null,
-    });
-  }
+    // Public web pages must never depend on Clerk auth resolution. This keeps
+    // Vercel screenshots/thumbnails and unauthenticated landing pages from
+    // failing if Clerk middleware auth is temporarily unavailable.
+    if (isPublicRoute(req)) {
+      return NextResponse.next();
+    }
 
-  // Protect all dashboard and API routes
-  if (isProtectedRoute(req) && !userId) {
-    // For API routes, return JSON error instead of redirecting
-    if (isApiRoute(req)) {
-      // Mobile sends Clerk session JWTs as Authorization: Bearer <token>.
-      // Let Node route handlers validate Bearer requests so middleware does
-      // not falsely reject valid mobile tokens before route-level diagnostics.
-      if (authHeaderFormat === 'bearer') {
-        console.warn('[API AUTH DEBUG]', {
-          route: `middleware ${pathname}`,
-          action: 'pass_bearer_to_route',
-          hasAuthHeader: true,
-          authHeaderFormat,
-          userId: null,
-        });
-        return NextResponse.next();
+    // Mobile sends Clerk session JWTs as Authorization: Bearer <token>.
+    // Let Node route handlers validate Bearer requests so middleware does not
+    // falsely reject valid mobile tokens before route-level diagnostics.
+    if (isApiRoute(req) && authHeaderFormat === 'bearer') {
+      console.warn('[API AUTH DEBUG]', {
+        route: `middleware ${pathname}`,
+        action: 'pass_bearer_to_route',
+        hasAuthHeader: true,
+        authHeaderFormat,
+        userId: null,
+      });
+      return NextResponse.next();
+    }
+
+    let userId = null;
+    let redirectToSignIn;
+    let authError = null;
+    try {
+      const authResult = await auth();
+      userId = authResult.userId;
+      redirectToSignIn = authResult.redirectToSignIn;
+    } catch (error) {
+      authError = error;
+    }
+
+    if (isProtectedRoute(req)) {
+      console.warn('[API AUTH DEBUG]', {
+        route: `middleware ${pathname}`,
+        hasAuthHeader,
+        authHeaderFormat,
+        userId,
+        authErrorType: authError?.name || null,
+        host: req.headers.get('host') || null,
+        forwardedHost: req.headers.get('x-forwarded-host') || null,
+        origin: req.headers.get('origin') || null,
+      });
+    }
+
+    // Protect all dashboard and API routes
+    if (isProtectedRoute(req) && !userId) {
+      // For API routes, return JSON error instead of redirecting
+      if (isApiRoute(req)) {
+        const authCode = isAnalyzeApiRoute(req) ? 'AUTH_EXPIRED' : 'AUTH_REQUIRED';
+        return NextResponse.json(
+          {
+            success: false,
+            error: { code: authCode, message: 'Authentication required' },
+          },
+          { status: 401 }
+        );
       }
-      const authCode = isAnalyzeApiRoute(req) ? 'AUTH_EXPIRED' : 'AUTH_REQUIRED';
+      // Redirect unauthenticated users to sign-in, preserving intended destination
+      if (redirectToSignIn) {
+        return redirectToSignIn({ returnBackUrl: req.url });
+      }
+      return NextResponse.redirect(new URL('/sign-in', req.url));
+    }
+
+    // Prevent authenticated users from accessing auth pages (avoids loop)
+    if (userId && (pathname.startsWith('/sign-in') || pathname.startsWith('/sign-up'))) {
+      return NextResponse.redirect(new URL('/dashboard', req.url));
+    }
+
+    return NextResponse.next();
+  } catch (error) {
+    console.error('[Middleware] safe fallback after middleware error:', error?.message || error);
+    if (isApiRoute(req)) {
       return NextResponse.json(
-        { 
-          success: false, 
-          error: { code: authCode, message: 'Authentication required' } 
-        },
+        { success: false, error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } },
         { status: 401 }
       );
     }
-    // Redirect unauthenticated users to sign-in, preserving intended destination
-    if (redirectToSignIn) {
-      return redirectToSignIn({ returnBackUrl: req.url });
-    }
-    return NextResponse.redirect(new URL('/sign-in', req.url));
+    return NextResponse.next();
   }
-
-  // Prevent authenticated users from accessing auth pages (avoids loop)
-  if (userId && (pathname.startsWith('/sign-in') || pathname.startsWith('/sign-up'))) {
-    return NextResponse.redirect(new URL('/dashboard', req.url));
-  }
-
-  return NextResponse.next();
 });
 
 export const config = {

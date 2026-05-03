@@ -77,6 +77,38 @@ describe('classifier (Stage 2)', () => {
     expect(chargedOff).toBeTruthy();
     expect(chargedOff.classification).toBe(CLASSIFICATIONS.HIGH_PRIORITY);
   });
+
+  test('payment-history legend text does not create a negative finding for a positive account', () => {
+    const ext = {
+      reportType: 'credit_bureau',
+      accounts: [{
+        itemId: 'it_positive_with_legend',
+        itemKind: 'account',
+        span: {
+          start: 0,
+          end: 200,
+          text: 'WELLS FARGO CARD SERV\nStatus: Pays As Agreed\nPayment History\nPaid on Time\n30 Days Past Due\n60 Days Past Due\nCharge Off',
+        },
+        bureau: 'Experian',
+        source: 'Experian',
+        accountName: 'WELLS FARGO CARD SERV',
+        status: 'Pays As Agreed',
+        paymentStatus: '',
+        paymentHistory: 'Paid on Time 30 Days Past Due 60 Days Past Due Charge Off',
+        fields: {},
+      }],
+      collections: [],
+      inquiries: [],
+      publicRecords: [],
+      bankingItems: [],
+      fraudMarkers: [],
+      remarks: [],
+    };
+
+    const cls = classifyExtractedReport(ext);
+    expect(cls[0].classification).toBe(CLASSIFICATIONS.POSITIVE);
+    expect(cls[0].classifierRule).toBe('account.positive');
+  });
 });
 
 describe('classifier — operational blockers', () => {

@@ -19,7 +19,7 @@ export default function ChatSidebar({ logAction, onClose }) {
     {
       id: 1,
       role: 'assistant',
-      content: "I'm your credit dispute strategist. I know the FCRA inside and out. Upload a credit report for analysis, or tell me what's going on with your credit."
+      content: "I'm your credit dispute strategist for educational guidance. I can help you understand FCRA-based dispute steps and documentation options. Upload a credit report for analysis, or tell me what's going on with your credit."
     }
   ]);
   const [input, setInput] = useState('');

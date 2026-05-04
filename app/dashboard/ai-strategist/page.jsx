@@ -8,18 +8,17 @@ import { UpgradePrompt } from '../components/UpgradePrompt';
 
 const INTRO_MESSAGE = `You've got a strategist in your corner now.
 
-I know the Fair Credit Reporting Act inside and out — every statute, every deadline, every leverage point the bureaus hope you never discover. §605B, §611, §623, FDCPA §809 — I speak this language fluently so you don't have to.
+I know the Fair Credit Reporting Act and related dispute workflows — including §605B, §611, §623, and FDCPA §809 — and I can help you understand practical next steps.
 
-I've guided people from collections nightmares and identity theft disasters to 800+ credit scores. Not by gaming the system — by using the law exactly as it was designed to protect you.
+This assistant provides educational guidance to help you prepare and organize your own documentation.
 
 **Here's what I can do for you:**
-→ Analyze your credit reports and spot every disputable item
-→ Tell you exactly which letters to send, in what order, and why
-→ Track deadlines and tell you when bureaus are violating your rights
-→ Escalate strategically when they ignore you
-→ Prepare you for legal action if it comes to that
+→ Help you review report findings and prioritize what to verify first
+→ Suggest dispute letter language you can adapt
+→ Explain timelines and what each step usually involves
+→ Help you document follow-up and escalation options
 
-This isn't generic advice. Every situation is different, and I'll give you a specific game plan based on yours.
+I don't provide legal advice or guaranteed outcomes. For legal advice specific to your case, consult a licensed attorney.
 
 **What's going on with your credit?**`;
 
@@ -27,7 +26,7 @@ const QUICK_STARTS = [
   { text: "I'm a victim of identity theft", icon: Shield },
   { text: "I have collections I want to dispute", icon: FileText },
   { text: "Break down my rights under FCRA", icon: Scale },
-  { text: "What's the fastest path to clean credit?", icon: Zap },
+  { text: "Help me build a dispute plan from my findings", icon: Zap },
 ];
 
 const VOICE_SYSTEM_PROMPT = `${SYSTEM_PROMPT}

@@ -19,7 +19,7 @@ const PAGE_SUGGESTIONS = {
     { text: "I'm a victim of identity theft — where do I start?", icon: Shield },
     { text: "Break down §605B for me like I'm 5", icon: Scale },
     { text: "What's the nuclear option if bureaus ignore me?", icon: Zap },
-    { text: "How fast can I realistically fix my credit?", icon: Clock },
+    { text: "What timeline should I expect for disputes?", icon: Clock },
   ],
   templates: [
     { text: "Which letter should I send first?", icon: FileText },
@@ -37,7 +37,7 @@ const PAGE_SUGGESTIONS = {
     { text: "Help me prioritize these items", icon: Zap },
     { text: "Should I dispute everything at once?", icon: MessageSquare },
     { text: "What's my strongest case here?", icon: Shield },
-    { text: "Estimate my timeline to clean credit", icon: Clock },
+    { text: "Estimate my dispute timeline", icon: Clock },
   ],
   audit: [
     { text: "How do I use this log as evidence?", icon: Scale },
@@ -51,16 +51,15 @@ const INTRO_MESSAGE = `You've got a strategist in your corner now.
 
 I know the Fair Credit Reporting Act inside and out — every statute, every deadline, every leverage point the bureaus hope you never discover. §605B, §611, §623, FDCPA §809 — I speak this language fluently so you don't have to.
 
-I've guided people from collections nightmares and identity theft disasters to 800+ credit scores. Not by gaming the system — by using the law exactly as it was designed to protect you.
+This assistant provides educational guidance to help you prepare and organize your own documentation.
 
 Here's what I can do for you:
-→ Analyze your credit reports and spot every disputable item
-→ Tell you exactly which letters to send, in what order, and why
-→ Track deadlines and tell you when bureaus are violating your rights
-→ Escalate strategically when they ignore you
-→ Prepare you for legal action if it comes to that
+→ Help you review report findings and prioritize what to verify first
+→ Suggest dispute letter language you can adapt
+→ Explain timelines and what each step usually involves
+→ Help you document follow-up and escalation options
 
-This isn't generic advice. Every situation is different, and I'll give you a specific game plan based on yours.
+I don't provide legal advice or guaranteed outcomes. For legal advice specific to your case, consult a licensed attorney.
 
 **What's going on with your credit?**`;
 
@@ -89,9 +88,9 @@ RESPONSE STYLE:
 - Reference statutes naturally
 - If recommending a letter template, mention it's available in the Templates tab
 - If they need to track something, mention the Tracker tab
-- Match their energy — if they're stressed, acknowledge it; if they're ready to fight, match that
-
-Never say "I'm just an AI" or hedge excessively. You know this stuff cold.`;
+- Match their energy — if they're stressed, acknowledge it and keep guidance practical
+- If information is insufficient, say what is missing and ask a focused clarifying question
+- Never promise legal outcomes, removals, or score changes.`;
 
 export default function CommandPalette({ currentTab }) {
   const [isOpen, setIsOpen] = useState(false);

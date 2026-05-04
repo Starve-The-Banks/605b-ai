@@ -23,7 +23,8 @@
     "ads:hooks": "node ads_automation/pipeline.mjs --hooks-only",
     "ads:scripts": "node ads_automation/pipeline.mjs --scripts-only",
     "ads:no-render": "node ads_automation/pipeline.mjs --no-render",
-    "ads:check": "node ads_automation/pipeline.mjs --check"
+    "ads:check": "node ads_automation/pipeline.mjs --check",
+    "validate:ai-assistant": "node scripts/validate-ai-assistant.mjs"
   },
   "jest": {
     "testPathIgnorePatterns": [

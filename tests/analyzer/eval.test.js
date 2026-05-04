@@ -90,7 +90,12 @@ describe('analyzer golden evaluator', () => {
         expect(actionable.length).toBeLessThanOrEqual(expectation.maxActionableIssues);
       }
       if (typeof expectation.minReviewItems === 'number') {
-        expect(result.reviewOnly.length).toBeGreaterThanOrEqual(expectation.minReviewItems);
+        const reviewEquivalentCount =
+          result.reviewOnly.length +
+          result.findings.filter(
+            (f) => f.category === 'review_only' || (f.category === 'informational' && f.type === 'inquiry')
+          ).length;
+        expect(reviewEquivalentCount).toBeGreaterThanOrEqual(expectation.minReviewItems);
       }
 
       if (expectation.minExtractedAccounts) {
@@ -318,6 +323,38 @@ describe('analyzer golden evaluator', () => {
     expect(accountFinding.category).toBe('high_priority_issue');
   });
 
+  test('clean report emits informational account findings', async () => {
+    const text = readFileSync(
+      join(process.cwd(), 'tests/fixtures/analyze/clean-perfect-report.txt'),
+      'utf8'
+    );
+    const result = await runAnalyzerPipeline(text, { anthropic: await getClient(), model: 'mock' });
+    const informationalFindings = result.findings.filter((f) => f.category === 'informational');
+    expect(result.summary.reportStatus).toBe('clean');
+    expect(informationalFindings.length).toBeGreaterThan(0);
+    for (const finding of informationalFindings) {
+      expect(finding.displayTitle).toBeTruthy();
+      expect(finding.displaySubtitle).toBeTruthy();
+      expect(finding.accountContext).toBeTruthy();
+      expect(finding.issueType).toBeTruthy();
+    }
+  });
+
+  test('fraud-only report emits review_only signals without account findings', async () => {
+    const text = [
+      'Experian Credit Report',
+      'Report Date: 04/01/2026',
+      '',
+      'Fraud Alert: Active fraud alert is on this file.',
+      'Security Freeze: Present',
+    ].join('\n');
+    const result = await runAnalyzerPipeline(text, { anthropic: await getClient(), model: 'mock' });
+    expect(result.findings.length).toBe(0);
+    expect(result.reviewOnly.length).toBeGreaterThan(0);
+    expect(result.reviewOnly.every((f) => f.category === 'review_only')).toBe(true);
+    expect(result.summary.reportStatus).toBe('review_only');
+  });
+
   test('real-world dense tradelines with late and charge-off never return clean', async () => {
     const text = readFileSync(
       join(process.cwd(), 'tests/analyzer/fixtures/real-world-dense-tradelines.txt'),
@@ -405,7 +442,7 @@ describe('analyzer golden evaluator', () => {
       expect(f).toHaveProperty('bureau');
       expect(f).toHaveProperty('source');
       expect(f).toHaveProperty('category');
-      expect(['review_only', 'potential_issue', 'high_priority_issue']).toContain(f.category);
+      expect(['review_only', 'informational', 'potential_issue', 'high_priority_issue']).toContain(f.category);
       expect(typeof f.confidence).toBe('number');
       expect(f.reason || f.reasoning).toBeTruthy();
     }

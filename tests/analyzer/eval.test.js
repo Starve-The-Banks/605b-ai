@@ -363,7 +363,7 @@ describe('analyzer golden evaluator', () => {
     const result = await runAnalyzerPipeline(text, { anthropic: await getClient(), model: 'mock' });
     const collectionFinding = result.findings.find(
       (f) =>
-        f.issueType === 'collection.account_reported' &&
+        (f.issueType === 'collection.account_reported' || f.subtype === 'charge_off') &&
         (f.category === 'high_priority_issue' || f.category === 'potential_issue')
     );
     expect(result.summary.operationalBlocks).toBe(true);
@@ -372,7 +372,7 @@ describe('analyzer golden evaluator', () => {
     expect(result.summary.potentialIssues).toBeGreaterThanOrEqual(1);
     expect(collectionFinding.displayTitle).toBeTruthy();
     expect(collectionFinding.displayTitle).not.toMatch(/^Type[A-Z]/);
-    expect(collectionFinding.displaySubtitle).toMatch(/Collection account/i);
+    expect(collectionFinding.displaySubtitle).toMatch(/Collection account|Debt Buyer|charge[- ]off|closed/i);
     expect(collectionFinding.accountContext).toBeTruthy();
     expect(collectionFinding.recommendedTemplate).toBeTruthy();
   });

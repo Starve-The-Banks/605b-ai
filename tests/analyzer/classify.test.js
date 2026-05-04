@@ -109,6 +109,42 @@ describe('classifier (Stage 2)', () => {
     expect(cls[0].classification).toBe(CLASSIFICATIONS.POSITIVE);
     expect(cls[0].classifierRule).toBe('account.positive');
   });
+
+  test('weak collection-like language without explicit collection status is review_only', () => {
+    const ext = {
+      reportType: 'credit_bureau',
+      accounts: [{
+        itemId: 'it_weak_collection_signal',
+        itemKind: 'account',
+        span: {
+          start: 0,
+          end: 300,
+          text: 'WELLS FARGO CARD SERV\nAccount Type: Revolving\nPayment History\nOK Current 30 Days Late 60 Days Late Collection Charge Off',
+        },
+        bureau: 'Equifax',
+        source: 'Equifax',
+        accountName: 'WELLS FARGO CARD SERV',
+        status: 'Open / Current',
+        paymentStatus: 'Pays as agreed',
+        accountType: 'Revolving',
+        paymentHistory: 'OK Current 30 Days Late 60 Days Late Collection Charge Off',
+        remarks: '',
+        fields: {
+          'Account Condition': 'Open / Current',
+        },
+      }],
+      collections: [],
+      inquiries: [],
+      publicRecords: [],
+      bankingItems: [],
+      fraudMarkers: [],
+      remarks: [],
+    };
+
+    const cls = classifyExtractedReport(ext);
+    expect(cls[0].classification).toBe(CLASSIFICATIONS.REVIEW_ONLY);
+    expect(cls[0].classifierRule).toBe('account.collection_weak_signal');
+  });
 });
 
 describe('classifier — operational blockers', () => {

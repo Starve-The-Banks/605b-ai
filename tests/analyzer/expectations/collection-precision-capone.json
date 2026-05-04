@@ -1,0 +1,20 @@
+{
+  "fixture": "../fixtures/collection-precision-capone.txt",
+  "expectedReportType": "credit_bureau",
+  "expectedStatus": "high_priority_issue",
+  "expectedSuspectedUncertain": false,
+  "minActionableIssues": 1,
+  "maxActionableIssues": 1,
+  "minExtractedAccounts": 2,
+  "maxExtractedCollections": 1,
+  "minExtractedCollections": 1,
+  "mustContainEvidence": [
+    "CAPITAL ONE BANK USA",
+    "Assigned to collection agency"
+  ],
+  "forbidClean": true,
+  "expectedClassifications": {
+    "highPriorityMin": 1
+  },
+  "expectedOperationalBlocks": []
+}

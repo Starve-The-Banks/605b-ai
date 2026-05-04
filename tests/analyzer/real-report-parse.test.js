@@ -85,6 +85,25 @@ describe('real credit report parser', () => {
     )).toBe(true);
   });
 
+  test('collection precision: only Capital One is high-priority collection', async () => {
+    const text = readFileSync(
+      join(process.cwd(), 'tests/analyzer/fixtures/collection-precision-capone.txt'),
+      'utf8',
+    );
+    const result = await runAnalyzerPipeline(text, { budgetMs: 12_000 });
+
+    const highPriority = result.findings.filter((finding) => finding.category === 'high_priority_issue');
+    expect(highPriority).toHaveLength(1);
+    expect(normalizedFindingText(highPriority[0])).toContain('CAPITAL ONE');
+    expect(normalizedFindingText(highPriority[0])).not.toContain('WELLS FARGO');
+    expect(normalizedFindingText(highPriority[0])).not.toContain('CHIME');
+
+    const reviewAndInfo = [...result.reviewOnly, ...result.findings.filter((f) => f.category === 'informational')];
+    const reviewText = reviewAndInfo.map((finding) => normalizedFindingText(finding)).join('\n');
+    expect(reviewText).toContain('WELLS FARGO CARD SERV');
+    expect(reviewText).toContain('CHIMEFIN/STRIDE BANK');
+  });
+
   test('empty extraction never returns a clean/no-issues result', async () => {
     const result = await runAnalyzerPipeline('', { budgetMs: 12_000 });
 

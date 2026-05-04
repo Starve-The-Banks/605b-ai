@@ -191,7 +191,7 @@ describe('validator — account context display', () => {
       fields: { Type: 'Secured Loan', Status: 'Collection' },
       classification: CLASSIFICATIONS.HIGH_PRIORITY,
       classifierConfidence: 0.9,
-      classifierRule: 'account.collection',
+      classifierRule: 'account.collection_strong',
       classifierReason: 'Account status indicates a collection.',
       isNegativeMarker: true,
     };
@@ -219,7 +219,7 @@ describe('validator — account context display', () => {
       fields: {},
       classification: CLASSIFICATIONS.HIGH_PRIORITY,
       classifierConfidence: 0.95,
-      classifierRule: 'account.collection',
+      classifierRule: 'account.collection_strong',
       classifierReason: 'Account status indicates a collection.',
       isNegativeMarker: true,
       subtype: 'collection',

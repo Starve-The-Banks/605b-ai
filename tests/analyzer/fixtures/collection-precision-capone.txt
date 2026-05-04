@@ -1,0 +1,33 @@
+Triple Bureau Credit Report
+Report Date: 05/04/2026
+
+Account: CHIMEFIN/STRIDE BANK
+Bureau: Equifax
+Account Type: Revolving
+Account Condition: Open / Current
+Responsibility: Individual Account
+Payment Status: Pays as agreed
+Balance: $0
+Amount Past Due: $0
+Payment History: OK Current 30 Days Late 60 Days Late 90 Days Late Collection Charge Off
+
+Account: WELLS FARGO CARD SERV
+Bureau: Equifax
+Account Type: Revolving
+Account Condition: Open / Current
+Responsibility: Authorized User
+Payment Status: Pays as agreed
+Balance: $25
+Amount Past Due: $0
+Credit Limit: $20,000
+Payment History: OK Current 30 Days Late 60 Days Late 90 Days Late Collection Charge Off
+
+Account: CAPITAL ONE BANK USA
+Bureau: Equifax
+Account Type: Debt Buyer
+Account Condition: Collection Account
+Status: Collection account
+Payment Status: Charged off and sold to collection agency
+Remarks: Assigned to collection agency for debt collection.
+Balance: $950
+Amount Past Due: $950

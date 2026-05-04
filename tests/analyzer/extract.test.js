@@ -98,7 +98,7 @@ describe('extractor (Stage 1)', () => {
     expect(late.balance).toBe('$1,243');
     expect(late.remarks).toMatch(/past due/i);
 
-    const chargedOff = out.accounts.find((a) => /regional bank/i.test(a.accountName || ''));
+    const chargedOff = [...out.accounts, ...out.collections].find((a) => /regional bank/i.test(a.accountName || ''));
     expect(chargedOff).toBeTruthy();
     expect(chargedOff.status).toMatch(/charged off/i);
   });

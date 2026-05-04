@@ -89,8 +89,9 @@ function main() {
   runStrictChecks();
 
   runStep('Step 2: Lint', 'npm run lint');
-  runStep('Step 3: Build', 'npm run build');
-  runStep('Step 4: Tests', 'npm run test');
+  runStep('Step 3: Sentry config check', 'npm run check:sentry');
+  runStep('Step 4: Build', 'npm run build');
+  runStep('Step 5: Tests', 'npm run test');
 
   if (process.env.VALIDATION_BASE_URL) {
     const requiredValidationTokens = [
@@ -101,19 +102,19 @@ function main() {
     const missingValidationTokens = requiredValidationTokens.filter((name) => !process.env[name]);
 
     if (missingValidationTokens.length > 0) {
-      console.log('\n[release-check] Step 5: AI assistant validation (production-safe mode)');
+      console.log('\n[release-check] Step 6: AI assistant validation (production-safe mode)');
       console.log(
         `Skipping AI validation (missing env vars: ${missingValidationTokens.join(', ')})`
       );
     } else {
-      runStep('Step 5: AI assistant validation (production-safe mode)', 'node scripts/validate-ai-assistant.mjs');
+      runStep('Step 6: AI assistant validation (production-safe mode)', 'node scripts/validate-ai-assistant.mjs');
     }
   } else {
-    console.log('\n[release-check] Step 5: AI assistant validation (production-safe mode)');
+    console.log('\n[release-check] Step 6: AI assistant validation (production-safe mode)');
     console.log('Skipping AI validation (no VALIDATION_BASE_URL provided)');
   }
 
-  runStep('Step 6: Analyzer verification', 'pnpm test -- tests/analyzer');
+  runStep('Step 7: Analyzer verification', 'pnpm test -- tests/analyzer');
 
   console.log('\n✅ RELEASE CHECK PASSED — SAFE TO DEPLOY');
 }

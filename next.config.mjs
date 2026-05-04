@@ -102,10 +102,11 @@ const nextConfig = {
 }
 
 export default withSentryConfig(nextConfig, {
-  org: '605bai',
-  project: '605b-web',
-  // Silence non-error output in CI; show in local dev
-  silent: !process.env.CI,
+  org: process.env.SENTRY_ORG || '605bai',
+  project: process.env.SENTRY_PROJECT || '605b-web',
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  // Keep build logs quiet by default; override manually when debugging builds.
+  silent: true,
   // Upload source maps for readable stack traces in Sentry
   widenClientFileUpload: true,
   // Annotate React components for better error context

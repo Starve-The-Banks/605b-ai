@@ -25,6 +25,7 @@
     "ads:no-render": "node ads_automation/pipeline.mjs --no-render",
     "ads:check": "node ads_automation/pipeline.mjs --check",
     "validate:ai-assistant": "node scripts/validate-ai-assistant.mjs",
+    "check:sentry": "node scripts/check-sentry-config.mjs",
     "get:dev-token": "curl http://localhost:3000/api/dev/token",
     "validate:ai:local": "ENABLE_DEV_TOKEN_ENDPOINT=true VALIDATION_BASE_URL=http://localhost:3000 node scripts/validate-ai-assistant.mjs",
     "release:check": "cross-env NODE_ENV=development node scripts/release-check.mjs",

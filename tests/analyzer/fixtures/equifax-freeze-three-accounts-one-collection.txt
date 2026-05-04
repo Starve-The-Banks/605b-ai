@@ -1,0 +1,31 @@
+Equifax Credit Report
+Report Date: 05/01/2026
+
+Account: CHIME/STRIDE BANK
+Bureau: Equifax
+Account Type: Revolving
+Account Number: 1111222233334444
+Status: Open / Current
+Payment Status: Pays as agreed
+Balance: $42
+
+Account: CAPITAL ONE AUTO
+Bureau: Equifax
+Account Type: Installment
+Account Number: 5555666677778888
+Status: Closed / Paid
+Payment Status: Paid as agreed
+Balance: $0
+
+Account: JEFFERSON CAPITAL
+Bureau: Equifax
+Account Type: Debt Buyer
+Original Creditor: CITY MEDICAL
+Account Number: 9999000011112222
+Status: Closed
+Payment Status: Collection/Chargeoff
+Remarks: Assigned to collection agency
+Balance: $842
+
+Fraud Alert: Initial fraud alert is active.
+Security Freeze: Credit freeze enabled.

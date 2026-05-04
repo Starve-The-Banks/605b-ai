@@ -1,0 +1,13 @@
+{
+  "fixture": "../fixtures/equifax-freeze-three-accounts-one-collection.txt",
+  "expectedReportType": "credit_bureau",
+  "expectedStatus": "high_priority_issue",
+  "expectedSuspectedUncertain": false,
+  "minActionableIssues": 1,
+  "minReviewItems": 1,
+  "minExtractedAccounts": 3,
+  "forbidClean": true,
+  "expectedOperationalBlocks": [{ "type": "fraud_alert" }, { "type": "freeze" }],
+  "mustContainEvidence": ["JEFFERSON CAPITAL", "Assigned to collection agency", "fraud alert", "Credit freeze"],
+  "expectedClassifications": { "highPriorityMin": 1 }
+}

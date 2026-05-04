@@ -103,6 +103,25 @@ describe('extractor (Stage 1)', () => {
     expect(chargedOff.status).toMatch(/charged off/i);
   });
 
+  test('normalizes concatenated key/value account artifacts into structured fields', () => {
+    const text = [
+      'Equifax Credit Report',
+      'Report Date: 05/01/2026',
+      '',
+      'Account: TypeDebt Buyer',
+      'Bureau: Equifax',
+      'Account TypeDebt Buyer ResponsibilityIndividual Date Opened08/20/2024 StatusCollection account. Balance$1,667',
+    ].join('\n');
+    const out = extractReport(text);
+    expect(out.accounts.length + out.collections.length).toBeGreaterThanOrEqual(1);
+    const item = [...out.collections, ...out.accounts][0];
+    expect(item.accountName).not.toBe('TypeDebt Buyer');
+    expect(item.accountType).toBe('Debt Buyer');
+    expect(item.status).toMatch(/collection/i);
+    expect(item.balance).toMatch(/\$1,667|\$1667/);
+    expect(item.sourceSpanNormalized || item.span.text).toContain('Account Type: Debt Buyer');
+  });
+
   test('itemIds are stable across runs for the same input', () => {
     const a = extractReport(fixture('one-real-collection.txt'));
     const b = extractReport(fixture('one-real-collection.txt'));

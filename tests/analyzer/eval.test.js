@@ -355,6 +355,28 @@ describe('analyzer golden evaluator', () => {
     expect(result.summary.reportStatus).toBe('review_only');
   });
 
+  test('equifax freeze + tradelines includes collection finding with required shape', async () => {
+    const text = readFileSync(
+      join(process.cwd(), 'tests/analyzer/fixtures/equifax-freeze-three-accounts-one-collection.txt'),
+      'utf8'
+    );
+    const result = await runAnalyzerPipeline(text, { anthropic: await getClient(), model: 'mock' });
+    const collectionFinding = result.findings.find(
+      (f) =>
+        f.issueType === 'collection.account_reported' &&
+        (f.category === 'high_priority_issue' || f.category === 'potential_issue')
+    );
+    expect(result.summary.operationalBlocks).toBe(true);
+    expect(result.extracted.accounts.length + result.extracted.collections.length).toBeGreaterThanOrEqual(3);
+    expect(collectionFinding).toBeTruthy();
+    expect(result.summary.potentialIssues).toBeGreaterThanOrEqual(1);
+    expect(collectionFinding.displayTitle).toBeTruthy();
+    expect(collectionFinding.displayTitle).not.toMatch(/^Type[A-Z]/);
+    expect(collectionFinding.displaySubtitle).toMatch(/Collection account/i);
+    expect(collectionFinding.accountContext).toBeTruthy();
+    expect(collectionFinding.recommendedTemplate).toBeTruthy();
+  });
+
   test('real-world dense tradelines with late and charge-off never return clean', async () => {
     const text = readFileSync(
       join(process.cwd(), 'tests/analyzer/fixtures/real-world-dense-tradelines.txt'),
@@ -428,6 +450,9 @@ describe('analyzer golden evaluator', () => {
     expect(result).toHaveProperty('classifications');
     expect(result).toHaveProperty('diagnostics');
     expect(result.schemaVersion).toBe(2);
+    expect(typeof result.diagnostics.collectionLikeMarkerCount).toBe('number');
+    expect(result.diagnostics.emittedByCategory).toBeTruthy();
+    expect(result.diagnostics.emittedByIssueType).toBeTruthy();
     // Each finding has the v1 shape required by mobile's hasDisplayEvidence filter.
     for (const f of result.findings) {
       expect(f.accountId).toBeTruthy();

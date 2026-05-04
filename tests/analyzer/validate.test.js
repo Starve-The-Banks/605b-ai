@@ -199,8 +199,45 @@ describe('validator — account context display', () => {
     const out = buildValidatedFindings({ classified: [item], annotations: new Map() });
     const finding = out.findings[0];
 
-    expect(finding.account).toBe('Account needing review');
+    expect(finding.account).toBe('Collection account');
     expect(finding.account).not.toMatch(/TypeSecured Loan/);
     expect(finding.accountContext.accountType).toBe('Secured Loan');
+  });
+
+  test('normalizes concatenated account fields and never surfaces TypeDebt Buyer labels', () => {
+    const item = {
+      itemId: 'it_concat_collection',
+      itemKind: 'account',
+      span: {
+        start: 0,
+        end: 220,
+        text: 'Account TypeDebt Buyer ResponsibilityIndividual Date Opened08/20/2024 StatusCollection account. Balance$1,667',
+      },
+      bureau: 'Experian',
+      source: 'Experian',
+      accountName: 'TypeDebt Buyer',
+      fields: {},
+      classification: CLASSIFICATIONS.HIGH_PRIORITY,
+      classifierConfidence: 0.95,
+      classifierRule: 'account.collection',
+      classifierReason: 'Account status indicates a collection.',
+      isNegativeMarker: true,
+      subtype: 'collection',
+      accountType: 'Debt Buyer',
+      status: 'Collection account',
+      balance: '$1,667',
+    };
+
+    const out = buildValidatedFindings({ classified: [item], annotations: new Map() });
+    const finding = out.findings[0];
+
+    expect(finding.displayTitle).not.toBe('TypeDebt Buyer');
+    expect(finding.displayTitle).toBe('Collection account');
+    expect(finding.accountContext.accountType).toBe('Debt Buyer');
+    expect(finding.accountContext.status).toBe('Collection account');
+    expect(finding.accountContext.balance).toMatch(/\$1,667|\$1667/);
+    expect(finding.accountContext.evidenceSnippet).toContain('Account Type: Debt Buyer');
+    expect(finding.accountContext.evidenceSnippet).toContain('Responsibility: Individual');
+    expect(finding.accountContext.evidenceSnippet).toContain('Date Opened: 08/20/2024');
   });
 });

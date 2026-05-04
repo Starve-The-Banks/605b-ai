@@ -293,6 +293,31 @@ describe('analyzer golden evaluator', () => {
     expect(collection.category).toBe('high_priority_issue');
   });
 
+  test('hard invariant: fraud alert does not suppress account findings', async () => {
+    const text = [
+      'Experian Credit Report',
+      'Report Date: 04/01/2026',
+      '',
+      'Fraud Alert: Active fraud alert is on this file.',
+      '',
+      'Account: Capital One',
+      'Bureau: Experian',
+      'Status: Charge Off',
+      'Account Number: 123456789',
+      'Balance: $1,234',
+      'Payment Status: Charged Off',
+      '',
+      'Collections: None',
+    ].join('\n');
+    const result = await runAnalyzerPipeline(text, { anthropic: await getClient(), model: 'mock' });
+    const operational = result.reviewOnly.find((f) => f.subtype === 'operational_blocker');
+    const accountFinding = result.findings.find((f) => /capital one/i.test(`${f.displayTitle} ${f.account}`));
+
+    expect(operational).toBeTruthy();
+    expect(accountFinding).toBeTruthy();
+    expect(accountFinding.category).toBe('high_priority_issue');
+  });
+
   test('real-world dense tradelines with late and charge-off never return clean', async () => {
     const text = readFileSync(
       join(process.cwd(), 'tests/analyzer/fixtures/real-world-dense-tradelines.txt'),
@@ -368,6 +393,14 @@ describe('analyzer golden evaluator', () => {
     expect(result.schemaVersion).toBe(2);
     // Each finding has the v1 shape required by mobile's hasDisplayEvidence filter.
     for (const f of result.findings) {
+      expect(f.accountId).toBeTruthy();
+      expect(f.accountContext).toBeTruthy();
+      expect(f.displayTitle).toBeTruthy();
+      expect(f.displayTitle).not.toMatch(/^Type[A-Z]/);
+      expect(f.issueType).toBeTruthy();
+      expect(f.recommendedTemplateId).toBeTruthy();
+      expect(f.recommendedTemplate).toBeTruthy();
+      expect(f.recommendedTemplate.appliesToAccountId).toBe(f.accountId);
       expect(f).toHaveProperty('evidence_quote');
       expect(f).toHaveProperty('bureau');
       expect(f).toHaveProperty('source');
